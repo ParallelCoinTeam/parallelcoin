@@ -15,7 +15,6 @@ import (
 	
 	"github.com/urfave/cli"
 	
-	"github.com/p9c/pod/app/appdata"
 	"github.com/p9c/pod/cmd/node/state"
 	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
 	"github.com/p9c/pod/pkg/pod"
@@ -48,8 +47,8 @@ type Xt struct {
 	ActiveNet *netparams.Params
 	// Language libraries
 	Language *lang.Lexicon
-	// DataDir is the default data dir
-	DataDir string
+	// // DataDir is the default data dir
+	// DataDir string
 	// Node is the run state of the node
 	Node atomic.Bool
 	// NodeReady is closed when it is ready then always returns
@@ -137,7 +136,7 @@ func GetNewContext(appName, appLang, subtext string) *Xt {
 		ConfigMap:        configMap,
 		StateCfg:         new(state.Config),
 		Language:         lang.ExportLanguage(appLang),
-		DataDir:          appdata.Dir(appName, false),
+		// DataDir:          appdata.Dir(appName, false),
 		NodeChan:         make(chan *chainrpc.Server),
 		Syncing:          atomic.NewBool(false),
 	}

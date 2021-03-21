@@ -2,10 +2,13 @@ package gui
 
 import (
 	"crypto/rand"
-	"github.com/p9c/pod/pkg/blockchain/wire"
+	"fmt"
+	"github.com/niubaoshu/gotiny"
+	"github.com/p9c/pod/cmd/kopach/control/p2padvt"
+	"github.com/p9c/pod/pkg/comm/transport"
 	"github.com/p9c/pod/pkg/logg"
-	"github.com/p9c/pod/pkg/util"
 	"github.com/tyler-smith/go-bip39"
+	"net"
 	"os"
 	"runtime"
 	"strings"
@@ -45,6 +48,7 @@ func Main(cx *conte.Xt, c *cli.Context) (e error) {
 		quit:       cx.KillAll,
 		Size:       &size,
 		noWallet:   &noWallet,
+		otherNodes: make(map[uint64]*nodeSpec),
 	}
 	return wg.Run()
 }
@@ -95,7 +99,7 @@ type WalletGUI struct {
 	console                                  *Console
 	RecentTxsWidget, TxHistoryWidget         l.Widget
 	recentTxsClickables, txHistoryClickables []*gui.Clickable
-	txRecentList, txHistoryList              []btcjson.ListTransactionsResult
+	txHistoryList                            []btcjson.ListTransactionsResult
 	openTxID, prevOpenTxID                   *uberatomic.String
 	originTxDetail                           string
 	txMx                                     sync.Mutex
@@ -122,17 +126,103 @@ type WalletGUI struct {
 	createVerifying                     bool
 	restoring                           bool
 	lastUpdated                         uberatomic.Int64
+	multiConn                           *transport.Channel
+	otherNodes                          map[uint64]*nodeSpec
+	uuid                                uint64
 }
 
-type blockUpdate struct {
-	height    int32
-	header    *wire.BlockHeader
-	txs       []*util.Tx
-	timestamp time.Time
+type nodeSpec struct {
+	time.Time
+	addr string
+}
+
+// type blockUpdate struct {
+// 	height    int32
+// 	header    *wire.BlockHeader
+// 	txs       []*util.Tx
+// 	timestamp time.Time
+// }
+
+var handlersMulticast = transport.Handlers{
+	// string(sol.Magic):      processSolMsg,
+	string(p2padvt.Magic): processAdvtMsg,
+	// string(hashrate.Magic): processHashrateMsg,
+}
+
+func processAdvtMsg(ctx interface{}, src net.Addr, dst string, b []byte) (e error) {
+	wg := ctx.(*WalletGUI)
+	if !*wg.cx.Config.Discovery {
+		return
+	}
+	D.Ln("processing advertisment message", src, dst)
+	if wg.ChainClient == nil {
+		I.Ln("no chain client to process advertisment")
+		return
+	}
+	var j p2padvt.Advertisment
+	gotiny.Unmarshal(b, &j)
+	// I.S(j)
+	var uuid uint64
+	uuid = j.UUID
+	// I.Ln("uuid of advertisment", uuid, wg.otherNodes)
+	if uuid == wg.uuid {
+		D.Ln("ignoring own advertisment message")
+		return
+	}
+	if _, ok := wg.otherNodes[uuid]; !ok {
+		// if we haven't already added it to the permanent peer list, we can add it now
+		I.Ln("connecting to lan peer with same PSK", j.IPs, uuid)
+		wg.otherNodes[uuid] = &nodeSpec{}
+		wg.otherNodes[uuid].Time = time.Now()
+		// try all IPs
+		for addr := range j.IPs {
+			peerIP := net.JoinHostPort(addr, fmt.Sprint(j.P2P))
+			if e = wg.ChainClient.AddNode(peerIP, "add"); E.Chk(e) {
+				continue
+			}
+			D.Ln("connected to peer via address", peerIP)
+			wg.otherNodes[uuid].addr = peerIP
+			break
+		}
+		I.Ln("otherNodes", wg.otherNodes)
+	} else {
+		// update last seen time for uuid for garbage collection of stale disconnected
+		// nodes
+		I.Ln("other node", uuid, wg.otherNodes[uuid].addr)
+		wg.otherNodes[uuid].Time = time.Now()
+	}
+	// If we lose connection for more than 9 seconds we delete and if the node
+	// reappears it can be reconnected
+	for i := range wg.otherNodes {
+		if time.Now().Sub(wg.otherNodes[i].Time) > time.Second*6 {
+			// also remove from connection manager
+			if e = wg.ChainClient.AddNode(wg.otherNodes[i].addr, "remove"); E.Chk(e) {
+			}
+			D.Ln("deleting", wg.otherNodes[i])
+			delete(wg.otherNodes, i)
+		}
+	}
+	// on := int32(len(wg.otherNodes))
+	// wg.otherNodeCount.Store(on)
+	return
 }
 
 func (wg *WalletGUI) Run() (e error) {
 	wg.openTxID = uberatomic.NewString("")
+	var mc *transport.Channel
+	quit := qu.T()
+	if mc, e = transport.NewBroadcastChannel(
+		"controller",
+		wg,
+		*wg.cx.Config.MinerPass,
+		transport.DefaultPort,
+		16384,
+		handlersMulticast,
+		quit,
+	); E.Chk(e) {
+		return
+	}
+	wg.multiConn = mc
 	wg.prevOpenTxID = uberatomic.NewString("")
 	wg.stateLoaded = uberatomic.NewBool(false)
 	wg.currentReceiveRegenerate = uberatomic.NewBool(true)
@@ -182,7 +272,6 @@ func (wg *WalletGUI) Run() (e error) {
 	wg.State = GetNewState(wg.cx.ActiveNet, wg.MainApp.ActivePageGetAtomic())
 	wg.unlockPage = wg.getWalletUnlockAppWidget()
 	wg.loadingPage = wg.getLoadingPage()
-	// wg.Watcher()
 	if !apputil.FileExists(*wg.cx.Config.WalletFile) {
 		I.Ln("wallet file does not exist", *wg.cx.Config.WalletFile)
 	} else {
@@ -207,9 +296,15 @@ func (wg *WalletGUI) Run() (e error) {
 		},
 	)
 	go func() {
+		ticker := time.NewTicker(time.Second)
 	out:
 		for {
 			select {
+			case <-ticker.C:
+				if wg.node.Running() {
+					if e = wg.Advertise(); E.Chk(e) {
+					}
+				}
 			case <-wg.invalidate.Wait():
 				T.Ln("invalidating render queue")
 				wg.Window.Window.Invalidate()
@@ -239,10 +334,14 @@ func (wg *WalletGUI) Run() (e error) {
 							wg.CreateWalletPage,
 							func(gtx l.Context) l.Dimensions {
 								switch {
-								case wg.ready.Load() && wg.stateLoaded.Load():
+								case wg.stateLoaded.Load():
 									return wg.MainApp.Fn()(gtx)
-								case wg.ready.Load() || wg.stateLoaded.Load():
-									return wg.loadingPage.Fn()(gtx)
+								// case wg.ready.Load():
+								// 	wg.loadingPage.ActivePage("loading")
+								// 	return wg.loadingPage.Fn()(gtx)
+								// case wg.stateLoaded.Load():
+								// 	wg.loadingPage.ActivePage("unlocking")
+								// 	return wg.loadingPage.Fn()(gtx)
 								default:
 									return wg.unlockPage.Fn()(gtx)
 								}

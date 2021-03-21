@@ -165,7 +165,7 @@ var (
 	
 	P9PrimeSequence = []int{2, 3, 5, 7, 11, 13, 17, 19, 23}
 	IntervalDivisor = 1
-	IntervalBase    = 9
+	IntervalBase    = 29
 	// P9Algos is the algorithm specifications after the hard fork
 	P9Algos        = make(map[string]AlgoParams)
 	P9AlgosNumeric = map[int32]AlgoParams{

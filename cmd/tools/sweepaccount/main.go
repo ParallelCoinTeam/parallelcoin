@@ -78,7 +78,7 @@ func init() {
 	// Unset localhost defaults if certificate file can not be found.
 	certFileExists, e := cfgutil.FileExists(opts.RPCCertificateFile)
 	if e != nil {
-		fatalf("%v", err)
+		fatalf("%v", e)
 	}
 	if !certFileExists {
 		opts.RPCConnect = ""
@@ -102,7 +102,7 @@ func init() {
 	}
 	rpcConnect, e := cfgutil.NormalizeAddress(opts.RPCConnect, activeNet.WalletRPCServerPort)
 	if e != nil {
-		fatalf("Invalid RPC network address `%v`: %v", opts.RPCConnect, err)
+		fatalf("Invalid RPC network address `%v`: %v", opts.RPCConnect, e)
 	}
 	opts.RPCConnect = rpcConnect
 	if opts.RPCUsername == "" {
@@ -110,7 +110,7 @@ func init() {
 	}
 	certFileExists, e = cfgutil.FileExists(opts.RPCCertificateFile)
 	if e != nil {
-		fatalf("%v", err)
+		fatalf("%v", e)
 	}
 	if !certFileExists {
 		fatalf("RPC certificate file `%s` not found", opts.RPCCertificateFile)
@@ -204,7 +204,7 @@ func makeDestinationScriptSource(
 func main() {
 	e := sweep()
 	if e != nil {
-		fatalf("%v", err)
+		fatalf("%v", e)
 	}
 }
 func sweep() (e error) {
@@ -275,20 +275,20 @@ func sweep() (e error) {
 		)
 		if e != nil {
 			if e != (noInputValue{}) {
-				reportError("Failed to create unsigned transaction: %v", err)
+				reportError("Failed to create unsigned transaction: %v", e)
 			}
 			continue
 		}
 		// Unlock the wallet, sign the transaction, and immediately lock.
 		e = rpcClient.WalletPassphrase(privatePassphrase, 60)
 		if e != nil {
-			reportError("Failed to unlock wallet: %v", err)
+			reportError("Failed to unlock wallet: %v", e)
 			continue
 		}
 		signedTransaction, complete, e := rpcClient.SignRawTransaction(tx.Tx)
 		_ = rpcClient.WalletLock()
 		if e != nil {
-			reportError("Failed to sign transaction: %v", err)
+			reportError("Failed to sign transaction: %v", e)
 			continue
 		}
 		if !complete {
@@ -298,7 +298,7 @@ func sweep() (e error) {
 		// Publish the signed sweep transaction.
 		txHash, e := rpcClient.SendRawTransaction(signedTransaction, false)
 		if e != nil {
-			reportError("Failed to publish transaction: %v", err)
+			reportError("Failed to publish transaction: %v", e)
 			continue
 		}
 		outputAmount := util.Amount(tx.Tx.TxOut[0].Value)
@@ -358,7 +358,7 @@ func pickNoun(
 }
 
 var subsystem = logg.AddLoggerSubsystem()
-var ftl, err, wrn, inf, dbg, trc logg.LevelPrinter = logg.GetLogPrinterSet(subsystem)
+var F, E, W, I, D, T logg.LevelPrinter = logg.GetLogPrinterSet(subsystem)
 
 func init() {
 	// var _ = logg.AddFilteredSubsystem(subsystem)
@@ -375,13 +375,13 @@ func init() {
 	I.F("%s", "I.F")
 	D.F("%s", "D.F")
 	T.F("%s", "T.F")
-	ftl.C(func() string { return "ftl.C" })
-	err.C(func() string { return "err.C" })
+	F.C(func() string { return "ftl.C" })
+	E.C(func() string { return "err.C" })
 	W.C(func() string { return "W.C" })
 	I.C(func() string { return "inf.C" })
 	D.C(func() string { return "D.C" })
 	T.C(func() string { return "T.C" })
-	ftl.C(func() string { return "ftl.C" })
+	F.C(func() string { return "ftl.C" })
 	E.Chk(errors.New("E.Chk"))
 	W.Chk(errors.New("W.Chk"))
 	I.Chk(errors.New("inf.Chk"))

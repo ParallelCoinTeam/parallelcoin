@@ -58,7 +58,7 @@ type State struct {
 	templateShards    [][]byte
 	multiConn         *transport.Channel
 	otherNodes        map[uint64]*nodeSpec
-	otherNodeCount    *atomic.Int32
+	// otherNodeCount    *atomic.Int32
 	hashSampleBuf     *rav.BufferUint64
 	hashCount         atomic.Uint64
 	lastNonce         int32
@@ -78,7 +78,6 @@ func New(
 	stateCfg *state.Config,
 	node *chainrpc.Node,
 	rpcServer *chainrpc.Server,
-	otherNodeCount *atomic.Int32,
 	mempoolUpdateChan qu.C,
 	uuid uint64,
 	killall qu.C,
@@ -98,7 +97,6 @@ func New(
 		stateCfg:          stateCfg,
 		mempoolUpdateChan: mempoolUpdateChan,
 		otherNodes:        make(map[uint64]*nodeSpec),
-		otherNodeCount:    otherNodeCount,
 		quit:              quit,
 		uuid:              uuid,
 		start:             qu.Ts(2),
@@ -222,30 +220,30 @@ out:
 	for {
 		D.Ln("controller now pausing")
 		s.mining.Store(false)
-		if !s.Syncing.Load() {
-			if s.walletClient.Disconnected() {
-				D.Ln("wallet client is disconnected, retrying")
-				if e = s.startWallet(); !E.Chk(e) {
-					continue
-				}
-				select {
-				case <-time.After(time.Second):
-					continue
-				case <-s.quit:
-					break out
-				}
-			}
-		} else {
-			select {
-			case <-time.After(time.Second):
-				continue
-			case <-s.quit:
-				break out
-			}
-		}
-		// D.Ln("wallet client is connected, switching to running")
-		// if e = s.updateBlockTemplate(); E.Chk(e) {
+		// if !s.Syncing.Load() {
+		// 	if s.walletClient.Disconnected() {
+		// 		D.Ln("wallet client is disconnected, retrying")
+		// 		if e = s.startWallet(); !E.Chk(e) {
+		// 			continue
+		// 		}
+		// 		select {
+		// 		case <-time.After(time.Second):
+		// 			continue
+		// 		case <-s.quit:
+		// 			break out
+		// 		}
+		// 	}
+		// } else {
+		// 	select {
+		// 	case <-time.After(time.Second):
+		// 		continue
+		// 	case <-s.quit:
+		// 		break out
+		// 	}
 		// }
+		// // D.Ln("wallet client is connected, switching to running")
+		// // if e = s.updateBlockTemplate(); E.Chk(e) {
+		// // }
 	pausing:
 		for {
 			select {
@@ -260,8 +258,8 @@ out:
 				// // s.updateBlockTemplate()
 			case <-ticker.C:
 				D.Ln("controller ticker running")
-				s.Advertise()
-				s.checkConnectivity()
+				// s.Advertise()
+				// s.checkConnectivity()
 			case <-s.start.Wait():
 				D.Ln("received start signal while paused")
 				if s.walletClient.Disconnected() {
@@ -308,8 +306,6 @@ out:
 					break
 				}
 			case <-ticker.C:
-				D.Ln("advertising peer details")
-				s.Advertise()
 				D.Ln("checking if wallet is connected")
 				s.checkConnectivity()
 				D.Ln("resending current templates...")
@@ -382,16 +378,19 @@ func (s *State) checkConnectivity() {
 	}
 	T.Ln(totalPeers, "total peers", lanPeers, "lan peers solo:", *s.cfg.Solo, "lan:", *s.cfg.LAN)
 }
-
-func (s *State) Advertise() {
-	T.Ln("sending out advertisment")
-	var e error
-	if e = s.multiConn.SendMany(
-		p2padvt.Magic,
-		transport.GetShards(p2padvt.Get(s.uuid, s.cfg, s.node)),
-	); E.Chk(e) {
-	}
-}
+//
+// func (s *State) Advertise() {
+// 	if !*s.cfg.Discovery {
+// 		return
+// 	}
+// 	T.Ln("sending out advertisment")
+// 	var e error
+// 	if e = s.multiConn.SendMany(
+// 		p2padvt.Magic,
+// 		transport.GetShards(p2padvt.Get(s.uuid, s.cfg)),
+// 	); E.Chk(e) {
+// 	}
+// }
 
 func (s *State) doBlockUpdate(prev *util.Block) (e error) {
 	if s.Syncing.Load() {
@@ -530,7 +529,7 @@ func (s *State) GetNewAddressFromMiningAddrs() (addr util.Address, e error) {
 
 var handlersMulticast = transport.Handlers{
 	string(sol.Magic):      processSolMsg,
-	string(p2padvt.Magic):  processAdvtMsg,
+	// string(p2padvt.Magic):  processAdvtMsg,
 	string(hashrate.Magic): processHashrateMsg,
 }
 
@@ -584,8 +583,8 @@ func processAdvtMsg(ctx interface{}, src net.Addr, dst string, b []byte) (e erro
 			delete(s.otherNodes, i)
 		}
 	}
-	on := int32(len(s.otherNodes))
-	s.otherNodeCount.Store(on)
+	// on := int32(len(s.otherNodes))
+	// s.otherNodeCount.Store(on)
 	return
 }
 
@@ -619,7 +618,7 @@ func processSolMsg(ctx interface{}, src net.Addr, dst string, b []byte,) (e erro
 	}
 	
 	I.Ln("sending pause to workers")
-	if e = s.multiConn.SendMany(pause.Magic, transport.GetShards(p2padvt.Get(s.uuid, s.cfg, s.node))); E.Chk(e) {
+	if e = s.multiConn.SendMany(pause.Magic, transport.GetShards(p2padvt.Get(s.uuid, s.cfg))); E.Chk(e) {
 		return
 	}
 	I.Ln("signalling controller to enter pause mode")

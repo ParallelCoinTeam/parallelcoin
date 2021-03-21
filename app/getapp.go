@@ -810,6 +810,11 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 				cx.Config.WalletOff,
 			),
 			au.Bool(
+				"discover",
+				"enable LAN multicast peer discovery in GUI wallet",
+				cx.Config.WalletOff,
+			),
+			au.Bool(
 				"delaystart",
 				"pauses for 3 seconds before starting, for internal use with restart function",
 				nil,

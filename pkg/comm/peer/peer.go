@@ -875,21 +875,22 @@ func (p *Peer) readMessage(encoding wire.MessageEncoding) (wire.Message, []byte,
 		return nil, nil, e
 	}
 	// // Use closures to log expensive operations so they are only run when the logging level requires it.
-	// T.C(
-	// 	func() string {
-	// 		// Debug summary of message.
-	// 		summary := messageSummary(msg)
-	// 		if len(summary) > 0 {
-	// 			summary = " (" + summary + ")"
-	// 		}
-	// 		o := fmt.Sprintf(
-	// 			"Received %v%s from %s\n",
-	// 			msg.Command(), summary, p,
-	// 		)
-	// 		o += spew.Sdump(msg)
-	// 		return o + spew.Sdump(buf)
-	// 	},
-	// )
+	T.C(
+		func() (o string) {
+			// Debug summary of message.
+			summary := messageSummary(msg)
+			if len(summary) > 0 {
+				summary = " (" + summary + ")"
+			}
+			o = fmt.Sprintf(
+				"Received %v%s from %s\n",
+				msg.Command(), summary, p,
+			)
+			// o += spew.Sdump(msg)
+			// o += spew.Sdump(buf)
+			return o
+		},
+	)
 	return msg, buf, nil
 }
 
@@ -900,29 +901,30 @@ func (p *Peer) writeMessage(msg wire.Message, enc wire.MessageEncoding) (e error
 		return nil
 	}
 	// // Use closures to log expensive operations so they are only run when the logging level requires it.
-	// T.C(
-	// 	func() string {
-	// 		// Debug summary of message.
-	// 		summary := messageSummary(msg)
-	// 		if len(summary) > 0 {
-	// 			summary = " (" + summary + ")"
-	// 		}
-	// 		o := fmt.Sprintf(
-	// 			"Sending %v%s to %s\n", msg.Command(),
-	// 			summary, p,
-	// 		)
-	// 		o += spew.Sdump(msg)
-	// 		var buf bytes.Buffer
-	// 		_, e := wire.WriteMessageWithEncodingN(
-	// 			&buf, msg, p.ProtocolVersion(),
-	// 			p.cfg.ChainParams.Net, enc,
-	// 		)
-	// 		if e != nil {
-	// 			return e.Error()
-	// 		}
-	// 		return o + spew.Sdump(buf.Bytes())
-	// 	},
-	// )
+	T.C(
+		func() (o string) {
+			// Debug summary of message.
+			summary := messageSummary(msg)
+			if len(summary) > 0 {
+				summary = " (" + summary + ")"
+			}
+			o = fmt.Sprintf(
+				"Sending %v%s to %s\n", msg.Command(),
+				summary, p,
+			)
+			// o += spew.Sdump(msg)
+			// var buf bytes.Buffer
+			// _, e := wire.WriteMessageWithEncodingN(
+			// 	&buf, msg, p.ProtocolVersion(),
+			// 	p.cfg.ChainParams.Net, enc,
+			// )
+			// if e != nil {
+			// 	return e.Error()
+			// }
+			// o += spew.Sdump(buf.Bytes())
+			return
+		},
+	)
 	cmd := msg.Command()
 	if cmd != "ping" && cmd != "pong" && cmd != "inv" {
 		D.C(

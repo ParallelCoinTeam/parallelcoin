@@ -4,6 +4,9 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"io/ioutil"
+	"os"
+	"path/filepath"
+	"time"
 	
 	"lukechampine.com/blake3"
 	
@@ -17,9 +20,33 @@ var eh = blake3.Sum256([]byte(""))
 var emptyhash = hex.EncodeToString(eh[:])
 
 // Pod saves the configuration to the configured location
+//
+// note that this state change does not propagate configuration changes to other
+// components of pod, except by restarting them. This is not quite concurrent
+// safe and a configuration server/db would be better but this generally works
+// as configs don't get changed often except by user actions
+//
+// special handling code allows the use of the in-memory storage for the wallet
+// lock password directly in the app. and once-per-run identifiers. This only
+// applies in the GUI.
+//
+// todo: maybe to not do this if gui is not the app?
 func Pod(c *pod.Config) (success bool) {
 	c.Lock()
 	defer c.Unlock()
+	lockPath := filepath.Join(*c.DataDir, "pod.json.lock")
+	// wait if there is a lock on the file
+	for apputil.FileExists(lockPath) {
+		time.Sleep(time.Second / 2)
+	}
+	var e error
+	var lockFile *os.File
+	// create the lock file
+	if lockFile, e = os.Create(lockPath); D.Chk(e) {
+		panic(e)
+	}
+	if e = lockFile.Close(); D.Chk(e) {
+	}
 	// D.S(c)
 	D.Ln("saving configuration to", *c.ConfigFile)
 	var uac cli.StringSlice
@@ -50,7 +77,6 @@ func Pod(c *pod.Config) (success bool) {
 	// load config into a fresh variable
 	cfg, _ := pod.EmptyConfig()
 	var cfgFile []byte
-	var e error
 	wp := *c.WalletPass
 	// D.Ln("wp", wp)
 	if *c.WalletPass == "" {
@@ -58,7 +84,7 @@ func Pod(c *pod.Config) (success bool) {
 			D.Ln("loaded config")
 			if e = json.Unmarshal(cfgFile, &cfg); !E.Chk(e) {
 				*c.WalletPass = *cfg.WalletPass
-				// D.Ln("unmarshaled config", wp, *c.WalletPass)
+				D.Ln("unmarshaled config")
 			}
 		} else {
 			*c.WalletPass = emptyhash
@@ -79,11 +105,13 @@ func Pod(c *pod.Config) (success bool) {
 			success = true
 		}
 	}
-	if c.UserAgentComments != nil {
+	if uac != nil {
 		*c.UserAgentComments = uac
 	}
 	*c.WalletPass = wp
 	*c.PipeLog = pipeLogOn
+	if e = os.Remove(lockPath); D.Chk(e) {
+	}
 	// D.Ln("walletpass", *c.WalletPass)
 	return
 }

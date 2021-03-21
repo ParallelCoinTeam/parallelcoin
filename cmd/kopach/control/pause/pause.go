@@ -14,7 +14,7 @@ var Magic = []byte{'p', 'a', 'u', 1}
 // }
 
 func GetPauseContainer(uuid uint64, cfg *pod.Config, node *chainrpc.Node) []byte {
-	return p2padvt.Get(uuid, cfg, node)
+	return p2padvt.Get(uuid, cfg)
 	// mB := p2padvt.Get(cx).CreateContainer(Magic)
 	// return &Container{*mB}
 }

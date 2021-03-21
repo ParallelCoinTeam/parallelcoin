@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/p9c/pod/pkg/logg"
-	"github.com/p9c/pod/pkg/util/routeable"
 	"io/ioutil"
 	prand "math/rand"
 	"os"
@@ -31,7 +30,6 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) (e error) {
 		// if user set datadir this is first thing to configure
 		if c.IsSet("datadir") {
 			*cx.Config.DataDir = c.String("datadir")
-			cx.DataDir = c.String("datadir")
 			D.Ln("datadir", *cx.Config.DataDir)
 		}
 		D.Ln(c.IsSet("D"), c.IsSet("datadir"))
@@ -389,22 +387,22 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) (e error) {
 			I.Ln("saving configuration")
 			cx.StateCfg.Save = true
 		}
-		// if e = routeable.Discover(); E.Chk(e) {
-		// 	// TODO: this should trigger the display of this lack of internet
-		// }
-		go func() {
-		out:
-			for {
-				select {
-				case <-time.After(time.Second * 10):
-					if e = routeable.Discover(); E.Chk(e) {
-						// TODO: this should trigger the display of this lack of internet
-					}
-				case <-cx.KillAll:
-					break out
-				}
-			}
-		}()
+		// // if e = routeable.Discover(); E.Chk(e) {
+		// // 	// TODO: this should trigger the display of this lack of internet
+		// // }
+		// go func() {
+		// out:
+		// 	for {
+		// 		select {
+		// 		case <-time.After(time.Second * 10):
+		// 			if e = routeable.Discover(); E.Chk(e) {
+		// 				// TODO: this should trigger the display of this lack of internet
+		// 			}
+		// 		case <-cx.KillAll:
+		// 			break out
+		// 		}
+		// 	}
+		// }()
 		return nil
 	}
 }

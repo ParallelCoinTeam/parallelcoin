@@ -475,6 +475,16 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 		if !wg.miner.Running() {
 			miningIcon = &p9icons.NoMine
 		}
+		discoverColor :=
+			"DocText"
+		discoverIcon :=
+			&icons.DeviceWiFiTethering
+		if !*wg.cx.Config.Discovery {
+			discoverIcon =
+				&icons.CommunicationPortableWiFiOff
+			discoverColor =
+				"scrim"
+		}
 		return wg.Flex().AlignMiddle().
 			Rigid(
 				wg.ButtonLayout(wg.statusBarButtons[0]).
@@ -507,7 +517,34 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 									wg.State.SetActivePage("home")
 								} else {
 									wg.node.Start()
+									// wg.ready.Store(true)
+									// wg.stateLoaded.Store(true)
 								}
+							}()
+						},
+					).
+					Fn,
+			).
+			Rigid(
+				wg.ButtonLayout(wg.statusBarButtons[6]).
+					CornerRadius(0).
+					Embed(
+						wg.Inset(
+							0.25,
+							wg.Icon().
+								Scale(gui.Scales["H5"]).
+								Color(discoverColor).
+								Src(discoverIcon).
+								Fn,
+						).Fn,
+					).
+					Background(wg.MainApp.StatusBarBackgroundGet()).
+					SetClick(
+						func() {
+							go func() {
+								*wg.cx.Config.Discovery = !*wg.cx.Config.Discovery
+								save.Pod(wg.cx.Config)
+								I.Ln("discover enabled:", *wg.cx.Config.Discovery)
 							}()
 						},
 					).

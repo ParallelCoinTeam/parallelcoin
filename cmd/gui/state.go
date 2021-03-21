@@ -163,12 +163,12 @@ func (s *State) Load(filename string, pass *string) (e error) {
 	if data, e = ioutil.ReadFile(filename); E.Chk(e) {
 		return
 	}
-	// D.Ln("cipher:", *pass)
+	D.Ln("cipher:", *pass)
 	if ciph, e = gcm.GetCipher(*pass); E.Chk(e) {
 		return
 	}
 	ns := ciph.NonceSize()
-	// D.Ln("nonce size:", ns)
+	D.Ln("nonce size:", ns)
 	nonce := data[:ns]
 	data = data[ns:]
 	var b []byte
@@ -181,7 +181,7 @@ func (s *State) Load(filename string, pass *string) (e error) {
 	if e = json.Unmarshal(b, ss); E.Chk(e) {
 		return
 	}
-	// D.Ln(string(b))
+	D.Ln(string(b))
 	ss.Unmarshal(s)
 	return
 }

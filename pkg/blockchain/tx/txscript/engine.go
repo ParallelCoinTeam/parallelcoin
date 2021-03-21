@@ -509,25 +509,25 @@ func (vm *Engine) Execute() (e error) {
 		if e != nil {
 			return e
 		}
-		// T.C(
-		// 	func() string {
-		// 		var o string
-		// 		dis, e := vm.DisasmPC()
-		// 		if e != nil {
-		// 			o += "c stepping (" + e.Error() + ")"
-		// 		}
-		// 		o += "oo stepping " + dis
-		// 		var dstr, astr string
-		// 		// if we're tracing, dump the stacks.
-		// 		if vm.dstack.Depth() != 0 {
-		// 			dstr = "\nStack:\n" + vm.dstack.String()
-		// 		}
-		// 		if vm.astack.Depth() != 0 {
-		// 			astr = "\nAltStack:\n" + vm.astack.String()
-		// 		}
-		// 		return o + dstr + astr
-		// 	},
-		// )
+		T.C(
+			func() string {
+				var o string
+				dis, e := vm.DisasmPC()
+				if e != nil {
+					o += "c stepping (" + e.Error() + ")"
+				}
+				o += "oo stepping " + dis
+				var dstr, astr string
+				// if we're tracing, dump the stacks.
+				if vm.dstack.Depth() != 0 {
+					dstr = "\nStack:\n" + vm.dstack.String()
+				}
+				if vm.astack.Depth() != 0 {
+					astr = "\nAltStack:\n" + vm.astack.String()
+				}
+				return o + dstr + astr
+			},
+		)
 	}
 	return vm.CheckErrorCondition(true)
 }

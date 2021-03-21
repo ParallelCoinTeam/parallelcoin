@@ -777,9 +777,6 @@ func (wg *WalletGUI) RecentTransactions(n int, listName string) l.Widget {
 	switch listName {
 	case "history":
 		wg.TxHistoryWidget = wo
-		if !wg.ready.Load() {
-			wg.ready.Store(true)
-		}
 	case "recent":
 		wg.RecentTxsWidget = wo
 	}

@@ -1,12 +1,13 @@
 package btcjson_test
 
 import (
+	"errors"
 	"github.com/p9c/pod/pkg/logg"
 )
 
 
 var subsystem string = logg.AddLoggerSubsystem()
-var ftl, err, wrn, inf, dbg, trc logg.LevelPrinter = logg.GetLogPrinterSet(subsystem)
+var F, E, W, I, D, T logg.LevelPrinter = logg.GetLogPrinterSet(subsystem)
 
 func init() {
 	// var _ = logg.AddFilteredSubsystem(subsystem)
@@ -23,13 +24,13 @@ func init() {
 	I.F("%s", "I.F")
 	D.F("%s", "D.F")
 	T.F("%s", "T.F")
-	ftl.C(func() string { return "ftl.C" })
-	err.C(func() string { return "err.C" })
+	F.C(func() string { return "ftl.C" })
+	E.C(func() string { return "err.C" })
 	W.C(func() string { return "W.C" })
 	I.C(func() string { return "inf.C" })
 	D.C(func() string { return "D.C" })
 	T.C(func() string { return "T.C" })
-	ftl.C(func() string { return "ftl.C" })
+	F.C(func() string { return "ftl.C" })
 	E.Chk(errors.New("E.Chk"))
 	W.Chk(errors.New("W.Chk"))
 	I.Chk(errors.New("inf.Chk"))

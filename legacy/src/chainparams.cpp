@@ -55,8 +55,8 @@ public:
         assert(genesis.hashMerkleRoot == uint256("0xc843eae4658e3a51d2f280c36376ce56dc71a6c70e4b1c5ad2d7a9316f9b9ab7"));
 
         vSeeds.push_back(CDNSSeedData("seed1.parallelcoin.info", "seed1.parallelcoin.info"));
-        vSeeds.push_back(CDNSSeedData("seed3.parallelcoin.info", "seed3.parallelcoin.info"));
         vSeeds.push_back(CDNSSeedData("seed2.parallelcoin.info", "seed2.parallelcoin.info"));
+        vSeeds.push_back(CDNSSeedData("seed3.parallelcoin.info", "seed3.parallelcoin.info"));
         vSeeds.push_back(CDNSSeedData("seed4.parallelcoin.info", "seed4.parallelcoin.info"));
         vSeeds.push_back(CDNSSeedData("seed5.parallelcoin.info", "seed5.parallelcoin.info"));
 

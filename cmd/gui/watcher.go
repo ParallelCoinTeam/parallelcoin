@@ -9,6 +9,7 @@ import (
 
 // Watcher keeps the chain and wallet and rpc clients connected
 func (wg *WalletGUI) Watcher() qu.C {
+	I.Ln("starting up watcher")
 	quit := qu.T()
 	// start things up first
 	if !wg.node.Running() {
@@ -36,6 +37,7 @@ func (wg *WalletGUI) Watcher() qu.C {
 			out:
 				for {
 					// keep trying until shutdown or the wallet client connects
+					I.Ln("attempting to get blockchain info from wallet")
 					var bci *btcjson.GetBlockChainInfoResult
 					if bci, e = wg.WalletClient.GetBlockChainInfo(); E.Chk(e) {
 						select {
@@ -50,8 +52,6 @@ func (wg *WalletGUI) Watcher() qu.C {
 				}
 			}
 			wg.unlockPassword.Wipe()
-			wg.ready.Store(true)
-			wg.Invalidate()
 			select {
 			case <-time.After(time.Second):
 				break allOut
@@ -67,9 +67,11 @@ func (wg *WalletGUI) Watcher() qu.C {
 		for {
 		disconnected:
 			for {
-				// D.Ln("top of watcher loop")
+				D.Ln("top of watcher loop")
 				select {
 				case <-watchTick.C:
+					if e = wg.Advertise(); E.Chk(e) {
+					}
 					if !wg.node.Running() {
 						D.Ln("watcher starting node")
 						wg.node.Start()

@@ -22,7 +22,7 @@ import (
 // mainnet this is probably set to 9 or so to raise the difficulty to a reasonable level for the hard fork. at 5
 // repetitions (first plus repeats, thus 4), an example block header produces a number around 48kb in byte size and
 // ~119000 decimal digits, which is then finally hashed down to 32 bytes
-var HashReps = 2
+var HashReps = 3
 
 // Argon2i takes bytes, generates a Blake3 hash as salt, generates an argon2i key
 func Argon2i(bytes []byte) []byte {

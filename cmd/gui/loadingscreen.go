@@ -26,12 +26,22 @@ func (wg *WalletGUI) getLoadingPage() (a *gui.App) {
 	)
 	a.Pages(
 		map[string]l.Widget{
-			"home": wg.Page(
-				"home", gui.Widgets{
+			"loading": wg.Page(
+				"loading", gui.Widgets{
 					gui.WidgetSize{
 						Widget:
 						func(gtx l.Context) l.Dimensions {
 							return a.Flex().Flexed(1, a.Direction().Center().Embed(a.H1("loading").Fn).Fn).Fn(gtx)
+						},
+					},
+				},
+			),
+			"unlocking": wg.Page(
+				"unlocking", gui.Widgets{
+					gui.WidgetSize{
+						Widget:
+						func(gtx l.Context) l.Dimensions {
+							return a.Flex().Flexed(1, a.Direction().Center().Embed(a.H1("unlocking").Fn).Fn).Fn(gtx)
 						},
 					},
 				},

@@ -147,6 +147,7 @@ type Config struct {
 	DisableDNSSeed         *bool            `group:"node" label:"Disable DNS Seed" description:"disable seeding of addresses to peers" type:"" widget:"toggle" json:"DisableDNSSeed" hook:"restart"`
 	DisableListen          *bool            `group:"node" label:"Disable Listen" description:"disables inbound connections for the peer to peer network" type:"" widget:"toggle" json:"DisableListen" hook:"restart"`
 	DisableRPC             *bool            `group:"rpc" label:"Disable RPC" description:"disable rpc servers, as well as kopach controller" type:"" widget:"toggle" json:"DisableRPC" hook:"restart"`
+	Discovery              *bool            `group:"node" label:"Disovery" description:"enable LAN peer discovery in GUI" type:"" widget:"toggle" json:"Discovery" hook:"restart"`
 	ExternalIPs            *cli.StringSlice `group:"node" label:"External IP Addresses" description:"extra addresses to tell peers they can connect to" type:"address" widget:"multi" json:"ExternalIPs" hook:"restart"`
 	FreeTxRelayLimit       *float64         `group:"policy" label:"Free Tx Relay Limit" description:"limit relay of transactions with no transaction fee to the given amount in thousands of bytes per minute" type:"" widget:"float" json:"FreeTxRelayLimit" hook:"restart"`
 	GenThreads             *int             `group:"mining" label:"Gen Threads" description:"number of threads to mine with" type:"" widget:"integer" json:"GenThreads" hook:"genthreads"`
@@ -252,6 +253,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 		DisableDNSSeed:         newbool(),
 		DisableListen:          newbool(),
 		DisableRPC:             newbool(),
+		Discovery:              newbool(),
 		ExternalIPs:            newStringSlice(),
 		FreeTxRelayLimit:       newfloat64(),
 		Generate:               newbool(),
@@ -353,6 +355,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 		"DisableDNSSeed":         c.DisableDNSSeed,
 		"DisableListen":          c.DisableListen,
 		"DisableRPC":             c.DisableRPC,
+		"Discovery":              c.Discovery,
 		"ExternalIPs":            c.ExternalIPs,
 		"FreeTxRelayLimit":       c.FreeTxRelayLimit,
 		"Generate":               c.Generate,
