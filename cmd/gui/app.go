@@ -526,6 +526,15 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 					Fn,
 			).
 			Rigid(
+				wg.Inset(
+					0.33,
+					wg.Body1(fmt.Sprintf("%d", wg.State.bestBlockHeight.Load())).
+						Font("go regular").TextScale(gui.Scales["Caption"]).
+						Color("DocText").
+						Fn,
+				).Fn,
+			).
+			Rigid(
 				wg.ButtonLayout(wg.statusBarButtons[6]).
 					CornerRadius(0).
 					Embed(
@@ -553,7 +562,7 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 			Rigid(
 				wg.Inset(
 					0.33,
-					wg.Body1(fmt.Sprintf("%d", wg.State.bestBlockHeight.Load())).
+					wg.Body1(fmt.Sprintf("%d LAN %d", len(wg.otherNodes), wg.peerCount.Load())).
 						Font("go regular").TextScale(gui.Scales["Caption"]).
 						Color("DocText").
 						Fn,

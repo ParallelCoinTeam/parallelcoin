@@ -883,7 +883,7 @@ func (p *Peer) readMessage(encoding wire.MessageEncoding) (wire.Message, []byte,
 				summary = " (" + summary + ")"
 			}
 			o = fmt.Sprintf(
-				"Received %v%s from %s\n",
+				"Received %v%s from %s",
 				msg.Command(), summary, p,
 			)
 			// o += spew.Sdump(msg)
@@ -909,7 +909,7 @@ func (p *Peer) writeMessage(msg wire.Message, enc wire.MessageEncoding) (e error
 				summary = " (" + summary + ")"
 			}
 			o = fmt.Sprintf(
-				"Sending %v%s to %s\n", msg.Command(),
+				"Sending %v%s to %s", msg.Command(),
 				summary, p,
 			)
 			// o += spew.Sdump(msg)

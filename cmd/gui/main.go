@@ -129,6 +129,7 @@ type WalletGUI struct {
 	multiConn                           *transport.Channel
 	otherNodes                          map[uint64]*nodeSpec
 	uuid                                uint64
+	peerCount                           *uberatomic.Int32
 }
 
 type nodeSpec struct {
@@ -165,7 +166,7 @@ func processAdvtMsg(ctx interface{}, src net.Addr, dst string, b []byte) (e erro
 	var uuid uint64
 	uuid = j.UUID
 	// I.Ln("uuid of advertisment", uuid, wg.otherNodes)
-	if uuid == wg.uuid {
+	if int(uuid) == *wg.cx.Config.UUID {
 		D.Ln("ignoring own advertisment message")
 		return
 	}
@@ -191,6 +192,7 @@ func processAdvtMsg(ctx interface{}, src net.Addr, dst string, b []byte) (e erro
 		I.Ln("other node", uuid, wg.otherNodes[uuid].addr)
 		wg.otherNodes[uuid].Time = time.Now()
 	}
+	// I.S(wg.otherNodes)
 	// If we lose connection for more than 9 seconds we delete and if the node
 	// reappears it can be reconnected
 	for i := range wg.otherNodes {
@@ -223,6 +225,7 @@ func (wg *WalletGUI) Run() (e error) {
 		return
 	}
 	wg.multiConn = mc
+	wg.peerCount = uberatomic.NewInt32(0)
 	wg.prevOpenTxID = uberatomic.NewString("")
 	wg.stateLoaded = uberatomic.NewBool(false)
 	wg.currentReceiveRegenerate = uberatomic.NewBool(true)
@@ -301,8 +304,18 @@ func (wg *WalletGUI) Run() (e error) {
 		for {
 			select {
 			case <-ticker.C:
+				if e = wg.Advertise(); E.Chk(e) {
+				}
 				if wg.node.Running() {
-					if e = wg.Advertise(); E.Chk(e) {
+					if wg.ChainClient != nil {
+						if !wg.ChainClient.Disconnected() {
+							var pi []btcjson.GetPeerInfoResult
+							if pi, e = wg.ChainClient.GetPeerInfo(); E.Chk(e) {
+								continue
+							}
+							wg.peerCount.Store(int32(len(pi)))
+							wg.Invalidate()
+						}
 					}
 				}
 			case <-wg.invalidate.Wait():

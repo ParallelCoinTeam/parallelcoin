@@ -743,7 +743,7 @@ func (n *Node) HandleQuery(state *PeerState, querymsg interface{}) {
 			return
 		}
 		for _, nodePeer := range state.PersistentPeers {
-			if nodePeer.Addr() == msg.Addr {
+			if nodePeer.Addr() == msg.Addr || nodePeer.Peer.LocalAddr().String() == msg.Addr {
 				if msg.Permanent {
 					msg.Reply <- errors.New("nodePeer already connected")
 				} else {

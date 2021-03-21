@@ -23,7 +23,7 @@ func (wg *WalletGUI) WalletAndClientRunning() bool {
 }
 
 func (wg *WalletGUI) Advertise() (e error) {
-	if *wg.cx.Config.Discovery {
+	if wg.node.Running() && *wg.cx.Config.Discovery {
 		I.Ln("sending out advertisment")
 		if e = wg.multiConn.SendMany(
 			p2padvt.Magic,
