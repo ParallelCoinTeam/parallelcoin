@@ -259,7 +259,7 @@ func (mp *TxPool) ProcessTransaction(
 	b *blockchain.BlockChain, tx *util.Tx,
 	allowOrphan, rateLimit bool, tag Tag,
 ) ([]*TxDesc, error) {
-	F.Ln("processing transaction", tx.Hash())
+	D.Ln("processing transaction", tx.Hash())
 	// Protect concurrent access.
 	mp.mtx.Lock()
 	defer mp.mtx.Unlock()

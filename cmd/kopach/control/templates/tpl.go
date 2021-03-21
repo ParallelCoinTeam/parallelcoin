@@ -121,9 +121,9 @@ func (rm *RecentMessages) Len() (o int) {
 func (rm *RecentMessages) Find(nonce uint64) *Message {
 	for i := range rm.msgs {
 		if rm.msgs[i] != nil {
-			D.Ln("recent message", i, rm.msgs[i].Nonce, nonce)
+			I.Ln("recent message", i, rm.msgs[i].Nonce, nonce)
 			if rm.msgs[i].Nonce == nonce {
-				D.Ln("found message", nonce)
+				I.Ln("found message", nonce)
 				msg := rm.msgs[i]
 				rm.msgs[i] = nil
 				rm.cursor = i

@@ -1276,8 +1276,8 @@ func checkBlockSanity(
 	if !header.MerkleRoot.IsEqual(calculatedMerkleRoot) {
 		str := fmt.Sprintf(
 			"block merkle root is invalid - block "+
-				"header indicates %v, but calculated value is %v",
-			header.MerkleRoot, calculatedMerkleRoot,
+				"header indicates %v, but calculated value is %v with version %d",
+			header.MerkleRoot, calculatedMerkleRoot, block.MsgBlock().Header.Version,
 		)
 		return ruleError(ErrBadMerkleRoot, str)
 	}

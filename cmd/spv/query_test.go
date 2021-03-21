@@ -18,7 +18,7 @@ var (
 	bigOne = big.NewInt(1)
 	// blockDataFile is the path to a file containing the first 256 blocks of the block chain.
 	//
-	// blockDataFile = filepath.Join("testdata", "blocks1-256.bz2")
+	// blockDataFile = filepath.Join("tstdata", "blocks1-256.bz2")
 	// blockDataNet is the expected network in the test block data.
 	// blockDataNet = wire.MainNet
 	//
@@ -300,7 +300,7 @@ func getFilter(cs *ChainService, b *chainhash.Hash, t *testing.T) *gcs.Filter {
 	return val
 }
 
-// // loadBlocks loads the blocks contained in the testdata directory and returns
+// // loadBlocks loads the blocks contained in the tstdata directory and returns
 // // a slice of them.
 // //
 // // NOTE: copied from btcsuite/btcd/database/ffldb/interface_test.go

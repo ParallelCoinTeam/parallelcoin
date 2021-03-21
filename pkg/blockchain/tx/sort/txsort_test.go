@@ -58,7 +58,7 @@ func TestSort(t *testing.T) {
 	}
 	for _, test := range tests {
 		// Load and deserialize the test transaction.
-		filePath := filepath.Join("testdata", test.hexFile)
+		filePath := filepath.Join("tstdata", test.hexFile)
 		txHexBytes, e := ioutil.ReadFile(filePath)
 		if e != nil  {
 			t.Errorf("ReadFile (%s): failed to read test file: %v",
