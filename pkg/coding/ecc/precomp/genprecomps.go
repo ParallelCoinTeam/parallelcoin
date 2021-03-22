@@ -1,3 +1,5 @@
+// +build gensecp256k1
+
 package main
 
 import (

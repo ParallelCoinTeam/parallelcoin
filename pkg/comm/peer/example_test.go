@@ -2,15 +2,19 @@ package peer_test
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/logg"
 	"net"
 	"time"
 	
-	qu "github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/pod/pkg/util/qu"
 	
 	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
 	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/comm/peer"
 )
+
+var subsystem = logg.AddLoggerSubsystem()
+var F, E, W, I, D, T logg.LevelPrinter = logg.GetLogPrinterSet(subsystem)
 
 // mockRemotePeer creates a basic inbound peer listening on the simnet port for use with Example_peerConnection. It does
 // not return until the listner is active.
@@ -24,13 +28,13 @@ func mockRemotePeer() (e error) {
 	}
 	// Accept connections on the simnet port.
 	listener, e := net.Listen("tcp", "127.0.0.1:18555")
-	if e != nil  {
+	if e != nil {
 		return e
 	}
 	go func() {
 		conn, e := listener.Accept()
-		if e != nil  {
-			peer.Errorf("Accept: error %v", e)
+		if e != nil {
+			E.F("Accept: error %v", e)
 			return
 		}
 		// Create and start the inbound peer.
@@ -46,7 +50,7 @@ func mockRemotePeer() (e error) {
 func Example_newOutboundPeer() {
 	// Ordinarily this will not be needed since the outbound peer will be connecting to a remote peer, however, since this example is executed and tested, a mock remote peer is needed to listen for the outbound peer.
 	if e := mockRemotePeer(); E.Chk(e) {
-		peer.Errorf("mockRemotePeer: unexpected error %v", e)
+		E.F("mockRemotePeer: unexpected error %v", e)
 		return
 	}
 	// Create an outbound peer that is configured to act as a simnet node that offers no services and has listeners for the version and verack messages.  The verack listener is used here to signal the code below when the handshake has been finished by signalling a channel.
@@ -68,14 +72,14 @@ func Example_newOutboundPeer() {
 		},
 	}
 	p, e := peer.NewOutboundPeer(peerCfg, "127.0.0.1:18555")
-	if e != nil  {
-		peer.Errorf("NewOutboundPeer: error %v", e)
+	if e != nil {
+		E.F("NewOutboundPeer: error %v", e)
 		return
 	}
 	// Establish the connection to the peer address and mark it connected.
 	conn, e := net.Dial("tcp", p.Addr())
-	if e != nil  {
-		peer.Errorf("net.Dial: error %v", e)
+	if e != nil {
+		E.F("net.Dial: error %v", e)
 		return
 	}
 	p.AssociateConnection(conn)
@@ -83,7 +87,7 @@ func Example_newOutboundPeer() {
 	select {
 	case <-verack.Wait():
 	case <-time.After(time.Second * 1):
-		peer.Error("Example_peerConnection: verack timeout")
+		E.F("Example_peerConnection: verack timeout")
 	}
 	// Disconnect the peer.
 	p.Disconnect()

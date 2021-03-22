@@ -954,6 +954,7 @@ func (n *Node) InboundPeerConnected(conn net.Conn) {
 		n.peerState.ForAllPeers(
 			func(np *NodePeer) {
 				if np.IP.Equal(msg.AddrMe.IP) && np.Port == msg.AddrMe.Port && np.ID() != sp.ID() {
+					I.Ln("we would disconnect this peer at this point")
 					sp.Disconnect()
 				}
 			},
