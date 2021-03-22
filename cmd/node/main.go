@@ -158,7 +158,7 @@ func Main(cx *conte.Xt) (e error) {
 		cx.NodeChan <- cx.RPCServer
 	}
 	D.Ln("starting controller")
-	cx.Controller = control.New(
+	cx.Controller, e = control.New(
 		cx.Syncing,
 		cx.Config,
 		cx.StateCfg,
@@ -167,6 +167,7 @@ func Main(cx *conte.Xt) (e error) {
 		mempoolUpdateChan,
 		uint64(*cx.Config.UUID),
 		cx.KillAll,
+		cx.RealNode.StartController, cx.RealNode.StopController,
 	)
 	go cx.Controller.Run()
 	// cx.Controller.Start()

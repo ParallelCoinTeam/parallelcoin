@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"fmt"
+	"github.com/p9c/pod/cmd/kopach/control/sol"
 	"github.com/p9c/pod/cmd/kopach/control/templates"
 	"github.com/p9c/pod/pkg/logg"
 	"net"
@@ -287,19 +288,11 @@ var handlers = transport.Handlers{
 		gotiny.Unmarshal(b, &jr)
 		w.height = jr.Height
 		cN := jr.UUID
-		if int(cN) != *w.cx.Config.UUID {
-			firstSender := w.FirstSender.Load()
-			otherSent := firstSender != cN && firstSender != 0
-			if otherSent {
-				T.Ln("ignoring other controller job")
-				// ignore other controllers while one is active and received first
-				return
-			}
-		} else {
-			// I.Ln("no tworking on job of local controller")
-			// I.Ln("p9 average",fork.P9Average)
-			// T.Ln("now listening to controller at", cN)
-			w.FirstSender.Store(0)
+		firstSender := w.FirstSender.Load()
+		otherSent := firstSender != cN && firstSender != 0
+		if otherSent {
+			T.Ln("ignoring other controller job")
+			// ignore other controllers while one is active and received first
 			return
 		}
 		w.FirstSender.Store(cN)
@@ -333,58 +326,58 @@ var handlers = transport.Handlers{
 		w.FirstSender.Store(0)
 		return
 	},
-	// string(sol.Magic): func(
-	// 	ctx interface{}, src net.Addr, dst string,
-	// 	b []byte,
-	// ) (e error) {
-	// 	w := ctx.(*Worker)
-	// 	I.Ln("shuffling work due to solution on network")
-	// 	w.FirstSender.Store(0)
-	// 	// 	D.Ln("solution detected from miner at", src)
-	// 	// 	portSlice := strings.Split(w.FirstSender.Load(), ":")
-	// 	// 	if len(portSlice) < 2 {
-	// 	// 		D.Ln("error with solution", w.FirstSender.Load(), portSlice)
-	// 	// 		return
-	// 	// 	}
-	// 	// 	// port := portSlice[1]
-	// 	// 	// j := sol.LoadSolContainer(b)
-	// 	// 	// senderPort := j.GetSenderPort()
-	// 	// 	// if fmt.Sprint(senderPort) == port {
-	// 	// 	// // W.Ln("we found a solution")
-	// 	// 	// // prepend to list of solutions for GUI display if enabled
-	// 	// 	// if *w.cx.Config.KopachGUI {
-	// 	// 	// 	// D.Ln("length solutions", len(w.solutions))
-	// 	// 	// 	blok := j.GetMsgBlock()
-	// 	// 	// 	w.solutions = append(
-	// 	// 	// 		w.solutions, []SolutionData{
-	// 	// 	// 			{
-	// 	// 	// 				time:   time.Now(),
-	// 	// 	// 				height: int(w.height),
-	// 	// 	// 				algo: fmt.Sprint(
-	// 	// 	// 					fork.GetAlgoName(blok.Header.Version, w.height),
-	// 	// 	// 				),
-	// 	// 	// 				hash:       blok.Header.BlockHashWithAlgos(w.height).String(),
-	// 	// 	// 				indexHash:  blok.Header.BlockHash().String(),
-	// 	// 	// 				version:    blok.Header.Version,
-	// 	// 	// 				prevBlock:  blok.Header.PrevBlock.String(),
-	// 	// 	// 				merkleRoot: blok.Header.MerkleRoot.String(),
-	// 	// 	// 				timestamp:  blok.Header.Timestamp,
-	// 	// 	// 				bits:       blok.Header.Bits,
-	// 	// 	// 				nonce:      blok.Header.Nonce,
-	// 	// 	// 			},
-	// 	// 	// 		}...,
-	// 	// 	// 	)
-	// 	// 	// 	if len(w.solutions) > 2047 {
-	// 	// 	// 		w.solutions = w.solutions[len(w.solutions)-2047:]
-	// 	// 	// 	}
-	// 	// 	// 	w.solutionCount = len(w.solutions)
-	// 	// 	// 	w.Update <- struct{}{}
-	// 	// 	// }
-	// 	// 	// }
-	// 	// 	// D.Ln("no longer listening to", w.FirstSender.Load())
-	// 	// 	// w.FirstSender.Store("")
-	// 	return
-	// },
+	string(sol.Magic): func(
+		ctx interface{}, src net.Addr, dst string,
+		b []byte,
+	) (e error) {
+		w := ctx.(*Worker)
+		I.Ln("shuffling work due to solution on network")
+		w.FirstSender.Store(0)
+		// 	D.Ln("solution detected from miner at", src)
+		// 	portSlice := strings.Split(w.FirstSender.Load(), ":")
+		// 	if len(portSlice) < 2 {
+		// 		D.Ln("error with solution", w.FirstSender.Load(), portSlice)
+		// 		return
+		// 	}
+		// 	// port := portSlice[1]
+		// 	// j := sol.LoadSolContainer(b)
+		// 	// senderPort := j.GetSenderPort()
+		// 	// if fmt.Sprint(senderPort) == port {
+		// 	// // W.Ln("we found a solution")
+		// 	// // prepend to list of solutions for GUI display if enabled
+		// 	// if *w.cx.Config.KopachGUI {
+		// 	// 	// D.Ln("length solutions", len(w.solutions))
+		// 	// 	blok := j.GetMsgBlock()
+		// 	// 	w.solutions = append(
+		// 	// 		w.solutions, []SolutionData{
+		// 	// 			{
+		// 	// 				time:   time.Now(),
+		// 	// 				height: int(w.height),
+		// 	// 				algo: fmt.Sprint(
+		// 	// 					fork.GetAlgoName(blok.Header.Version, w.height),
+		// 	// 				),
+		// 	// 				hash:       blok.Header.BlockHashWithAlgos(w.height).String(),
+		// 	// 				indexHash:  blok.Header.BlockHash().String(),
+		// 	// 				version:    blok.Header.Version,
+		// 	// 				prevBlock:  blok.Header.PrevBlock.String(),
+		// 	// 				merkleRoot: blok.Header.MerkleRoot.String(),
+		// 	// 				timestamp:  blok.Header.Timestamp,
+		// 	// 				bits:       blok.Header.Bits,
+		// 	// 				nonce:      blok.Header.Nonce,
+		// 	// 			},
+		// 	// 		}...,
+		// 	// 	)
+		// 	// 	if len(w.solutions) > 2047 {
+		// 	// 		w.solutions = w.solutions[len(w.solutions)-2047:]
+		// 	// 	}
+		// 	// 	w.solutionCount = len(w.solutions)
+		// 	// 	w.Update <- struct{}{}
+		// 	// }
+		// 	// }
+		// 	// D.Ln("no longer listening to", w.FirstSender.Load())
+		// 	// w.FirstSender.Store("")
+		return
+	},
 }
 
 func (w *Worker) HashReport() float64 {

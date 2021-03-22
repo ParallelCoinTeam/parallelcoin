@@ -159,17 +159,18 @@ type (
 		// blocks.
 		FeeEstimator *mempool.FeeEstimator
 		// CFCheckptCaches stores a cached slice of filter headers for cfcheckpt messages for each filter type.
-		CFCheckptCaches    map[wire.FilterType][]CFHeaderKV
-		CFCheckptCachesMtx sync.RWMutex
-		Config             *pod.Config
-		ActiveNet          *netparams.Params
-		StateCfg           *state.Config
-		GenThreads         uint32
-		Started            int32
-		Shutdown           int32
-		ShutdownSched      int32
-		HighestKnown       uberatomic.Int32
-		peerState          *PeerState
+		CFCheckptCaches                 map[wire.FilterType][]CFHeaderKV
+		CFCheckptCachesMtx              sync.RWMutex
+		Config                          *pod.Config
+		ActiveNet                       *netparams.Params
+		StateCfg                        *state.Config
+		GenThreads                      uint32
+		Started                         int32
+		Shutdown                        int32
+		ShutdownSched                   int32
+		HighestKnown                    uberatomic.Int32
+		peerState                       *PeerState
+		StartController, StopController qu.C
 	}
 	// NodePeer extends the peer to maintain state shared by the server and the blockmanager.
 	NodePeer struct {
@@ -2781,6 +2782,8 @@ func NewNode(listenAddrs []string, db database.DB, interruptChan qu.C, cx *Conte
 		Config:               cx.Config,
 		StateCfg:             cx.StateCfg,
 		ActiveNet:            cx.ActiveNet,
+		StartController:      qu.Ts(2),
+		StopController:       qu.Ts(2),
 	}
 	// Create the transaction and address indexes if needed.
 	//
@@ -3051,13 +3054,15 @@ func NewNode(listenAddrs []string, db database.DB, interruptChan qu.C, cx *Conte
 					TxMemPool:   s.TxMemPool,
 					// Generator:    blockTemplateGenerator,
 					// CPUMiner:     s.CPUMiner,
-					TxIndex:      s.TxIndex,
-					AddrIndex:    s.AddrIndex,
-					CfIndex:      s.CFIndex,
-					FeeEstimator: s.FeeEstimator,
-					Algo:         l,
-					Hashrate:     cx.Hashrate,
-					Quit:         s.Quit,
+					TxIndex:         s.TxIndex,
+					AddrIndex:       s.AddrIndex,
+					CfIndex:         s.CFIndex,
+					FeeEstimator:    s.FeeEstimator,
+					Algo:            l,
+					Hashrate:        cx.Hashrate,
+					Quit:            s.Quit,
+					StartController: s.StartController,
+					StopController:  s.StopController,
 				}, cx.StateCfg, cx.Config,
 			)
 			if e != nil {
@@ -3249,7 +3254,6 @@ func FileExists(name string) bool {
 	}
 	return true
 }
-
 
 func GetBlkTemplateGenerator(node *Node, cfg *pod.Config, stateCfg *state.Config) *mining.BlkTmplGenerator {
 	D.Ln("getting a block template generator")

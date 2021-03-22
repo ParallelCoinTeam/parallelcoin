@@ -95,22 +95,23 @@ type RetrievedTx struct {
 
 // Server provides a concurrent safe RPC server to a chain server.
 type Server struct {
-	Cfg                    ServerConfig
-	StateCfg               *state.Config
-	Config                 *pod.Config
-	NtfnMgr                *WSNtfnMgr
-	StatusLines            map[int]string
-	StatusLock             sync.RWMutex
-	WG                     sync.WaitGroup
-	GBTWorkState           *GBTWorkState
-	HelpCacher             *HelpCacher
-	RequestProcessShutdown qu.C
-	Quit                   qu.C
-	Started                int32
-	Shutdown               int32
-	NumClients             int32
-	AuthSHA                [sha256.Size]byte
-	LimitAuthSHA           [sha256.Size]byte
+	Cfg                             ServerConfig
+	StateCfg                        *state.Config
+	Config                          *pod.Config
+	NtfnMgr                         *WSNtfnMgr
+	StatusLines                     map[int]string
+	StatusLock                      sync.RWMutex
+	WG                              sync.WaitGroup
+	GBTWorkState                    *GBTWorkState
+	HelpCacher                      *HelpCacher
+	RequestProcessShutdown          qu.C
+	Quit                            qu.C
+	Started                         int32
+	Shutdown                        int32
+	NumClients                      int32
+	AuthSHA                         [sha256.Size]byte
+	LimitAuthSHA                    [sha256.Size]byte
+	StartController, StopController qu.C
 }
 
 // ServerConfig is a descriptor containing the RPC server configuration.
@@ -158,6 +159,7 @@ type ServerConfig struct {
 	// CPUMiner *exec.Cmd
 	Hashrate uberatomic.Uint64
 	Quit     qu.C
+	StartController, StopController qu.C
 }
 
 // ServerConnManager represents a connection manager for use with the RPC server. The interface contract requires that

@@ -596,6 +596,12 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 						func() {
 							*wg.cx.Config.Controller = !*wg.cx.Config.Controller
 							I.Ln("controller running:", *wg.cx.Config.Controller)
+							var e error
+							if e = wg.ChainClient.SetGenerate(
+								*wg.cx.Config.Controller,
+								*wg.cx.Config.GenThreads,
+							); !E.Chk(e) {
+							}
 							// // wg.toggleMiner()
 							// go func() {
 							// 	if wg.miner.Running() {

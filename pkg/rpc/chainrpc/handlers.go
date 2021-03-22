@@ -1292,7 +1292,7 @@ func HandleGetDifficulty(s *Server, cmd interface{}, closeChan qu.C) (interface{
 
 // HandleGetGenerate implements the getgenerate command.
 func HandleGetGenerate(s *Server, cmd interface{}, closeChan qu.C) (interface{}, error) { // cpuminer
-	_ ,ok := cmd.(*btcjson.GetGenerateCmd)
+	_, ok := cmd.(*btcjson.GetGenerateCmd)
 	if ok {
 		result := *s.Config.Controller
 		return &result, nil
@@ -1792,8 +1792,8 @@ func HandleGetPeerInfo(s *Server, cmd interface{}, closeChan qu.C) (interface{},
 			addr =
 				statsSnap.Addr
 			addrLocal =
-				// (*s.Config.P2PConnect)[0]
-			p.ToPeer().LocalAddr().String()
+			// (*s.Config.P2PConnect)[0]
+				p.ToPeer().LocalAddr().String()
 		}
 		info := &btcjson.GetPeerInfoResult{
 			ID:             statsSnap.ID,
@@ -2553,12 +2553,12 @@ func HandleSendRawTransaction(
 
 // HandleSetGenerate implements the setgenerate command.
 func HandleSetGenerate(s *Server, cmd interface{}, closeChan qu.C) (interface{}, error) { // cpuminer
-		c ,ok := cmd.(*btcjson.SetGenerateCmd)
+	c, ok := cmd.(*btcjson.SetGenerateCmd)
 	if ok {
 		if c.Generate {
-		
+			s.Cfg.StartController.Signal()
 		} else {
-		
+			s.Cfg.StopController.Signal()
 		}
 		return &struct{}{}, nil
 	}
