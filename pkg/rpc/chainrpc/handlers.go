@@ -1292,6 +1292,11 @@ func HandleGetDifficulty(s *Server, cmd interface{}, closeChan qu.C) (interface{
 
 // HandleGetGenerate implements the getgenerate command.
 func HandleGetGenerate(s *Server, cmd interface{}, closeChan qu.C) (interface{}, error) { // cpuminer
+	_ ,ok := cmd.(*btcjson.GetGenerateCmd)
+	if ok {
+		result := *s.Config.Controller
+		return &result, nil
+	}
 	// generating := s.StateCfg.Miner != nil
 	// if generating {
 	//	D.Ln("miner is running internally")
@@ -1300,7 +1305,7 @@ func HandleGetGenerate(s *Server, cmd interface{}, closeChan qu.C) (interface{},
 	// }
 	// return nil, nil
 	// return s.Cfg.CPUMiner.IsMining(), nil
-	return false, errors.New("there is no internal cpu miner anymore")
+	return false, errors.New("command was not a btcjson.GetGenerateCmd")
 }
 
 // var startTime = time.Now()
@@ -2547,9 +2552,17 @@ func HandleSendRawTransaction(
 }
 
 // HandleSetGenerate implements the setgenerate command.
-// TODO: this and lots of RPC needs to be revised before release
 func HandleSetGenerate(s *Server, cmd interface{}, closeChan qu.C) (interface{}, error) { // cpuminer
-	return nil, errors.New("there is no internal cpu miner")
+		c ,ok := cmd.(*btcjson.SetGenerateCmd)
+	if ok {
+		if c.Generate {
+		
+		} else {
+		
+		}
+		return &struct{}{}, nil
+	}
+	return nil, errors.New("command was not a btcjson.SetGenerateCmd")
 	// var msg string
 	// var e error
 	// // c, ok := cmd.(*btcjson.GetRawTransactionCmd)

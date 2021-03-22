@@ -475,6 +475,10 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 		if !wg.miner.Running() {
 			miningIcon = &p9icons.NoMine
 		}
+		controllerIcon := &icons.NotificationSyncDisabled
+		if *wg.cx.Config.Controller {
+			controllerIcon = &icons.NotificationSync
+		}
 		discoverColor :=
 			"DocText"
 		discoverIcon :=
@@ -583,7 +587,7 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 										Icon().
 										Scale(gui.Scales["H5"]).
 										Color(clr).
-										Src(&icons.ActionBuild).Fn,
+										Src(controllerIcon).Fn,
 								).Fn(gtx)
 						},
 					).
@@ -591,6 +595,7 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 					SetClick(
 						func() {
 							*wg.cx.Config.Controller = !*wg.cx.Config.Controller
+							I.Ln("controller running:", *wg.cx.Config.Controller)
 							// // wg.toggleMiner()
 							// go func() {
 							// 	if wg.miner.Running() {
