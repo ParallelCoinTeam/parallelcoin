@@ -84,7 +84,7 @@ type Worker struct {
 	hashCount           atomic.Uint64
 	hashSampleBuf       *rav.BufferUint64
 	hashrate            float64
-	lastNonce           int32
+	lastNonce           uint64
 }
 
 func (w *Worker) Start() {
@@ -295,7 +295,12 @@ var handlers = transport.Handlers{
 			// ignore other controllers while one is active and received first
 			return
 		}
-		w.FirstSender.Store(cN)
+		if jr.Nonce == w.lastNonce {
+			I.Ln("same job again, ignoring")
+			return
+		}
+		w.lastNonce = jr.Nonce
+		// w.FirstSender.Store(cN)
 		w.lastSent.Store(time.Now().UnixNano())
 		for i := range w.clients {
 			if e = w.clients[i].NewJob(&jr); E.Chk(e) {
@@ -330,9 +335,9 @@ var handlers = transport.Handlers{
 		ctx interface{}, src net.Addr, dst string,
 		b []byte,
 	) (e error) {
-		w := ctx.(*Worker)
-		I.Ln("shuffling work due to solution on network")
-		w.FirstSender.Store(0)
+		// w := ctx.(*Worker)
+		// I.Ln("shuffling work due to solution on network")
+		// w.FirstSender.Store(0)
 		// 	D.Ln("solution detected from miner at", src)
 		// 	portSlice := strings.Split(w.FirstSender.Load(), ":")
 		// 	if len(portSlice) < 2 {
