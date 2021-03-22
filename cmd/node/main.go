@@ -147,32 +147,30 @@ func Main(cx *conte.Xt) (e error) {
 	}
 	server.Start()
 	cx.RealNode = server
-	if len(server.RPCServers) > 0 && *cx.Config.CAPI {
-		D.Ln("starting cAPI.....")
-		// chainrpc.RunAPI(server.RPCServers[0], cx.NodeKill)
-		// D.Ln("propagating rpc server handle (node has started)")
-	}
+	// if len(server.RPCServers) > 0 && *cx.Config.CAPI {
+	// 	D.Ln("starting cAPI.....")
+	// 	// chainrpc.RunAPI(server.RPCServers[0], cx.NodeKill)
+	// 	// D.Ln("propagating rpc server handle (node has started)")
+	// }
 	if len(server.RPCServers) > 0 {
 		cx.RPCServer = server.RPCServers[0]
 		D.Ln("sending back node")
 		cx.NodeChan <- cx.RPCServer
 	}
-	if !*cx.Config.DisableController {
-		D.Ln("starting controller")
-		cx.Controller = control.New(
-			cx.Syncing,
-			cx.Config,
-			cx.StateCfg,
-			cx.RealNode,
-			cx.RPCServer,
-			mempoolUpdateChan,
-			uint64(*cx.Config.UUID),
-			cx.KillAll,
-		)
-		go cx.Controller.Run()
-		// cx.Controller.Start()
-		D.Ln("controller started")
-	}
+	D.Ln("starting controller")
+	cx.Controller = control.New(
+		cx.Syncing,
+		cx.Config,
+		cx.StateCfg,
+		cx.RealNode,
+		cx.RPCServer,
+		mempoolUpdateChan,
+		uint64(*cx.Config.UUID),
+		cx.KillAll,
+	)
+	go cx.Controller.Run()
+	// cx.Controller.Start()
+	D.Ln("controller started")
 	once := true
 	gracefulShutdown := func() {
 		if !once {

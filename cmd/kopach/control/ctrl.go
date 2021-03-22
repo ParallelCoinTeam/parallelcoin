@@ -83,10 +83,6 @@ func New(
 	killall qu.C,
 ) (s *State) {
 	var e error
-	if *cfg.DisableController {
-		W.Ln("controller is disabled")
-		return
-	}
 	quit := qu.T()
 	D.Ln("creating othernodes map")
 	s = &State{
@@ -151,6 +147,8 @@ func New(
 	return
 }
 
+// todo: the stop
+
 // Start up the controller
 func (s *State) Start() {
 	D.Ln("calling start controller")
@@ -211,10 +209,6 @@ func (s *State) updateBlockTemplate() (e error) {
 func (s *State) Run() {
 	D.Ln("starting controller server")
 	var e error
-	if *s.cfg.DisableController {
-		W.Ln("controller is disabled")
-		return
-	}
 	ticker := time.NewTicker(time.Second)
 out:
 	for {

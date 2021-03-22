@@ -562,11 +562,49 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 			Rigid(
 				wg.Inset(
 					0.33,
-					wg.Body1(fmt.Sprintf("%d LAN %d", len(wg.otherNodes), wg.peerCount.Load())).
-						Font("go regular").TextScale(gui.Scales["Caption"]).
+					wg.Caption(fmt.Sprintf("%d LAN %d", len(wg.otherNodes), wg.peerCount.Load())).
+						Font("go regular").
 						Color("DocText").
 						Fn,
 				).Fn,
+			).
+			Rigid(
+				wg.ButtonLayout(wg.statusBarButtons[7]).
+					CornerRadius(0).
+					Embed(
+						func(gtx l.Context) l.Dimensions {
+							clr := "scrim"
+							if *wg.cx.Config.Controller {
+								clr = "DocText"
+							}
+							return wg.
+								Inset(
+									0.25, wg.
+										Icon().
+										Scale(gui.Scales["H5"]).
+										Color(clr).
+										Src(&icons.ActionBuild).Fn,
+								).Fn(gtx)
+						},
+					).
+					Background(wg.MainApp.StatusBarBackgroundGet()).
+					SetClick(
+						func() {
+							*wg.cx.Config.Controller = !*wg.cx.Config.Controller
+							// // wg.toggleMiner()
+							// go func() {
+							// 	if wg.miner.Running() {
+							// 		*wg.cx.Config.Generate = false
+							// 		wg.miner.Stop()
+							// 	} else {
+							// 		wg.miner.Start()
+							// 		*wg.cx.Config.Generate = true
+							// 	}
+							// 	save.Pod(wg.cx.Config)
+							// }()
+						},
+					).
+					Fn,
 			).
 			Rigid(
 				wg.ButtonLayout(wg.statusBarButtons[1]).
@@ -592,14 +630,16 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 						func() {
 							// wg.toggleMiner()
 							go func() {
-								if wg.miner.Running() {
-									*wg.cx.Config.Generate = false
-									wg.miner.Stop()
-								} else {
-									wg.miner.Start()
-									*wg.cx.Config.Generate = true
+								if *wg.cx.Config.GenThreads != 0 {
+									if wg.miner.Running() {
+										*wg.cx.Config.Generate = false
+										wg.miner.Stop()
+									} else {
+										wg.miner.Start()
+										*wg.cx.Config.Generate = true
+									}
+									save.Pod(wg.cx.Config)
 								}
-								save.Pod(wg.cx.Config)
 							}()
 						},
 					).

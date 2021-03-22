@@ -15,7 +15,7 @@ import (
 )
 
 func rpcNodeHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
-	*cx.Config.DisableController = true
+	// *cx.Config.DisableController = true
 	return nodeHandle(cx)
 }
 

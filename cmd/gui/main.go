@@ -434,7 +434,7 @@ func (wg *WalletGUI) GetButtons() {
 	for i := range wg.buttonBarButtons {
 		wg.buttonBarButtons[i] = wg.Clickable()
 	}
-	wg.statusBarButtons = make([]*gui.Clickable, 7)
+	wg.statusBarButtons = make([]*gui.Clickable, 8)
 	for i := range wg.statusBarButtons {
 		wg.statusBarButtons[i] = wg.Clickable()
 	}

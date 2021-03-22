@@ -642,9 +642,9 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 				cx.Config.LAN,
 			),
 			au.Bool(
-				"disablecontroller",
-				"disables multicast (this is force default for node unless explicitly enabled)",
-				cx.Config.DisableController,
+				"controller",
+				"enables multicast",
+				cx.Config.Controller,
 			),
 			au.Bool(
 				"autoports",

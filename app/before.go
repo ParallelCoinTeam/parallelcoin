@@ -380,8 +380,8 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) (e error) {
 		if c.IsSet("notty") {
 			cx.IsGUI = true
 		}
-		if c.IsSet("disablecontroller") {
-			*cx.Config.DisableController = c.Bool("disablecontroller")
+		if c.IsSet("controller") {
+			*cx.Config.Controller = c.Bool("controller")
 		}
 		if c.IsSet("save") {
 			I.Ln("saving configuration")
