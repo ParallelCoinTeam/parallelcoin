@@ -22,23 +22,23 @@ import (
 	"sync/atomic"
 	"time"
 	
-	qu "github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/pod/pkg/util/qu"
 	
 	"github.com/btcsuite/websocket"
 	uberatomic "go.uber.org/atomic"
 	
 	"github.com/p9c/pod/cmd/node/mempool"
 	"github.com/p9c/pod/cmd/node/state"
-	blockchain "github.com/p9c/pod/pkg/blockchain"
+	"github.com/p9c/pod/pkg/blockchain"
 	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	"github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/blockchain/fork"
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
-	indexers "github.com/p9c/pod/pkg/blockchain/indexers"
+	"github.com/p9c/pod/pkg/blockchain/indexers"
 	"github.com/p9c/pod/pkg/blockchain/mining"
-	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
+	"github.com/p9c/pod/pkg/blockchain/tx/txscript"
 	"github.com/p9c/pod/pkg/blockchain/wire"
 	p "github.com/p9c/pod/pkg/comm/peer"
-	database "github.com/p9c/pod/pkg/database"
+	"github.com/p9c/pod/pkg/database"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/util"
@@ -1640,7 +1640,7 @@ func CreateTxRawResult(
 	txReply := &btcjson.TxRawResult{
 		Hex:      mtxHex,
 		Txid:     txHash,
-		Hash:     mtx.TxHash().String(),  // WitnessHash().String(),
+		Hash:     mtx.TxHash().String(), // WitnessHash().String(),
 		Size:     int32(mtx.SerializeSize()),
 		Vsize:    int32(mempool.GetTxVirtualSize(util.NewTx(mtx))),
 		Vin:      CreateVinList(mtx),
@@ -1994,7 +1994,7 @@ func NormalizeAddress(addr, defaultPort string) string {
 }
 
 func init() {
-
+	
 	RPCHandlers = RPCHandlersBeforeInit
 	rand.Seed(time.Now().UnixNano())
 }

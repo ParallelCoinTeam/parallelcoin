@@ -7,6 +7,8 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"github.com/p9c/pod/cmd/kopach/control/peersummary"
+	"github.com/p9c/pod/pkg/blockchain/mining"
 	"github.com/p9c/pod/pkg/logg"
 	"math"
 	"net"
@@ -135,7 +137,7 @@ type (
 		NewPeers             chan *NodePeer
 		DonePeers            chan *NodePeer
 		BanPeers             chan *NodePeer
-		PeerState            chan chan PeerSummaries
+		PeerState            chan chan peersummary.PeerSummaries
 		Query                chan interface{}
 		RelayInv             chan RelayMsg
 		Broadcast            chan BroadcastMsg
@@ -192,12 +194,6 @@ type (
 		IP             net.IP
 		Port           uint16
 	}
-	// PeerSummary stores the salient network location information about a peer
-	PeerSummary struct {
-		IP      net.IP
-		Inbound bool
-	}
-	PeerSummaries []PeerSummary
 	// SimpleAddr implements the net.Addr interface with two struct fields
 	SimpleAddr struct {
 		Net, Addr string
@@ -1089,11 +1085,11 @@ out:
 				for i := range n.peerState.PersistentPeers {
 					res[i] = n.peerState.PersistentPeers[i]
 				}
-				var ps PeerSummaries
+				var ps peersummary.PeerSummaries
 				for i := range res {
 					if res[i].Connected() {
 						ps = append(
-							ps, PeerSummary{
+							ps, peersummary.PeerSummary{
 								IP:      res[i].Peer.NA().IP,
 								Inbound: res[i].Inbound(),
 							},
@@ -2767,7 +2763,7 @@ func NewNode(listenAddrs []string, db database.DB, interruptChan qu.C, cx *Conte
 		NewPeers:             make(chan *NodePeer, *cx.Config.MaxPeers),
 		DonePeers:            make(chan *NodePeer, *cx.Config.MaxPeers),
 		BanPeers:             make(chan *NodePeer, *cx.Config.MaxPeers),
-		PeerState:            make(chan chan PeerSummaries, 1),
+		PeerState:            make(chan chan peersummary.PeerSummaries, 1),
 		Query:                make(chan interface{}),
 		RelayInv:             make(chan RelayMsg, *cx.Config.MaxPeers),
 		Broadcast:            make(chan BroadcastMsg, *cx.Config.MaxPeers),
@@ -3252,4 +3248,25 @@ func FileExists(name string) bool {
 		}
 	}
 	return true
+}
+
+
+func GetBlkTemplateGenerator(node *Node, cfg *pod.Config, stateCfg *state.Config) *mining.BlkTmplGenerator {
+	D.Ln("getting a block template generator")
+	return mining.NewBlkTmplGenerator(
+		&mining.Policy{
+			BlockMinWeight:    uint32(*cfg.BlockMinWeight),
+			BlockMaxWeight:    uint32(*cfg.BlockMaxWeight),
+			BlockMinSize:      uint32(*cfg.BlockMinSize),
+			BlockMaxSize:      uint32(*cfg.BlockMaxSize),
+			BlockPrioritySize: uint32(*cfg.BlockPrioritySize),
+			TxMinFreeFee:      stateCfg.ActiveMinRelayTxFee,
+		},
+		node.ChainParams,
+		node.TxMemPool,
+		node.Chain,
+		node.TimeSource,
+		node.SigCache,
+		node.HashCache,
+	)
 }

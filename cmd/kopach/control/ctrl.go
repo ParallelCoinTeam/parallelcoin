@@ -10,6 +10,7 @@ import (
 	"github.com/p9c/pod/cmd/kopach/control/job"
 	"github.com/p9c/pod/cmd/kopach/control/p2padvt"
 	"github.com/p9c/pod/cmd/kopach/control/pause"
+	"github.com/p9c/pod/cmd/kopach/control/peersummary"
 	"github.com/p9c/pod/cmd/kopach/control/sol"
 	"github.com/p9c/pod/cmd/kopach/control/templates"
 	"github.com/p9c/pod/cmd/node/state"
@@ -61,7 +62,6 @@ type State struct {
 	hashSampleBuf     *rav.BufferUint64
 	hashCount         atomic.Uint64
 	lastNonce         int32
-	mining            *atomic.Bool
 	lastBlockUpdate   atomic.Int64
 }
 
@@ -98,11 +98,10 @@ func New(
 		stop:              qu.Ts(2),
 		blockUpdate:       make(chan *util.Block, 1),
 		hashSampleBuf:     rav.NewBufferUint64(100),
-		mining:            atomic.NewBool(false),
 		msgBlockTemplates: templates.NewRecentMessages(),
 	}
 	s.lastBlockUpdate.Store(time.Now().Add(-time.Second * 3).Unix())
-	s.generator = s.getBlkTemplateGenerator()
+	s.generator = chainrpc.GetBlkTemplateGenerator(node, cfg, stateCfg)
 	var mc *transport.Channel
 	if mc, e = transport.NewBroadcastChannel(
 		"controller",
@@ -211,8 +210,6 @@ func (s *State) Run() {
 	ticker := time.NewTicker(time.Second)
 out:
 	for {
-		D.Ln("controller now pausing")
-		s.mining.Store(false)
 		// if !s.Syncing.Load() {
 		// 	if s.walletClient.Disconnected() {
 		// 		D.Ln("wallet client is disconnected, retrying")
@@ -237,6 +234,8 @@ out:
 		// // D.Ln("wallet client is connected, switching to running")
 		// // if e = s.updateBlockTemplate(); E.Chk(e) {
 		// // }
+		D.Ln("controller now pausing")
+		*s.cfg.Controller = false
 	pausing:
 		for {
 			select {
@@ -271,12 +270,12 @@ out:
 				break out
 			}
 		}
-		D.Ln("controller now running")
 		// if s.templateShards == nil || len(s.templateShards) < 1 {
+		// }
+		D.Ln("controller now running")
 		if e = s.updateBlockTemplate(); E.Chk(e) {
 		}
-		// }
-		s.mining.Store(true)
+		*s.cfg.Controller = true
 	running:
 		for {
 			select {
@@ -333,7 +332,7 @@ func (s *State) checkConnectivity() {
 		return
 	}
 	T.Ln("checking connectivity state")
-	ps := make(chan chainrpc.PeerSummaries, 1)
+	ps := make(chan peersummary.PeerSummaries, 1)
 	s.node.PeerState <- ps
 	T.Ln("sent peer list query")
 	var lanPeers int
@@ -411,26 +410,6 @@ func (s *State) doBlockUpdate(prev *util.Block) (e error) {
 	D.Ln("caching error corrected message shards...")
 	s.templateShards = transport.GetShards(tpl.Serialize())
 	return
-}
-
-func (s *State) getBlkTemplateGenerator() *mining.BlkTmplGenerator {
-	D.Ln("getting a block template generator")
-	return mining.NewBlkTmplGenerator(
-		&mining.Policy{
-			BlockMinWeight:    uint32(*s.cfg.BlockMinWeight),
-			BlockMaxWeight:    uint32(*s.cfg.BlockMaxWeight),
-			BlockMinSize:      uint32(*s.cfg.BlockMinSize),
-			BlockMaxSize:      uint32(*s.cfg.BlockMaxSize),
-			BlockPrioritySize: uint32(*s.cfg.BlockPrioritySize),
-			TxMinFreeFee:      s.stateCfg.ActiveMinRelayTxFee,
-		},
-		s.node.ChainParams,
-		s.node.TxMemPool,
-		s.node.Chain,
-		s.node.TimeSource,
-		s.node.SigCache,
-		s.node.HashCache,
-	)
 }
 
 // GetMsgBlockTemplate gets a Message building on given block paying to a given

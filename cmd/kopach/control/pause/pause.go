@@ -1,23 +1,17 @@
 package pause
 
-import (
-	"github.com/p9c/pod/cmd/kopach/control/p2padvt"
-	"github.com/p9c/pod/pkg/pod"
-	"github.com/p9c/pod/pkg/rpc/chainrpc"
-)
-
 var Magic = []byte{'p', 'a', 'u', 1}
 
 //
 // type Container struct {
 // 	simplebuffer.Container
 // }
-
-func GetPauseContainer(uuid uint64, cfg *pod.Config, node *chainrpc.Node) []byte {
-	return p2padvt.Get(uuid, cfg)
-	// mB := p2padvt.Get(cx).CreateContainer(Magic)
-	// return &Container{*mB}
-}
+//
+// func GetPauseContainer(uuid uint64, cfg *pod.Config, node *chainrpc.Node) []byte {
+// 	return p2padvt.Get(uuid, cfg)
+// 	// mB := p2padvt.Get(cx).CreateContainer(Magic)
+// 	// return &Container{*mB}
+// }
 
 // func LoadPauseContainer(b []byte) (out *Container) {
 // 	out = &Container{}

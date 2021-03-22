@@ -163,7 +163,7 @@ func Main(cx *conte.Xt) (e error) {
 		cx.Config,
 		cx.StateCfg,
 		cx.RealNode,
-		cx.RPCServer,
+		cx.RPCServer.Cfg.ConnMgr,
 		mempoolUpdateChan,
 		uint64(*cx.Config.UUID),
 		cx.KillAll,
