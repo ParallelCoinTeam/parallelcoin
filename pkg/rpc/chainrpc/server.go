@@ -942,8 +942,13 @@ func (n *Node) HandleUpdatePeerHeights(
 // disconnection.
 func (n *Node) InboundPeerConnected(conn net.Conn) {
 	ca := conn.RemoteAddr().String()
+	var h string
+	var e error
+	if h, _, e = net.SplitHostPort(ca); E.Chk(e) {
+	}
+	remoteIP := net.ParseIP(h)
 	cla := conn.LocalAddr().String()
-	I.Ln("inbound peer connected", ca, cla)
+	I.Ln("inbound peer connected", ca, cla, remoteIP)
 	sp := NewServerPeer(n, false)
 	sp.IsWhitelisted = GetIsWhitelisted(n.StateCfg, conn.RemoteAddr())
 	sp.Peer = peer.NewInboundPeer(NewPeerConfig(sp))
@@ -953,10 +958,16 @@ func (n *Node) InboundPeerConnected(conn net.Conn) {
 		msg := <-msgChan
 		n.peerState.ForAllPeers(
 			func(np *NodePeer) {
+				// check also that the address of origin matches the one in the message, if this
+				// is wrong it is being spoofed and is suspicious
 				if np.IP.Equal(msg.AddrMe.IP) && np.Port == msg.AddrMe.Port && np.ID() != sp.ID() {
-					I.Ln("we would disconnect this peer at this point")
+					I.Ln("disconnecting inbound peer we are connected outbound to")
 					sp.Disconnect()
 				}
+					if !msg.AddrYou.IP.Equal(remoteIP) {
+						W.Ln("disconnecting peer", ca, "who is sending message with non-matching IP", msg.AddrYou.IP)
+						sp.Disconnect()
+					}
 			},
 		)
 	}()
