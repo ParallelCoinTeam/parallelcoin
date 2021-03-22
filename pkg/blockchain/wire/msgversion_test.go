@@ -20,7 +20,7 @@ func TestVersion(t *testing.T) {
 	you := NewNetAddress(tcpAddrYou, SFNodeNetwork)
 	nonce, e := RandomUint64()
 	if e != nil  {
-		t.Errorf("RandomUint64: error generating nonce: %v", err)
+		t.Errorf("RandomUint64: error generating nonce: %v", e)
 	}
 	// Ensure we get the correct data back out.
 	msg := NewMsgVersion(me, you, nonce, lastBlock)
@@ -54,7 +54,7 @@ func TestVersion(t *testing.T) {
 	}
 	e = msg.AddUserAgent("myclient", "1.2.3", "optional", "comments")
 	if e != nil  {
-		t.Log(err)
+		t.Log(e)
 	}
 	customUserAgent := DefaultUserAgent + "myclient:1.2.3(optional; comments)/"
 	if msg.UserAgent != customUserAgent {
@@ -63,7 +63,7 @@ func TestVersion(t *testing.T) {
 	}
 	e = msg.AddUserAgent("mygui", "3.4.5")
 	if e != nil  {
-		t.Log(err)
+		t.Log(e)
 	}
 	customUserAgent += "mygui:3.4.5/"
 	if msg.UserAgent != customUserAgent {
@@ -73,7 +73,7 @@ func TestVersion(t *testing.T) {
 	// accounting for ":", "/"
 	e = msg.AddUserAgent(strings.Repeat("t",
 		MaxUserAgentLen-len(customUserAgent)-2+1), "")
-	if _, ok := err.(*MessageError); !ok {
+	if _, ok := e.(*MessageError); !ok {
 		t.Errorf("AddUserAgent: expected error not received "+
 			"- got %v, want %T", e, MessageError{})
 	}

@@ -948,8 +948,12 @@ func (n *Node) InboundPeerConnected(conn net.Conn) {
 	}
 	remoteIP := net.ParseIP(h)
 	cla := conn.LocalAddr().String()
+	var hh string
+	if hh, _, e = net.SplitHostPort(cla); E.Chk(e) {
+	}
+	localIP := net.ParseIP(hh)
 	I.Ln("inbound peer connected", ca, cla, remoteIP)
-	sp := NewServerPeer(n, false)
+	sp := NewServerPeer(n, localIP, false)
 	sp.IsWhitelisted = GetIsWhitelisted(n.StateCfg, conn.RemoteAddr())
 	sp.Peer = peer.NewInboundPeer(NewPeerConfig(sp))
 	msgChan := sp.AssociateConnection(conn)
@@ -958,29 +962,39 @@ func (n *Node) InboundPeerConnected(conn net.Conn) {
 		msg := <-msgChan
 		n.peerState.ForAllPeers(
 			func(np *NodePeer) {
-				// check also that the address of origin matches the one in the message, if this
-				// is wrong it is being spoofed and is suspicious
 				if np.IP.Equal(msg.AddrMe.IP) && np.Port == msg.AddrMe.Port && np.ID() != sp.ID() {
 					I.Ln("disconnecting inbound peer we are connected outbound to")
 					sp.Disconnect()
 				}
-					if !msg.AddrYou.IP.Equal(remoteIP) {
-						W.Ln("disconnecting peer", ca, "who is sending message with non-matching IP", msg.AddrYou.IP)
-						sp.Disconnect()
-					}
+				// check also that the address of origin matches the one in the message, if this
+				// is wrong and not zero it is being spoofed and is suspicious
+				if !msg.AddrMe.IP.Equal(net.IP{0, 0, 0, 0}) && msg.AddrYou.IP.String() != remoteIP.String() {
+					W.Ln("disconnecting peer", remoteIP, "who is sending message with non-matching IP", msg.AddrYou.IP)
+					sp.Disconnect()
+				}
 			},
 		)
 	}()
 }
 
-// OutboundPeerConnected is invoked by the connection manager when a new outbound connection is established. It
-// initializes a new outbound server peer instance, associates it with the relevant state such as the connection request
-// instance and the connection itself, and finally notifies the address manager of the attempt.
+// OutboundPeerConnected is invoked by the connection manager when a new
+// outbound connection is established. It initializes a new outbound server peer
+// instance, associates it with the relevant state such as the connection
+// request instance and the connection itself, and finally notifies the address
+// manager of the attempt.
+//
+// TODO: the serverpeer should attach to the same connection as the inbound
+//  connection?
 func (n *Node) OutboundPeerConnected(c *connmgr.ConnReq, conn net.Conn) {
 	ca := conn.RemoteAddr().String()
 	cla := conn.LocalAddr().String()
 	I.Ln("outbound peer connected", ca, cla)
-	sp := NewServerPeer(n, c.Permanent)
+	var hh string
+	var e error
+	if hh, _, e = net.SplitHostPort(cla); E.Chk(e) {
+	}
+	localIP := net.ParseIP(hh)
+	sp := NewServerPeer(n, localIP, c.Permanent)
 	p, e := peer.NewOutboundPeer(NewPeerConfig(sp), c.Addr.String())
 	if e != nil {
 		E.F("cannot create outbound peer %n: %v %n", c.Addr, e)
@@ -996,6 +1010,7 @@ func (n *Node) OutboundPeerConnected(c *connmgr.ConnReq, conn net.Conn) {
 		n.peerState.ForAllPeers(
 			func(np *NodePeer) {
 				if np.IP.Equal(msg.AddrMe.IP) && np.Port == msg.AddrMe.Port && np.ID() != sp.ID() {
+					I.Ln("disconnecting outbound peer we are connected inbound to")
 					sp.Disconnect()
 				}
 			},
@@ -3072,16 +3087,47 @@ func NewNode(listenAddrs []string, db database.DB, interruptChan qu.C, cx *Conte
 }
 
 // NewServerPeer returns a new ServerPeer instance. The peer needs to be set by the caller.
-func NewServerPeer(s *Node, isPersistent bool) *NodePeer {
+//
+// note that peers that give different addresses to the sender address are
+// disconnected to stop spoofing to disrupt other connections with the fake IP.
+// Therefore upnp external address must be found and otherwise zero for proxy,
+// empty or explicitly disabled. further external inbound ports as possible to
+// configure in externalIPs are left as an exercise for the reader, since there
+// can be more than one and the message only anyway allows one IP on both sides,
+// so anyhow external ip's also have to send different messages so what are they
+// for anyway (spoofing?) - but seriously, todo: remove external ips
+func NewServerPeer(s *Node, localIP net.IP, isPersistent bool) *NodePeer {
 	var e error
 	var host, port string
-	if host, port, e = net.SplitHostPort((*s.Config.P2PConnect)[0]); E.Chk(e) {
-	}
-	ipa := net.ParseIP(host)
+	var ipa net.IP
 	var p uint64
-	if p, e = strconv.ParseUint(port, 10, 16); E.Chk(e) {
+	if s.Config.P2PConnect != nil || len(*s.Config.P2PConnect) < 1 || *s.Config.DisableListen || *s.Config.Proxy != "" ||
+		*s.Config.OnionProxy != "" {
+		// return an empty IP address if we are not listening (this also is done on
+		// proxy connections to not leak info)
+	} else {
+		myAddress := (*s.Config.P2PConnect)[0]
+		if host, port, e = net.SplitHostPort(myAddress); E.Chk(e) {
+		}
+		if p, e = strconv.ParseUint(port, 10, 16); E.Chk(e) {
+		}
+		// use the given UPNP external address if in use so version message matches
+		// sender
+		if *s.Config.UPNP {
+			var exip net.IP
+			if exip, e = s.NAT.GetExternalAddress(); E.Chk(e) {
+			} else {
+				ipa = exip
+			}
+		} else {
+			ipa = net.ParseIP(host)
+		}
+		// if the return interface address is given...
+		if !localIP.Equal(net.IP{0, 0, 0, 0}) {
+			ipa = localIP
+		}
+		I.Ln(ipa, p)
 	}
-	I.Ln(ipa, p)
 	return &NodePeer{
 		Server:         s,
 		Persistent:     isPersistent,
