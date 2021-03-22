@@ -45,7 +45,7 @@ type State struct {
 	Syncing           *atomic.Bool
 	cfg               *pod.Config
 	node              *chainrpc.Node
-	rpcServer         *chainrpc.Server
+	connMgr           chainrpc.ServerConnManager
 	stateCfg          *state.Config
 	mempoolUpdateChan qu.C
 	uuid              uint64
@@ -58,7 +58,6 @@ type State struct {
 	templateShards    [][]byte
 	multiConn         *transport.Channel
 	otherNodes        map[uint64]*nodeSpec
-	// otherNodeCount    *atomic.Int32
 	hashSampleBuf     *rav.BufferUint64
 	hashCount         atomic.Uint64
 	lastNonce         int32
@@ -77,7 +76,7 @@ func New(
 	cfg *pod.Config,
 	stateCfg *state.Config,
 	node *chainrpc.Node,
-	rpcServer *chainrpc.Server,
+	connMgr chainrpc.ServerConnManager,
 	mempoolUpdateChan qu.C,
 	uuid uint64,
 	killall qu.C,
@@ -89,7 +88,7 @@ func New(
 		Syncing:           syncing,
 		cfg:               cfg,
 		node:              node,
-		rpcServer:         rpcServer,
+		connMgr:           connMgr,
 		stateCfg:          stateCfg,
 		mempoolUpdateChan: mempoolUpdateChan,
 		otherNodes:        make(map[uint64]*nodeSpec),
@@ -372,6 +371,7 @@ func (s *State) checkConnectivity() {
 	}
 	T.Ln(totalPeers, "total peers", lanPeers, "lan peers solo:", *s.cfg.Solo, "lan:", *s.cfg.LAN)
 }
+
 //
 // func (s *State) Advertise() {
 // 	if !*s.cfg.Discovery {
@@ -522,7 +522,7 @@ func (s *State) GetNewAddressFromMiningAddrs() (addr util.Address, e error) {
 }
 
 var handlersMulticast = transport.Handlers{
-	string(sol.Magic):      processSolMsg,
+	string(sol.Magic): processSolMsg,
 	// string(p2padvt.Magic):  processAdvtMsg,
 	string(hashrate.Magic): processHashrateMsg,
 }
@@ -550,7 +550,7 @@ func processAdvtMsg(ctx interface{}, src net.Addr, dst string, b []byte) (e erro
 		}
 		for addr := range j.IPs {
 			peerIP := net.JoinHostPort(addr, fmt.Sprint(j.P2P))
-			if e = s.rpcServer.Cfg.ConnMgr.Connect(
+			if e = s.connMgr.Connect(
 				peerIP,
 				true,
 			); E.Chk(e) {
@@ -571,7 +571,7 @@ func processAdvtMsg(ctx interface{}, src net.Addr, dst string, b []byte) (e erro
 	for i := range s.otherNodes {
 		if time.Now().Sub(s.otherNodes[i].Time) > time.Second*6 {
 			// also remove from connection manager
-			if e = s.rpcServer.Cfg.ConnMgr.RemoveByAddr(s.otherNodes[i].addr); E.Chk(e) {
+			if e = s.connMgr.RemoveByAddr(s.otherNodes[i].addr); E.Chk(e) {
 			}
 			D.Ln("deleting", s.otherNodes[i])
 			delete(s.otherNodes, i)
