@@ -9,6 +9,7 @@ import (
 
 // Watcher keeps the chain and wallet and rpc clients connected
 func (wg *WalletGUI) Watcher() qu.C {
+	var e error
 	I.Ln("starting up watcher")
 	quit := qu.T()
 	// start things up first
@@ -22,7 +23,6 @@ func (wg *WalletGUI) Watcher() qu.C {
 		if e = wg.chainClient(); E.Chk(e) {
 		}
 	}
-	var e error
 	if !wg.wallet.Running() {
 		D.Ln("watcher starting wallet")
 		wg.wallet.Start()
@@ -61,6 +61,7 @@ func (wg *WalletGUI) Watcher() qu.C {
 		}
 	}
 	go func() {
+		
 		watchTick := time.NewTicker(time.Second)
 		var e error
 	totalOut:
@@ -115,6 +116,15 @@ func (wg *WalletGUI) Watcher() qu.C {
 					break totalOut
 				case <-wg.quit.Wait():
 					break totalOut
+				}
+			}
+			if *wg.cx.Config.Controller {
+				if wg.ChainClient != nil {
+					if e = wg.ChainClient.SetGenerate(
+						*wg.cx.Config.Controller,
+						*wg.cx.Config.GenThreads,
+					); !E.Chk(e) {
+					}
 				}
 			}
 		connected:
