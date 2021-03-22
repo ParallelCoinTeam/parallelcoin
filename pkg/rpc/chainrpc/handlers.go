@@ -1776,10 +1776,24 @@ func HandleGetPeerInfo(s *Server, cmd interface{}, closeChan qu.C) (interface{},
 	infos := make([]*btcjson.GetPeerInfoResult, 0, len(peers))
 	for _, p := range peers {
 		statsSnap := p.ToPeer().StatsSnapshot()
+		var addr, addrLocal string
+		if statsSnap.Inbound {
+			addr =
+				statsSnap.Addr
+			addrLocal =
+				p.ToPeer().LocalAddr().String()
+			// (*s.Config.P2PConnect)[0]
+		} else {
+			addr =
+				statsSnap.Addr
+			addrLocal =
+				// (*s.Config.P2PConnect)[0]
+			p.ToPeer().LocalAddr().String()
+		}
 		info := &btcjson.GetPeerInfoResult{
 			ID:             statsSnap.ID,
-			Addr:           statsSnap.Addr,
-			AddrLocal:      p.ToPeer().LocalAddr().String(),
+			Addr:           addr,
+			AddrLocal:      addrLocal,
 			Services:       fmt.Sprintf("%08d", uint64(statsSnap.Services)),
 			RelayTxes:      !p.IsTxRelayDisabled(),
 			LastSend:       statsSnap.LastSend.Unix(),

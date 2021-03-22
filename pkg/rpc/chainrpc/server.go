@@ -189,6 +189,8 @@ type (
 		IsWhitelisted  bool
 		Persistent     bool
 		DisableRelayTx bool
+		IP             net.IP
+		Port           uint16
 	}
 	// PeerSummary stores the salient network location information about a peer
 	PeerSummary struct {
@@ -536,6 +538,7 @@ func (n *Node) WaitForShutdown() {
 
 // HandleAddPeerMsg deals with adding new peers. It is invoked from the peerHandler goroutine.
 func (n *Node) HandleAddPeerMsg(state *PeerState, sp *NodePeer) bool {
+	I.Ln("HandleAddPeerMsg")
 	if sp == nil {
 		return false
 	}
@@ -578,32 +581,41 @@ func (n *Node) HandleAddPeerMsg(state *PeerState, sp *NodePeer) bool {
 		// TODO: how to handle permanent peers here? they should be rescheduled.
 		return false
 	}
-	for i := range state.OutboundPeers {
-		for j := range state.InboundPeers {
-			D.Ln(
-				state.OutboundPeers[i].UserAgent(),
-				state.InboundPeers[j].UserAgent(),
-				sp.UserAgent(),
-				state.OutboundPeers[i].LocalAddr().String(),
-				state.InboundPeers[j].LocalAddr().String(),
-				sp.Addr(),
-				state.OutboundPeers[i].Addr(),
-				state.InboundPeers[j].Addr(),
-				sp.Addr(),
-			)
-			if strings.Contains(sp.UserAgent(), "nonce") &&
-				state.OutboundPeers[i].UserAgent() == sp.UserAgent() ||
-				state.InboundPeers[j].UserAgent() == sp.UserAgent() ||
-				state.OutboundPeers[i].LocalAddr().String() == sp.Addr() ||
-				state.InboundPeers[j].LocalAddr().String() == sp.Addr() ||
-				state.OutboundPeers[i].Addr() == sp.Addr() ||
-				state.InboundPeers[j].Addr() == sp.Addr() {
-				D.Ln("already have connection to peer with UAC", sp.UserAgent())
-				
-				sp.Disconnect()
-			}
-		}
-	}
+	// I.S(state.InboundPeers)
+	// I.S(state.OutboundPeers)
+	// I.S(state.PersistentPeers)
+	
+	// for i := range state.InboundPeers {
+	// 	if state.InboundPeers[i].LocalAddr() == sp.Addr() {
+	//
+	// 	}
+	// }
+	// for i := range state.OutboundPeers {
+	//
+	// }
+	
+	// 		D.Ln(
+	// 			state.OutboundPeers[i].UserAgent(),
+	// 			state.InboundPeers[j].UserAgent(),
+	// 			sp.UserAgent(),
+	// 			state.OutboundPeers[i].LocalAddr().String(),
+	// 			state.InboundPeers[j].LocalAddr().String(),
+	// 			sp.Addr(),
+	// 			state.OutboundPeers[i].Addr(),
+	// 			state.InboundPeers[j].Addr(),
+	// 			sp.Addr(),
+	// 		)
+	// 		if strings.Contains(sp.UserAgent(), "nonce") &&
+	// 			state.OutboundPeers[i].UserAgent() == sp.UserAgent() ||
+	// 			state.InboundPeers[j].UserAgent() == sp.UserAgent() ||
+	// 			state.OutboundPeers[i].LocalAddr().String() == sp.Addr() ||
+	// 			state.InboundPeers[j].LocalAddr().String() == sp.Addr() ||
+	// 			state.OutboundPeers[i].Addr() == sp.Addr() ||
+	// 			state.InboundPeers[j].Addr() == sp.Addr() {
+	// 			D.Ln("already have connection to peer with UAC", sp.UserAgent())
+	//
+	// 			sp.Disconnect()
+	// 		}
 	// for i := range state.InboundPeers {
 	// 	D.Ln("inbound peer:", state.InboundPeers[i].LocalAddr(), state.InboundPeers[i].Addr())
 	// }
@@ -611,7 +623,7 @@ func (n *Node) HandleAddPeerMsg(state *PeerState, sp *NodePeer) bool {
 	// 	D.Ln("outbound peer:", state.OutboundPeers[i].LocalAddr(), state.OutboundPeers[i].Addr())
 	// }
 	// Add the new peer and start it.
-	D.Ln("new peer ", sp.UserAgent(), sp.Addr())
+	D.Ln("new peer", sp.UserAgent(), sp.Addr(), sp.LocalAddr(), sp.Inbound())
 	if sp.Inbound() {
 		state.InboundPeers[sp.ID()] = sp
 	} else {
@@ -746,6 +758,26 @@ func (n *Node) HandleQuery(state *PeerState, querymsg interface{}) {
 			if nodePeer.Addr() == msg.Addr || nodePeer.Peer.LocalAddr().String() == msg.Addr {
 				if msg.Permanent {
 					msg.Reply <- errors.New("nodePeer already connected")
+				} else {
+					msg.Reply <- errors.New("nodePeer exists as a permanent nodePeer")
+				}
+				return
+			}
+		}
+		for _, nodePeer := range state.InboundPeers {
+			if nodePeer.Addr() == msg.Addr || nodePeer.Peer.LocalAddr().String() == msg.Addr {
+				if msg.Permanent {
+					msg.Reply <- errors.New("nodePeer already connected inbound")
+				} else {
+					msg.Reply <- errors.New("nodePeer exists as a permanent nodePeer inbound")
+				}
+				return
+			}
+		}
+		for _, nodePeer := range state.OutboundPeers {
+			if nodePeer.Addr() == msg.Addr || nodePeer.Peer.LocalAddr().String() == msg.Addr {
+				if msg.Permanent {
+					msg.Reply <- errors.New("nodePeer already connected outbound inbound")
 				} else {
 					msg.Reply <- errors.New("nodePeer exists as a permanent nodePeer")
 				}
@@ -909,17 +941,33 @@ func (n *Node) HandleUpdatePeerHeights(
 // initializes a new inbound server peer instance, associates it with the connection, and starts a goroutine to wait for
 // disconnection.
 func (n *Node) InboundPeerConnected(conn net.Conn) {
+	ca := conn.RemoteAddr().String()
+	cla := conn.LocalAddr().String()
+	I.Ln("inbound peer connected", ca, cla)
 	sp := NewServerPeer(n, false)
 	sp.IsWhitelisted = GetIsWhitelisted(n.StateCfg, conn.RemoteAddr())
 	sp.Peer = peer.NewInboundPeer(NewPeerConfig(sp))
-	sp.AssociateConnection(conn)
+	msgChan := sp.AssociateConnection(conn)
 	go n.PeerDoneHandler(sp)
+	go func() {
+		msg := <-msgChan
+		n.peerState.ForAllPeers(
+			func(np *NodePeer) {
+				if np.IP.Equal(msg.AddrMe.IP) && np.Port == msg.AddrMe.Port && np.ID() != sp.ID() {
+					sp.Disconnect()
+				}
+			},
+		)
+	}()
 }
 
 // OutboundPeerConnected is invoked by the connection manager when a new outbound connection is established. It
 // initializes a new outbound server peer instance, associates it with the relevant state such as the connection request
 // instance and the connection itself, and finally notifies the address manager of the attempt.
 func (n *Node) OutboundPeerConnected(c *connmgr.ConnReq, conn net.Conn) {
+	ca := conn.RemoteAddr().String()
+	cla := conn.LocalAddr().String()
+	I.Ln("outbound peer connected", ca, cla)
 	sp := NewServerPeer(n, c.Permanent)
 	p, e := peer.NewOutboundPeer(NewPeerConfig(sp), c.Addr.String())
 	if e != nil {
@@ -929,8 +977,18 @@ func (n *Node) OutboundPeerConnected(c *connmgr.ConnReq, conn net.Conn) {
 	sp.Peer = p
 	sp.ConnReq = c
 	sp.IsWhitelisted = GetIsWhitelisted(n.StateCfg, conn.RemoteAddr())
-	sp.AssociateConnection(conn)
+	msgChan := sp.AssociateConnection(conn)
 	go n.PeerDoneHandler(sp)
+	go func() {
+		msg := <-msgChan
+		n.peerState.ForAllPeers(
+			func(np *NodePeer) {
+				if np.IP.Equal(msg.AddrMe.IP) && np.Port == msg.AddrMe.Port && np.ID() != sp.ID() {
+					sp.Disconnect()
+				}
+			},
+		)
+	}()
 	n.AddrManager.Attempt(sp.NA())
 }
 
@@ -2578,11 +2636,13 @@ func MergeCheckpoints(defaultCheckpoints, additional []chaincfg.Checkpoint) []ch
 	return checkpoints
 }
 
-func // NewPeerConfig returns the configuration for the given ServerPeer.
-NewPeerConfig(sp *NodePeer) *peer.Config {
-	// to work around the lack of a single identifier in the protocol, for dealing with testing situations with multiple
-	// nodes on one IP address (and there is a to-do on this) we generate a random 32 bit value, convert to hex and set
-	// it as the first of the user agent comments, which we can then use to count individual connections properly
+// NewPeerConfig returns the configuration for the given ServerPeer.
+func NewPeerConfig(sp *NodePeer) *peer.Config {
+	// to work around the lack of a single identifier in the protocol, for dealing
+	// with testing situations with multiple nodes on one IP address (and there is a
+	// to-do on this) we generate a random 32 bit value, convert to hex and set it
+	// as the first of the user agent comments, which we can then use to count
+	// individual connections properly
 	return &peer.Config{
 		Listeners: peer.MessageListeners{
 			OnVersion:      sp.OnVersion,
@@ -2621,6 +2681,8 @@ NewPeerConfig(sp *NodePeer) *peer.Config {
 		DisableRelayTx:    *sp.Server.Config.BlocksOnly,
 		ProtocolVersion:   peer.MaxProtocolVersion,
 		TrickleInterval:   *sp.Server.Config.TrickleInterval,
+		IP:                sp.IP,
+		Port:              sp.Port,
 	}
 }
 
@@ -2999,6 +3061,15 @@ func NewNode(listenAddrs []string, db database.DB, interruptChan qu.C, cx *Conte
 
 // NewServerPeer returns a new ServerPeer instance. The peer needs to be set by the caller.
 func NewServerPeer(s *Node, isPersistent bool) *NodePeer {
+	var e error
+	var host, port string
+	if host, port, e = net.SplitHostPort((*s.Config.P2PConnect)[0]); E.Chk(e) {
+	}
+	ipa := net.ParseIP(host)
+	var p uint64
+	if p, e = strconv.ParseUint(port, 10, 16); E.Chk(e) {
+	}
+	I.Ln(ipa, p)
 	return &NodePeer{
 		Server:         s,
 		Persistent:     isPersistent,
@@ -3007,6 +3078,8 @@ func NewServerPeer(s *Node, isPersistent bool) *NodePeer {
 		Quit:           qu.T(),
 		TxProcessed:    qu.Ts(1),
 		BlockProcessed: qu.Ts(1),
+		IP:             ipa,
+		Port:           uint16(p),
 	}
 }
 

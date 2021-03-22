@@ -1,9 +1,11 @@
 package peer
 
 import (
+	"bytes"
 	"container/list"
 	"errors"
 	"fmt"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/p9c/pod/pkg/logg"
 	"io"
 	"math/rand"
@@ -193,6 +195,8 @@ type Config struct {
 	Listeners MessageListeners
 	// TrickleInterval is the duration of the ticker which trickles down the inventory to a peer.
 	TrickleInterval time.Duration
+	IP              net.IP
+	Port            uint16
 }
 
 // minUint32 is a helper function to return the minimum of two uint32s. This avoids a math import and the need to cast
@@ -383,6 +387,8 @@ type Peer struct {
 	queueQuit          qu.C
 	outQuit            qu.C
 	quit               qu.C
+	IP                 net.IP
+	Port               uint16
 }
 
 // String returns the peer's address and directionality as a human-readable string.
@@ -886,8 +892,8 @@ func (p *Peer) readMessage(encoding wire.MessageEncoding) (wire.Message, []byte,
 				"Received %v%s from %s",
 				msg.Command(), summary, p,
 			)
-			// o += spew.Sdump(msg)
-			// o += spew.Sdump(buf)
+			o += spew.Sdump(msg)
+			o += spew.Sdump(buf)
 			return o
 		},
 	)
@@ -935,12 +941,12 @@ func (p *Peer) writeMessage(msg wire.Message, enc wire.MessageEncoding) (e error
 					summary = " (" + summary + ")"
 				}
 				o := fmt.Sprintf("Sending %v%s to %s", msg.Command(), summary, p)
-				// o += spew.Sdump(msg)
-				// var buf bytes.Buffer
-				// _, e = wire.WriteMessageWithEncodingN(&buf, msg, p.ProtocolVersion(), p.cfg.ChainParams.Net, enc)
-				// if e != nil  {
-				// 				// 	return e.Error()
-				// }
+				o += spew.Sdump(msg)
+				var buf bytes.Buffer
+				_, e = wire.WriteMessageWithEncodingN(&buf, msg, p.ProtocolVersion(), p.cfg.ChainParams.Net, enc)
+				if e != nil {
+					// 	return e.Error()
+				}
 				return o // + spew.Sdump(buf.Bytes())
 			},
 		)
@@ -1657,7 +1663,7 @@ func (p *Peer) Disconnect() {
 	if atomic.AddInt32(&p.disconnect, 1) != 1 {
 		return
 	}
-	T.Ln("disconnecting", p)
+	T.Ln("disconnecting", p, logg.Caller("from", 1))
 	if atomic.LoadInt32(&p.connected) != 0 {
 		_ = p.conn.Close()
 	}
@@ -1666,10 +1672,10 @@ func (p *Peer) Disconnect() {
 
 // readRemoteVersionMsg waits for the next message to arrive from the remote peer. If the next message is not a version
 // message or the version is not acceptable then return an error.
-func (p *Peer) readRemoteVersionMsg() (e error) {
+func (p *Peer) readRemoteVersionMsg() (msg *wire.MsgVersion, e error) {
 	if p.versionKnown {
 		D.Ln("received version previously, dropping")
-		return nil
+		return
 	}
 	// Read their version message.
 	var remoteMsg wire.Message
@@ -1677,10 +1683,11 @@ func (p *Peer) readRemoteVersionMsg() (e error) {
 	if e != nil {
 		if e != io.EOF {
 		}
-		return e
+		return
 	}
 	// Notify and disconnect clients if the first message is not a version message.
-	msg, ok := remoteMsg.(*wire.MsgVersion)
+	var ok bool
+	msg, ok = remoteMsg.(*wire.MsgVersion)
 	if !ok {
 		reason := "a version message must precede all others"
 		rejectMsg := wire.NewMsgReject(
@@ -1688,11 +1695,13 @@ func (p *Peer) readRemoteVersionMsg() (e error) {
 			reason,
 		)
 		_ = p.writeMessage(rejectMsg, wire.LatestEncoding)
-		return errors.New(reason)
+		e = errors.New(reason)
+		return
 	}
 	// Detect self connections.
 	if !AllowSelfConns && SentNonces.Exists(msg.Nonce) {
-		return errors.New("disconnecting peer connected to self")
+		e = errors.New("disconnecting peer connected to self")
+		return
 	}
 	// Negotiate the protocol version and set the services to what the remote peer advertised.
 	p.flagsMtx.Lock()
@@ -1732,10 +1741,12 @@ func (p *Peer) readRemoteVersionMsg() (e error) {
 	// }
 	// Invoke the callback if specified.
 	if p.cfg.Listeners.OnVersion != nil {
+		I.Ln("writing version message")
 		rejectMsg := p.cfg.Listeners.OnVersion(p, msg)
 		if rejectMsg != nil {
 			_ = p.writeMessage(rejectMsg, wire.LatestEncoding)
-			return errors.New(rejectMsg.Reason)
+			e = errors.New(rejectMsg.Reason)
+			return
 		}
 	}
 	// Notify and disconnect clients that have a protocol version that is too old.
@@ -1754,9 +1765,10 @@ func (p *Peer) readRemoteVersionMsg() (e error) {
 			reason,
 		)
 		_ = p.writeMessage(rejectMsg, wire.LatestEncoding)
-		return errors.New(reason)
+		e = errors.New(reason)
+		return
 	}
-	return nil
+	return
 }
 
 // localVersionMsg creates a version message that can be used to send to the remote peer.
@@ -1788,8 +1800,20 @@ func (p *Peer) localVersionMsg() (mv *wire.MsgVersion, e error) {
 	// an inbound connection from a peer didn't necessarily mean the peer itself accepted inbound connections.
 	//
 	// Also, the timestamp is unused in the version message.
+	// I.Ln(p.addr)
+	// var h string
+	// var port string
+	// if h, port, e = net.SplitHostPort(p.addr); E.Chk(e) {
+	// }
+	// var portN int64
+	// if portN, e = strconv.ParseInt(port, 10, 64); E.Chk(e) {
+	// }
+	// ipAddr := net.ParseIP(h)
 	ourNA := &wire.NetAddress{
-		Services: p.cfg.Services,
+		Timestamp: time.Now(),
+		Services:  p.cfg.Services,
+		IP:        p.IP,
+		Port:      p.Port,
 	}
 	// Generate a unique Nonce for this peer so self connections can be detected. This is accomplished by adding it to a
 	// size-limited map of recently seen nonces.
@@ -1813,20 +1837,19 @@ func (p *Peer) localVersionMsg() (mv *wire.MsgVersion, e error) {
 }
 
 // writeLocalVersionMsg writes our version message to the remote peer.
-func (p *Peer) writeLocalVersionMsg() (e error) {
-	localVerMsg, e := p.localVersionMsg()
-	if e != nil {
-		return e
+func (p *Peer) writeLocalVersionMsg() (msg *wire.MsgVersion, e error) {
+	if msg, e = p.localVersionMsg(); E.Chk(e) {
+		return
 	}
-	return p.writeMessage(localVerMsg, wire.LatestEncoding)
+	return msg, p.writeMessage(msg, wire.LatestEncoding)
 }
 
 // negotiateInboundProtocol waits to receive a version message from the peer then sends our version message.
 //
 // If the events do not occur in that order then it returns an error.
-func (p *Peer) negotiateInboundProtocol() (e error) {
-	if e := p.readRemoteVersionMsg(); E.Chk(e) {
-		return e
+func (p *Peer) negotiateInboundProtocol() (msg *wire.MsgVersion, e error) {
+	if msg, e = p.readRemoteVersionMsg(); E.Chk(e) {
+		return
 	}
 	return p.writeLocalVersionMsg()
 }
@@ -1834,36 +1857,47 @@ func (p *Peer) negotiateInboundProtocol() (e error) {
 // negotiateOutboundProtocol sends our version message then waits to receive a version message from the peer.
 //
 // If the events do not occur in that order then it returns an error.
-func (p *Peer) negotiateOutboundProtocol() (e error) {
-	if e := p.writeLocalVersionMsg(); E.Chk(e) {
-		return e
+func (p *Peer) negotiateOutboundProtocol() (msg *wire.MsgVersion, e error) {
+	if msg, e = p.writeLocalVersionMsg(); E.Chk(e) {
+		return
 	}
 	return p.readRemoteVersionMsg()
 }
 
 // start begins processing input and output messages.
-func (p *Peer) start() (e error) {
-	T.Ln("starting peer", p)
+func (p *Peer) start(msgChan chan *wire.MsgVersion) (e error) {
+	T.Ln("starting peer", p, p.LocalAddr())
 	negotiateErr := make(chan error, 1)
 	go func() {
+		var e error
+		var msg *wire.MsgVersion
 		if p.inbound {
-			negotiateErr <- p.negotiateInboundProtocol()
+			if msg, e = p.negotiateInboundProtocol(); E.Chk(e) {
+				negotiateErr <- e
+			}
 		} else {
-			negotiateErr <- p.negotiateOutboundProtocol()
+			if msg, e = p.negotiateOutboundProtocol(); E.Chk(e) {
+				negotiateErr <- e
+			}
 		}
+		I.Ln("sending version message back")
+		msgChan <- msg
+		I.Ln("sent version message back")
+		negotiateErr <- nil
 	}()
 	// Negotiate the protocol within the specified negotiateTimeout.
 	select {
-	case e := <-negotiateErr:
+	case e = <-negotiateErr:
 		if e != nil {
 			if e != io.EOF {
 			}
 			p.Disconnect()
-			return e
+			return
 		}
 	case <-time.After(negotiateTimeout):
 		p.Disconnect()
-		return errors.New("protocol negotiation timeout")
+		e = errors.New("protocol negotiation timeout")
+		return
 	}
 	T.Ln("connected to", p)
 	// The protocol has been negotiated successfully so start processing input and output messages.
@@ -1874,14 +1908,15 @@ func (p *Peer) start() (e error) {
 	go p.pingHandler()
 	// Send our verack message now that the IO processing machinery has started.
 	p.QueueMessage(wire.NewMsgVerAck(), nil)
-	return nil
+	return
 }
 
 // AssociateConnection associates the given conn to the peer. Calling this function when the peer is already connected
 // will have no effect.
-func (p *Peer) AssociateConnection(conn net.Conn) {
+func (p *Peer) AssociateConnection(conn net.Conn) (msgChan chan *wire.MsgVersion) {
 	// Already connected?
 	if !atomic.CompareAndSwapInt32(&p.connected, 0, 1) {
+		I.Ln("already connected to peer", conn.RemoteAddr(),conn.LocalAddr())
 		return
 	}
 	p.conn = conn
@@ -1899,12 +1934,17 @@ func (p *Peer) AssociateConnection(conn net.Conn) {
 		}
 		p.na = na
 	}
+	msgChan = make(chan *wire.MsgVersion, 1)
+	I.Ln("starting peer", conn.RemoteAddr(),conn.LocalAddr())
 	go func() {
-		if e := p.start(); E.Chk(e) {
+		if e := p.start(msgChan); E.Chk(e) {
 			D.F("cannot start peer %v: %v", p, e)
 			p.Disconnect()
 		}
+		I.Ln("finished starting peer", conn.RemoteAddr(),conn.LocalAddr())
 	}()
+	I.Ln("returning meanwhile starting peer", conn.RemoteAddr(),conn.LocalAddr())
+	return
 }
 
 // WaitForDisconnect waits until the peer has completely disconnected and all resources are cleaned up. This will happen
@@ -1945,6 +1985,8 @@ func newPeerBase(origCfg *Config, inbound bool) *Peer {
 		cfg:             cfg, // Copy so caller can't mutate.
 		services:        cfg.Services,
 		protocolVersion: cfg.ProtocolVersion,
+		IP:              origCfg.IP,
+		Port:            origCfg.Port,
 	}
 	return &p
 }
