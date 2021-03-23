@@ -417,7 +417,7 @@ func (s *State) GetMsgBlockTemplate(prev *util.Block, addr util.Address) (mbt *t
 		Merkles:   make(templates.Merkles),
 	}
 	for next, curr, more := fork.AlgoVerIterator(mbt.Height); more(); next() {
-		I.Ln("creating template for", curr())
+		// I.Ln("creating template for", curr())
 		var templateX *mining.BlockTemplate
 		if templateX, e = s.generator.NewBlockTemplate(
 			addr,
@@ -430,7 +430,7 @@ func (s *State) GetMsgBlockTemplate(prev *util.Block, addr util.Address) (mbt *t
 			mbt.Timestamp = newH.Timestamp
 			mbt.Bits[curr()] = newH.Bits
 			mbt.Merkles[curr()] = newH.MerkleRoot
-			I.Ln("merkle for", curr(), mbt.Merkles[curr()])
+			// I.Ln("merkle for", curr(), mbt.Merkles[curr()])
 			mbt.SetTxs(curr(), newB.Transactions)
 		}
 	}
@@ -615,7 +615,11 @@ func processSolMsg(ctx interface{}, src net.Addr, dst string, b []byte,) (e erro
 			bmb := block.MsgBlock()
 			coinbaseTx := bmb.Transactions[0].TxOut[0]
 			prevHeight := block.Height() - 1
-			prevBlock, _ := s.node.Chain.BlockByHeight(prevHeight)
+			var prevBlock *util.Block
+			if prevBlock, e = s.node.Chain.BlockByHeight(prevHeight); E.Chk(e){}
+			if prevBlock == nil {
+				return "prevblock nil while generating log"
+			}
 			prevTime := prevBlock.MsgBlock().Header.Timestamp.Unix()
 			since := bmb.Header.Timestamp.Unix() - prevTime
 			bHash := bmb.BlockHashWithAlgos(block.Height())

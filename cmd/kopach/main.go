@@ -295,11 +295,11 @@ var handlers = transport.Handlers{
 			// ignore other controllers while one is active and received first
 			return
 		}
-		if jr.Nonce == w.lastNonce {
-			I.Ln("same job again, ignoring")
-			return
-		}
-		w.lastNonce = jr.Nonce
+		// if jr.Nonce == w.lastNonce {
+		// 	I.Ln("same job again, ignoring (NOT)")
+		// 	// return
+		// }
+		// w.lastNonce = jr.Nonce
 		// w.FirstSender.Store(cN)
 		w.lastSent.Store(time.Now().UnixNano())
 		for i := range w.clients {
