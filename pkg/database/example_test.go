@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	
 	"github.com/p9c/pod/pkg/blockchain/wire"
-	database "github.com/p9c/pod/pkg/database"
+	"github.com/p9c/pod/pkg/database"
 	_ "github.com/p9c/pod/pkg/database/ffldb"
 )
 
@@ -25,8 +25,8 @@ func ExampleCreate() {
 	// up after itself.
 	dbPath := filepath.Join(os.TempDir(), "examplecreate")
 	db, e := database.Create("ffldb", dbPath, wire.MainNet)
-	if e != nil  {
-		database.		return
+	if e != nil {
+		return
 	}
 	defer func() {
 		if e := os.RemoveAll(dbPath); database.E.Chk(e) {
@@ -54,8 +54,8 @@ func Example_basicUsage() {
 	// up after itself.
 	dbPath := filepath.Join(os.TempDir(), "exampleusage")
 	db, e := database.Create("ffldb", dbPath, wire.MainNet)
-	if e != nil  {
-		database.		return
+	if e != nil {
+		return
 	}
 	defer func() {
 		if e := os.RemoveAll(dbPath); database.E.Chk(e) {
@@ -67,32 +67,34 @@ func Example_basicUsage() {
 	}()
 	// Use the Update function of the database to perform a managed read-write transaction. The transaction will
 	// automatically be rolled back if the supplied inner function returns a non-nil error.
-	e = db.Update(func(tx database.Tx) (e error) {
-		// Store a key/value pair directly in the metadata bucket. Typically a nested bucket would be used for a given
-		// feature, but this example is using the metadata bucket directly for simplicity.
-		key := []byte("mykey")
-		value := []byte("myvalue")
-		if e := tx.Metadata().Put(key, value); E.Chk(e) {
-			return e
-		}
-		// Read the key back and ensure it matches.
-		if !bytes.Equal(tx.Metadata().Get(key), value) {
-			return fmt.Errorf("unexpected value for key '%s'", key)
-		}
-		// Create a new nested bucket under the metadata bucket.
-		nestedBucketKey := []byte("mybucket")
-		nestedBucket, e := tx.Metadata().CreateBucket(nestedBucketKey)
-		if e != nil  {
-			return e
-		}
-		// The key from above that was set in the metadata bucket does not exist in this new nested bucket.
-		if nestedBucket.Get(key) != nil {
-			return fmt.Errorf("key '%s' is not expected nil", key)
-		}
-		return nil
-	})
-	if e != nil  {
-		database.		return
+	e = db.Update(
+		func(tx database.Tx) (e error) {
+			// Store a key/value pair directly in the metadata bucket. Typically a nested bucket would be used for a given
+			// feature, but this example is using the metadata bucket directly for simplicity.
+			key := []byte("mykey")
+			value := []byte("myvalue")
+			if e := tx.Metadata().Put(key, value); E.Chk(e) {
+				return e
+			}
+			// Read the key back and ensure it matches.
+			if !bytes.Equal(tx.Metadata().Get(key), value) {
+				return fmt.Errorf("unexpected value for key '%s'", key)
+			}
+			// Create a new nested bucket under the metadata bucket.
+			nestedBucketKey := []byte("mybucket")
+			nestedBucket, e := tx.Metadata().CreateBucket(nestedBucketKey)
+			if e != nil {
+				return e
+			}
+			// The key from above that was set in the metadata bucket does not exist in this new nested bucket.
+			if nestedBucket.Get(key) != nil {
+				return fmt.Errorf("key '%s' is not expected nil", key)
+			}
+			return nil
+		},
+	)
+	if e != nil {
+		return
 	}
 	// Output:
 }
