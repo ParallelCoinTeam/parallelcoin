@@ -6,8 +6,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/p9c/pod/pkg/amt"
-	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/btcaddr"
+	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/podcfg"
 	"sort"
 	"strings"
@@ -2918,11 +2918,12 @@ type SignatureError struct {
 	Error      error
 }
 
-// SignTransaction uses secrets of the wallet, as well as additional secrets passed in by the caller, to create and add
-// input signatures to a transaction.
+// SignTransaction uses secrets of the wallet, as well as additional secrets
+// passed in by the caller, to create and add input signatures to a transaction.
 //
-// Transaction input script validation is used to confirm that all signatures are valid. For any invalid input, a
-// SignatureError is added to the returns. The final error return is reserved for unexpected or fatal errors, such as
+// Transaction input script validation is used to confirm that all signatures
+// are valid. For any invalid input, a SignatureError is added to the returns.
+// The final error return is reserved for unexpected or fatal errors, such as
 // being unable to determine a previous output script to redeem.
 //
 // The transaction pointed to by tx is modified by this function.
@@ -2932,6 +2933,8 @@ func (w *Wallet) SignTransaction(
 	additionalKeysByAddress map[string]*util.WIF,
 	p2shRedeemScriptsByAddress map[string][]byte,
 ) (signErrors []SignatureError, e error) {
+	I.Ln("signing transaction")
+	I.S(tx)
 	e = walletdb.View(
 		w.db, func(dbtx walletdb.ReadTx) (e error) {
 			addrmgrNs := dbtx.ReadBucket(waddrmgrNamespaceKey)
@@ -2944,8 +2947,8 @@ func (w *Wallet) SignTransaction(
 					txDetails, e := w.TxStore.TxDetails(txmgrNs, prevHash)
 					if e != nil {
 						return fmt.Errorf(
-							"cannot query previous transaction "+
-								"details for %v: %v", txIn.PreviousOutPoint, e,
+							"cannot query previous transaction details for %v: %v",
+							txIn.PreviousOutPoint, e,
 						)
 					}
 					if txDetails == nil {
@@ -2956,8 +2959,8 @@ func (w *Wallet) SignTransaction(
 					}
 					prevOutScript = txDetails.MsgTx.TxOut[prevIndex].PkScript
 				}
-				// Set up our callbacks that we pass to txscript so it can look up the appropriate keys and scripts by
-				// address.
+				// Set up our callbacks that we pass to txscript so it can look up the
+				// appropriate keys and scripts by address.
 				getKey := txscript.KeyClosure(
 					func(addr btcaddr.Address) (*ec.PrivateKey, bool, error) {
 						if len(additionalKeysByAddress) != 0 {
@@ -2993,7 +2996,8 @@ func (w *Wallet) SignTransaction(
 				)
 				getScript := txscript.ScriptClosure(
 					func(addr btcaddr.Address) ([]byte, error) {
-						// If keys were provided then we can only use the redeem scripts provided with our inputs, too.
+						// If keys were provided then we can only use the redeem scripts provided with
+						// our inputs, too.
 						if len(additionalKeysByAddress) != 0 {
 							addrStr := addr.EncodeAddress()
 							script, ok := p2shRedeemScriptsByAddress[addrStr]

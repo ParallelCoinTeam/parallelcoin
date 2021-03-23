@@ -173,7 +173,7 @@ func Handle(cx *pod.State) func(c *cli.Context) (e error) {
 		go func() {
 			D.Ln("starting controller watcher")
 			ticker := time.NewTicker(time.Second)
-			logger := time.NewTicker(time.Second * 5)
+			logger := time.NewTicker(time.Second)
 		out:
 			for {
 				select {
@@ -276,7 +276,6 @@ var handlers = transport.Handlers{
 		ctx interface{}, src net.Addr, dst string,
 		b []byte,
 	) (e error) {
-		T.Ln("received job")
 		w := ctx.(*Worker)
 		if !w.active.Load() {
 			T.Ln("not active")
@@ -289,7 +288,7 @@ var handlers = transport.Handlers{
 		firstSender := w.FirstSender.Load()
 		otherSent := firstSender != cN && firstSender != 0
 		if otherSent {
-			T.Ln("ignoring other controller job")
+			T.Ln("ignoring other controller job", jr.Nonce, jr.UUID)
 			// ignore other controllers while one is active and received first
 			return
 		}
@@ -299,6 +298,7 @@ var handlers = transport.Handlers{
 		// }
 		// w.lastNonce = jr.Nonce
 		// w.FirstSender.Store(cN)
+		T.Ln("received job, starting workers on it", jr.Nonce, jr.UUID)
 		w.lastSent.Store(time.Now().UnixNano())
 		for i := range w.clients {
 			if e = w.clients[i].NewJob(&jr); E.Chk(e) {
@@ -317,10 +317,10 @@ var handlers = transport.Handlers{
 		np := advt.UUID
 		// np := p.GetControllerListenerPort()
 		// ns := net.JoinHostPort(strings.Split(ni.String(), ":")[0], fmt.Sprint(np))
-		D.Ln("received pause from server at", ni, np)
+		D.Ln("received pause from server at", ni, np, "stopping", len(w.clients), "workers stopping")
 		if fs == np {
 			for i := range w.clients {
-				D.Ln("sending pause to worker", i, fs, np)
+				// D.Ln("sending pause to worker", i, fs, np)
 				e := w.clients[i].Pause()
 				if e != nil {
 				}
@@ -384,7 +384,7 @@ var handlers = transport.Handlers{
 }
 
 func (w *Worker) HashReport() float64 {
-	T.Ln("generating hash report")
+	// T.Ln("generating hash report")
 	w.hashSampleBuf.Add(w.hashCount.Load())
 	av := ewma.NewMovingAverage()
 	var i int

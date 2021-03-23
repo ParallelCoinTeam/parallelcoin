@@ -26,7 +26,7 @@ import (
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
-const RoundsPerAlgo = 1024
+const CountPerRound = 500
 
 type Worker struct {
 	mx               sync.Mutex
@@ -56,16 +56,16 @@ type Counter struct {
 
 // NewCounter returns an initialized algorithm rolling counter that ensures each
 // miner does equal amounts of every algorithm
-func NewCounter(roundsPerAlgo int32) (c *Counter) {
+func NewCounter(countPerRound int32) (c *Counter) {
 	// these will be populated when work arrives
 	var algos []int32
 	// Start the counter at a random position
 	rand.Seed(time.Now().UnixNano())
 	c = &Counter{}
-	c.C.Store(int32(rand.Intn(int(roundsPerAlgo)+1) + 1))
+	c.C.Store(int32(rand.Intn(int(countPerRound)+1) + 1))
 	c.Algos.Store(algos)
-	c.RoundsPerAlgo.Store(roundsPerAlgo)
-	c.rpa = roundsPerAlgo
+	c.RoundsPerAlgo.Store(countPerRound)
+	c.rpa = countPerRound
 	return
 }
 
@@ -75,13 +75,13 @@ func (c *Counter) GetAlgoVer(height int32) (ver int32) {
 	algs := fork.GetAlgoVerSlice(height)
 	// D.Ln(algs)
 	if c.RoundsPerAlgo.Load() < 1 {
-		D.Ln("RoundsPerAlgo is", c.RoundsPerAlgo.Load(), len(algs))
+		D.Ln("CountPerRound is", c.RoundsPerAlgo.Load(), len(algs))
 		return 0
 	}
 	if len(algs) > 0 {
 		ver = algs[c.C.Load()%int32(len(algs))]
 		// ver = algs[(c.C.Load()/
-		// 	c.RoundsPerAlgo.Load())%
+		// 	c.CountPerRound.Load())%
 		// 	int32(len(algs))]
 		c.C.Add(1)
 	}
@@ -121,7 +121,7 @@ func NewWithConnAndSemaphore(id string, conn *stdconn.StdConn, quit qu.C, uuid u
 		id:            id,
 		pipeConn:      conn,
 		quit:          quit,
-		roller:        NewCounter(RoundsPerAlgo),
+		roller:        NewCounter(CountPerRound),
 		startChan:     qu.T(),
 		stopChan:      qu.T(),
 		hashSampleBuf: ring.NewBufferUint64(1000),
@@ -229,7 +229,7 @@ out:
 					hash := blockHeader.BlockHashWithAlgos(newHeight)
 					bigHash := blockchain.HashToBig(&hash)
 					if bigHash.Cmp(bits.CompactToBig(blockHeader.Bits)) <= 0 {
-						D.Ln("found solution", newHeight)
+						D.Ln("found solution", newHeight, w.templatesMessage.Nonce, w.templatesMessage.UUID)
 						srs := sol.Encode(w.templatesMessage.Nonce, w.templatesMessage.UUID, blockHeader)
 						e := w.dispatchConn.SendMany(
 							sol.Magic,

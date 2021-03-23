@@ -2,7 +2,6 @@ package transport
 
 import (
 	"crypto/cipher"
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"github.com/p9c/pod/pkg/logg"
@@ -80,7 +79,7 @@ func (c *Channel) Send(magic []byte, nonce []byte, data []byte) (n int, e error)
 
 // SendMany sends a BufIter of shards as produced by GetShards
 func (c *Channel) SendMany(magic []byte, b [][]byte) (e error) {
-	D.Ln(logg.Caller("sending from", 1))
+	D.Ln("magic", string(magic), logg.Caller("sending from", 1))
 	var nonce []byte
 	if nonce, e = GetNonce(c.sendCiph); E.Chk(e) {
 	} else {
@@ -91,7 +90,7 @@ func (c *Channel) SendMany(magic []byte, b [][]byte) (e error) {
 				// debug.PrintStack()
 			}
 		}
-		T.Ln(c.Creator, "sent packets", string(magic), hex.EncodeToString(nonce), c.Sender.LocalAddr(), c.Sender.RemoteAddr())
+		// T.Ln(c.Creator, "sent packets", string(magic), hex.EncodeToString(nonce), c.Sender.LocalAddr(), c.Sender.RemoteAddr())
 	}
 	return
 }
@@ -115,8 +114,10 @@ func GetShards(data []byte) (shards [][]byte) {
 }
 
 // NewUnicastChannel sets up a listener and sender for a specified destination
-func NewUnicastChannel(creator string, ctx interface{}, key, sender, receiver string, maxDatagramSize int,
-	handlers Handlers, quit qu.C) (channel *Channel, e error) {
+func NewUnicastChannel(
+	creator string, ctx interface{}, key, sender, receiver string, maxDatagramSize int,
+	handlers Handlers, quit qu.C,
+) (channel *Channel, e error) {
 	channel = &Channel{
 		Creator:         creator,
 		MaxDatagramSize: maxDatagramSize,
@@ -124,7 +125,7 @@ func NewUnicastChannel(creator string, ctx interface{}, key, sender, receiver st
 		context:         ctx,
 	}
 	var magics []string
-
+	
 	for i := range handlers {
 		magics = append(magics, i)
 	}
@@ -157,8 +158,10 @@ func NewSender(address string, maxDatagramSize int) (conn *net.UDPConn, e error)
 
 // Listen binds to the UDP Address and port given and writes packets received
 // from that Address to a buffer which is passed to a handler
-func Listen(address string, channel *Channel, maxDatagramSize int, handlers Handlers,
-	quit qu.C) (conn *net.UDPConn, e error) {
+func Listen(
+	address string, channel *Channel, maxDatagramSize int, handlers Handlers,
+	quit qu.C,
+) (conn *net.UDPConn, e error) {
 	var addr *net.UDPAddr
 	if addr, e = net.ResolveUDPAddr("udp4", address); E.Chk(e) {
 		return
@@ -178,14 +181,16 @@ func Listen(address string, channel *Channel, maxDatagramSize int, handlers Hand
 // NewBroadcastChannel returns a broadcaster and listener with a given handler
 // on a multicast address and specified port. The handlers define the messages
 // that will be processed and any other messages are ignored
-func NewBroadcastChannel(creator string, ctx interface{}, key string, port int, maxDatagramSize int, handlers Handlers,
-	quit qu.C) (channel *Channel, e error) {
+func NewBroadcastChannel(
+	creator string, ctx interface{}, key string, port int, maxDatagramSize int, handlers Handlers,
+	quit qu.C,
+) (channel *Channel, e error) {
 	channel = &Channel{
-		Creator: creator,
+		Creator:         creator,
 		MaxDatagramSize: maxDatagramSize,
-		buffers: make(map[string]*MsgBuffer),
-		context: ctx,
-		Ready: qu.T(),
+		buffers:         make(map[string]*MsgBuffer),
+		context:         ctx,
+		Ready:           qu.T(),
 	}
 	if channel.sendCiph, e = gcm.GetCipher(key); E.Chk(e) {
 	}
@@ -254,8 +259,10 @@ func handleNetworkError(address string, e error) (result int) {
 // Handle listens for messages, decodes them, aggregates them, recovers the data
 // from the reed solomon fec shards received and invokes the handler provided
 // matching the magic on the complete received messages
-func Handle(address string, channel *Channel,
-	handlers Handlers, maxDatagramSize int, quit qu.C) {
+func Handle(
+	address string, channel *Channel,
+	handlers Handlers, maxDatagramSize int, quit qu.C,
+) {
 	buffer := make([]byte, maxDatagramSize)
 	T.Ln("starting handler for", channel.Creator, "listener")
 	// Loop forever reading from the socket until it is closed
@@ -303,7 +310,7 @@ out:
 					if len(bn.Buffers) >= 3 {
 						// try to decode it
 						var cipherText []byte
-						if cipherText, e = fec.Decode(bn.Buffers); E.Chk(e){
+						if cipherText, e = fec.Decode(bn.Buffers); E.Chk(e) {
 							continue
 						}
 						// D.F("received packet with magic %s from %s len %d bytes", magic, src.String(), len(cipherText))
@@ -325,10 +332,14 @@ out:
 					}
 				}
 			} else {
-				channel.buffers[nonce] = &MsgBuffer{[][]byte{},
-					time.Now(), false, src}
-				channel.buffers[nonce].Buffers = append(channel.buffers[nonce].
-					Buffers, shard)
+				channel.buffers[nonce] = &MsgBuffer{
+					[][]byte{},
+					time.Now(), false, src,
+				}
+				channel.buffers[nonce].Buffers = append(
+					channel.buffers[nonce].
+						Buffers, shard,
+				)
 			}
 		}
 	}

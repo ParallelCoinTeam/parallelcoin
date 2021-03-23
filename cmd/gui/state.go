@@ -182,7 +182,7 @@ func (s *State) Load(filename string, pass *string) (e error) {
 	if e = json.Unmarshal(b, ss); E.Chk(e) {
 		return
 	}
-	D.Ln(string(b))
+	// D.Ln(string(b))
 	ss.Unmarshal(s)
 	return
 }

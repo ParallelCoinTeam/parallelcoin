@@ -244,11 +244,14 @@ out:
 				// }
 				// // s.updateBlockTemplate()
 			case <-ticker.C:
-				I.Ln("controller ticker running")
+				D.Ln("controller ticker running")
 				// s.Advertise()
-				// s.checkConnectivity()
+				// s.checkConnected()
 			case <-s.start.Wait():
 				I.Ln("received start signal while paused")
+				if !s.checkConnected() {
+					break
+				}
 				if s.walletClient.Disconnected() {
 					I.Ln("wallet client is disconnected, retrying")
 					if e = s.startWallet(); E.Chk(e) {
@@ -292,10 +295,11 @@ out:
 					break
 				}
 			case <-ticker.C:
-				I.Ln("checking if wallet is connected")
-				s.checkConnectivity()
-				I.Ln("resending current templates...")
-				// I.S(s.templateShards)
+				// T.Ln("checking if wallet is connected")
+				if !s.checkConnected() {
+					break running
+				}
+				// I.Ln("resending current templates...")
 				if e = s.multiConn.SendMany(job.Magic, s.templateShards); E.Chk(e) {
 					break
 				}
@@ -316,25 +320,25 @@ out:
 	}
 }
 
-func (s *State) checkConnectivity() {
+func (s *State) checkConnected() (connected bool) {
 	// if !*s.cfg.Generate || *s.cfg.GenThreads == 0 {
 	// 	I.Ln("no need to check connectivity if we aren't mining")
 	// 	return
 	// }
 	if *s.cfg.Solo {
 		I.Ln("in solo mode, mining anyway")
-		s.Start()
-		return
+		// s.Start()
+		return true
 	}
-	T.Ln("checking connectivity state")
+	// T.Ln("checking connectivity state")
 	ps := make(chan peersummary.PeerSummaries, 1)
 	s.node.PeerState <- ps
-	T.Ln("sent peer list query")
+	// T.Ln("sent peer list query")
 	var lanPeers int
 	var totalPeers int
 	select {
 	case connState := <-ps:
-		T.Ln("received peer list query response")
+		// T.Ln("received peer list query response")
 		totalPeers = len(connState)
 		for i := range connState {
 			if routeable.IPNet.Contains(connState[i].IP) {
@@ -345,17 +349,19 @@ func (s *State) checkConnectivity() {
 			// if there is no peers on lan and solo was not set, stop mining
 			if lanPeers == 0 {
 				T.Ln("no lan peers while in lan mode, stopping mining")
-				s.Stop()
+				// s.Stop()
 			} else {
-				s.Start()
+				// s.Start()
+				connected=true
 			}
 		} else {
 			if totalPeers-lanPeers == 0 {
 				// we have no peers on the internet, stop mining
 				T.Ln("no internet peers, stopping mining")
-				s.Stop()
+				// s.Stop()
 			} else {
-				s.Start()
+				// s.Start()
+				connected=true
 			}
 		}
 		break
@@ -364,6 +370,7 @@ func (s *State) checkConnectivity() {
 		break
 	}
 	T.Ln(totalPeers, "total peers", lanPeers, "lan peers solo:", *s.cfg.Solo, "lan:", *s.cfg.LAN)
+	return
 }
 
 //

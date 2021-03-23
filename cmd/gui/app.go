@@ -594,13 +594,15 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 					Background(wg.MainApp.StatusBarBackgroundGet()).
 					SetClick(
 						func() {
-							*wg.cx.Config.Controller = !*wg.cx.Config.Controller
-							I.Ln("controller running:", *wg.cx.Config.Controller)
-							var e error
-							if e = wg.ChainClient.SetGenerate(
-								*wg.cx.Config.Controller,
-								*wg.cx.Config.GenThreads,
-							); !E.Chk(e) {
+							if wg.ChainClient != nil && !wg.ChainClient.Disconnected() {
+								*wg.cx.Config.Controller = !*wg.cx.Config.Controller
+								I.Ln("controller running:", *wg.cx.Config.Controller)
+								var e error
+								if e = wg.ChainClient.SetGenerate(
+									*wg.cx.Config.Controller,
+									*wg.cx.Config.GenThreads,
+								); !E.Chk(e) {
+								}
 							}
 							// // wg.toggleMiner()
 							// go func() {

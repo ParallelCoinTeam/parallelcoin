@@ -20,8 +20,8 @@ import (
 	"gioui.org/op/paint"
 	uberatomic "go.uber.org/atomic"
 	
-	"github.com/p9c/pod/pkg/gui"
 	"github.com/p9c/pod/pkg/btcjson"
+	"github.com/p9c/pod/pkg/gui"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/util/qu"
 	
@@ -155,18 +155,17 @@ func processAdvtMsg(ctx interface{}, src net.Addr, dst string, b []byte) (e erro
 	if !*wg.cx.Config.Discovery {
 		return
 	}
-	D.Ln("processing advertisment message", src, dst)
 	if wg.ChainClient == nil {
-		I.Ln("no chain client to process advertisment")
+		T.Ln("no chain client to process advertisment")
 		return
 	}
 	var j p2padvt.Advertisment
 	gotiny.Unmarshal(b, &j)
 	// I.S(j)
-	var uuid uint64
-	uuid = j.UUID
-	// I.Ln("uuid of advertisment", uuid, wg.otherNodes)
-	if int(uuid) == *wg.cx.Config.UUID {
+	var peerUUID uint64
+	peerUUID = j.UUID
+	// I.Ln("peerUUID of advertisment", peerUUID, wg.otherNodes)
+	if int(peerUUID) == *wg.cx.Config.UUID {
 		D.Ln("ignoring own advertisment message")
 		return
 	}
@@ -177,7 +176,7 @@ func processAdvtMsg(ctx interface{}, src net.Addr, dst string, b []byte) (e erro
 	for i := range pi {
 		for k := range j.IPs {
 			jpa := net.JoinHostPort(k, fmt.Sprint(j.P2P))
-			I.Ln(jpa, pi[i].Addr, pi[i].AddrLocal)
+			// I.Ln(jpa, pi[i].Addr, pi[i].AddrLocal)
 			if jpa == pi[i].Addr {
 				I.Ln("not connecting to node already connected outbound")
 				return
@@ -194,12 +193,11 @@ func processAdvtMsg(ctx interface{}, src net.Addr, dst string, b []byte) (e erro
 		// 	}
 		// }
 	}
-	
-	if _, ok := wg.otherNodes[uuid]; !ok {
+	if _, ok := wg.otherNodes[peerUUID]; !ok {
 		// if we haven't already added it to the permanent peer list, we can add it now
-		I.Ln("connecting to lan peer with same PSK", j.IPs, uuid)
-		wg.otherNodes[uuid] = &nodeSpec{}
-		wg.otherNodes[uuid].Time = time.Now()
+		I.Ln("connecting to lan peer with same PSK", j.IPs, peerUUID)
+		wg.otherNodes[peerUUID] = &nodeSpec{}
+		wg.otherNodes[peerUUID].Time = time.Now()
 		for i := range j.IPs {
 			addy := net.JoinHostPort(i, fmt.Sprint(j.P2P))
 			for j := range pi {
@@ -216,15 +214,15 @@ func processAdvtMsg(ctx interface{}, src net.Addr, dst string, b []byte) (e erro
 				continue
 			}
 			D.Ln("connected to peer via address", peerIP)
-			wg.otherNodes[uuid].addr = peerIP
+			wg.otherNodes[peerUUID].addr = peerIP
 			break
 		}
-		I.Ln("otherNodes", wg.otherNodes)
+		I.Ln(peerUUID, "added", "otherNodes", wg.otherNodes)
 	} else {
-		// update last seen time for uuid for garbage collection of stale disconnected
+		// update last seen time for peerUUID for garbage collection of stale disconnected
 		// nodes
-		I.Ln("other node", uuid, wg.otherNodes[uuid].addr)
-		wg.otherNodes[uuid].Time = time.Now()
+		D.Ln("other node seen again", peerUUID, wg.otherNodes[peerUUID].addr)
+		wg.otherNodes[peerUUID].Time = time.Now()
 	}
 	// I.S(wg.otherNodes)
 	// If we lose connection for more than 9 seconds we delete and if the node

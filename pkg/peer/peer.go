@@ -1,11 +1,9 @@
 package peer
 
 import (
-	"bytes"
 	"container/list"
 	"errors"
 	"fmt"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/logg"
 	"io"
@@ -892,8 +890,8 @@ func (p *Peer) readMessage(encoding wire.MessageEncoding) (wire.Message, []byte,
 				"Received %v%s from %s",
 				msg.Command(), summary, p,
 			)
-			o += spew.Sdump(msg)
-			o += spew.Sdump(buf)
+			// o += spew.Sdump(msg)
+			// o += spew.Sdump(buf)
 			return o
 		},
 	)
@@ -941,12 +939,12 @@ func (p *Peer) writeMessage(msg wire.Message, enc wire.MessageEncoding) (e error
 					summary = " (" + summary + ")"
 				}
 				o := fmt.Sprintf("Sending %v%s to %s", msg.Command(), summary, p)
-				o += spew.Sdump(msg)
-				var buf bytes.Buffer
-				_, e = wire.WriteMessageWithEncodingN(&buf, msg, p.ProtocolVersion(), p.cfg.ChainParams.Net, enc)
-				if e != nil {
-					// 	return e.Error()
-				}
+				// o += spew.Sdump(msg)
+				// var buf bytes.Buffer
+				// _, e = wire.WriteMessageWithEncodingN(&buf, msg, p.ProtocolVersion(), p.cfg.ChainParams.Net, enc)
+				// if e != nil {
+				// 	// 	return e.Error()
+				// }
 				return o // + spew.Sdump(buf.Bytes())
 			},
 		)

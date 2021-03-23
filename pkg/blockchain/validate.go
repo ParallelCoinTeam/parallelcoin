@@ -23,7 +23,7 @@ import (
 const (
 	// MaxTimeOffsetSeconds is the maximum number of seconds a block time is allowed to be ahead of the current time.
 	// 90 seconds, and anyone whose clock is more out of sync than that will be forked off chain.
-	MaxTimeOffsetSeconds = 90
+	MaxTimeOffsetSeconds = 300
 	// MinCoinbaseScriptLen is the minimum length a coinbase script can be.
 	MinCoinbaseScriptLen = 2
 	// MaxCoinbaseScriptLen is the maximum length a coinbase script can be.

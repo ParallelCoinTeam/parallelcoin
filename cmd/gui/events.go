@@ -25,7 +25,7 @@ func (wg *WalletGUI) WalletAndClientRunning() bool {
 
 func (wg *WalletGUI) Advertise() (e error) {
 	if wg.node.Running() && *wg.cx.Config.Discovery {
-		I.Ln("sending out advertisment")
+		// I.Ln("sending out p2p advertisment")
 		if e = wg.multiConn.SendMany(
 			p2padvt.Magic,
 			transport.GetShards(p2padvt.Get(uint64(*wg.cx.Config.UUID), (*wg.cx.Config.P2PListeners)[0])),

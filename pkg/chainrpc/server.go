@@ -954,25 +954,25 @@ func (n *Node) InboundPeerConnected(conn net.Conn) {
 	sp := NewServerPeer(n, localIP, false)
 	sp.IsWhitelisted = GetIsWhitelisted(n.StateCfg, conn.RemoteAddr())
 	sp.Peer = peer.NewInboundPeer(NewPeerConfig(sp))
-	msgChan := sp.AssociateConnection(conn)
+	_ = sp.AssociateConnection(conn)
 	go n.PeerDoneHandler(sp)
-	go func() {
-		msg := <-msgChan
-		n.peerState.ForAllPeers(
-			func(np *NodePeer) {
-				if np.IP.Equal(msg.AddrMe.IP) && np.Port == msg.AddrMe.Port && np.ID() != sp.ID() {
-					I.Ln("disconnecting inbound peer we are connected outbound to")
-					sp.Disconnect()
-				}
-				// check also that the address of origin matches the one in the message, if this
-				// is wrong and not zero it is being spoofed and is suspicious
-				if !msg.AddrMe.IP.Equal(net.IP{0, 0, 0, 0}) && msg.AddrYou.IP.String() != remoteIP.String() {
-					W.Ln("disconnecting peer", remoteIP, "who is sending message with non-matching IP", msg.AddrYou.IP)
-					sp.Disconnect()
-				}
-			},
-		)
-	}()
+	// go func() {
+	// 	msg := <-msgChan
+	// 	n.peerState.ForAllPeers(
+	// 		func(np *NodePeer) {
+	// 			if np.IP.Equal(msg.AddrMe.IP) && np.Port == msg.AddrMe.Port && np.ID() != sp.ID() {
+	// 				I.Ln("disconnecting inbound peer we are connected outbound to")
+	// 				sp.Disconnect()
+	// 			}
+	// 			// check also that the address of origin matches the one in the message, if this
+	// 			// is wrong and not zero it is being spoofed and is suspicious
+	// 			if !msg.AddrMe.IP.Equal(net.IP{0, 0, 0, 0}) && msg.AddrYou.IP.String() != remoteIP.String() {
+	// 				W.Ln("disconnecting peer", remoteIP, "who is sending message with non-matching IP", msg.AddrYou.IP)
+	// 				sp.Disconnect()
+	// 			}
+	// 		},
+	// 	)
+	// }()
 }
 
 // OutboundPeerConnected is invoked by the connection manager when a new
@@ -1001,19 +1001,19 @@ func (n *Node) OutboundPeerConnected(c *connmgr.ConnReq, conn net.Conn) {
 	sp.Peer = p
 	sp.ConnReq = c
 	sp.IsWhitelisted = GetIsWhitelisted(n.StateCfg, conn.RemoteAddr())
-	msgChan := sp.AssociateConnection(conn)
+	_ = sp.AssociateConnection(conn)
 	go n.PeerDoneHandler(sp)
-	go func() {
-		msg := <-msgChan
-		n.peerState.ForAllPeers(
-			func(np *NodePeer) {
-				if np.IP.Equal(msg.AddrMe.IP) && np.Port == msg.AddrMe.Port && np.ID() != sp.ID() {
-					I.Ln("disconnecting outbound peer we are connected inbound to")
-					sp.Disconnect()
-				}
-			},
-		)
-	}()
+	// go func() {
+	// 	msg := <-msgChan
+	// 	n.peerState.ForAllPeers(
+	// 		func(np *NodePeer) {
+	// 			if np.IP.Equal(msg.AddrMe.IP) && np.Port == msg.AddrMe.Port && np.ID() != sp.ID() {
+	// 				I.Ln("disconnecting outbound peer we are connected inbound to")
+	// 				sp.Disconnect()
+	// 			}
+	// 		},
+	// 	)
+	// }()
 	n.AddrManager.Attempt(sp.NA())
 }
 
@@ -1128,7 +1128,7 @@ out:
 			// Disconnect all peers on server shutdown.
 			n.peerState.ForAllPeers(
 				func(sp *NodePeer) {
-					// Tracef("shutdown peer %n", sp)
+					T.F("shutdown peer %n", sp)
 					sp.Disconnect()
 				},
 			)
