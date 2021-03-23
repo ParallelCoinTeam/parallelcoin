@@ -11,14 +11,13 @@ import (
 	"time"
 	
 	"github.com/p9c/pod/pkg/chaincfg"
-	chainhash "github.com/p9c/pod/pkg/chainhash"
-	txscript "github.com/p9c/pod/pkg/txscript"
+	"github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/txscript"
 	"github.com/p9c/pod/pkg/util"
 	
-	chaincfg "github.com/p9c/pod/pkg/chaincfg"
-	"github.com/p9c/pod/pkg/wire"
-	database "github.com/p9c/pod/pkg/database"
+	"github.com/p9c/pod/pkg/database"
 	_ "github.com/p9c/pod/pkg/database/ffldb"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 const (
@@ -32,8 +31,8 @@ const (
 
 // filesExists returns whether or not the named file or directory exists.
 func fileExists(name string) bool {
-	if _, e = os.Stat(name); E.Chk(e) {
-		if os.IsNotExist(err) {
+	if _, e := os.Stat(name); E.Chk(e) {
+		if os.IsNotExist(e) {
 			return false
 		}
 	}
@@ -59,7 +58,7 @@ func loadBlocks(filename string) (blocks []*util.Block, e error) {
 	var dr io.Reader
 	var fi io.ReadCloser
 	fi, e = os.Open(filename)
-	if e != nil  {
+	if e != nil {
 		return
 	}
 	if strings.HasSuffix(filename, ".bz2") {
@@ -73,10 +72,10 @@ func loadBlocks(filename string) (blocks []*util.Block, e error) {
 	}()
 	var block *util.Block
 	height := int64(1)
-	for ;; height++ {
+	for ; ; height++ {
 		var rintbuf uint32
 		e = binary.Read(dr, binary.LittleEndian, &rintbuf)
-		if e ==  io.EOF {
+		if e == io.EOF {
 			// hit end of file at expected offset: no warning
 			// height--
 			e = nil
@@ -89,11 +88,11 @@ func loadBlocks(filename string) (blocks []*util.Block, e error) {
 		rbytes := make([]byte, blocklen)
 		// read block
 		_, e = dr.Read(rbytes)
-		if e != nil  {
-			fmt.Println(err)
+		if e != nil {
+			fmt.Println(e)
 		}
 		block, e = util.NewBlockFromBytes(rbytes)
-		if e != nil  {
+		if e != nil {
 			return
 		}
 		blocks = append(blocks, block)
@@ -112,8 +111,8 @@ func chainSetup(dbName string, netparams *chaincfg.Params) (*BlockChain, func(),
 	var teardown func()
 	if testDbType == "memdb" {
 		ndb, e := database.Create(testDbType)
-		if e != nil  {
-			return nil, nil, fmt.Errorf("error creating db: %v", err)
+		if e != nil {
+			return nil, nil, fmt.Errorf("error creating db: %v", e)
 		}
 		db = ndb
 		// Setup a teardown function for cleaning up. This function is returned to the caller to be invoked when it is
@@ -126,8 +125,10 @@ func chainSetup(dbName string, netparams *chaincfg.Params) (*BlockChain, func(),
 		// Create the root directory for test databases.
 		if !fileExists(testDbRoot) {
 			if e := os.MkdirAll(testDbRoot, 0700); E.Chk(e) {
-				e := fmt.Errorf("unable to create test db "+
-					"root: %v", err)
+				e := fmt.Errorf(
+					"unable to create test db "+
+						"root: %v", e,
+				)
 				return nil, nil, e
 			}
 		}
@@ -135,8 +136,8 @@ func chainSetup(dbName string, netparams *chaincfg.Params) (*BlockChain, func(),
 		dbPath := filepath.Join(testDbRoot, dbName)
 		_ = os.RemoveAll(dbPath)
 		ndb, e := database.Create(testDbType, dbPath, blockDataNet)
-		if e != nil  {
-			return nil, nil, fmt.Errorf("error creating db: %v", err)
+		if e != nil {
+			return nil, nil, fmt.Errorf("error creating db: %v", e)
 		}
 		db = ndb
 		// Setup a teardown function for cleaning up. This function is returned to the caller to be invoked when it is
@@ -154,16 +155,18 @@ func chainSetup(dbName string, netparams *chaincfg.Params) (*BlockChain, func(),
 	// global instance.
 	paramsCopy := *netparams
 	// Create the main chain instance.
-	chain, e := New(&Config{
-		DB:          db,
-		ChainParams: &paramsCopy,
-		Checkpoints: nil,
-		TimeSource:  NewMedianTime(),
-		SigCache:    txscript.NewSigCache(1000),
-	})
-	if e != nil  {
+	chain, e := New(
+		&Config{
+			DB:          db,
+			ChainParams: &paramsCopy,
+			Checkpoints: nil,
+			TimeSource:  NewMedianTime(),
+			SigCache:    txscript.NewSigCache(1000),
+		},
+	)
+	if e != nil {
 		teardown()
-		e := fmt.Errorf("failed to create chain instance: %v", err)
+		e := fmt.Errorf("failed to create chain instance: %v", e)
 		return nil, nil, e
 	}
 	return chain, teardown, nil
@@ -179,7 +182,7 @@ func loadUtxoView(filename string) (*UtxoViewpoint, error) {
 	// described in chainio.go.
 	filename = filepath.Join("tstdata", filename)
 	fi, e := os.Open(filename)
-	if e != nil  {
+	if e != nil {
 		return nil, e
 	}
 	// Choose read based on whether the file is compressed or not.
@@ -198,9 +201,9 @@ func loadUtxoView(filename string) (*UtxoViewpoint, error) {
 		// Hash of the utxo entry.
 		var hash chainhash.Hash
 		_, e := io.ReadAtLeast(r, hash[:], len(hash[:]))
-		if e != nil  {
+		if e != nil {
 			// Expected EOF at the right offset.
-			if e ==  io.EOF {
+			if e == io.EOF {
 				break
 			}
 			return nil, e
@@ -208,24 +211,24 @@ func loadUtxoView(filename string) (*UtxoViewpoint, error) {
 		// Output index of the utxo entry.
 		var index uint32
 		e = binary.Read(r, binary.LittleEndian, &index)
-		if e != nil  {
+		if e != nil {
 			return nil, e
 		}
 		// Num of serialized utxo entry bytes.
 		var numBytes uint32
 		e = binary.Read(r, binary.LittleEndian, &numBytes)
-		if e != nil  {
+		if e != nil {
 			return nil, e
 		}
 		// Serialized utxo entry.
 		serialized := make([]byte, numBytes)
 		_, e = io.ReadAtLeast(r, serialized, int(numBytes))
-		if e != nil  {
+		if e != nil {
 			return nil, e
 		}
 		// Deserialize it and add it to the view.
 		entry, e := deserializeUtxoEntry(serialized)
-		if e != nil  {
+		if e != nil {
 			return nil, e
 		}
 		view.Entries()[wire.OutPoint{Hash: hash, Index: index}] = entry
@@ -248,9 +251,9 @@ func convertUtxoStore(r io.Reader, w io.Writer) (e error) {
 		// Hash of the utxo entry.
 		var hash chainhash.Hash
 		_, e := io.ReadAtLeast(r, hash[:], len(hash[:]))
-		if e != nil  {
+		if e != nil {
 			// Expected EOF at the right offset.
-			if e ==  io.EOF {
+			if e == io.EOF {
 				break
 			}
 			return e
@@ -258,45 +261,45 @@ func convertUtxoStore(r io.Reader, w io.Writer) (e error) {
 		// Num of serialized utxo entry bytes.
 		var numBytes uint32
 		e = binary.Read(r, littleEndian, &numBytes)
-		if e != nil  {
+		if e != nil {
 			return e
 		}
 		// Serialized utxo entry.
 		serialized := make([]byte, numBytes)
 		_, e = io.ReadAtLeast(r, serialized, int(numBytes))
-		if e != nil  {
+		if e != nil {
 			return e
 		}
 		// Deserialize the entry.
 		entries, e := deserializeUtxoEntryV0(serialized)
-		if e != nil  {
+		if e != nil {
 			return e
 		}
 		// Loop through all of the utxos and write them out in the new format.
 		for outputIdx, entry := range entries {
 			// Reserialize the entries using the new format.
 			serialized, e := serializeUtxoEntry(entry)
-			if e != nil  {
+			if e != nil {
 				return e
 			}
 			// Write the hash of the utxo entry.
 			_, e = w.Write(hash[:])
-			if e != nil  {
+			if e != nil {
 				return e
 			}
 			// Write the output index of the utxo entry.
 			e = binary.Write(w, littleEndian, outputIdx)
-			if e != nil  {
+			if e != nil {
 				return e
 			}
 			// Write num of serialized utxo entry bytes.
 			e = binary.Write(w, littleEndian, uint32(len(serialized)))
-			if e != nil  {
+			if e != nil {
 				return e
 			}
 			// Write the serialized utxo.
 			_, e = w.Write(serialized)
-			if e != nil  {
+			if e != nil {
 				return e
 			}
 		}
@@ -328,8 +331,6 @@ func newFakeChain(params *chaincfg.Params) *BlockChain {
 		blocksPerRetarget:   int32(targetTimespan / targetTimePerBlock),
 		Index:               index,
 		BestChain:           newChainView(node),
-		warningCaches:       newThresholdCaches(vbNumBits),
-		deploymentCaches:    newThresholdCaches(chaincfg.DefinedDeployments),
 	}
 }
 

@@ -8,11 +8,11 @@ import (
 	"testing"
 	"time"
 	
+	"github.com/p9c/pod/pkg/addrmgr"
 	"github.com/p9c/pod/pkg/chaincfg"
-	"github.com/p9c/pod/pkg/comm/peer/addrmgr"
 	"github.com/p9c/pod/pkg/database/walletdb"
 	_ "github.com/p9c/pod/pkg/database/walletdb/bdb"
-	waddrmgr "github.com/p9c/pod/pkg/wallet/waddrmgr"
+	"github.com/p9c/pod/pkg/wallet/waddrmgr"
 )
 
 var (

@@ -1,7 +1,6 @@
-package fork
+package blockchain
 
 import (
-	"github.com/p9c/pod/pkg/blockchain"
 	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/hardfork"
@@ -76,7 +75,7 @@ func CreateHardForkSubsidyTx(
 	script, _ = txscript.PayToAddrScript(addr)
 	tx.AddTxOut(
 		&wire.TxOut{
-			Value:    blockchain.CalcBlockSubsidy(nextBlockHeight+1, params, version),
+			Value:    CalcBlockSubsidy(nextBlockHeight+1, params, version),
 			PkScript: script,
 		},
 	)

@@ -32,9 +32,9 @@ import (
 	"github.com/p9c/pod/cmd/kopach/control/job"
 	"github.com/p9c/pod/cmd/kopach/control/pause"
 	"github.com/p9c/pod/pkg/chainhash"
-	"github.com/p9c/pod/pkg/comm/stdconn/worker"
 	"github.com/p9c/pod/pkg/comm/transport"
 	rav "github.com/p9c/pod/pkg/data/ring"
+	"github.com/p9c/pod/pkg/pipe/stdconn/worker"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
 

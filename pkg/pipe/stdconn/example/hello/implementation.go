@@ -7,7 +7,7 @@ import (
 	
 	"github.com/p9c/pod/pkg/util/qu"
 	
-	"github.com/p9c/pod/pkg/stdconn"
+	"github.com/p9c/pod/pkg/pipe/stdconn"
 )
 
 type Hello struct {

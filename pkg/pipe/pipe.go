@@ -5,8 +5,8 @@ import (
 	"io"
 	"os"
 	
-	"github.com/p9c/pod/pkg/comm/stdconn"
-	"github.com/p9c/pod/pkg/comm/stdconn/worker"
+	"github.com/p9c/pod/pkg/pipe/stdconn"
+	"github.com/p9c/pod/pkg/pipe/stdconn/worker"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/util/qu"
 )

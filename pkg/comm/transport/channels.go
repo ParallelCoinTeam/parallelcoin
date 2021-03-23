@@ -13,9 +13,9 @@ import (
 	
 	"github.com/p9c/pod/pkg/util/qu"
 	
-	"github.com/p9c/pod/pkg/comm/multicast"
 	"github.com/p9c/pod/pkg/fec"
 	"github.com/p9c/pod/pkg/gcm"
+	"github.com/p9c/pod/pkg/multicast"
 )
 
 const (

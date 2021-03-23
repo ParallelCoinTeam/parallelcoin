@@ -3,11 +3,12 @@ package blockchain
 import (
 	"errors"
 	"fmt"
+	"github.com/p9c/pod/pkg/bits"
+	"github.com/p9c/pod/pkg/fork"
 	"time"
 	
 	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/database"
-	"github.com/p9c/pod/pkg/fork"
 	"github.com/p9c/pod/pkg/util"
 )
 
@@ -142,12 +143,12 @@ func (b *BlockChain) ProcessBlock(
 			// minimum expected based on elapsed time since the last checkpoint and maximum
 			// adjustment allowed by the retarget rules.
 			duration := blockHeader.Timestamp.Sub(checkpointTime)
-			requiredTarget := fork.CompactToBig(
+			requiredTarget := bits.CompactToBig(
 				b.calcEasiestDifficulty(
 					checkpointNode.bits, duration,
 				),
 			)
-			currentTarget := fork.CompactToBig(blockHeader.Bits)
+			currentTarget := bits.CompactToBig(blockHeader.Bits)
 			if currentTarget.Cmp(requiredTarget) > 0 {
 				str := fmt.Sprintf(
 					"processing: candidateBlock target difficulty of %064x is too low when compared to the"+

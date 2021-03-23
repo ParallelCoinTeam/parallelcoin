@@ -3,6 +3,7 @@ package app
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/p9c/pod/pkg/fork"
 	"github.com/p9c/pod/pkg/logg"
 	"github.com/p9c/pod/pkg/podcfg"
 	"io/ioutil"
@@ -18,7 +19,6 @@ import (
 	
 	"github.com/p9c/pod/pkg/apputil"
 	"github.com/p9c/pod/pkg/chaincfg"
-	"github.com/p9c/pod/pkg/fork"
 	"github.com/p9c/pod/pkg/pod"
 )
 

@@ -7,8 +7,8 @@ import (
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/util/qu"
 	
-	"github.com/p9c/pod/pkg/comm/stdconn/worker"
 	"github.com/p9c/pod/pkg/pipe/consume"
+	"github.com/p9c/pod/pkg/pipe/stdconn/worker"
 )
 
 // RunUnit handles correctly starting and stopping child processes that have StdConn pipe logging enabled, allowing

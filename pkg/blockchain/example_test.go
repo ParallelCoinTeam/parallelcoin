@@ -2,15 +2,15 @@ package blockchain_test
 
 import (
 	"fmt"
+	bits2 "github.com/p9c/pod/pkg/bits"
 	"log"
 	"math/big"
 	"os"
 	"path/filepath"
 	
-	blockchain "github.com/p9c/pod/pkg/blockchain"
-	chaincfg "github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/blockchain"
 	"github.com/p9c/pod/pkg/chaincfg"
-	database "github.com/p9c/pod/pkg/database"
+	"github.com/p9c/pod/pkg/database"
 	_ "github.com/p9c/pod/pkg/database/ffldb"
 	"github.com/p9c/pod/pkg/util"
 )
@@ -25,8 +25,8 @@ func ExampleBlockChain_ProcessBlock() {
 	dbPath := filepath.Join(os.TempDir(), "exampleprocessblock")
 	_ = os.RemoveAll(dbPath)
 	db, e := database.Create("ffldb", dbPath, chaincfg.MainNetParams.Net)
-	if e != nil  {
-		log.Printf("Failed to create database: %v\n", err)
+	if e != nil {
+		log.Printf("Failed to create database: %v\n", e)
 		return
 	}
 	defer func() {
@@ -41,22 +41,26 @@ func ExampleBlockChain_ProcessBlock() {
 	// not demonstrate some of the other available configuration options such as specifying a notification callback and
 	// signature cache. Also, the caller would ordinarily keep a reference to the median time source and add time values
 	// obtained from other peers on the network so the local time is adjusted to be in agreement with other peers.
-	chain, e := blockchain.New(&blockchain.Config{
-		DB:          db,
-		ChainParams: &chaincfg.MainNetParams,
-		TimeSource:  blockchain.NewMedianTime(),
-	})
-	if e != nil  {
-		log.Printf("Failed to create chain instance: %v\n", err)
+	chain, e := blockchain.New(
+		&blockchain.Config{
+			DB:          db,
+			ChainParams: &chaincfg.MainNetParams,
+			TimeSource:  blockchain.NewMedianTime(),
+		},
+	)
+	if e != nil {
+		log.Printf("Failed to create chain instance: %v\n", e)
 		return
 	}
 	// Process a block. For this example, we are going to intentionally cause an error by trying to process the genesis
 	// block which already exists.
 	genesisBlock := util.NewBlock(chaincfg.MainNetParams.GenesisBlock)
-	isMainChain, isOrphan, e := chain.ProcessBlock(0, genesisBlock,
-		blockchain.BFNone, 0)
-	if e != nil  {
-		log.Printf("Failed to process block: %v\n", err)
+	isMainChain, isOrphan, e := chain.ProcessBlock(
+		0, genesisBlock,
+		blockchain.BFNone, 0,
+	)
+	if e != nil {
+		log.Printf("Failed to process block: %v\n", e)
 		return
 	}
 	log.Printf("Block accepted. Is it on the main chain?: %v", isMainChain)
@@ -70,7 +74,7 @@ func ExampleBlockChain_ProcessBlock() {
 func ExampleCompactToBig() {
 	// Convert the bits from block 300000 in the main block chain.
 	bits := uint32(419465580)
-	targetDifficulty := blockchain.CompactToBig(bits)
+	targetDifficulty := bits2.CompactToBig(bits)
 	// Display it in hex.
 	fmt.Printf("%064x\n", targetDifficulty.Bytes())
 	// Output:
@@ -88,7 +92,7 @@ func ExampleBigToCompact() {
 		fmt.Println("invalid target difficulty")
 		return
 	}
-	bits := blockchain.BigToCompact(targetDifficulty)
+	bits := bits2.BigToCompact(targetDifficulty)
 	fmt.Println(bits)
 	// Output:
 	// 419465580

@@ -5,6 +5,8 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"fmt"
+	"github.com/p9c/pod/pkg/bits"
+	"github.com/p9c/pod/pkg/fork"
 	"math/big"
 	"math/rand"
 	"time"
@@ -15,7 +17,6 @@ import (
 	
 	"github.com/p9c/pod/pkg/blockchain"
 	"github.com/p9c/pod/pkg/chainhash"
-	"github.com/p9c/pod/pkg/fork"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/wire"
@@ -143,7 +144,7 @@ func HandleGetWork(s *Server, cmd interface{}, closeChan qu.C) (interface{}, err
 				return fmt.Sprintf(
 					"generated block template (timestamp %v, target %064x, "+
 						"merkle root %s, signature script %x)",
-					msgBlock.Header.Timestamp, fork.CompactToBig(
+					msgBlock.Header.Timestamp, bits.CompactToBig(
 						msgBlock.Header.
 							Bits,
 					), msgBlock.Header.MerkleRoot,
@@ -167,7 +168,7 @@ func HandleGetWork(s *Server, cmd interface{}, closeChan qu.C) (interface{}, err
 		D.F(
 			"updated block template (timestamp %v, target %064x, "+
 				"merkle root %s, signature script %x)",
-			msgBlock.Header.Timestamp, fork.CompactToBig(msgBlock.Header.Bits),
+			msgBlock.Header.Timestamp, bits.CompactToBig(msgBlock.Header.Bits),
 			msgBlock.Header.MerkleRoot, msgBlock.Transactions[0].TxIn[0].
 				SignatureScript,
 		)
@@ -229,7 +230,7 @@ func HandleGetWork(s *Server, cmd interface{}, closeChan qu.C) (interface{}, err
 	ReverseUint32Array(data)
 	ReverseUint32Array(hash1)
 	ReverseUint32Array(midstate[:])
-	target := BigToLEUint256(fork.CompactToBig(msgBlock.Header.Bits))
+	target := BigToLEUint256(bits.CompactToBig(msgBlock.Header.Bits))
 	reply := &btcjson.GetWorkResult{
 		Data:     hex.EncodeToString(data),
 		Hash1:    hex.EncodeToString(hash1),

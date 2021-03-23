@@ -4,6 +4,7 @@ package fork
 import (
 	"encoding/hex"
 	"fmt"
+	"github.com/p9c/pod/pkg/bits"
 	"math/big"
 	"math/rand"
 	"sort"
@@ -125,7 +126,7 @@ var (
 		return *big.NewInt(0).SetBytes(mplb)
 	}()
 	// FirstPowLimitBits is
-	FirstPowLimitBits = BigToCompact(&FirstPowLimit)
+	FirstPowLimitBits = bits.BigToCompact(&FirstPowLimit)
 	
 	p9PowLimit = func() big.Int {
 		mplb, _ := hex.DecodeString(
@@ -134,7 +135,7 @@ var (
 		)
 		return *big.NewInt(0).SetBytes(mplb)
 	}()
-	p9PowLimitBits = BigToCompact(&p9PowLimit)
+	p9PowLimitBits = bits.BigToCompact(&p9PowLimit)
 	// IsTestnet is set at startup here to be accessible to all other libraries
 	IsTestnet bool
 	// List is the list of existing hard forks and when they activate
@@ -190,14 +191,14 @@ var (
 		)
 		return *big.NewInt(0).SetBytes(mplb)
 	}()
-	SecondPowLimitBits = BigToCompact(&SecondPowLimit)
+	SecondPowLimitBits = bits.BigToCompact(&SecondPowLimit)
 	MainPowLimit       = func() big.Int {
 		mplb, _ := hex.DecodeString(
 			"00000fffff000000000000000000000000000000000000000000000000000000",
 		)
 		return *big.NewInt(0).SetBytes(mplb)
 	}()
-	MainPowLimitBits = BigToCompact(&MainPowLimit)
+	MainPowLimitBits = bits.BigToCompact(&MainPowLimit)
 )
 
 // GetAlgoID returns the 'algo_id' which in pre-hardfork is not the same as the block version number, but is afterwards
@@ -245,9 +246,9 @@ var algoVerSlice [][]int32
 func GetAlgoVerSlice(height int32) (o []int32) {
 	hf := GetCurrent(height)
 	if algoVerSlice == nil {
-		algoVerSlice = make([][]int32,0, len(List))
+		algoVerSlice = make([][]int32, 0, len(List))
 		for i := range List {
-			av := make ([]int32,0, len(List[i].AlgoVers))
+			av := make([]int32, 0, len(List[i].AlgoVers))
 			for j := range List[i].AlgoVers {
 				av = append(av, j)
 			}
@@ -346,7 +347,7 @@ func GetMinDiff(algoname string, height int32) (md *big.Int) {
 	// F.Ln("GetMinDiff", algoname)
 	minbits := GetMinBits(algoname, height)
 	// TraceF("mindiff minbits %08x", minbits)
-	return CompactToBig(minbits)
+	return bits.CompactToBig(minbits)
 }
 
 // GetTargetTimePerBlock returns the active block interval target based on hard fork status

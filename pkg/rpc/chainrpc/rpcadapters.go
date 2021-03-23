@@ -5,11 +5,11 @@ import (
 	
 	"github.com/p9c/pod/cmd/node/mempool"
 	"github.com/p9c/pod/pkg/blockchain"
-	"github.com/p9c/pod/pkg/wire"
 	"github.com/p9c/pod/pkg/chainhash"
-	"github.com/p9c/pod/pkg/comm/peer"
 	"github.com/p9c/pod/pkg/netsync"
+	"github.com/p9c/pod/pkg/peer"
 	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 // Peer provides a peer for use with the RPC server and implements the RPCServerPeer interface.

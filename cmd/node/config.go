@@ -12,7 +12,7 @@ import (
 	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/database"
 	
-	"github.com/p9c/pod/pkg/comm/peer"
+	"github.com/p9c/pod/pkg/peer"
 	// This ensures the database drivers get registered
 	_ "github.com/p9c/pod/pkg/database/ffldb"
 )

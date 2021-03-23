@@ -2,16 +2,16 @@ package blockchain
 
 import (
 	"github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/fork"
 	"math/big"
 	"sort"
 	"sync"
 	"sync/atomic"
 	"time"
 	
-	"github.com/p9c/pod/pkg/wire"
 	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/database"
-	"github.com/p9c/pod/pkg/fork"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 // blockStatus is a bit field representing the validation state of the block.

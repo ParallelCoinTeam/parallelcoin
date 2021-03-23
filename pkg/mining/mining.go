@@ -3,16 +3,17 @@ package mining
 import (
 	"container/heap"
 	"fmt"
+	"github.com/p9c/pod/pkg/bits"
 	"github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/fork"
 	"math/rand"
 	"time"
 	
 	"github.com/p9c/pod/pkg/blockchain"
-	"github.com/p9c/pod/pkg/txscript"
-	"github.com/p9c/pod/pkg/wire"
 	"github.com/p9c/pod/pkg/chainhash"
-	"github.com/p9c/pod/pkg/fork"
+	"github.com/p9c/pod/pkg/txscript"
 	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 const (
@@ -250,7 +251,7 @@ func createCoinbaseTx(
 		params.Net == wire.MainNet ||
 		nextBlockHeight == fork.List[1].TestnetStart &&
 			params.Net == wire.TestNet3 {
-		return createHardForkSubsidyTx(params, coinbaseScript, nextBlockHeight, addr, version)
+		return blockchain.CreateHardForkSubsidyTx(params, coinbaseScript, nextBlockHeight, addr, version)
 	}
 	
 	// Create the script to pay to the provided payment address if one was
@@ -848,7 +849,7 @@ mempoolLoop:
 	if reqDifficulty, e = g.Chain.CalcNextRequiredDifficulty(algo); E.Chk(e) {
 		return nil, e
 	}
-	T.F("reqDifficulty %d %08x %064x", vers, reqDifficulty, fork.CompactToBig(reqDifficulty))
+	T.F("reqDifficulty %d %08x %064x", vers, reqDifficulty, bits.CompactToBig(reqDifficulty))
 	// Create a new block ready to be solved.
 	merkles := blockchain.BuildMerkleTreeStore(blockTxns, false)
 	var msgBlock wire.MsgBlock
@@ -887,7 +888,7 @@ mempoolLoop:
 				totalFees,
 				blockSigOpCost,
 				blockWeight,
-				fork.CompactToBig(msgBlock.Header.Bits),
+				bits.CompactToBig(msgBlock.Header.Bits),
 				msgBlock.Header.PrevBlock.CloneBytes(),
 				bh.CloneBytes(),
 				msgBlock.Transactions[0].TxOut[0].Value,

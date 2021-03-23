@@ -14,16 +14,16 @@ import (
 	"github.com/p9c/pod/cmd/spv/cache/lru"
 	"github.com/p9c/pod/cmd/spv/filterdb"
 	"github.com/p9c/pod/cmd/spv/headerfs"
+	"github.com/p9c/pod/pkg/addrmgr"
 	"github.com/p9c/pod/pkg/blockchain"
 	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/chainhash"
-	"github.com/p9c/pod/pkg/wire"
-	"github.com/p9c/pod/pkg/comm/peer"
-	"github.com/p9c/pod/pkg/comm/peer/addrmgr"
-	"github.com/p9c/pod/pkg/comm/peer/connmgr"
+	"github.com/p9c/pod/pkg/connmgr"
 	"github.com/p9c/pod/pkg/database/walletdb"
+	"github.com/p9c/pod/pkg/peer"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/wallet/waddrmgr"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 type (

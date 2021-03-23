@@ -1,6 +1,7 @@
 package forkhash
 
 import (
+	"github.com/p9c/pod/pkg/fork"
 	"math/big"
 	
 	"github.com/bitbandi/go-x11"
@@ -12,8 +13,6 @@ import (
 	"golang.org/x/crypto/scrypt"
 	"golang.org/x/crypto/sha3"
 	"lukechampine.com/blake3"
-	
-	"github.com/p9c/pod/pkg/fork"
 	
 	"github.com/p9c/pod/pkg/chainhash"
 )
@@ -133,16 +132,19 @@ func Hash(bytes []byte, name string, height int32) (out chainhash.Hash) {
 	switch name {
 	case fork.Scrypt:
 		if fork.GetCurrent(height) > 0 {
-			_ = out.SetBytes(DivHash(Scrypt, bytes, hR))
+			_ = out.SetBytes(DivHash(ScryptHash, bytes, hR))
 		} else {
-			_ = out.SetBytes(Scrypt(bytes))
+			_ = out.SetBytes(ScryptHash(bytes))
 		}
 	case fork.SHA256d:
 		if fork.GetCurrent(height) > 0 {
 			_ = out.SetBytes(DivHash(chainhash.DoubleHashB, bytes, hR))
 		} else {
-			_ = out.SetBytes(chainhash.DoubleHashB(
-				bytes))
+			_ = out.SetBytes(
+				chainhash.DoubleHashB(
+					bytes,
+				),
+			)
 		}
 	default:
 		_ = out.SetBytes(DivHash(Blake3, bytes, hR))
@@ -162,8 +164,8 @@ func Blake3(bytes []byte) []byte {
 	return b[:]
 }
 
-// Scrypt takes bytes and returns a scrypt 256 bit hash
-func Scrypt(bytes []byte) []byte {
+// ScryptHash takes bytes and returns a scrypt 256 bit hash
+func ScryptHash(bytes []byte) []byte {
 	b := bytes
 	c := make([]byte, len(b))
 	copy(c, b)

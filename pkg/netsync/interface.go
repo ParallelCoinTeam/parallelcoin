@@ -3,11 +3,11 @@ package netsync
 import (
 	"github.com/p9c/pod/cmd/node/mempool"
 	"github.com/p9c/pod/pkg/blockchain"
-	"github.com/p9c/pod/pkg/wire"
 	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/chainhash"
-	"github.com/p9c/pod/pkg/comm/peer"
+	"github.com/p9c/pod/pkg/peer"
 	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 // PeerNotifier exposes methods to notify peers of status changes to transactions, blocks, etc. Currently server (in the

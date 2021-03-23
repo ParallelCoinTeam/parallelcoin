@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 	
-	qu "github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/pod/pkg/util/qu"
 )
 
 func init() {
@@ -51,8 +51,8 @@ func (c mockConn) RemoteAddr() net.Addr {
 func (c mockConn) Close() (e error) {
 	return nil
 }
-func (c mockConn) SetDeadline(t time.Time) error      { return nil }
-func (c mockConn) SetReadDeadline(t time.Time) error  { return nil }
+func (c mockConn) SetDeadline(t time.Time) error          { return nil }
+func (c mockConn) SetReadDeadline(t time.Time) error      { return nil }
 func (c mockConn) SetWriteDeadline(t time.Time) (e error) { return nil }
 
 // mockDialer mocks the net.Dial interface by returning a mock connection to the given address.

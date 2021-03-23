@@ -4,17 +4,18 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"github.com/p9c/pod/pkg/bits"
 	"github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/fork"
 	"math"
 	"math/big"
 	"time"
 	
-	"github.com/p9c/pod/pkg/txscript"
-	"github.com/p9c/pod/pkg/wire"
 	"github.com/p9c/pod/pkg/chainhash"
-	"github.com/p9c/pod/pkg/fork"
 	"github.com/p9c/pod/pkg/hardfork"
+	"github.com/p9c/pod/pkg/txscript"
 	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 const (
@@ -593,9 +594,9 @@ func (b *BlockChain) checkBlockHeaderContext(
 				str,
 				header.Version,
 				blockDifficulty,
-				CompactToBig(blockDifficulty),
+				bits.CompactToBig(blockDifficulty),
 				expectedDifficulty,
-				CompactToBig(expectedDifficulty),
+				bits.CompactToBig(expectedDifficulty),
 			)
 			E.Ln(str)
 			return ruleError(ErrUnexpectedDifficulty, str)
@@ -1329,7 +1330,7 @@ func checkProofOfWork(
 	if powLimit == nil {
 		return errors.New("PoW limit was not set")
 	}
-	target := fork.CompactToBig(header.Bits)
+	target := bits.CompactToBig(header.Bits)
 	// Tracef("target %064x %08x", target, header.Bits)
 	// Tracef("header: %+v", header)
 	if target.Sign() <= 0 {

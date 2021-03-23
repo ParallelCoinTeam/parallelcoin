@@ -3,6 +3,7 @@ package app
 import (
 	"github.com/gookit/color"
 	"github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/fork"
 	"github.com/p9c/pod/pkg/logg"
 	"github.com/p9c/pod/pkg/pod"
 	"os"
@@ -14,7 +15,6 @@ import (
 	"github.com/urfave/cli"
 	
 	"github.com/p9c/pod/cmd/kopach"
-	"github.com/p9c/pod/pkg/fork"
 )
 
 func KopachHandle(cx *pod.State) func(c *cli.Context) (e error) {

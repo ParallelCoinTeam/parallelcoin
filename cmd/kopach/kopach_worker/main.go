@@ -3,6 +3,7 @@ package kopach_worker
 import (
 	"github.com/gookit/color"
 	"github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/fork"
 	"github.com/p9c/pod/pkg/logg"
 	"github.com/p9c/pod/pkg/pod"
 	"net/rpc"
@@ -11,7 +12,6 @@ import (
 	"github.com/urfave/cli"
 	
 	"github.com/p9c/pod/cmd/kopach/worker"
-	"github.com/p9c/pod/pkg/fork"
 )
 
 func KopachWorkerHandle(cx *pod.State) func(c *cli.Context) (e error) {

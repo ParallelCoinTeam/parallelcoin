@@ -9,6 +9,9 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"github.com/p9c/pod/pkg/bits"
+	"github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/fork"
 	"math"
 	"runtime"
 	"time"
@@ -16,7 +19,6 @@ import (
 	"github.com/p9c/pod/pkg/blockchain"
 	"github.com/p9c/pod/pkg/chainhash"
 	ec "github.com/p9c/pod/pkg/ecc"
-	"github.com/p9c/pod/pkg/fork"
 	"github.com/p9c/pod/pkg/txscript"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/wire"
@@ -197,8 +199,8 @@ func payToScriptHashScript(redeemScript []byte) []byte {
 		AddOp(txscript.OP_HASH160).AddData(redeemScriptHash).
 		AddOp(txscript.OP_EQUAL).Script()
 	if e != nil  {
-		E.Ln(err)
-		panic(err)
+		E.Ln(e)
+		panic(e)
 	}
 	return script
 }
@@ -211,8 +213,8 @@ func pushDataScript(items ...[]byte) []byte {
 	}
 	script, e := builder.Script()
 	if e != nil  {
-		E.Ln(err)
-		panic(err)
+		E.Ln(e)
+		panic(e)
 	}
 	return script
 }
@@ -229,8 +231,8 @@ func opReturnScript(data []byte) []byte {
 	builder := txscript.NewScriptBuilder()
 	script, e := builder.AddOp(txscript.OP_RETURN).AddData(data).Script()
 	if e != nil  {
-		E.Ln(err)
-		panic(err)
+		E.Ln(e)
+		panic(e)
 	}
 	return script
 }
@@ -239,8 +241,8 @@ func opReturnScript(data []byte) []byte {
 func uniqueOpReturnScript() []byte {
 	rand, e := wire.RandomUint64()
 	if e != nil  {
-		E.Ln(err)
-		panic(err)
+		E.Ln(e)
+		panic(e)
 	}
 	data := make([]byte, 8)
 	binary.LittleEndian.PutUint64(data[0:8], rand)
@@ -253,8 +255,8 @@ func (g *testGenerator) createCoinbaseTx(blockHeight int32, version int32) *wire
 	extraNonce := uint64(0)
 	coinbaseScript, e := standardCoinbaseScript(blockHeight, extraNonce)
 	if e != nil  {
-		E.Ln(err)
-		panic(err)
+		E.Ln(e)
+		panic(e)
 	}
 	tx := wire.NewMsgTx(1)
 	tx.AddTxIn(&wire.TxIn{
@@ -295,7 +297,7 @@ func solveBlock(header *wire.BlockHeader, height int32) bool {
 		nonce uint32
 	}
 	// solver accepts a block header and a nonce range to test. It is intended to be run as a goroutine.
-	targetDifficulty := fork.CompactToBig(header.Bits)
+	targetDifficulty := bits.CompactToBig(header.Bits)
 	quit := make(chan bool)
 	results := make(chan sbResult)
 	solver := func(hdr wire.BlockHeader, startNonce, stopNonce uint32) {
@@ -384,7 +386,7 @@ func additionalTx(tx *wire.MsgTx) func(*wire.MsgBlock) {
 	return func(b *wire.MsgBlock) {
 		e := b.AddTransaction(tx)
 		if e != nil  {
-			E.Ln(err)
+			E.Ln(e)
 		}
 	}
 }
@@ -400,7 +402,7 @@ func createSpendTx(spend *spendableOut, fee util.Amount) *wire.MsgTx {
 		SignatureScript:  nil,
 	})
 	spendTx.AddTxOut(wire.NewTxOut(int64(spend.amount-fee),
-		opTrueScript
+		opTrueScript,
 	))
 	spendTx.AddTxOut(wire.NewTxOut(0, uniqueOpReturnScript()))
 	return spendTx
@@ -576,13 +578,13 @@ func encodeNonCanonicalBlock(b *wire.MsgBlock) []byte {
 	var buf bytes.Buffer
 	e := b.Header.BtcEncode(&buf, 0, wire.BaseEncoding)
 	if e != nil  {
-		E.Ln(err)
+		E.Ln(e)
 	}
 	buf.Write(nonCanonicalVarInt(uint32(len(b.Transactions))))
 	for _, tx := range b.Transactions {
 		e := tx.BtcEncode(&buf, 0, wire.BaseEncoding)
 		if e != nil  {
-			E.Ln(err)
+			E.Ln(e)
 		}
 	}
 	return buf.Bytes()
@@ -595,7 +597,7 @@ func cloneBlock(b *wire.MsgBlock) wire.MsgBlock {
 	for _, tx := range b.Transactions {
 		e := blockCopy.AddTransaction(tx.Copy())
 		if e != nil  {
-			E.Ln(err)
+			E.Ln(e)
 		}
 	}
 	return blockCopy
@@ -745,7 +747,7 @@ func Generate(includeLargeReorg bool) (tests [][]TestInstance, e error) {
 	// Create a test generator instance initialized with the genesis block as the tip.
 	g, e := makeTestGenerator(regressionNetParams)
 	if e != nil  {
-		E.Ln(err)
+		E.Ln(e)
 		return nil, e
 	}
 	// Define some convenience helper functions to return an individual test instance that has the described
@@ -1163,7 +1165,7 @@ func Generate(includeLargeReorg bool) (tests [][]TestInstance, e error) {
 			prevTx.AddTxOut(wire.NewTxOut(2, p2shScript))
 			e := b.AddTransaction(prevTx)
 			if e != nil  {
-				E.Ln(err)
+				E.Ln(e)
 			}
 		}
 	})
@@ -1184,14 +1186,14 @@ func Generate(includeLargeReorg bool) (tests [][]TestInstance, e error) {
 			sig, e := txscript.RawTxInSignature(tx, 0,
 				redeemScript, txscript.SigHashAll, g.privKey)
 			if e != nil  {
-				E.Ln(err)
-				panic(err)
+				E.Ln(e)
+				panic(e)
 			}
 			tx.TxIn[0].SignatureScript = pushDataScript(sig,
 				redeemScript)
 			e = b.AddTransaction(tx)
 			if e != nil  {
-				E.Ln(err)
+				E.Ln(e)
 			}
 		}
 		// Create a final tx that includes a non-pay-to-script-hash output with the number of signature operations
@@ -1202,7 +1204,7 @@ func Generate(includeLargeReorg bool) (tests [][]TestInstance, e error) {
 		tx.TxOut[0].PkScript = repeatOpcode(txscript.OP_CHECKSIG, fill)
 		e := b.AddTransaction(tx)
 		if e != nil  {
-			E.Ln(err)
+			E.Ln(e)
 		}
 	})
 	rejected(blockchain.ErrTooManySigOps)
@@ -1219,14 +1221,14 @@ func Generate(includeLargeReorg bool) (tests [][]TestInstance, e error) {
 			sig, e := txscript.RawTxInSignature(tx, 0,
 				redeemScript, txscript.SigHashAll, g.privKey)
 			if e != nil  {
-				E.Ln(err)
-				panic(err)
+				E.Ln(e)
+				panic(e)
 			}
 			tx.TxIn[0].SignatureScript = pushDataScript(sig,
 				redeemScript)
 			e = b.AddTransaction(tx)
 			if e != nil  {
-				E.Ln(err)
+				E.Ln(e)
 			}
 		}
 		// Create a final tx that includes a non-pay-to-script-hash output with the number of signature operations
@@ -1240,7 +1242,7 @@ func Generate(includeLargeReorg bool) (tests [][]TestInstance, e error) {
 		tx.TxOut[0].PkScript = repeatOpcode(txscript.OP_CHECKSIG, fill)
 		e := b.AddTransaction(tx)
 		if e != nil  {
-			E.Ln(err)
+			E.Ln(e)
 		}
 	})
 	accepted()
@@ -1361,7 +1363,7 @@ func Generate(includeLargeReorg bool) (tests [][]TestInstance, e error) {
 	g.nextBlock("b51", outs[14], 0, func(b *wire.MsgBlock) {
 		e := b.AddTransaction(b.Transactions[1])
 		if e != nil  {
-			E.Ln(err)
+			E.Ln(e)
 		}
 	})
 	g.assertTipBlockNumTxns(3)
@@ -1453,7 +1455,7 @@ func Generate(includeLargeReorg bool) (tests [][]TestInstance, e error) {
 		tx3 := createSpendTxForTx(tx2, lowFee)
 		e := b.AddTransaction(tx3)
 		if e != nil  {
-			E.Ln(err)
+			E.Ln(e)
 		}
 	})
 	g.assertTipBlockNumTxns(3)
@@ -1462,7 +1464,7 @@ func Generate(includeLargeReorg bool) (tests [][]TestInstance, e error) {
 		*b = cloneBlock(b57)
 		e := b.AddTransaction(b.Transactions[2])
 		if e != nil  {
-			E.Ln(err)
+			E.Ln(e)
 		}
 	})
 	g.assertTipBlockNumTxns(4)
@@ -1498,17 +1500,17 @@ func Generate(includeLargeReorg bool) (tests [][]TestInstance, e error) {
 			spendTx = createSpendTxForTx(spendTx, lowFee)
 			e := b.AddTransaction(spendTx)
 			if e != nil  {
-				E.Ln(err)
+				E.Ln(e)
 			}
 		}
 		// Add the duplicate transactions (3rd and 4th).
 		e := b.AddTransaction(b.Transactions[2])
 		if e != nil  {
-			E.Ln(err)
+			E.Ln(e)
 		}
 		e = b.AddTransaction(b.Transactions[3])
 		if e != nil  {
-			E.Ln(err)
+			E.Ln(e)
 		}
 	})
 	g.assertTipBlockNumTxns(8)
@@ -1625,7 +1627,7 @@ func Generate(includeLargeReorg bool) (tests [][]TestInstance, e error) {
 		tx3 := createSpendTxForTx(b.Transactions[1], lowFee)
 		e := b.AddTransaction(tx3)
 		if e != nil  {
-			E.Ln(err)
+			E.Ln(e)
 		}
 	})
 	accepted()
@@ -1638,11 +1640,11 @@ func Generate(includeLargeReorg bool) (tests [][]TestInstance, e error) {
 		tx3 := createSpendTxForTx(tx2, lowFee)
 		e := b.AddTransaction(tx3)
 		if e != nil  {
-			E.Ln(err)
+			E.Ln(e)
 		}
 		e = b.AddTransaction(tx2)
 		if e != nil  {
-			E.Ln(err)
+			E.Ln(e)
 		}
 	})
 	rejected(blockchain.ErrMissingTxOut)
@@ -1657,13 +1659,13 @@ func Generate(includeLargeReorg bool) (tests [][]TestInstance, e error) {
 		tx4 := createSpendTxForTx(tx2, lowFee)
 		e := b.AddTransaction(tx3)
 		if e != nil  {
-			E.Ln(err)
-			fmt.Println(err)
+			E.Ln(e)
+			fmt.Println(e)
 		}
 		e = b.AddTransaction(tx4)
 		if e != nil  {
-			E.Ln(err)
-			fmt.Println(err)
+			E.Ln(e)
+			fmt.Println(e)
 		}
 	})
 	rejected(blockchain.ErrMissingTxOut)
@@ -1773,7 +1775,7 @@ func Generate(includeLargeReorg bool) (tests [][]TestInstance, e error) {
 		tx3.TxIn[0].SignatureScript = []byte{txscript.OP_FALSE}
 		e := b.AddTransaction(tx3)
 		if e != nil  {
-			E.Ln(err)
+			E.Ln(e)
 		}
 	})
 	accepted()
@@ -1801,7 +1803,7 @@ func Generate(includeLargeReorg bool) (tests [][]TestInstance, e error) {
 			tx := createSpendTx(&spend, zeroFee)
 			e := b.AddTransaction(tx)
 			if e != nil  {
-				E.Ln(err)
+				E.Ln(e)
 			}
 		}
 	})

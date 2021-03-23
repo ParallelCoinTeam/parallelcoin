@@ -12,12 +12,12 @@ import (
 	
 	"github.com/p9c/pod/cmd/node/mempool"
 	"github.com/p9c/pod/pkg/blockchain"
-	"github.com/p9c/pod/pkg/wire"
 	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/chainhash"
-	peerpkg "github.com/p9c/pod/pkg/comm/peer"
 	"github.com/p9c/pod/pkg/database"
+	peerpkg "github.com/p9c/pod/pkg/peer"
 	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 type (

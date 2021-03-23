@@ -2,8 +2,8 @@ package main
 
 import (
 	"github.com/p9c/pod/pkg/logg"
-	"github.com/p9c/pod/pkg/stdconn/example/hello/hello"
-	"github.com/p9c/pod/pkg/stdconn/worker"
+	"github.com/p9c/pod/pkg/pipe/stdconn/example/hello/hello"
+	"github.com/p9c/pod/pkg/pipe/stdconn/worker"
 	"github.com/p9c/pod/pkg/util/qu"
 )
 

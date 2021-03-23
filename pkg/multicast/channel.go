@@ -1,9 +1,11 @@
-// Package multicast provides a UDP multicast connection with an in-process multicast interface for sending and receiving.
+// Package multicast provides a UDP multicast connection with an in-process
+// multicast interface for sending and receiving.
 //
-// In order to allow processes on the same machine (windows) to receive the messages this code enables multicast
-// loopback. It is up to the consuming library to discard messages it sends. This is only necessary because the
-// net standard library disables loopback by default though on windows this takes effect whereas on unix platforms
-// it does not.
+// In order to allow processes on the same machine (windows) to receive the
+// messages this code enables multicast loopback. It is up to the consuming
+// library to discard messages it sends. This is only necessary because the net
+// standard library disables loopback by default though on windows this takes
+// effect whereas on unix platforms it does not.
 //
 // This code was derived from the information found here:
 // https://stackoverflow.com/questions/43109552/how-to-set-ip-multicast-loop-on-multicast-udpconn-in-golang

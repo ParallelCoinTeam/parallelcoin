@@ -6,6 +6,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/fork"
+	"github.com/p9c/pod/pkg/forkhash"
 	"github.com/p9c/pod/pkg/logg"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/podcfg"
@@ -17,13 +19,12 @@ import (
 	"strings"
 	"time"
 	
-	"github.com/p9c/pod/pkg/forkhash"
 	"github.com/p9c/pod/pkg/util/routeable"
 	
 	"github.com/p9c/pod/cmd/node"
 	"github.com/p9c/pod/pkg/apputil"
 	"github.com/p9c/pod/pkg/blockchain"
-	"github.com/p9c/pod/pkg/comm/peer/connmgr"
+	"github.com/p9c/pod/pkg/connmgr"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/util/normalize"
@@ -34,7 +35,6 @@ import (
 	
 	"github.com/p9c/pod/cmd/node/state"
 	"github.com/p9c/pod/pkg/appdata"
-	"github.com/p9c/pod/pkg/fork"
 )
 
 const (

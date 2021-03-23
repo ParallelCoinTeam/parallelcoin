@@ -1,7 +1,6 @@
 package mining
 
 import (
-	"github.com/p9c/pod/pkg/mining/addresses"
 	"github.com/p9c/pod/pkg/podcfg"
 	"github.com/urfave/cli"
 	
@@ -14,19 +13,19 @@ import (
 // todo: make this remove ones that have been used or received a payment or mined
 func RefillMiningAddresses(w *wallet.Wallet, cfg *podcfg.Config, stateCfg *state.Config) {
 	if w == nil {
-		addresses.D.Ln("trying to refill without a wallet")
+		D.Ln("trying to refill without a wallet")
 		return
 	}
 	if cfg == nil {
-		addresses.D.Ln("config is empty")
+		D.Ln("config is empty")
 		return
 	}
 	var miningAddressLen int
 	if cfg.MiningAddrs != nil {
-		addresses.D.Ln("miningAddressLen", len(*cfg.MiningAddrs))
+		D.Ln("miningAddressLen", len(*cfg.MiningAddrs))
 		miningAddressLen = len(*cfg.MiningAddrs)
 	} else {
-		addresses.D.Ln("miningaddrs slice is missing")
+		D.Ln("miningaddrs slice is missing")
 		cfg.MiningAddrs = new(cli.StringSlice)
 	}
 	toMake := 99 - miningAddressLen
@@ -34,16 +33,16 @@ func RefillMiningAddresses(w *wallet.Wallet, cfg *podcfg.Config, stateCfg *state
 		toMake = 0
 	}
 	if toMake < 1 {
-		addresses.D.Ln("not making any new addresses")
+		D.Ln("not making any new addresses")
 		return
 	}
-	addresses.D.Ln("refilling mining addresses")
+	D.Ln("refilling mining addresses")
 	account, e := w.AccountNumber(
 		wm.KeyScopeBIP0044,
 		"default",
 	)
 	if e != nil {
-		addresses.E.Ln("error getting account number ", e)
+		E.Ln("error getting account number ", e)
 	}
 	for i := 0; i < toMake; i++ {
 		addr, e := w.NewAddress(
@@ -57,12 +56,12 @@ func RefillMiningAddresses(w *wallet.Wallet, cfg *podcfg.Config, stateCfg *state
 			// are ready to use
 			stateCfg.ActiveMiningAddrs = append(stateCfg.ActiveMiningAddrs, addr)
 		} else {
-			addresses.E.Ln("error adding new address ", e)
+			E.Ln("error adding new address ", e)
 		}
 	}
 	if podcfg.Save(cfg) {
-		addresses.D.Ln("saved config with new addresses")
+		D.Ln("saved config with new addresses")
 	} else {
-		addresses.E.Ln("error adding new addresses", e)
+		E.Ln("error adding new addresses", e)
 	}
 }

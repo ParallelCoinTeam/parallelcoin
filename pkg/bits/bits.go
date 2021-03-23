@@ -1,4 +1,4 @@
-package fork
+package bits
 
 import "math/big"
 

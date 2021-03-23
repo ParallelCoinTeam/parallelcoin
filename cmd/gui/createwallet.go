@@ -3,6 +3,7 @@ package gui
 import (
 	"fmt"
 	"github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/fork"
 	"github.com/p9c/pod/pkg/gui"
 	"github.com/p9c/pod/pkg/podcfg"
 	"github.com/p9c/pod/pkg/util/interrupt"
@@ -14,7 +15,6 @@ import (
 	l "gioui.org/layout"
 	"github.com/urfave/cli"
 	
-	"github.com/p9c/pod/pkg/fork"
 	"github.com/p9c/pod/pkg/wallet"
 )
 

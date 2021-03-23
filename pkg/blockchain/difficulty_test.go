@@ -1,6 +1,7 @@
 package blockchain
 
 import (
+	"github.com/p9c/pod/pkg/bits"
 	"math/big"
 	"testing"
 )
@@ -16,7 +17,7 @@ func TestBigToCompact(t *testing.T) {
 	}
 	for x, test := range tests {
 		n := big.NewInt(test.in)
-		r := BigToCompact(n)
+		r := bits.BigToCompact(n)
 		if r != test.out {
 			t.Errorf("TestBigToCompact test #%d failed: got %d want %d\n",
 				x, r, test.out)
@@ -34,7 +35,7 @@ func TestCompactToBig(t *testing.T) {
 		{10000000, 0},
 	}
 	for x, test := range tests {
-		n := CompactToBig(test.in)
+		n := bits.CompactToBig(test.in)
 		want := big.NewInt(test.out)
 		if n.Cmp(want) != 0 {
 			t.Errorf("TestCompactToBig test #%d failed: got %d want %d\n",

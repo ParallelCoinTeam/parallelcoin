@@ -9,7 +9,9 @@ import (
 	js "encoding/json"
 	"errors"
 	"fmt"
+	"github.com/p9c/pod/pkg/bits"
 	"github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/fork"
 	"github.com/p9c/pod/pkg/podcfg"
 	"io"
 	"io/ioutil"
@@ -33,11 +35,10 @@ import (
 	"github.com/p9c/pod/cmd/node/state"
 	"github.com/p9c/pod/pkg/blockchain"
 	"github.com/p9c/pod/pkg/chainhash"
-	p "github.com/p9c/pod/pkg/comm/peer"
 	"github.com/p9c/pod/pkg/database"
-	"github.com/p9c/pod/pkg/fork"
 	"github.com/p9c/pod/pkg/indexers"
 	"github.com/p9c/pod/pkg/mining"
+	p "github.com/p9c/pod/pkg/peer"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/txscript"
 	"github.com/p9c/pod/pkg/util"
@@ -800,7 +801,7 @@ func (state *GBTWorkState) BlockTemplateResult(useCoinbaseValue bool, submitOld 
 	//   Including MinTime -> time/ decrement
 	//
 	//   Omitting CoinbaseTxn -> coinbase, generation
-	targetDifficulty := fmt.Sprintf("%064x", fork.CompactToBig(header.Bits))
+	targetDifficulty := fmt.Sprintf("%064x", bits.CompactToBig(header.Bits))
 	templateID := EncodeTemplateID(state.prevHash, state.LastGenerated)
 	reply := btcjson.GetBlockTemplateResult{
 		Bits:         strconv.FormatInt(int64(header.Bits), 16),
@@ -991,7 +992,7 @@ func (state *GBTWorkState) UpdateBlockTemplate(
 		msgBlock = template.Block
 		targetDifficulty = fmt.Sprintf(
 			"%064x",
-			fork.CompactToBig(msgBlock.Header.Bits),
+			bits.CompactToBig(msgBlock.Header.Bits),
 		)
 		// Get the minimum allowed timestamp for the block based on the median timestamp of the last several blocks per
 		// the chain consensus rules.
@@ -1049,7 +1050,7 @@ func (state *GBTWorkState) UpdateBlockTemplate(
 		msgBlock = template.Block
 		targetDifficulty = fmt.Sprintf(
 			"%064x",
-			fork.CompactToBig(msgBlock.Header.Bits),
+			bits.CompactToBig(msgBlock.Header.Bits),
 		)
 		// Update the time of the block template to the current time while accounting for the median time of the past
 		// several blocks per the chain consensus rules.
@@ -1964,15 +1965,15 @@ func GenCertPair(certFile, keyFile string) (e error) {
 // GetDifficultyRatio returns the proof-of-work difficulty as a multiple of the
 // minimum difficulty using the passed bits field from the header of a block.
 func GetDifficultyRatio(
-	bits uint32, params *chaincfg.Params,
+	b uint32, params *chaincfg.Params,
 	algo int32,
 ) float64 {
 	// The minimum difficulty is the max possible proof-of-work limit bits converted
 	// back to a number. Note this is not the same as the proof of work limit
 	// directly because the block difficulty is encoded in a block with the compact
 	// form which loses precision.
-	max := fork.CompactToBig(0x1d00ffff)
-	target := fork.CompactToBig(bits)
+	max := bits.CompactToBig(0x1d00ffff)
+	target := bits.CompactToBig(b)
 	difficulty := new(big.Rat).SetFrac(max, target)
 	outString := difficulty.FloatString(8)
 	diff, e := strconv.ParseFloat(outString, 64)
