@@ -4,9 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/btcaddr"
 	
 	ec "github.com/p9c/pod/pkg/ecc"
-	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/wire"
 )
 
@@ -122,7 +122,7 @@ func p2pkSignatureScript(
 // arguably legal to not be able to sign any of the outputs, no error is returned.
 func signMultiSig(
 	tx *wire.MsgTx, idx int, subScript []byte, hashType SigHashType,
-	addresses []util.Address, nRequired int, kdb KeyDB,
+	addresses []btcaddr.Address, nRequired int, kdb KeyDB,
 ) (sig []byte, k bool) {
 	// We start with a single OP_FALSE to work around the (now standard) but in the reference implementation that causes
 	// a spurious pop at the end of OP_CHECKMULTISIG.
@@ -152,7 +152,7 @@ func sign(
 	subScript []byte, hashType SigHashType, kdb KeyDB, sdb ScriptDB,
 ) (
 	[]byte,
-	ScriptClass, []util.Address, int, error,
+	ScriptClass, []btcaddr.Address, int, error,
 ) {
 	class, addresses, nrequired, e := ExtractPkScriptAddrs(
 		subScript,
@@ -219,7 +219,7 @@ func sign(
 // match pkScript is an error and results in undefined behaviour.
 func mergeScripts(
 	chainParams *chaincfg.Params, tx *wire.MsgTx, idx int, pkScript []byte, class ScriptClass,
-	addresses []util.Address, nRequired int, sigScript, prevScript []byte,
+	addresses []btcaddr.Address, nRequired int, sigScript, prevScript []byte,
 ) []byte {
 	// TODO: the scripthash and multisig paths here are overly inefficient in that they will recompute already known data.
 	//  some internal refactoring could probably make this avoid needless extra calculations.
@@ -275,7 +275,7 @@ func mergeScripts(
 // this function is internal only we assume that the arguments have come from other functions internally and thus are
 // all consistent with each other, behaviour is undefined if this contract is broken.
 func mergeMultiSig(
-	tx *wire.MsgTx, idx int, addresses []util.Address, nRequired int, pkScript, sigScript,
+	tx *wire.MsgTx, idx int, addresses []btcaddr.Address, nRequired int, pkScript, sigScript,
 	prevScript []byte,
 ) []byte {
 	// This is an internal only function and we already parsed this script as ok for multisig (this is how we got here),
@@ -324,7 +324,7 @@ sigLoop:
 		hash := calcSignatureHash(pkPops, hashType, tx, idx)
 		for _, addr := range addresses {
 			// All multisig addresses should be pubkey addresses it is an error to call this internal function with bad input.
-			pkaddr := addr.(*util.AddressPubKey)
+			pkaddr := addr.(*btcaddr.PubKey)
 			pubKey := pkaddr.PubKey()
 			// If it matches we put it in the map. We only can take one signature per public key so if we already have one, we
 			// can throw this away.
@@ -363,14 +363,14 @@ sigLoop:
 // KeyDB is an interface type provided to SignTxOutput, it encapsulates any user state required to get the private keys
 // for an address.
 type KeyDB interface {
-	GetKey(util.Address) (*ec.PrivateKey, bool, error)
+	GetKey(btcaddr.Address) (*ec.PrivateKey, bool, error)
 }
 
 // KeyClosure implements KeyDB with a closure.
-type KeyClosure func(util.Address) (*ec.PrivateKey, bool, error)
+type KeyClosure func(btcaddr.Address) (*ec.PrivateKey, bool, error)
 
 // GetKey implements KeyDB by returning the result of calling the closure.
-func (kc KeyClosure) GetKey(address util.Address) (
+func (kc KeyClosure) GetKey(address btcaddr.Address) (
 	*ec.PrivateKey,
 	bool, error,
 ) {
@@ -380,14 +380,14 @@ func (kc KeyClosure) GetKey(address util.Address) (
 // ScriptDB is an interface type provided to SignTxOutput, it encapsulates any user state required to get the scripts
 // for an pay-to-script-hash address.
 type ScriptDB interface {
-	GetScript(util.Address) ([]byte, error)
+	GetScript(btcaddr.Address) ([]byte, error)
 }
 
 // ScriptClosure implements ScriptDB with a closure.
-type ScriptClosure func(util.Address) ([]byte, error)
+type ScriptClosure func(btcaddr.Address) ([]byte, error)
 
 // GetScript implements ScriptDB by returning the result of calling the closure.
-func (sc ScriptClosure) GetScript(address util.Address) ([]byte, error) {
+func (sc ScriptClosure) GetScript(address btcaddr.Address) ([]byte, error) {
 	return sc(address)
 }
 

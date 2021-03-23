@@ -38,7 +38,7 @@ type checkCFHTestCase struct {
 }
 type resolveCFHTestCase struct {
 	name        string
-	block       *wire.MsgBlock
+	block       *wire.Block
 	idx         int
 	peerFilters map[string]*gcs.Filter
 	badPeers    []string
@@ -94,7 +94,7 @@ var (
 	}
 	// For the purpose of the cfheader mismatch test, we actually only need to have the scripts of each transaction
 	// present.
-	block = &wire.MsgBlock{
+	block = &wire.Block{
 		Transactions: []*wire.MsgTx{
 			{
 				TxOut: []*wire.TxOut{

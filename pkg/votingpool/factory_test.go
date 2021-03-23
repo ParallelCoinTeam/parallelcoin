@@ -3,6 +3,8 @@ package votingpool
 // Helpers to create parameterized objects to use in tests.
 import (
 	"bytes"
+	amount2 "github.com/p9c/pod/pkg/amt"
+	"github.com/p9c/pod/pkg/btcaddr"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -13,9 +15,8 @@ import (
 	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/txscript"
-	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/hdkeychain"
-	"github.com/p9c/pod/pkg/wallet/waddrmgr"
+	"github.com/p9c/pod/pkg/waddrmgr"
 	"github.com/p9c/pod/pkg/walletdb"
 	"github.com/p9c/pod/pkg/wire"
 	"github.com/p9c/pod/pkg/wtxmgr"
@@ -45,7 +46,7 @@ func createWithdrawalTx(t *testing.T, dbtx walletdb.ReadWriteTx, pool *Pool, inp
 	}
 	for i, amount := range outputAmounts {
 		request := TstNewOutputRequest(
-			t, uint32(i), "34eVkREKgvvGASZW7hkgE2uNc1yycntMK6", util.Amount(amount), net)
+			t, uint32(i), "34eVkREKgvvGASZW7hkgE2uNc1yycntMK6", amount2.Amount(amount), net)
 		tx.addOutput(request)
 	}
 	return tx
@@ -225,7 +226,7 @@ func TstCreateSeriesCredits(t *testing.T, dbtx walletdb.ReadWriteTx, pool *Pool,
 			BlockMeta: wtxmgr.BlockMeta{
 				Block: wtxmgr.Block{Height: TstInputsBlock},
 			},
-			Amount:   util.Amount(msgTx.TxOut[i].Value),
+			Amount:   amount2.Amount(msgTx.TxOut[i].Value),
 			PkScript: msgTx.TxOut[i].PkScript,
 		}
 		credits[i] = NewCredit(c, *addr)
@@ -272,7 +273,7 @@ func TstCreateCreditsOnStore(t *testing.T, dbtx walletdb.ReadWriteTx, s *wtxmgr.
 				Index: uint32(i),
 			},
 			BlockMeta: *meta,
-			Amount:    util.Amount(msgTx.TxOut[i].Value),
+			Amount:    amount2.Amount(msgTx.TxOut[i].Value),
 			PkScript:  msgTx.TxOut[i].PkScript,
 		}
 	}
@@ -354,9 +355,9 @@ func TstCreateTxStore(t *testing.T, db walletdb.DB) *wtxmgr.Store {
 	}
 	return store
 }
-func TstNewOutputRequest(t *testing.T, transaction uint32, address string, amount util.Amount,
+func TstNewOutputRequest(t *testing.T, transaction uint32, address string, amount amount2.Amount,
 	net *chaincfg.Params) OutputRequest {
-	addr, e := util.DecodeAddress(address, net)
+	addr, e := address.DecodeAddress(address, net)
 	if e != nil  {
 		t.Fatalf("Unable to decode address %s", address)
 	}
@@ -403,8 +404,8 @@ func TstNewChangeAddress(t *testing.T, p *Pool, seriesID uint32, idx Index) (add
 	}
 	return addr
 }
-func TstConstantFee(fee util.Amount) func() util.Amount {
-	return func() util.Amount { return fee }
+func TstConstantFee(fee amount2.Amount) func() amount2.Amount {
+	return func() amount2.Amount { return fee }
 }
 func createAndFulfillWithdrawalRequests(t *testing.T, dbtx walletdb.ReadWriteTx, pool *Pool, roundID uint32) withdrawalInfo {
 	params := pool.Manager().ChainParams()
@@ -414,7 +415,7 @@ func createAndFulfillWithdrawalRequests(t *testing.T, dbtx walletdb.ReadWriteTx,
 		TstNewOutputRequest(t, 2, "3PbExiaztsSYgh6zeMswC49hLUwhTQ86XG", 2e6, params),
 	}
 	changeStart := TstNewChangeAddress(t, pool, seriesID, 0)
-	dustThreshold := util.Amount(1e4)
+	dustThreshold := amount2.Amount(1e4)
 	startAddr := TstNewWithdrawalAddress(t, dbtx, pool, seriesID, 1, 0)
 	lastSeriesID := seriesID
 	w := newWithdrawal(roundID, requests, eligible, *changeStart)

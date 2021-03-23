@@ -12,7 +12,7 @@ import (
 	"github.com/p9c/pod/pkg/util/qu"
 	
 	"github.com/p9c/pod/pkg/util/prompt"
-	"github.com/p9c/pod/pkg/wallet/waddrmgr"
+	"github.com/p9c/pod/pkg/waddrmgr"
 	"github.com/p9c/pod/pkg/walletdb"
 )
 

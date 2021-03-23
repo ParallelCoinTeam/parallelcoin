@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"fmt"
+	"github.com/p9c/pod/pkg/amt"
+	"github.com/p9c/pod/pkg/btcaddr"
 	"math"
 	"reflect"
 	"sort"
@@ -11,8 +13,7 @@ import (
 	"time"
 	
 	"github.com/p9c/pod/pkg/txscript"
-	"github.com/p9c/pod/pkg/util"
-	"github.com/p9c/pod/pkg/wallet/waddrmgr"
+	"github.com/p9c/pod/pkg/waddrmgr"
 	"github.com/p9c/pod/pkg/walletdb"
 	"github.com/p9c/pod/pkg/wire"
 	"github.com/p9c/pod/pkg/wtxmgr"
@@ -42,8 +43,8 @@ type (
 	// OutputRequest represents one of the outputs (address/amount) requested by a withdrawal, and includes information
 	// about the user's outbailment request.
 	OutputRequest struct {
-		Address  util.Address
-		Amount   util.Amount
+		Address  btcaddr.Address
+		Amount   amt.Amount
 		PkScript []byte
 		// The notary server that received the outbailment request.
 		Server string
@@ -64,7 +65,7 @@ type (
 	OutBailmentOutpoint struct {
 		ntxid  Ntxid
 		index  uint32
-		amount util.Amount
+		amount amt.Amount
 	}
 	// changeAwareTx is just a wrapper around wire.MsgTx that knows about its change output, if any.
 	changeAwareTx struct {
@@ -77,7 +78,7 @@ type (
 	WithdrawalStatus struct {
 		nextInputAddr  WithdrawalAddress
 		nextChangeAddr ChangeAddress
-		fees           util.Amount
+		fees           amt.Amount
 		outputs        map[OutBailmentID]*WithdrawalOutput
 		sigs           map[Ntxid]TxSigs
 		transactions   map[Ntxid]changeAwareTx
@@ -89,7 +90,7 @@ type (
 		startAddress  WithdrawalAddress
 		changeStart   ChangeAddress
 		lastSeriesID  uint32
-		dustThreshold util.Amount
+		dustThreshold amt.Amount
 		status        WithdrawalStatus
 	}
 	// TxSigs is list of raw signatures (one for every pubkey in the multi-sig script) for a given transaction input.
@@ -152,7 +153,7 @@ func (s *WithdrawalStatus) Sigs() map[Ntxid]TxSigs {
 }
 
 // Fees returns the total amount of network fees included in all transactions generated as part of a withdrawal.
-func (s *WithdrawalStatus) Fees() util.Amount {
+func (s *WithdrawalStatus) Fees() amt.Amount {
 	return s.fees
 }
 
@@ -210,7 +211,7 @@ func (o *WithdrawalOutput) Outpoints() []OutBailmentOutpoint {
 }
 
 // Amount returns the amount (in satoshis) in this OutBailmentOutpoint.
-func (o OutBailmentOutpoint) Amount() util.Amount {
+func (o OutBailmentOutpoint) Amount() amt.Amount {
 	return o.amount
 }
 
@@ -234,7 +235,7 @@ type withdrawalTxOut struct {
 	// amount being the remainder of the originally requested amount minus the amounts fulfilled by other
 	// withdrawalTxOut. The original OutputRequest, if needed, can be obtained from WithdrawalStatus.outputs.
 	request OutputRequest
-	amount  util.Amount
+	amount  amt.Amount
 }
 
 // String makes withdrawalTxOut satisfy the Stringer interface.
@@ -249,7 +250,7 @@ func (o *withdrawalTxOut) pkScript() []byte {
 type withdrawalTx struct {
 	inputs  []Credit
 	outputs []*withdrawalTxOut
-	fee     util.Amount
+	fee     amt.Amount
 	// changeOutput holds information about the change for this transaction.
 	changeOutput *wire.TxOut
 	// calculateSize returns the estimated serialized size (in bytes) of this tx. See calculateTxSize() for details on
@@ -257,7 +258,7 @@ type withdrawalTx struct {
 	calculateSize func() int
 	// calculateFee calculates the expected network fees for this tx. We use a struct field instead of a method so that
 	// it can be replaced in tests.
-	calculateFee func() util.Amount
+	calculateFee func() amt.Amount
 }
 
 // newWithdrawalTx creates a new withdrawalTx and calls setOptions()
@@ -265,8 +266,8 @@ type withdrawalTx struct {
 func newWithdrawalTx(setOptions func(tx *withdrawalTx)) *withdrawalTx {
 	tx := &withdrawalTx{}
 	tx.calculateSize = func() int { return calculateTxSize(tx) }
-	tx.calculateFee = func() util.Amount {
-		return util.Amount(1+tx.calculateSize()/1000) * feeIncrement
+	tx.calculateFee = func() amt.Amount {
+		return amt.Amount(1+tx.calculateSize()/1000) * feeIncrement
 	}
 	setOptions(tx)
 	return tx
@@ -290,7 +291,7 @@ func (tx *withdrawalTx) isTooBig() bool {
 }
 
 // inputTotal returns the sum amount of all inputs in this tx.
-func (tx *withdrawalTx) inputTotal() (total util.Amount) {
+func (tx *withdrawalTx) inputTotal() (total amt.Amount) {
 	for _, input := range tx.inputs {
 		total += input.Amount
 	}
@@ -299,7 +300,7 @@ func (tx *withdrawalTx) inputTotal() (total util.Amount) {
 
 // outputTotal returns the sum amount of all outputs in this tx. It does not include the amount for the change output,
 // in case the tx has one.
-func (tx *withdrawalTx) outputTotal() (total util.Amount) {
+func (tx *withdrawalTx) outputTotal() (total amt.Amount) {
 	for _, output := range tx.outputs {
 		total += output.amount
 	}
@@ -437,7 +438,7 @@ func (p *Pool) StartWithdrawal(
 	ns walletdb.ReadWriteBucket,
 	addrmgrNs walletdb.ReadBucket, roundID uint32, requests []OutputRequest,
 	startAddress WithdrawalAddress, lastSeriesID uint32, changeStart ChangeAddress,
-	txStore *wtxmgr.Store, txmgrNs walletdb.ReadBucket, chainHeight int32, dustThreshold util.Amount,
+	txStore *wtxmgr.Store, txmgrNs walletdb.ReadBucket, chainHeight int32, dustThreshold amt.Amount,
 ) (
 	*WithdrawalStatus, error,
 ) {
@@ -596,7 +597,7 @@ func (w *withdrawal) finalizeCurrentTx() (e error) {
 		// different amount from the original one.
 		outputStatus := w.status.outputs[txOut.request.outBailmentID()]
 		origRequest := outputStatus.request
-		amtFulfilled := util.Amount(0)
+		amtFulfilled := amt.Amount(0)
 		for _, outpoint := range outputStatus.outpoints {
 			amtFulfilled += outpoint.amount
 		}
@@ -617,11 +618,11 @@ func (w *withdrawal) finalizeCurrentTx() (e error) {
 // amount order) if we don't have enough to fulfill them all. For every dropped output request we update its entry in
 // w.status.outputs with the status string set to statusPartial.
 func (w *withdrawal) maybeDropRequests() {
-	inputAmount := util.Amount(0)
+	inputAmount := amt.Amount(0)
 	for _, input := range w.eligibleInputs {
 		inputAmount += input.Amount
 	}
-	outputAmount := util.Amount(0)
+	outputAmount := amt.Amount(0)
 	for _, request := range w.pendingRequests {
 		outputAmount += request.Amount
 	}
@@ -726,7 +727,7 @@ func (s *WithdrawalStatus) updateStatusFor(tx *withdrawalTx) {
 // of the items does not matter.
 func (wi *withdrawalInfo) match(
 	requests []OutputRequest, startAddress WithdrawalAddress,
-	lastSeriesID uint32, changeStart ChangeAddress, dustThreshold util.Amount,
+	lastSeriesID uint32, changeStart ChangeAddress, dustThreshold amt.Amount,
 ) bool {
 	// Use reflect.DeepEqual to compare changeStart and startAddress as they're structs that contain pointers and we
 	// want to compare their content and not their address.
@@ -779,7 +780,7 @@ func (wi *withdrawalInfo) match(
 func getWithdrawalStatus(
 	p *Pool, ns, addrmgrNs walletdb.ReadBucket, roundID uint32, requests []OutputRequest,
 	startAddress WithdrawalAddress, lastSeriesID uint32, changeStart ChangeAddress,
-	dustThreshold util.Amount,
+	dustThreshold amt.Amount,
 ) (*WithdrawalStatus, error) {
 	serialized := getWithdrawal(ns, p.ID, roundID)
 	if bytes.Equal(serialized, []byte{}) {
@@ -889,7 +890,7 @@ func SignTx(
 }
 
 // getRedeemScript returns the redeem script for the given P2SH address. It must be called with the manager unlocked.
-func getRedeemScript(mgr *waddrmgr.Manager, addrmgrNs walletdb.ReadBucket, addr *util.AddressScriptHash) (
+func getRedeemScript(mgr *waddrmgr.Manager, addrmgrNs walletdb.ReadBucket, addr *btcaddr.ScriptHash) (
 	[]byte,
 	error,
 ) {
@@ -914,7 +915,7 @@ func signMultiSigUTXO(
 	pkScript []byte,
 	sigs []RawSig,
 ) (e error) {
-	var addresses []util.Address
+	var addresses []btcaddr.Address
 	var class txscript.ScriptClass
 	class, addresses, _, e = txscript.ExtractPkScriptAddrs(pkScript, mgr.ChainParams())
 	if e != nil {
@@ -924,7 +925,7 @@ func signMultiSigUTXO(
 		return newError(ErrTxSigning, fmt.Sprintf("pkScript is not P2SH: %s", class), nil)
 	}
 	var redeemScript []byte
-	redeemScript, e = getRedeemScript(mgr, addrmgrNs, addresses[0].(*util.AddressScriptHash))
+	redeemScript, e = getRedeemScript(mgr, addrmgrNs, addresses[0].(*btcaddr.ScriptHash))
 	if e != nil {
 		return newError(ErrTxSigning, "unable to retrieve redeem script", e)
 	}

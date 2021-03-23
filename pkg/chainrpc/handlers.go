@@ -7,6 +7,9 @@ import (
 	"errors"
 	"fmt"
 	"github.com/p9c/pod/cmd/node/version"
+	"github.com/p9c/pod/pkg/amt"
+	block2 "github.com/p9c/pod/pkg/block"
+	"github.com/p9c/pod/pkg/btcaddr"
 	"github.com/p9c/pod/pkg/fork"
 	"github.com/p9c/pod/pkg/logg"
 	"math/big"
@@ -19,10 +22,10 @@ import (
 	
 	"github.com/p9c/pod/cmd/node/mempool"
 	"github.com/p9c/pod/pkg/blockchain"
+	"github.com/p9c/pod/pkg/btcjson"
 	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/database"
 	ec "github.com/p9c/pod/pkg/ecc"
-	"github.com/p9c/pod/pkg/btcjson"
 	"github.com/p9c/pod/pkg/txscript"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/interrupt"
@@ -130,14 +133,14 @@ func HandleCreateRawTransaction(
 	params := s.Cfg.ChainParams
 	for encodedAddr, amount := range c.Amounts {
 		// Ensure amount is in the valid range for monetary amounts.
-		if amount <= 0 || amount > util.MaxSatoshi.ToDUO() {
+		if amount <= 0 || amount > amt.MaxSatoshi.ToDUO() {
 			return nil, &btcjson.RPCError{
 				Code:    btcjson.ErrRPCType,
 				Message: "Invalid amount",
 			}
 		}
 		// Decode the provided address.
-		addr, e := util.DecodeAddress(encodedAddr, params)
+		addr, e := btcaddr.Decode(encodedAddr, params)
 		if e != nil {
 			E.Ln(e)
 			return nil, &btcjson.RPCError{
@@ -148,8 +151,8 @@ func HandleCreateRawTransaction(
 		// Ensure the address is one of the supported types and that the network encoded with the address matches the
 		// network the server is currently on.
 		switch addr.(type) {
-		case *util.AddressPubKeyHash:
-		case *util.AddressScriptHash:
+		case *btcaddr.PubKeyHash:
+		case *btcaddr.ScriptHash:
 		default:
 			return nil, &btcjson.RPCError{
 				Code:    btcjson.ErrRPCInvalidAddressOrKey,
@@ -171,7 +174,7 @@ func HandleCreateRawTransaction(
 			return nil, InternalRPCError(e.Error(), context)
 		}
 		// Convert the amount to satoshi.
-		satoshi, e := util.NewAmount(amount)
+		satoshi, e := amt.NewAmount(amount)
 		if e != nil {
 			E.Ln(e)
 			context := "Failed to convert amount"
@@ -292,7 +295,7 @@ func HandleDecodeScript(
 		addresses[i] = addr.EncodeAddress()
 	}
 	// Convert the script itself to a pay-to-script-hash address.
-	p2sh, e := util.NewAddressScriptHash(script, s.Cfg.ChainParams)
+	p2sh, e := btcaddr.NewScriptHash(script, s.Cfg.ChainParams)
 	if e != nil {
 		E.Ln(e)
 		context := "Failed to convert script to pay-to-script-hash"
@@ -561,7 +564,7 @@ func HandleGetBlock(s *Server, cmd interface{}, closeChan qu.C) (interface{}, er
 		return hex.EncodeToString(blkBytes), nil
 	}
 	// The verbose flag is set, so generate the JSON object and return it. Deserialize the block.
-	blk, e := util.NewBlockFromBytes(blkBytes)
+	blk, e := block2.NewFromBytes(blkBytes)
 	if e != nil {
 		context := "Failed to deserialize block"
 		return nil, InternalRPCError(e.Error(), context)
@@ -585,7 +588,7 @@ func HandleGetBlock(s *Server, cmd interface{}, closeChan qu.C) (interface{}, er
 		nextHashString = nextHash.String()
 	}
 	params := s.Cfg.ChainParams
-	blockHeader := &blk.MsgBlock().Header
+	blockHeader := &blk.WireBlock().Header
 	algoname := fork.GetAlgoName(blockHeader.Version, blockHeight)
 	a := fork.GetAlgoVer(algoname, blockHeight)
 	algoid := fork.GetAlgoID(algoname, blockHeight)
@@ -595,7 +598,7 @@ func HandleGetBlock(s *Server, cmd interface{}, closeChan qu.C) (interface{}, er
 		VersionHex:    fmt.Sprintf("%08x", blockHeader.Version),
 		PowAlgoID:     algoid,
 		PowAlgo:       algoname,
-		PowHash:       blk.MsgBlock().BlockHashWithAlgos(blockHeight).String(),
+		PowHash:       blk.WireBlock().BlockHashWithAlgos(blockHeight).String(),
 		MerkleRoot:    blockHeader.MerkleRoot.String(),
 		PreviousHash:  blockHeader.PrevBlock.String(),
 		Nonce:         blockHeader.Nonce,
@@ -604,7 +607,7 @@ func HandleGetBlock(s *Server, cmd interface{}, closeChan qu.C) (interface{}, er
 		Height:        int64(blockHeight),
 		TxNum:         len(blk.Transactions()),
 		Size:          int32(len(blkBytes)),
-		StrippedSize:  int32(blk.MsgBlock().SerializeSizeStripped()),
+		StrippedSize:  int32(blk.WireBlock().SerializeSizeStripped()),
 		Weight:        int32(blockchain.GetBlockWeight(blk)),
 		Bits:          strconv.FormatInt(int64(blockHeader.Bits), 16),
 		Difficulty:    GetDifficultyRatio(blockHeader.Bits, params, a),
@@ -1009,17 +1012,17 @@ func HandleGetBlockTemplateProposal(
 			),
 		}
 	}
-	var msgBlock wire.MsgBlock
+	var msgBlock wire.Block
 	if e := msgBlock.Deserialize(bytes.NewReader(dataBytes)); E.Chk(e) {
 		return nil, &btcjson.RPCError{
 			Code:    btcjson.ErrRPCDeserialization,
 			Message: "block decode failed: " + e.Error(),
 		}
 	}
-	block := util.NewBlock(&msgBlock)
+	block := block2.NewBlock(&msgBlock)
 	// Ensure the block is building from the expected previous block.
 	expectedPrevHash := s.Cfg.Chain.BestSnapshot().Hash
-	prevHash := &block.MsgBlock().Header.PrevBlock
+	prevHash := &block.WireBlock().Header.PrevBlock
 	if !expectedPrevHash.IsEqual(prevHash) {
 		return "bad-prevblk", nil
 	}
@@ -1250,7 +1253,7 @@ func HandleGetDifficulty(s *Server, cmd interface{}, closeChan qu.C) (interface{
 		E.Ln("ERROR", e)
 		
 	}
-	var algo = prev.MsgBlock().Header.Version
+	var algo = prev.WireBlock().Header.Version
 	if algo != 514 {
 		algo = 2
 	}
@@ -1258,8 +1261,8 @@ func HandleGetDifficulty(s *Server, cmd interface{}, closeChan qu.C) (interface{
 	if c.Algo == fork.Scrypt && algo != 514 {
 		algo = 514
 		for {
-			if prev.MsgBlock().Header.Version != 514 {
-				ph := prev.MsgBlock().Header.PrevBlock
+			if prev.WireBlock().Header.Version != 514 {
+				ph := prev.WireBlock().Header.PrevBlock
 				prev, e = s.Cfg.Chain.BlockByHash(&ph)
 				if e != nil {
 					E.Ln("ERROR", e)
@@ -1267,15 +1270,15 @@ func HandleGetDifficulty(s *Server, cmd interface{}, closeChan qu.C) (interface{
 				}
 				continue
 			}
-			bestbits = prev.MsgBlock().Header.Bits
+			bestbits = prev.WireBlock().Header.Bits
 			break
 		}
 	}
 	if c.Algo == fork.SHA256d && algo != 2 {
 		algo = 2
 		for {
-			if prev.MsgBlock().Header.Version == 514 {
-				ph := prev.MsgBlock().Header.PrevBlock
+			if prev.WireBlock().Header.Version == 514 {
+				ph := prev.WireBlock().Header.PrevBlock
 				prev, e = s.Cfg.Chain.BlockByHash(&ph)
 				if e != nil {
 					E.Ln("ERROR", e)
@@ -1283,7 +1286,7 @@ func HandleGetDifficulty(s *Server, cmd interface{}, closeChan qu.C) (interface{
 				}
 				continue
 			}
-			bestbits = prev.MsgBlock().Header.Bits
+			bestbits = prev.WireBlock().Header.Bits
 			break
 		}
 	}
@@ -2057,7 +2060,7 @@ func HandleGetTxOut(s *Server, cmd interface{}, closeChan qu.C) (interface{}, er
 	txOutReply := &btcjson.GetTxOutResult{
 		BestBlock:     bestBlockHash,
 		Confirmations: int64(confirmations),
-		Value:         util.Amount(value).ToDUO(),
+		Value:         amt.Amount(value).ToDUO(),
 		ScriptPubKey: btcjson.ScriptPubKeyResult{
 			Asm:       disbuf,
 			Hex:       hex.EncodeToString(pkScript),
@@ -2264,7 +2267,7 @@ func HandleSearchRawTransactions(s *Server, cmd interface{}, closeChan qu.C) (in
 	}
 	// Attempt to decode the supplied address.
 	params := s.Cfg.ChainParams
-	addr, e := util.DecodeAddress(c.Address, params)
+	addr, e := btcaddr.Decode(c.Address, params)
 	if e != nil {
 		return nil, &btcjson.RPCError{
 			Code:    btcjson.ErrRPCInvalidAddressOrKey,
@@ -2695,7 +2698,7 @@ func HandleSubmitBlock(s *Server, cmd interface{}, closeChan qu.C) (interface{},
 	if e != nil {
 		return nil, DecodeHexError(hexStr)
 	}
-	block, e := util.NewBlockFromBytes(serializedBlock)
+	block, e := block2.NewFromBytes(serializedBlock)
 	if e != nil {
 		return nil, &btcjson.RPCError{
 			Code:    btcjson.ErrRPCDeserialization,
@@ -2747,7 +2750,7 @@ func HandleValidateAddress(s *Server, cmd interface{}, closeChan qu.C) (interfac
 		}
 	}
 	result := btcjson.ValidateAddressChainResult{}
-	addr, e := util.DecodeAddress(c.Address, s.Cfg.ChainParams)
+	addr, e := btcaddr.Decode(c.Address, s.Cfg.ChainParams)
 	if e != nil {
 		// Return the default value (false) for IsValid.
 		return result, nil
@@ -2824,7 +2827,7 @@ func HandleVerifyMessage(s *Server, cmd interface{}, closeChan qu.C) (interface{
 	}
 	// Decode the provided address.
 	params := s.Cfg.ChainParams
-	addr, e := util.DecodeAddress(c.Address, params)
+	addr, e := btcaddr.Decode(c.Address, params)
 	if e != nil {
 		return nil, &btcjson.RPCError{
 			Code:    btcjson.ErrRPCInvalidAddressOrKey,
@@ -2832,7 +2835,7 @@ func HandleVerifyMessage(s *Server, cmd interface{}, closeChan qu.C) (interface{
 		}
 	}
 	// Only P2PKH addresses are valid for signing.
-	if _, ok := addr.(*util.AddressPubKeyHash); !ok {
+	if _, ok := addr.(*btcaddr.PubKeyHash); !ok {
 		return nil, &btcjson.RPCError{
 			Code:    btcjson.ErrRPCType,
 			Message: "Address is not a pay-to-pubkey-hash address",
@@ -2874,7 +2877,7 @@ func HandleVerifyMessage(s *Server, cmd interface{}, closeChan qu.C) (interface{
 	} else {
 		serializedPK = pk.SerializeUncompressed()
 	}
-	address, e := util.NewAddressPubKey(serializedPK, params)
+	address, e := btcaddr.NewPubKey(serializedPK, params)
 	if e != nil {
 		// Again mirror Bitcoin Core behavior, which treats error in public key reconstruction as invalid signature.
 		return false, nil

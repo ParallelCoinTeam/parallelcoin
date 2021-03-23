@@ -2,12 +2,12 @@ package wallet
 
 import (
 	"bytes"
-	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/btcaddr"
 	"strings"
 	
-	"github.com/p9c/pod/pkg/txscript"
 	"github.com/p9c/pod/pkg/chainclient"
-	wm "github.com/p9c/pod/pkg/wallet/waddrmgr"
+	"github.com/p9c/pod/pkg/txscript"
+	wm "github.com/p9c/pod/pkg/waddrmgr"
 	"github.com/p9c/pod/pkg/walletdb"
 	tm "github.com/p9c/pod/pkg/wtxmgr"
 )
@@ -250,7 +250,7 @@ func (w *Wallet) addRelevantTx(dbtx walletdb.ReadWriteTx, rec *tm.TxRecord, bloc
 	}
 	// Chk every output to determine whether it is controlled by a wallet key. If so, mark the output as a credit.
 	for i, output := range rec.MsgTx.TxOut {
-		var addrs []util.Address
+		var addrs []btcaddr.Address
 		_, addrs, _, e = txscript.ExtractPkScriptAddrs(
 			output.PkScript,
 			w.chainParams,

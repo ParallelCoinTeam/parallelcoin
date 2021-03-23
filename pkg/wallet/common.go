@@ -1,10 +1,11 @@
 package wallet
 
 import (
+	"github.com/p9c/pod/pkg/amt"
+	"github.com/p9c/pod/pkg/btcaddr"
 	"time"
 	
 	"github.com/p9c/pod/pkg/chainhash"
-	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/wire"
 )
 
@@ -65,9 +66,9 @@ type P2SHMultiSigOutput struct {
 	//  improves consistency. Only not done now because wtxmgr APIs don't support an efficient way of fetching other
 	//  Transactionoutput data together with the rest of the multisig info.
 	OutPoint        wire.OutPoint
-	OutputAmount    util.Amount
+	OutputAmount    amt.Amount
 	ContainingBlock BlockIdentity
-	P2SHAddress     *util.AddressScriptHash
+	P2SHAddress     *btcaddr.ScriptHash
 	RedeemScript    []byte
 	M, N            uint8           // M of N signatures required to redeem
 	Redeemer        *OutputRedeemer // nil unless spent

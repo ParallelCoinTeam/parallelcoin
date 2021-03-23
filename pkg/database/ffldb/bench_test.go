@@ -1,13 +1,13 @@
 package ffldb
 
 import (
+	block2 "github.com/p9c/pod/pkg/block"
 	"os"
 	"path/filepath"
 	"testing"
 	
-	chaincfg "github.com/p9c/pod/pkg/chaincfg"
-	database "github.com/p9c/pod/pkg/database"
-	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/database"
 )
 
 // BenchmarkBlockHeader benchmarks how long it takes to load the mainnet genesis block header.
@@ -28,7 +28,7 @@ func BenchmarkBlockHeader(b *testing.B) {
 		}
 	}()
 	e = db.Update(func(tx database.Tx) (e error) {
-		block := util.NewBlock(chaincfg.MainNetParams.GenesisBlock)
+		block := block2.NewBlock(chaincfg.MainNetParams.GenesisBlock)
 		return tx.StoreBlock(block)
 	})
 	if e != nil  {
@@ -71,7 +71,7 @@ func BenchmarkBlock(b *testing.B) {
 		}
 	}()
 	e = db.Update(func(tx database.Tx) (e error) {
-		block := util.NewBlock(chaincfg.MainNetParams.GenesisBlock)
+		block := block2.NewBlock(chaincfg.MainNetParams.GenesisBlock)
 		return tx.StoreBlock(block)
 	})
 	if e != nil  {

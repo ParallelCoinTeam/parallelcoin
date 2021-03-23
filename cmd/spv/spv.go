@@ -3,6 +3,7 @@ package spv
 import (
 	"errors"
 	"fmt"
+	"github.com/p9c/pod/pkg/amt"
 	"net"
 	"strconv"
 	"sync"
@@ -19,10 +20,9 @@ import (
 	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/connmgr"
-	"github.com/p9c/pod/pkg/walletdb"
 	"github.com/p9c/pod/pkg/peer"
-	"github.com/p9c/pod/pkg/util"
-	"github.com/p9c/pod/pkg/wallet/waddrmgr"
+	"github.com/p9c/pod/pkg/waddrmgr"
+	"github.com/p9c/pod/pkg/walletdb"
 	"github.com/p9c/pod/pkg/wire"
 )
 
@@ -711,10 +711,10 @@ func (sp *ServerPeer) OnAddr(_ *peer.Peer, msg *wire.MsgAddr) {
 // disconnected if an invalid fee filter value is provided.
 func (sp *ServerPeer) OnFeeFilter(_ *peer.Peer, msg *wire.MsgFeeFilter) {
 	// Chk that the passed minimum fee is a valid amount.
-	if msg.MinFee < 0 || msg.MinFee > int64(util.MaxSatoshi) {
+	if msg.MinFee < 0 || msg.MinFee > int64(amt.MaxSatoshi) {
 		D.F(
 			"peer %v sent an invalid feefilter '%v' -- disconnecting %s",
-			sp, util.Amount(msg.MinFee),
+			sp, amt.Amount(msg.MinFee),
 		)
 		sp.Disconnect()
 		return

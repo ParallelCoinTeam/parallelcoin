@@ -2,14 +2,14 @@ package wtxmgr
 
 import (
 	"bytes"
+	amount2 "github.com/p9c/pod/pkg/amt"
 	"github.com/p9c/pod/pkg/chaincfg"
 	"time"
 	
 	"github.com/p9c/pod/pkg/blockchain"
 	"github.com/p9c/pod/pkg/chainhash"
-	"github.com/p9c/pod/pkg/wire"
 	"github.com/p9c/pod/pkg/walletdb"
-	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 type (
@@ -46,7 +46,7 @@ type (
 	debit struct {
 		txHash chainhash.Hash
 		index  uint32
-		amount util.Amount
+		amount amount2.Amount
 		spends indexedIncidence
 	}
 	// credit describes a transaction output which was or is spendable by
@@ -54,7 +54,7 @@ type (
 	credit struct {
 		outPoint wire.OutPoint
 		block    Block
-		amount   util.Amount
+		amount   amount2.Amount
 		change   bool
 		spentBy  indexedIncidence // Index == ^uint32(0) if unspent
 	}
@@ -70,7 +70,7 @@ type (
 	Credit struct {
 		wire.OutPoint
 		BlockMeta
-		Amount       util.Amount
+		Amount       amount2.Amount
 		PkScript     []byte
 		Received     time.Time
 		FromCoinBase bool
@@ -356,14 +356,14 @@ func (s *Store) addCredit(
 		if existsRawUnspent(ns, k) != nil {
 			return false, nil
 		}
-		v := valueUnminedCredit(util.Amount(rec.MsgTx.TxOut[index].Value), change)
+		v := valueUnminedCredit(amount2.Amount(rec.MsgTx.TxOut[index].Value), change)
 		return true, putRawUnminedCredit(ns, k, v)
 	}
 	k, v := existsCredit(ns, &rec.Hash, index, &block.Block)
 	if v != nil {
 		return false, nil
 	}
-	txOutAmt := util.Amount(rec.MsgTx.TxOut[index].Value)
+	txOutAmt := amount2.Amount(rec.MsgTx.TxOut[index].Value)
 	T.F(
 		"marking transaction %v output %d (%v) spendable",
 		rec.Hash, index, txOutAmt,
@@ -447,7 +447,7 @@ func (s *Store) rollback(ns walletdb.ReadWriteBucket, height int32) (e error) {
 					coinBaseCredits = append(coinBaseCredits, op)
 					unspentKey, credKey := existsUnspent(ns, &op)
 					if credKey != nil {
-						minedBalance -= util.Amount(output.Value)
+						minedBalance -= amount2.Amount(output.Value)
 						e = deleteRawUnspent(ns, unspentKey)
 						if e != nil {
 							return e
@@ -492,7 +492,7 @@ func (s *Store) rollback(ns walletdb.ReadWriteBucket, height int32) (e error) {
 				// unspendRawCredit does not error in case the no credit exists for this key, but this behavior is
 				// correct. Since blocks are removed in increasing order, this credit may have already been removed from
 				// a previously removed transaction record in this rollback.
-				var amt util.Amount
+				var amt amount2.Amount
 				amt, e = unspendRawCredit(ns, credKey)
 				if e != nil {
 					return e
@@ -544,7 +544,7 @@ func (s *Store) rollback(ns walletdb.ReadWriteBucket, height int32) (e error) {
 				}
 				credKey := existsRawUnspent(ns, outPointKey)
 				if credKey != nil {
-					minedBalance -= util.Amount(output.Value)
+					minedBalance -= amount2.Amount(output.Value)
 					e = deleteRawUnspent(ns, outPointKey)
 					if e != nil {
 						return e
@@ -641,7 +641,7 @@ func // UnspentOutputs returns all unspent received transaction outputs.
 					Block: block,
 					Time:  blockTime,
 				},
-				Amount:       util.Amount(txOut.Value),
+				Amount:       amount2.Amount(txOut.Value),
 				PkScript:     txOut.PkScript,
 				Received:     rec.Received,
 				FromCoinBase: blockchain.IsCoinBaseTx(&rec.MsgTx),
@@ -682,7 +682,7 @@ func // UnspentOutputs returns all unspent received transaction outputs.
 				BlockMeta: BlockMeta{
 					Block: Block{Height: -1},
 				},
-				Amount:       util.Amount(txOut.Value),
+				Amount:       amount2.Amount(txOut.Value),
 				PkScript:     txOut.PkScript,
 				Received:     rec.Received,
 				FromCoinBase: blockchain.IsCoinBaseTx(&rec.MsgTx),
@@ -708,7 +708,7 @@ func // Balance returns the spendable wallet balance (total value of all unspent
 //
 // Balance may return unexpected results if syncHeight is lower than the block
 // height of the most recent mined transaction in the store.
-(s *Store) Balance(ns walletdb.ReadBucket, minConf int32, syncHeight int32) (util.Amount, error) {
+(s *Store) Balance(ns walletdb.ReadBucket, minConf int32, syncHeight int32) (amount2.Amount, error) {
 	bal, e := fetchMinedBalance(ns)
 	if e != nil {
 		return 0, e

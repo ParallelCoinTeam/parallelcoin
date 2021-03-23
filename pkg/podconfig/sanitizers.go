@@ -5,10 +5,12 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"github.com/p9c/pod/pkg/amt"
 	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/fork"
 	"github.com/p9c/pod/pkg/forkhash"
 	"github.com/p9c/pod/pkg/logg"
+	"github.com/p9c/pod/pkg/btcaddr"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/podcfg"
 	"io/ioutil"
@@ -541,7 +543,7 @@ func validatePolicies(cfg *podcfg.Config, stateConfig *state.Config) {
 	var e error
 	// Validate the the minrelaytxfee.
 	T.Ln("checking min relay tx fee")
-	stateConfig.ActiveMinRelayTxFee, e = util.NewAmount(*cfg.MinRelayTxFee)
+	stateConfig.ActiveMinRelayTxFee, e = amt.NewAmount(*cfg.MinRelayTxFee)
 	if e != nil {
 		E.Ln(e)
 		str := "%s: invalid minrelaytxfee: %v"
@@ -672,9 +674,9 @@ func validateMiningStuff(
 		D.Ln("MiningAddrs is nil")
 		return
 	}
-	state.ActiveMiningAddrs = make([]util.Address, 0, aml)
+	state.ActiveMiningAddrs = make([]btcaddr.Address, 0, aml)
 	for _, strAddr := range *cfg.MiningAddrs {
-		addr, e := util.DecodeAddress(strAddr, params)
+		addr, e := btcaddr.Decode(strAddr, params)
 		if e != nil {
 			E.Ln(e)
 			str := "%s: mining address '%s' failed to decode: %v"

@@ -28,8 +28,8 @@ package mining
 // }
 //
 // // Reconstruct takes a received block from the wire and reattaches the transactions
-// func (m *MsgBlockTemplate) Reconstruct(hdr *wire.BlockHeader) *wire.MsgBlock {
-// 	msgBlock := &wire.MsgBlock{Header: *hdr}
+// func (m *MsgBlockTemplate) Reconstruct(hdr *wire.BlockHeader) *wire.WireBlock {
+// 	msgBlock := &wire.WireBlock{Header: *hdr}
 // 	// the coinbase is the last transaction
 // 	txs := append(m.txs, m.coinbases[msgBlock.Header.Version])
 // 	for _, tx := range txs {
@@ -393,7 +393,7 @@ package mining
 // 		merkles := blockchain.BuildMerkleTreeStore(tX, false)
 // 		mbt.Merkles[curr()] = *merkles[len(merkles)-1]
 // 		// TODO: can we do this once instead of 9 times?
-// 		var msgBlock wire.MsgBlock
+// 		var msgBlock wire.WireBlock
 // 		msgBlock.Header = wire.BlockHeader{
 // 			Version:    curr(),
 // 			PrevBlock:  mbt.PrevBlock,

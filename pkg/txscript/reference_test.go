@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/p9c/pod/pkg/amt"
 	"io/ioutil"
 	"strconv"
 	"strings"
@@ -328,7 +329,7 @@ func testScripts(t *testing.T, tests [][]interface{}, useSigCache bool) {
 		}
 		var (
 			witness  wire.TxWitness
-			inputAmt util.Amount
+			inputAmt amt.Amount
 		)
 		// When the first field of the test data is a slice it contains witness data and
 		// everything else is offset by 1 as a result.
@@ -344,7 +345,7 @@ func testScripts(t *testing.T, tests [][]interface{}, useSigCache bool) {
 				t.Errorf("%s: can't parse witness; %v", name, e)
 				continue
 			}
-			inputAmt, e = util.NewAmount(witnessData[len(witnessData)-1].(float64))
+			inputAmt, e = amt.NewAmount(witnessData[len(witnessData)-1].(float64))
 			if e != nil {
 				t.Errorf(
 					"%s: can't parse input amt: %v",

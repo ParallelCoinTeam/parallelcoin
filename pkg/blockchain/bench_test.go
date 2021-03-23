@@ -1,14 +1,13 @@
 package blockchain
 
 import (
+	"github.com/p9c/pod/pkg/block"
 	"testing"
-
-	"github.com/p9c/pod/pkg/util"
 )
 
 // BenchmarkIsCoinBase performs a simple benchmark against the IsCoinBase function.
 func BenchmarkIsCoinBase(b *testing.B) {
-	tx, _ := util.NewBlock(&Block100000).Tx(1)
+	tx, _ := block.NewBlock(&Block100000).Tx(1)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		IsCoinBase(tx)

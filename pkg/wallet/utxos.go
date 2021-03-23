@@ -1,9 +1,9 @@
 package wallet
 
 import (
-	"github.com/p9c/pod/pkg/walletdb"
+	"github.com/p9c/pod/pkg/btcaddr"
 	"github.com/p9c/pod/pkg/txscript"
-	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/walletdb"
 	"github.com/p9c/pod/pkg/wire"
 )
 
@@ -36,7 +36,7 @@ func (w *Wallet) UnspentOutputs(policy OutputSelectionPolicy) ([]*TransactionOut
 					continue
 				}
 				// Ignore outputs that are not controlled by the account.
-				var addrs []util.Address
+				var addrs []btcaddr.Address
 				_, addrs, _, e = txscript.ExtractPkScriptAddrs(
 					output.PkScript,
 					w.chainParams,

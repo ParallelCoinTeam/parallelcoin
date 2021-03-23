@@ -60,7 +60,7 @@ func (b *batchSpendReporter) NotifyUnspentAndUnfound() {
 // spends may occur. Afterwards, any spends detected in the block are immediately dispatched, and the watchlist updated
 // in preparation of filtering the next block.
 func (b *batchSpendReporter) ProcessBlock(
-	blk *wire.MsgBlock,
+	blk *wire.Block,
 	newReqs []*GetUtxoRequest, height uint32,
 ) {
 	// If any requests want the UTXOs at this height, scan the block to find the original outputs that might be spent
@@ -107,7 +107,7 @@ func (b *batchSpendReporter) addNewRequests(reqs []*GetUtxoRequest) {
 // not spent later on. Requests corresponding to outpoints that are not found in the block will return a nil spend
 // report to indicate that the UTXO was not found.
 func (b *batchSpendReporter) findInitialTransactions(
-	block *wire.MsgBlock,
+	block *wire.Block,
 	newReqs []*GetUtxoRequest, height uint32,
 ) map[wire.OutPoint]*SpendReport {
 	// First, construct a reverse index from txid to all a list of requests whose outputs share the same txid.
@@ -193,7 +193,7 @@ func (b *batchSpendReporter) notifyRequests(
 // notifySpends finds any transactions in the block that spend from our watched outpoints. If a spend is detected it is
 // immediately delivered and cleaned up from the reporter's internal state.
 func (b *batchSpendReporter) notifySpends(
-	block *wire.MsgBlock,
+	block *wire.Block,
 	height uint32,
 ) map[wire.OutPoint]*SpendReport {
 	spends := make(map[wire.OutPoint]*SpendReport)

@@ -1,20 +1,19 @@
 package cfgutil
 
 import (
+	"github.com/p9c/pod/pkg/amt"
 	"strconv"
 	"strings"
-
-	"github.com/p9c/pod/pkg/util"
 )
 
 // AmountFlag embeds a util.Amount and implements the flags.Marshaler and Unmarshaler interfaces so it can be used as a
 // config struct field.
 type AmountFlag struct {
-	util.Amount
+	amt.Amount
 }
 
 // NewAmountFlag creates an AmountFlag with a default util.Amount.
-func NewAmountFlag(defaultValue util.Amount) *AmountFlag {
+func NewAmountFlag(defaultValue amt.Amount) *AmountFlag {
 	return &AmountFlag{defaultValue}
 }
 
@@ -31,7 +30,7 @@ func (a *AmountFlag) UnmarshalFlag(value string) (e error) {
 		E.Ln(e)
 		return e
 	}
-	amount, e := util.NewAmount(valueF64)
+	amount, e := amt.NewAmount(valueF64)
 	if e != nil  {
 		E.Ln(e)
 		return e

@@ -4,14 +4,14 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+	"github.com/p9c/pod/pkg/block"
 	"math/big"
 	"sync"
 	"time"
 	
-	chainhash "github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/database"
 	"github.com/p9c/pod/pkg/wire"
-	database "github.com/p9c/pod/pkg/database"
-	"github.com/p9c/pod/pkg/util"
 )
 
 const (
@@ -203,7 +203,7 @@ type SpentTxOut struct {
 // main chain.
 //
 // This function is safe for concurrent access.
-func (b *BlockChain) FetchSpendJournal(targetBlock *util.Block) ([]SpentTxOut, error) {
+func (b *BlockChain) FetchSpendJournal(targetBlock *block.Block) ([]SpentTxOut, error) {
 	b.ChainLock.RLock()
 	defer b.ChainLock.RUnlock()
 	var spendEntries []SpentTxOut
@@ -386,11 +386,11 @@ func serializeSpendJournalEntry(stxos []SpentTxOut) []byte {
 // containing transaction.
 //
 // It is up to the caller to handle this properly by looking the information up in the utxo set.
-func dbFetchSpendJournalEntry(dbTx database.Tx, block *util.Block) ([]SpentTxOut, error) {
+func dbFetchSpendJournalEntry(dbTx database.Tx, block *block.Block) ([]SpentTxOut, error) {
 	// Exclude the coinbase transaction since it can't spend anything.
 	spendBucket := dbTx.Metadata().Bucket(spendJournalBucketName)
 	serialized := spendBucket.Get(block.Hash()[:])
-	blockTxns := block.MsgBlock().Transactions[1:]
+	blockTxns := block.WireBlock().Transactions[1:]
 	stxos, e := deserializeSpendJournalEntry(serialized, blockTxns)
 	if e != nil {
 		// Ensure any deserialization errors are returned as database corruption errors.
@@ -868,13 +868,13 @@ func dbPutBestState(dbTx database.Tx, snapshot *BestState, workSum *big.Int) (e 
 // necessary buckets and inserting the genesis block so it must only be called on an uninitialized database.
 func (b *BlockChain) createChainState() (e error) {
 	// Create a new node from the genesis block and set it as the best node.
-	genesisBlock := util.NewBlock(b.params.GenesisBlock)
+	genesisBlock := block.NewBlock(b.params.GenesisBlock)
 	// Tracec(func() string {
 	//	xx, _ := genesisBlock.Bytes()
 	//	return hex.EncodeToString(xx)
 	// })
 	genesisBlock.SetHeight(0)
-	header := &genesisBlock.MsgBlock().Header
+	header := &genesisBlock.WireBlock().Header
 	node := NewBlockNode(header, nil)
 	node.status = statusDataStored | statusValid
 	var df Diffs
@@ -887,8 +887,8 @@ func (b *BlockChain) createChainState() (e error) {
 	b.Index.addNode(node)
 	// Initialize the state related to the best block. Since it is the genesis block, use its timestamp for the median
 	// time.
-	numTxns := uint64(len(genesisBlock.MsgBlock().Transactions))
-	blockSize := uint64(genesisBlock.MsgBlock().SerializeSize())
+	numTxns := uint64(len(genesisBlock.WireBlock().Transactions))
+	blockSize := uint64(genesisBlock.WireBlock().SerializeSize())
 	blockWeight := uint64(GetBlockWeight(genesisBlock))
 	b.stateSnapshot = newBestState(
 		node, blockSize, blockWeight, numTxns,
@@ -1002,10 +1002,10 @@ func (b *BlockChain) initChainState() (e error) {
 			if e != nil {
 				return e
 			}
-			// Load all of the headers from the data for the known best chain and construct the block index accordingly.
+			// Load all of the headers from the data for the known best chain and construct the blk index accordingly.
 			// Since the number of nodes are already known, perform a single alloc for them versus a whole bunch of little
 			// ones to reduce pressure on the GC.
-			T.Ln("loading block index...")
+			T.Ln("loading blk index...")
 			blockIndexBucket := dbTx.Metadata().Bucket(blockIndexBucketName)
 			// Determine how many blocks will be loaded into the index so we can allocate the right amount.
 			var blockCount int32
@@ -1022,7 +1022,7 @@ func (b *BlockChain) initChainState() (e error) {
 				if e != nil {
 					return e
 				}
-				// Determine the parent block node. Since we iterate block headers in order of height, if the blocks are
+				// Determine the parent blk node. Since we iterate blk headers in order of height, if the blocks are
 				// mostly linear there is a very good chance the previous header processed is the parent.
 				var parent *BlockNode
 				if lastNode == nil {
@@ -1030,14 +1030,14 @@ func (b *BlockChain) initChainState() (e error) {
 					if !blockHash.IsEqual(b.params.GenesisHash) {
 						return AssertError(
 							fmt.Sprintf(
-								"initChainState: expected first entry in block index"+
-									" to be genesis block, found %s",
+								"initChainState: expected first entry in blk index"+
+									" to be genesis blk, found %s",
 								blockHash,
 							),
 						)
 					}
 				} else if header.PrevBlock == lastNode.hash {
-					// Since we iterate block headers in order of height, if the blocks are mostly linear there is a very
+					// Since we iterate blk headers in order of height, if the blocks are mostly linear there is a very
 					// good chance the previous header processed is the parent.
 					parent = lastNode
 				} else {
@@ -1045,13 +1045,13 @@ func (b *BlockChain) initChainState() (e error) {
 					if parent == nil {
 						return AssertError(
 							fmt.Sprint(
-								"initChainState: Could not find parent for block ",
+								"initChainState: Could not find parent for blk ",
 								header.BlockHash(),
 							),
 						)
 					}
 				}
-				// Initialize the block node for the block, connect it, and add it to the block index.
+				// Initialize the blk node for the blk, connect it, and add it to the blk index.
 				node := &blockNodes[i]
 				initBlockNode(node, header, parent)
 				node.status = status
@@ -1064,24 +1064,24 @@ func (b *BlockChain) initChainState() (e error) {
 			if tip == nil {
 				return AssertError(
 					fmt.Sprintf(
-						"initChainState: cannot find chain tip %s in block index",
+						"initChainState: cannot find chain tip %s in blk index",
 						state.hash,
 					),
 				)
 			}
 			b.BestChain.SetTip(tip)
-			// Load the raw block bytes for the best block.
+			// Load the raw blk bytes for the best blk.
 			blockBytes, e := dbTx.FetchBlock(&state.hash)
 			if e != nil {
 				return e
 			}
-			var block wire.MsgBlock
-			e = block.Deserialize(bytes.NewReader(blockBytes))
+			var blk wire.Block
+			e = blk.Deserialize(bytes.NewReader(blockBytes))
 			if e != nil {
 				return e
 			}
 			// As a final consistency check, we'll run through all the nodes which are ancestors of the current chain tip,
-			// and mark them as valid if they aren't already marked as such. This is a safe assumption as all the block
+			// and mark them as valid if they aren't already marked as such. This is a safe assumption as all the blk
 			// before the current tip are valid by definition.
 			for iterNode := tip; iterNode != nil; iterNode = iterNode.parent {
 				// If this isn't already marked as valid in the index, then we'll mark it as valid now to ensure consistency
@@ -1095,10 +1095,10 @@ func (b *BlockChain) initChainState() (e error) {
 					b.Index.SetStatusFlags(iterNode, statusValid)
 				}
 			}
-			// Initialize the state related to the best block.
+			// Initialize the state related to the best blk.
 			blockSize := uint64(len(blockBytes))
-			blockWeight := uint64(GetBlockWeight(util.NewBlock(&block)))
-			numTxns := uint64(len(block.Transactions))
+			blockWeight := uint64(GetBlockWeight(block.NewBlock(&blk)))
+			numTxns := uint64(len(blk.Transactions))
 			b.stateSnapshot = newBestState(
 				tip, blockSize, blockWeight,
 				numTxns, state.totalTxns, tip.CalcPastMedianTime(),
@@ -1156,14 +1156,14 @@ height int32) (*wire.BlockHeader, error) {
 
 // dbFetchBlockByNode uses an existing database transaction to retrieve the raw block for the provided node, deserialize
 // it, and return a util.Block with the height set.
-func dbFetchBlockByNode(dbTx database.Tx, node *BlockNode) (*util.Block, error) {
+func dbFetchBlockByNode(dbTx database.Tx, node *BlockNode) (*block.Block, error) {
 	// Load the raw block bytes from the database.
 	blockBytes, e := dbTx.FetchBlock(&node.hash)
 	if e != nil {
 		return nil, e
 	}
 	// Create the encapsulated block and set the height appropriately.
-	block, e := util.NewBlockFromBytes(blockBytes)
+	block, e := block.NewFromBytes(blockBytes)
 	if e != nil {
 		return nil, e
 	}
@@ -1194,7 +1194,7 @@ func dbStoreBlockNode(dbTx database.Tx, node *BlockNode) (e error) {
 
 // dbStoreBlock stores the provided block in the database if it is not already there. The full block data is written to
 // ffldb.
-func dbStoreBlock(dbTx database.Tx, block *util.Block) (e error) {
+func dbStoreBlock(dbTx database.Tx, block *block.Block) (e error) {
 	hasBlock, e := dbTx.HasBlock(block.Hash())
 	if e != nil {
 		return e
@@ -1215,7 +1215,7 @@ func blockIndexKey(blockHash *chainhash.Hash, blockHeight uint32) []byte {
 }
 
 // BlockByHeight returns the block at the given height in the main chain. This function is safe for concurrent access.
-func (b *BlockChain) BlockByHeight(blockHeight int32) (*util.Block, error) {
+func (b *BlockChain) BlockByHeight(blockHeight int32) (*block.Block, error) {
 	// Lookup the block height in the best chain.
 	node := b.BestChain.NodeByHeight(blockHeight)
 	if node == nil {
@@ -1223,7 +1223,7 @@ func (b *BlockChain) BlockByHeight(blockHeight int32) (*util.Block, error) {
 		return nil, errNotInMainChain(str)
 	}
 	// Load the block from the database and return it.
-	var block *util.Block
+	var block *block.Block
 	e := b.db.View(
 		func(dbTx database.Tx) (e error) {
 			block, e = dbFetchBlockByNode(dbTx, node)
@@ -1236,7 +1236,7 @@ func (b *BlockChain) BlockByHeight(blockHeight int32) (*util.Block, error) {
 // BlockByHash returns the block from the main chain with the given hash with the appropriate chain height set.
 //
 // This function is safe for concurrent access.
-func (b *BlockChain) BlockByHash(hash *chainhash.Hash) (block *util.Block, e error) {
+func (b *BlockChain) BlockByHash(hash *chainhash.Hash) (block *block.Block, e error) {
 	// Lookup the block hash in block index and ensure it is in the best chain.
 	node := b.Index.LookupNode(hash)
 	if node == nil || !b.BestChain.Contains(node) {

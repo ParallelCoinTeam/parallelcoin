@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/p9c/pod/pkg/btcaddr"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -11,15 +12,15 @@ import (
 	"github.com/p9c/pod/pkg/util/qu"
 	
 	"github.com/p9c/pod/cmd/spv/headerfs"
+	"github.com/p9c/pod/pkg/btcjson"
 	"github.com/p9c/pod/pkg/chainhash"
-	"github.com/p9c/pod/pkg/txscript"
-	"github.com/p9c/pod/pkg/wire"
 	"github.com/p9c/pod/pkg/gcs"
 	"github.com/p9c/pod/pkg/gcs/builder"
-	"github.com/p9c/pod/pkg/btcjson"
 	"github.com/p9c/pod/pkg/rpcclient"
+	"github.com/p9c/pod/pkg/txscript"
 	"github.com/p9c/pod/pkg/util"
-	"github.com/p9c/pod/pkg/wallet/waddrmgr"
+	"github.com/p9c/pod/pkg/waddrmgr"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 // ErrRescanExit is an error returned to the caller in case the ongoing rescan exits.
@@ -33,7 +34,7 @@ type rescanOptions struct {
 	startTime    time.Time
 	startBlock   *waddrmgr.BlockStamp
 	endBlock     *waddrmgr.BlockStamp
-	watchAddrs   []util.Address
+	watchAddrs   []btcaddr.Address
 	watchInputs  []InputWithScript
 	watchList    [][]byte
 	txIdx        uint32
@@ -99,7 +100,7 @@ func EndBlock(endBlock *waddrmgr.BlockStamp) RescanOption {
 // function adds to the list of addresses being watched rather than replacing
 // the list. Each time a transaction spends to the specified address, the
 // outpoint is added to the WatchOutPoints list.
-func WatchAddrs(watchAddrs ...util.Address) RescanOption {
+func WatchAddrs(watchAddrs ...btcaddr.Address) RescanOption {
 	return func(ro *rescanOptions) {
 		ro.watchAddrs = append(ro.watchAddrs, watchAddrs...)
 	}
@@ -602,7 +603,7 @@ func (s *ChainService) extractBlockMatches(
 			curStamp.Height, curStamp.Hash,
 		)
 	}
-	blockHeader := block.MsgBlock().Header
+	blockHeader := block.WireBlock().Header
 	blockDetails := btcjson.BlockDetails{
 		Height: block.Height(),
 		Hash:   block.Hash().String(),
@@ -902,7 +903,7 @@ func (r *Rescan) Start() <-chan error {
 
 // updateOptions are a set of functional parameters for Update.
 type updateOptions struct {
-	addrs                    []util.Address
+	addrs                    []btcaddr.Address
 	inputs                   []InputWithScript
 	txIDs                    []chainhash.Hash
 	rewind                   uint32
@@ -917,7 +918,7 @@ func defaultUpdateOptions() *updateOptions {
 }
 
 // AddAddrs adds addresses to the filter.
-func AddAddrs(addrs ...util.Address) UpdateOption {
+func AddAddrs(addrs ...btcaddr.Address) UpdateOption {
 	return func(uo *updateOptions) {
 		uo.addrs = append(uo.addrs, addrs...)
 	}

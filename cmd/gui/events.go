@@ -3,6 +3,7 @@ package gui
 import (
 	"encoding/json"
 	"github.com/p9c/pod/cmd/kopach/control/p2padvt"
+	"github.com/p9c/pod/pkg/amt"
 	"github.com/p9c/pod/pkg/podcfg"
 	"github.com/p9c/pod/pkg/transport"
 	"github.com/p9c/pod/pkg/wire"
@@ -10,8 +11,8 @@ import (
 	"path/filepath"
 	"time"
 	
-	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/btcjson"
+	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/rpcclient"
 	"github.com/p9c/pod/pkg/util"
 )
@@ -222,13 +223,13 @@ func (wg *WalletGUI) processWalletBlockNotification() bool {
 		return false
 	}
 	// check account balance
-	var unconfirmed util.Amount
+	var unconfirmed amt.Amount
 	var e error
 	if unconfirmed, e = wg.WalletClient.GetUnconfirmedBalance("default"); E.Chk(e) {
 		return false
 	}
 	wg.State.SetBalanceUnconfirmed(unconfirmed.ToDUO())
-	var confirmed util.Amount
+	var confirmed amt.Amount
 	if confirmed, e = wg.WalletClient.GetBalance("default"); E.Chk(e) {
 		return false
 	}
@@ -261,7 +262,7 @@ func (wg *WalletGUI) forceUpdateChain() {
 	if tip, height, e = wg.ChainClient.GetBestBlock(); E.Chk(e) {
 		return
 	}
-	var block *wire.MsgBlock
+	var block *wire.Block
 	if block, e = wg.ChainClient.GetBlock(tip); E.Chk(e) {
 	}
 	t := block.Header.Timestamp
@@ -412,7 +413,7 @@ func (wg *WalletGUI) ChainNotifications() *rpcclient.NotificationHandlers {
 		// 	wg.RecentTransactions(-1, "history")
 		// 	wg.invalidate <- struct{}{}
 		// },
-		OnTxAccepted: func(hash *chainhash.Hash, amount util.Amount) {
+		OnTxAccepted: func(hash *chainhash.Hash, amount amt.Amount) {
 			// if wg.cx.Syncing.Load() {
 			// 	return
 			// }

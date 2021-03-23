@@ -4,10 +4,10 @@ import (
 	"encoding/hex"
 	js "encoding/json"
 	"errors"
+	"github.com/p9c/pod/pkg/block"
 	
-	chainhash "github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/btcjson"
-	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/chainhash"
 )
 
 // FutureGenerateResult is a future promise to deliver the result of a GenerateAsync RPC invocation (or an applicable
@@ -328,7 +328,7 @@ func (r FutureSubmitBlockResult) Receive() (e error) {
 
 // SubmitBlockAsync returns an instance of a type that can be used to get the result of the RPC at some future time by
 // invoking the Receive function on the returned instance. See SubmitBlock for the blocking version and more details.
-func (c *Client) SubmitBlockAsync(block *util.Block, options *btcjson.SubmitBlockOptions) FutureSubmitBlockResult {
+func (c *Client) SubmitBlockAsync(block *block.Block, options *btcjson.SubmitBlockOptions) FutureSubmitBlockResult {
 	blockHex := ""
 	if block != nil {
 		blockBytes, e := block.Bytes()
@@ -342,7 +342,7 @@ func (c *Client) SubmitBlockAsync(block *util.Block, options *btcjson.SubmitBloc
 }
 
 // SubmitBlock attempts to submit a new block into the bitcoin network.
-func (c *Client) SubmitBlock(block *util.Block, options *btcjson.SubmitBlockOptions) (e error) {
+func (c *Client) SubmitBlock(block *block.Block, options *btcjson.SubmitBlockOptions) (e error) {
 	return c.SubmitBlockAsync(block, options).Receive()
 }
 

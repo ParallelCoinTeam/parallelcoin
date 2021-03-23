@@ -2,14 +2,15 @@ package waddrmgr
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/btcaddr"
 	"github.com/p9c/pod/pkg/chaincfg"
 	"sync"
 	
-	"github.com/p9c/pod/pkg/walletdb"
 	ec "github.com/p9c/pod/pkg/ecc"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/hdkeychain"
 	"github.com/p9c/pod/pkg/util/zero"
+	"github.com/p9c/pod/pkg/walletdb"
 )
 
 // DerivationPath represents a derivation path from a particular key manager's
@@ -530,7 +531,7 @@ func (s *ScopedKeyManager) rowInterfaceToManaged(
 // This function MUST be called with the manager lock held for writes.
 func (s *ScopedKeyManager) loadAndCacheAddress(
 	ns walletdb.ReadBucket,
-	address util.Address,
+	address btcaddr.Address,
 ) (ManagedAddress, error) {
 	// Attempt to load the raw address information from the database.
 	rowInterface, e := fetchAddress(ns, &s.scope, address.ScriptAddress())
@@ -576,22 +577,22 @@ func (s *ScopedKeyManager) existsAddress(ns walletdb.ReadBucket, addressID []byt
 // pay-to-script-hash addresses.
 func (s *ScopedKeyManager) Address(
 	ns walletdb.ReadBucket,
-	address util.Address,
+	addr btcaddr.Address,
 ) (ma ManagedAddress, e error) {
 	// ScriptAddress will only return a script hash if we're accessing an address
 	// that is either PKH or SH. In the event we're passed a PK address, convert the
 	// PK to PKH address so that we can access it from the addrs map and database.
 	ok := false
-	var pka *util.AddressPubKey
-	if pka, ok = address.(*util.AddressPubKey); ok {
-		address = pka.AddressPubKeyHash()
+	var pka *btcaddr.PubKey
+	if pka, ok = addr.(*btcaddr.PubKey); ok {
+		addr = pka.PubKeyHash()
 	}
 	// Return the address from cache if it's available.
 	//
 	// NOTE: Not using a defer on the lock here since a write lock is needed if the
 	// lookup fails.
 	s.mtx.RLock()
-	if ma, ok = s.addrs[addrKey(address.ScriptAddress())]; ok {
+	if ma, ok = s.addrs[addrKey(addr.ScriptAddress())]; ok {
 		s.mtx.RUnlock()
 		return ma, nil
 	}
@@ -599,13 +600,13 @@ func (s *ScopedKeyManager) Address(
 	s.mtx.Lock()
 	defer s.mtx.Unlock()
 	// Attempt to load the address from the database.
-	return s.loadAndCacheAddress(ns, address)
+	return s.loadAndCacheAddress(ns, addr)
 }
 
 // AddrAccount returns the account to which the given address belongs.
 func (s *ScopedKeyManager) AddrAccount(
 	ns walletdb.ReadBucket,
-	address util.Address,
+	address btcaddr.Address,
 ) (account uint32, e error) {
 	if account, e = fetchAddrAccount(ns, &s.scope, address.ScriptAddress()); T.Chk(e) {
 		return 0, maybeConvertDbError(e)
@@ -1278,7 +1279,7 @@ func (s *ScopedKeyManager) ImportPrivateKey(
 	}
 	// Prevent duplicates.
 	serializedPubKey := wif.SerializePubKey()
-	pubKeyHash := util.Hash160(serializedPubKey)
+	pubKeyHash := btcaddr.Hash160(serializedPubKey)
 	alreadyExists := s.existsAddress(ns, pubKeyHash)
 	if alreadyExists {
 		str := fmt.Sprintf("address for public key %x already exists", serializedPubKey)
@@ -1375,7 +1376,7 @@ func (s *ScopedKeyManager) ImportScript(
 		return nil, managerError(ErrLocked, errLocked, nil)
 	}
 	// Prevent duplicates.
-	scriptHash := util.Hash160(script)
+	scriptHash := btcaddr.Hash160(script)
 	alreadyExists := s.existsAddress(ns, scriptHash)
 	if alreadyExists {
 		str := fmt.Sprintf(
@@ -1474,7 +1475,7 @@ func (s *ScopedKeyManager) fetchUsed(
 // MarkUsed updates the used flag for the provided address.
 func (s *ScopedKeyManager) MarkUsed(
 	ns walletdb.ReadWriteBucket,
-	address util.Address,
+	address btcaddr.Address,
 ) (e error) {
 	addressID := address.ScriptAddress()
 	if e = markAddressUsed(ns, &s.scope, addressID); E.Chk(e) {
@@ -1550,7 +1551,7 @@ func (s *ScopedKeyManager) ForEachActiveAccountAddress(
 // in the manager, breaking early on error.
 func (s *ScopedKeyManager) ForEachActiveAddress(
 	ns walletdb.ReadBucket,
-	fn func(addr util.Address) error,
+	fn func(addr btcaddr.Address) error,
 ) (e error) {
 	s.mtx.Lock()
 	defer s.mtx.Unlock()

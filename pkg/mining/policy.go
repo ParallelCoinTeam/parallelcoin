@@ -1,9 +1,9 @@
 package mining
 
 import (
-	blockchain "github.com/p9c/pod/pkg/blockchain"
+	"github.com/p9c/pod/pkg/amt"
+	"github.com/p9c/pod/pkg/blockchain"
 	"github.com/p9c/pod/pkg/wire"
-	"github.com/p9c/pod/pkg/util"
 )
 
 const (
@@ -35,7 +35,7 @@ type Policy struct {
 	// TxMinFreeFee is the minimum fee in Satoshi/1000 bytes that is required for a
 	// transaction to be treated as free for mining purposes (block template
 	// generation).
-	TxMinFreeFee util.Amount
+	TxMinFreeFee amt.Amount
 }
 
 // minInt is a helper function to return the minimum of two ints. This avoids a

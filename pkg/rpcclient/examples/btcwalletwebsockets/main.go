@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/amt"
 	"io/ioutil"
 	"log"
 	"path/filepath"
@@ -13,7 +14,6 @@ import (
 	
 	"github.com/p9c/pod/pkg/appdata"
 	"github.com/p9c/pod/pkg/rpcclient"
-	"github.com/p9c/pod/pkg/util"
 )
 
 func main() {
@@ -21,7 +21,7 @@ func main() {
 	// if you register for notifications. See the documentation of the rpcclient NotificationHandlers type for more
 	// details about each handler.
 	ntfnHandlers := rpcclient.NotificationHandlers{
-		OnAccountBalance: func(account string, balance util.Amount, confirmed bool) {
+		OnAccountBalance: func(account string, balance amt.Amount, confirmed bool) {
 			log.Printf(
 				"New balance for account %s: %v", account,
 				balance,

@@ -28,7 +28,7 @@ func (b *BlockChain) GetCommonP9Averages(lastNode *BlockNode, nH int32) (
 	var oldestStamp int64
 	f, _ := b.BlockByHeight(startHeight)
 	if f != nil {
-		fh := f.MsgBlock().Header.BlockHash()
+		fh := f.WireBlock().Header.BlockHash()
 		first := b.Index.LookupNode(&fh)
 		allTime := float64(lastNode.timestamp - first.timestamp)
 		allBlocks := float64(lastNode.height - first.height)
@@ -43,7 +43,7 @@ func (b *BlockChain) GetCommonP9Averages(lastNode *BlockNode, nH int32) (
 			allTimeDiv = float64(1)
 		}
 		allTimeDiv *= allTimeDiv * allTimeDiv * allTimeDiv * allTimeDiv
-		oldestStamp = f.MsgBlock().Header.Timestamp.Unix()
+		oldestStamp = f.WireBlock().Header.Timestamp.Unix()
 	} else {
 		// the previous if should prevent this occurring
 	}

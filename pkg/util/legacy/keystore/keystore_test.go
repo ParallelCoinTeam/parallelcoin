@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/rand"
 	"github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/btcaddr"
 	"math/big"
 	"reflect"
 	"testing"
@@ -533,7 +534,7 @@ func TestWatchingWalletExport(t *testing.T) {
 	}
 	// Test that ExtendActiveAddresses for the watching wallet match
 	// manually requested addresses of the original wallet.
-	var newAddrs []util.Address
+	var newAddrs []btcaddr.Address
 	for i := 0; i < 10; i++ {
 		addr, e := w.NextChainedAddress(createdAt)
 		if e != nil  {

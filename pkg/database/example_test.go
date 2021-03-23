@@ -151,7 +151,7 @@ func Example_basicUsage() {
 // 		DB// 		return
 // 	}
 // 	// Typically at this point, the block could be deserialized via the
-// 	// wire.MsgBlock.Deserialize function or used in its serialized form
+// 	// wire.Block.Deserialize function or used in its serialized form
 // 	// depending on need.  However, for this example, just display the
 // 	// number of serialized bytes to show it was loaded as expected.
 // 	fmt.Printf("Serialized block size: %d bytes\n", len(loadedBlockBytes))

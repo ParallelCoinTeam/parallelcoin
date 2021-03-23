@@ -5,6 +5,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"github.com/p9c/pod/pkg/amt"
 	"github.com/p9c/pod/pkg/logg"
 	"io/ioutil"
 	"os"
@@ -16,14 +17,13 @@ import (
 	"golang.org/x/crypto/ssh/terminal"
 	
 	"github.com/p9c/pod/pkg/appdata"
+	"github.com/p9c/pod/pkg/btcjson"
 	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/chainhash"
-	"github.com/p9c/pod/pkg/btcjson"
 	"github.com/p9c/pod/pkg/rpcclient"
 	"github.com/p9c/pod/pkg/txauthor"
 	"github.com/p9c/pod/pkg/txrules"
 	"github.com/p9c/pod/pkg/txscript"
-	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/cfgutil"
 	"github.com/p9c/pod/pkg/wire"
 )
@@ -144,13 +144,13 @@ func makeInputSource(
 	outputs []btcjson.ListUnspentResult,
 ) txauthor.InputSource {
 	var (
-		totalInputValue util.Amount
+		totalInputValue amt.Amount
 		inputs          = make([]*wire.TxIn, 0, len(outputs))
-		inputValues     = make([]util.Amount, 0, len(outputs))
+		inputValues     = make([]amt.Amount, 0, len(outputs))
 		sourceErr       error
 	)
 	for _, output := range outputs {
-		outputAmount, e := util.NewAmount(output.Amount)
+		outputAmount, e := amt.NewAmount(output.Amount)
 		if e != nil {
 			sourceErr = fmt.Errorf(
 				"invalid amount `%v` in listunspent result",
@@ -183,7 +183,7 @@ func makeInputSource(
 	if sourceErr == nil && totalInputValue == 0 {
 		sourceErr = noInputValue{}
 	}
-	return func(util.Amount) (util.Amount, []*wire.TxIn, []util.Amount, [][]byte, error) {
+	return func(amt.Amount) (amt.Amount, []*wire.TxIn, []amt.Amount, [][]byte, error) {
 		return totalInputValue, inputs, inputValues, nil, sourceErr
 	}
 }
@@ -257,7 +257,7 @@ func sweep() (e error) {
 			return errContext(e, "failed to read private passphrase")
 		}
 	}
-	var totalSwept util.Amount
+	var totalSwept amt.Amount
 	var numErrors int
 	var reportError = func(format string, args ...interface{}) {
 		if _, e = fmt.Fprintf(os.Stderr, format, args...); E.Chk(e) {
@@ -301,7 +301,7 @@ func sweep() (e error) {
 			reportError("Failed to publish transaction: %v", e)
 			continue
 		}
-		outputAmount := util.Amount(tx.Tx.TxOut[0].Value)
+		outputAmount := amt.Amount(tx.Tx.TxOut[0].Value)
 		I.F(
 			"Swept %v to destination account with transaction %v\n",
 			outputAmount, txHash,
@@ -333,9 +333,9 @@ func promptSecret(what string) (string, error) {
 }
 
 func saneOutputValue(
-	amount util.Amount,
+	amount amt.Amount,
 ) bool {
-	return amount >= 0 && amount <= util.MaxSatoshi
+	return amount >= 0 && amount <= amount.MaxSatoshi
 }
 
 func parseOutPoint(

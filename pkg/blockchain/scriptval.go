@@ -2,15 +2,16 @@ package blockchain
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/block"
 	"math"
 	"runtime"
 	
 	"github.com/p9c/pod/pkg/util/qu"
 	
-	"github.com/p9c/pod/pkg/txscript"
-	"github.com/p9c/pod/pkg/wire"
 	"github.com/p9c/pod/pkg/hardfork"
+	"github.com/p9c/pod/pkg/txscript"
 	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 // txValidateItem holds a transaction along with which input to validate.
@@ -233,7 +234,7 @@ func ValidateTransactionScripts(
 // checkBlockScripts executes and validates the scripts for all transactions in
 // the passed block using multiple goroutines.
 func checkBlockScripts(
-	block *util.Block, utxoView *UtxoViewpoint,
+	block *block.Block, utxoView *UtxoViewpoint,
 	scriptFlags txscript.ScriptFlags, sigCache *txscript.SigCache,
 	hashCache *txscript.HashCache,
 ) (e error) {

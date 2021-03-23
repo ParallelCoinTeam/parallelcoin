@@ -2,13 +2,14 @@ package votingpool
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/btcaddr"
 	"sort"
 	
 	"github.com/p9c/pod/pkg/txscript"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/hdkeychain"
 	"github.com/p9c/pod/pkg/util/zero"
-	"github.com/p9c/pod/pkg/wallet/waddrmgr"
+	"github.com/p9c/pod/pkg/waddrmgr"
 	"github.com/p9c/pod/pkg/walletdb"
 )
 
@@ -51,7 +52,7 @@ type (
 	}
 	poolAddress struct {
 		pool     *Pool
-		addr     util.Address
+		addr     btcaddr.Address
 		script   []byte
 		seriesID uint32
 		branch   Branch
@@ -525,16 +526,16 @@ func branchOrder(pks []*hdkeychain.ExtendedKey, branch Branch) ([]*hdkeychain.Ex
 
 // DepositScriptAddress calls DepositScript to get a multi-signature redemption script and returns the
 // pay-to-script-hash-address for that script.
-func (p *Pool) DepositScriptAddress(seriesID uint32, branch Branch, index Index) (util.Address, error) {
+func (p *Pool) DepositScriptAddress(seriesID uint32, branch Branch, index Index) (btcaddr.Address, error) {
 	script, e := p.DepositScript(seriesID, branch, index)
 	if e != nil {
 		return nil, e
 	}
 	return p.addressFor(script)
 }
-func (p *Pool) addressFor(script []byte) (util.Address, error) {
-	scriptHash := util.Hash160(script)
-	return util.NewAddressScriptHashFromHash(scriptHash, p.manager.ChainParams())
+func (p *Pool) addressFor(script []byte) (btcaddr.Address, error) {
+	scriptHash := btcaddr.Hash160(script)
+	return btcaddr.NewScriptHashFromHash(scriptHash, p.manager.ChainParams())
 }
 
 // DepositScript constructs and returns a multi-signature redemption script where a certain number (Series.reqSigs) of
@@ -550,7 +551,7 @@ func (p *Pool) DepositScript(seriesID uint32, branch Branch, index Index) ([]byt
 	if e != nil {
 		return nil, e
 	}
-	pks := make([]*util.AddressPubKey, len(pubKeys))
+	pks := make([]*btcaddr.PubKey, len(pubKeys))
 	for i, key := range pubKeys {
 		child, e := key.Child(uint32(index))
 		// TODO: implement getting the next index until we find a valid one, in case there is a
@@ -564,7 +565,7 @@ func (p *Pool) DepositScript(seriesID uint32, branch Branch, index Index) ([]byt
 			str := fmt.Sprintf("child #%d for this pubkey %d does not exist", index, i)
 			return nil, newError(ErrKeyChain, str, e)
 		}
-		pks[i], e = util.NewAddressPubKey(
+		pks[i], e = btcaddr.NewPubKey(
 			pubkey.SerializeCompressed(),
 			p.manager.ChainParams(),
 		)
@@ -763,7 +764,7 @@ func (p *Pool) addUsedAddr(
 	if e != nil && e.(waddrmgr.ManagerError).ErrorCode != waddrmgr.ErrDuplicateAddress {
 		return e
 	}
-	encryptedHash, e := p.manager.Encrypt(waddrmgr.CKTPublic, util.Hash160(script))
+	encryptedHash, e := p.manager.Encrypt(waddrmgr.CKTPublic, btcaddr.Hash160(script))
 	if e != nil {
 		return newError(ErrCrypto, "failed to encrypt script hash", e)
 	}
@@ -788,7 +789,7 @@ func (p *Pool) getUsedAddr(ns, addrmgrNs walletdb.ReadBucket, seriesID uint32, b
 	if e != nil {
 		return nil, newError(ErrCrypto, "failed to decrypt stored script hash", e)
 	}
-	addr, e := util.NewAddressScriptHashFromHash(hash, mgr.ChainParams())
+	addr, e := btcaddr.NewScriptHashFromHash(hash, mgr.ChainParams())
 	if e != nil {
 		return nil, newError(ErrInvalidScriptHash, "failed to parse script hash", e)
 	}

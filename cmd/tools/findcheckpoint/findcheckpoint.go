@@ -98,7 +98,7 @@ func findCandidates(
 			}
 			candidates = append(candidates, &checkpoint)
 		}
-		prevHash := &block.MsgBlock().Header.PrevBlock
+		prevHash := &block.WireBlock().Header.PrevBlock
 		block, e = chain.BlockByHash(prevHash)
 		if e != nil {
 			return nil, e

@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/btcaddr"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -16,7 +17,7 @@ import (
 	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/txscript"
 	"github.com/p9c/pod/pkg/util"
-	am "github.com/p9c/pod/pkg/wallet/waddrmgr"
+	am "github.com/p9c/pod/pkg/waddrmgr"
 	"github.com/p9c/pod/pkg/wire"
 	tm "github.com/p9c/pod/pkg/wtxmgr"
 )
@@ -78,7 +79,7 @@ type BitcoindClient struct {
 	// connection.
 	zmqTxNtfns chan *wire.MsgTx
 	// zmqBlockNtfns is a channel through which ZMQ block events will be retrieved from the backing bitcoind connection.
-	zmqBlockNtfns chan *wire.MsgBlock
+	zmqBlockNtfns chan *wire.Block
 	quit          qu.C
 	wg            sync.WaitGroup
 }
@@ -114,7 +115,7 @@ func (c *BitcoindClient) GetBlockHeight(hash *chainhash.Hash) (int32, error) {
 }
 
 // GetBlock returns a block from the hash.
-func (c *BitcoindClient) GetBlock(hash *chainhash.Hash) (*wire.MsgBlock, error) {
+func (c *BitcoindClient) GetBlock(hash *chainhash.Hash) (*wire.Block, error) {
 	return c.chainConn.client.GetBlock(hash)
 }
 
@@ -178,7 +179,7 @@ func (c *BitcoindClient) Notifications() <-chan interface{} {
 // addresses.
 //
 // NOTE: This is part of the chainclient.Interface interface.
-func (c *BitcoindClient) NotifyReceived(addrs []util.Address) (e error) {
+func (c *BitcoindClient) NotifyReceived(addrs []btcaddr.Address) (e error) {
 	if e = c.NotifyBlocks(); E.Chk(e) {
 	}
 	select {
@@ -257,8 +258,8 @@ func (c *BitcoindClient) LoadTxFilter(reset bool, filters ...interface{}) (e err
 	// any unsupported filter types, and the second to actually update our filters.
 	for _, filter := range filters {
 		switch filter := filter.(type) {
-		case []util.Address, []wire.OutPoint, []*wire.OutPoint,
-			map[wire.OutPoint]util.Address, []chainhash.Hash,
+		case []btcaddr.Address, []wire.OutPoint, []*wire.OutPoint,
+			map[wire.OutPoint]btcaddr.Address, []chainhash.Hash,
 			[]*chainhash.Hash:
 			// Proceed to check the next filter type.
 		default:
@@ -318,7 +319,7 @@ func (c *BitcoindClient) RescanBlocks(
 // outpoints to the client's watch list.
 func (c *BitcoindClient) Rescan(
 	blockHash *chainhash.Hash,
-	addresses []util.Address, outPoints map[wire.OutPoint]util.Address,
+	addresses []btcaddr.Address, outPoints map[wire.OutPoint]btcaddr.Address,
 ) (e error) {
 	// A block hash is required to use as the starting point of the rescan.
 	if blockHash == nil {
@@ -422,7 +423,7 @@ func (c *BitcoindClient) rescanHandler() {
 				c.watchedTxs = make(map[chainhash.Hash]struct{})
 				c.watchMtx.Unlock()
 			// We're adding the addresses to our filter.
-			case []util.Address:
+			case []btcaddr.Address:
 				c.watchMtx.Lock()
 				for _, addr := range update {
 					c.watchedAddresses[addr.String()] = struct{}{}
@@ -442,7 +443,7 @@ func (c *BitcoindClient) rescanHandler() {
 				}
 				c.watchMtx.Unlock()
 			// We're adding the outpoints that map to the scripts that we should scan for to our filter.
-			case map[wire.OutPoint]util.Address:
+			case map[wire.OutPoint]btcaddr.Address:
 				c.watchMtx.Lock()
 				for op := range update {
 					c.watchedOutPoints[op] = struct{}{}
@@ -677,7 +678,7 @@ func (c *BitcoindClient) onRescanFinished(
 // This will rewind back until it finds a common ancestor and notify all the new blocks since then.
 func (c *BitcoindClient) reorg(
 	currentBlock am.BlockStamp,
-	reorgBlock *wire.MsgBlock,
+	reorgBlock *wire.Block,
 ) (e error) {
 	D.Ln("possible reorg at block", reorgBlock.BlockHash())
 	// Retrieve the best known height based on the block which caused the reorg. This way, we can preserve the chain of
@@ -754,7 +755,7 @@ func (c *BitcoindClient) reorg(
 	currentBlock.Height--
 	// Now we fast-forward to the new block, notifying along the way.
 	for blocksToNotify.Front() != nil {
-		nextBlock := blocksToNotify.Front().Value.(*wire.MsgBlock)
+		nextBlock := blocksToNotify.Front().Value.(*wire.Block)
 		nextHeight := currentBlock.Height + 1
 		nextHash := nextBlock.BlockHash()
 		nextHeader, e := c.GetBlockHeader(&nextHash)
@@ -860,14 +861,14 @@ func (c *BitcoindClient) rescan(start chainhash.Hash) (e error) {
 		// If the previous header is before the wallet birthday, fetch the current header and construct a dummy block,
 		// rather than fetching the whole block itself. This speeds things up as we no longer have to fetch the whole
 		// block when we know it won't match any of our filters.
-		var block *wire.MsgBlock
+		var block *wire.Block
 		afterBirthday := previousHeader.Time >= c.birthday.Unix()
 		if !afterBirthday {
 			header, e := c.GetBlockHeader(hash)
 			if e != nil {
 				return e
 			}
-			block = &wire.MsgBlock{
+			block = &wire.Block{
 				Header: *header,
 			}
 			afterBirthday = c.birthday.Before(header.Timestamp)
@@ -974,7 +975,7 @@ func (c *BitcoindClient) rescan(start chainhash.Hash) (e error) {
 // filterBlock filters a block for watched outpoints and addresses, and returns any matching transactions, sending
 // notifications along the way.
 func (c *BitcoindClient) filterBlock(
-	block *wire.MsgBlock, height int32,
+	block *wire.Block, height int32,
 	notify bool,
 ) ([]*tm.TxRecord, error) {
 	// If this block happened before the client's birthday, then we'll skip it entirely.
@@ -1070,7 +1071,7 @@ func (c *BitcoindClient) filterTx(
 	// We'll start by cycling through its outputs to determine if it pays to any of the currently watched addresses. If
 	// an output matches, we'll add it to our watch list.
 	for i, out := range tx.TxOut {
-		var addrs []util.Address
+		var addrs []btcaddr.Address
 		_, addrs, _, e = txscript.ExtractPkScriptAddrs(
 			out.PkScript, c.chainParams,
 		)

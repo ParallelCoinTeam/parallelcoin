@@ -4,6 +4,7 @@ import (
 	"container/list"
 	"errors"
 	"fmt"
+	"github.com/p9c/pod/pkg/amt"
 	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/logg"
 	"math"
@@ -12,12 +13,12 @@ import (
 	"time"
 	
 	"github.com/p9c/pod/pkg/blockchain"
-	"github.com/p9c/pod/pkg/mining"
-	"github.com/p9c/pod/pkg/txscript"
-	"github.com/p9c/pod/pkg/wire"
 	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/hardfork"
 	"github.com/p9c/pod/pkg/indexers"
+	"github.com/p9c/pod/pkg/mining"
+	"github.com/p9c/pod/pkg/txscript"
+	"github.com/p9c/pod/pkg/wire"
 	
 	"github.com/p9c/pod/pkg/btcjson"
 	"github.com/p9c/pod/pkg/util"
@@ -81,7 +82,7 @@ type Policy struct {
 	// relay or mine. It is a fraction of the max signature operations for a block.
 	MaxSigOpCostPerTx int
 	// MinRelayTxFee defines the minimum transaction fee in DUO/kB to be considered a non-zero fee.
-	MinRelayTxFee util.Amount
+	MinRelayTxFee amt.Amount
 }
 
 // Tag represents an identifier to use for tagging orphan transactions. The caller may choose any scheme it desires
@@ -321,7 +322,7 @@ func (mp *TxPool) RawMempoolVerbose() map[string]*btcjson.GetRawMempoolVerboseRe
 		mpd := &btcjson.GetRawMempoolVerboseResult{
 			Size:             int32(tx.MsgTx().SerializeSize()),
 			VSize:            int32(GetTxVirtualSize(tx)),
-			Fee:              util.Amount(desc.Fee).ToDUO(),
+			Fee:              amt.Amount(desc.Fee).ToDUO(),
 			Time:             desc.Added.Unix(),
 			Height:           int64(desc.Height),
 			StartingPriority: desc.StartingPriority,

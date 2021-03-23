@@ -4,6 +4,7 @@ import (
 	"compress/bzip2"
 	"encoding/binary"
 	"fmt"
+	"github.com/p9c/pod/pkg/block"
 	"io"
 	"os"
 	"path/filepath"
@@ -13,7 +14,6 @@ import (
 	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/txscript"
-	"github.com/p9c/pod/pkg/util"
 	
 	"github.com/p9c/pod/pkg/database"
 	_ "github.com/p9c/pod/pkg/database/ffldb"
@@ -52,7 +52,7 @@ func isSupportedDbType(dbType string) bool {
 
 // loadBlocks reads files containing bitcoin block data (gzipped but otherwise in the format bitcoind writes) from disk
 // and returns them as an array of util.Block. This is largely borrowed from the test code in pod.
-func loadBlocks(filename string) (blocks []*util.Block, e error) {
+func loadBlocks(filename string) (blocks []*block.Block, e error) {
 	filename = filepath.Join("tstdata/", filename)
 	var network = wire.MainNet
 	var dr io.Reader
@@ -70,7 +70,7 @@ func loadBlocks(filename string) (blocks []*util.Block, e error) {
 		if e := fi.Close(); E.Chk(e) {
 		}
 	}()
-	var block *util.Block
+	var block *block.Block
 	height := int64(1)
 	for ; ; height++ {
 		var rintbuf uint32
@@ -91,7 +91,7 @@ func loadBlocks(filename string) (blocks []*util.Block, e error) {
 		if e != nil {
 			fmt.Println(e)
 		}
-		block, e = util.NewBlockFromBytes(rbytes)
+		block, e = block.NewBlockFromBytes(rbytes)
 		if e != nil {
 			return
 		}

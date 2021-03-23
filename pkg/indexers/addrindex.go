@@ -3,17 +3,19 @@ package indexers
 import (
 	"errors"
 	"fmt"
+	"github.com/p9c/pod/pkg/block"
 	"github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/btcaddr"
 	"sync"
 	
 	"github.com/p9c/pod/pkg/util/qu"
 	
 	"github.com/p9c/pod/pkg/blockchain"
-	"github.com/p9c/pod/pkg/txscript"
-	"github.com/p9c/pod/pkg/wire"
 	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/database"
+	"github.com/p9c/pod/pkg/txscript"
 	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 const (
@@ -446,22 +448,22 @@ func dbRemoveAddrIndexEntries(bucket internalBucket, addrKey [addrKeySize]byte, 
 }
 
 // addrToKey converts known address types to an addrindex key.  An error is returned for unsupported types.
-func addrToKey(addr util.Address) ([addrKeySize]byte, error) {
+func addrToKey(addr btcaddr.Address) ([addrKeySize]byte, error) {
 	switch addr := addr.(type) {
-	case *util.AddressPubKeyHash:
+	case *btcaddr.PubKeyHash:
 		var result [addrKeySize]byte
 		result[0] = addrKeyTypePubKeyHash
 		copy(result[1:], addr.Hash160()[:])
 		return result, nil
-	case *util.AddressScriptHash:
+	case *btcaddr.ScriptHash:
 		var result [addrKeySize]byte
 		result[0] = addrKeyTypeScriptHash
 		copy(result[1:], addr.Hash160()[:])
 		return result, nil
-	case *util.AddressPubKey:
+	case *btcaddr.PubKey:
 		var result [addrKeySize]byte
 		result[0] = addrKeyTypePubKeyHash
-		copy(result[1:], addr.AddressPubKeyHash().Hash160()[:])
+		copy(result[1:], addr.PubKeyHash().Hash160()[:])
 		return result, nil
 		// case *util.AddressWitnessScriptHash:
 		// 	var result [addrKeySize]byte
@@ -469,7 +471,7 @@ func addrToKey(addr util.Address) ([addrKeySize]byte, error) {
 		// 	// P2WSH outputs utilize a 32-byte data push created by hashing the script with sha256 instead of hash160. In
 		// 	// order to keep all address entries within the database uniform and compact, we use a hash160 here to reduce
 		// 	// the size of the salient data push to 20-bytes.
-		// 	copy(result[1:], util.Hash160(addr.ScriptAddress()))
+		// 	copy(result[1:], btcaddr.Hash160(addr.ScriptAddress()))
 		// 	return result, nil
 		// case *util.AddressWitnessPubKeyHash:
 		// 	var result [addrKeySize]byte
@@ -546,7 +548,7 @@ type writeIndexData map[[addrKeySize]byte][]int
 // associated transaction using the passed map.
 func (idx *AddrIndex) indexPkScript(data writeIndexData, pkScript []byte, txIdx int) {
 	// Nothing to index if the script is non-standard or otherwise doesn't contain any addresses.
-	var addrs []util.Address
+	var addrs []btcaddr.Address
 	var e error
 	_, addrs, _, e = txscript.ExtractPkScriptAddrs(
 		pkScript,
@@ -577,7 +579,7 @@ func (idx *AddrIndex) indexPkScript(data writeIndexData, pkScript []byte, txIdx 
 // indexBlock extract all of the standard addresses from all of the transactions in the passed block and maps each of
 // them to the associated transaction using the passed map.
 func (idx *AddrIndex) indexBlock(
-	data writeIndexData, block *util.Block,
+	data writeIndexData, block *block.Block,
 	stxos []blockchain.SpentTxOut,
 ) {
 	stxoIndex := 0
@@ -603,7 +605,7 @@ func (idx *AddrIndex) indexBlock(
 // ConnectBlock is invoked by the index manager when a new block has been connected to the main chain. This indexer adds
 // a mapping for each address the transactions in the block involve. This is part of the Indexer interface.
 func (idx *AddrIndex) ConnectBlock(
-	dbTx database.Tx, block *util.Block,
+	dbTx database.Tx, block *block.Block,
 	stxos []blockchain.SpentTxOut,
 ) (e error) {
 	// The offset and length of the transactions within the serialized block.
@@ -638,7 +640,7 @@ func (idx *AddrIndex) ConnectBlock(
 // DisconnectBlock is invoked by the index manager when a block has been disconnected from the main chain. This indexer
 // removes the address mappings each transaction in the block involve. This is part of the Indexer interface.
 func (idx *AddrIndex) DisconnectBlock(
-	dbTx database.Tx, block *util.Block,
+	dbTx database.Tx, block *block.Block,
 	stxos []blockchain.SpentTxOut,
 ) (e error) {
 	// Build all of the address to transaction mappings in a local map.
@@ -661,7 +663,7 @@ func (idx *AddrIndex) DisconnectBlock(
 // These results only include transactions confirmed in blocks. See the UnconfirmedTxnsForAddress method for obtaining
 // unconfirmed transactions that involve a given address. This function is safe for concurrent access.
 func (idx *AddrIndex) TxRegionsForAddress(
-	dbTx database.Tx, addr util.Address, numToSkip, numRequested uint32,
+	dbTx database.Tx, addr btcaddr.Address, numToSkip, numRequested uint32,
 	reverse bool,
 ) ([]database.BlockRegion, uint32, error) {
 	addrKey, e := addrToKey(addr)
@@ -765,7 +767,7 @@ func (idx *AddrIndex) RemoveUnconfirmedTx(hash *chainhash.Hash) {
 // UnconfirmedTxnsForAddress returns all transactions currently in the unconfirmed (memory-only) address index that
 // involve the passed address. Unsupported address types are ignored and will result in no results. This function is
 // safe for concurrent access.
-func (idx *AddrIndex) UnconfirmedTxnsForAddress(addr util.Address) []*util.Tx {
+func (idx *AddrIndex) UnconfirmedTxnsForAddress(addr btcaddr.Address) []*util.Tx {
 	// Ignore unsupported address types.
 	addrKey, e := addrToKey(addr)
 	if e != nil {

@@ -2,6 +2,8 @@ package gui
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/amt"
+	"github.com/p9c/pod/pkg/btcaddr"
 	"strconv"
 	"strings"
 	"time"
@@ -12,7 +14,6 @@ import (
 	
 	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/gui"
-	"github.com/p9c/pod/pkg/util"
 )
 
 type SendPage struct {
@@ -191,14 +192,14 @@ func (sp *SendPage) SendButton() l.Widget {
 						D.Ln("clicked send button")
 						go func() {
 							if wg.WalletAndClientRunning() {
-								var amt float64
-								var am util.Amount
+								var amount float64
+								var am amt.Amount
 								var e error
-								if amt, e = strconv.ParseFloat(
+								if amount, e = strconv.ParseFloat(
 									wg.inputs["sendAmount"].GetText(),
 									64,
 								); !E.Chk(e) {
-									if am, e = util.NewAmount(amt); E.Chk(e) {
+									if am, e = amt.NewAmount(amount); E.Chk(e) {
 										D.Ln(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", e)
 										// todo: indicate this to the user somehow
 										return
@@ -207,8 +208,8 @@ func (sp *SendPage) SendButton() l.Widget {
 									// todo: indicate this to the user somehow
 									return
 								}
-								var addr util.Address
-								if addr, e = util.DecodeAddress(
+								var addr btcaddr.Address
+								if addr, e = btcaddr.Decode(
 									wg.inputs["sendAddress"].GetText(),
 									wg.cx.ActiveNet,
 								); E.Chk(e) {
@@ -257,15 +258,15 @@ func (sp *SendPage) saveForm(txid string) {
 	D.Ln("processing form data to save")
 	amtS := wg.inputs["sendAmount"].GetText()
 	var e error
-	var amt float64
-	if amt, e = strconv.ParseFloat(amtS, 64); E.Chk(e) {
+	var amount float64
+	if amount, e = strconv.ParseFloat(amtS, 64); E.Chk(e) {
 		return
 	}
-	if amt == 0 {
+	if amount == 0 {
 		return
 	}
-	var ua util.Amount
-	if ua, e = util.NewAmount(amt); E.Chk(e) {
+	var ua amt.Amount
+	if ua, e = amt.NewAmount(amount); E.Chk(e) {
 		return
 	}
 	msg := wg.inputs["sendMessage"].GetText()
@@ -273,8 +274,8 @@ func (sp *SendPage) saveForm(txid string) {
 		return
 	}
 	addr := wg.inputs["sendAddress"].GetText()
-	var ad util.Address
-	if ad, e = util.DecodeAddress(addr, wg.cx.ActiveNet); E.Chk(e) {
+	var ad btcaddr.Address
+	if ad, e = btcaddr.Decode(addr, wg.cx.ActiveNet); E.Chk(e) {
 		return
 	}
 	wg.State.sendAddresses = append(
@@ -352,8 +353,8 @@ func (sp *SendPage) pasteFunction() (b bool) {
 	split1 := strings.Split(urn, "parallelcoin:")
 	split2 := strings.Split(split1[1], "?")
 	addr := split2[0]
-	var ua util.Address
-	if ua, e = util.DecodeAddress(addr, wg.cx.ActiveNet); E.Chk(e) {
+	var ua btcaddr.Address
+	if ua, e = btcaddr.Decode(addr, wg.cx.ActiveNet); E.Chk(e) {
 		return
 	}
 	_ = ua

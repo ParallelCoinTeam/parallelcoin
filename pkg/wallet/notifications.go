@@ -2,13 +2,14 @@ package wallet
 
 import (
 	"bytes"
+	"github.com/p9c/pod/pkg/amt"
+	"github.com/p9c/pod/pkg/btcaddr"
 	"sync"
 	
 	"github.com/p9c/pod/pkg/chainhash"
-	"github.com/p9c/pod/pkg/walletdb"
 	"github.com/p9c/pod/pkg/txscript"
-	"github.com/p9c/pod/pkg/util"
-	"github.com/p9c/pod/pkg/wallet/waddrmgr"
+	"github.com/p9c/pod/pkg/waddrmgr"
+	"github.com/p9c/pod/pkg/walletdb"
 	"github.com/p9c/pod/pkg/wtxmgr"
 )
 
@@ -17,7 +18,7 @@ import (
 // they are not included.
 type AccountBalance struct {
 	Account      uint32
-	TotalBalance util.Amount
+	TotalBalance amt.Amount
 }
 
 // AccountNotification contains properties regarding an account, such as its name and the number of derived and imported
@@ -115,7 +116,7 @@ type TransactionSummary struct {
 	Transaction []byte
 	MyInputs    []TransactionSummaryInput
 	MyOutputs   []TransactionSummaryOutput
-	Fee         util.Amount
+	Fee         amt.Amount
 	Timestamp   int64
 }
 
@@ -125,7 +126,7 @@ type TransactionSummary struct {
 type TransactionSummaryInput struct {
 	Index           uint32
 	PreviousAccount uint32
-	PreviousAmount  util.Amount
+	PreviousAmount  amt.Amount
 }
 
 // TransactionSummaryOutput describes wallet properties of a transaction output controlled by the wallet. The Index
@@ -259,7 +260,7 @@ func (s *NotificationServer) notifyAttachedBlock(dbtx walletdb.ReadTx, block *wt
 		return
 	}
 	s.currentTxNtfn.UnminedTransactionHashes = unminedHashes
-	bals := make(map[uint32]util.Amount)
+	bals := make(map[uint32]amt.Amount)
 	for _, b := range s.currentTxNtfn.AttachedBlocks {
 		relevantAccounts(s.wallet, bals, b.Transactions)
 	}
@@ -350,7 +351,7 @@ func (s *NotificationServer) notifyUnminedTransaction(dbtx walletdb.ReadTx, deta
 		)
 		return
 	}
-	bals := make(map[uint32]util.Amount)
+	bals := make(map[uint32]amt.Amount)
 	relevantAccounts(s.wallet, bals, unminedTxs)
 	e = totalBalances(dbtx, s.wallet, bals)
 	if e != nil {
@@ -449,7 +450,7 @@ func (c *TransactionNotificationsClient) Done() {
 		s.mu.Unlock()
 	}()
 }
-func flattenBalanceMap(m map[uint32]util.Amount) []AccountBalance {
+func flattenBalanceMap(m map[uint32]amt.Amount) []AccountBalance {
 	s := make([]AccountBalance, 0, len(m))
 	for k, v := range m {
 		s = append(s, AccountBalance{Account: k, TotalBalance: v})
@@ -477,7 +478,7 @@ func lookupInputAccount(dbtx walletdb.ReadTx, w *Wallet, details *wtxmgr.TxDetai
 		return 0
 	}
 	prevOut := prev.MsgTx.TxOut[prevOP.Index]
-	var addrs []util.Address
+	var addrs []btcaddr.Address
 	_, addrs, _, e = txscript.ExtractPkScriptAddrs(prevOut.PkScript, w.chainParams)
 	var inputAcct uint32
 	if e == nil && len(addrs) > 0 {
@@ -497,7 +498,7 @@ func lookupOutputChain(
 ) (account uint32, internal bool) {
 	addrmgrNs := dbtx.ReadBucket(waddrmgrNamespaceKey)
 	output := details.MsgTx.TxOut[cred.Index]
-	var addrs []util.Address
+	var addrs []btcaddr.Address
 	var e error
 	_, addrs, _, e = txscript.ExtractPkScriptAddrs(output.PkScript, w.chainParams)
 	var ma waddrmgr.ManagedAddress
@@ -524,13 +525,13 @@ func makeTxSummary(dbtx walletdb.ReadTx, w *Wallet, details *wtxmgr.TxDetails) T
 		}
 		serializedTx = buf.Bytes()
 	}
-	var fee util.Amount
+	var fee amt.Amount
 	if len(details.Debits) == len(details.MsgTx.TxIn) {
 		for _, deb := range details.Debits {
 			fee += deb.Amount
 		}
 		for _, txOut := range details.MsgTx.TxOut {
-			fee -= util.Amount(txOut.Value)
+			fee -= amt.Amount(txOut.Value)
 		}
 	}
 	var inputs []TransactionSummaryInput
@@ -574,7 +575,7 @@ func newNotificationServer(wallet *Wallet) *NotificationServer {
 		wallet:    wallet,
 	}
 }
-func relevantAccounts(w *Wallet, m map[uint32]util.Amount, txs []TransactionSummary) {
+func relevantAccounts(w *Wallet, m map[uint32]amt.Amount, txs []TransactionSummary) {
 	for _, tx := range txs {
 		for _, d := range tx.MyInputs {
 			m[d.PreviousAccount] = 0
@@ -584,7 +585,7 @@ func relevantAccounts(w *Wallet, m map[uint32]util.Amount, txs []TransactionSumm
 		}
 	}
 }
-func totalBalances(dbtx walletdb.ReadTx, w *Wallet, m map[uint32]util.Amount) (e error) {
+func totalBalances(dbtx walletdb.ReadTx, w *Wallet, m map[uint32]amt.Amount) (e error) {
 	addrmgrNs := dbtx.ReadBucket(waddrmgrNamespaceKey)
 	unspent, e := w.TxStore.UnspentOutputs(dbtx.ReadBucket(wtxmgrNamespaceKey))
 	if e != nil {
@@ -593,7 +594,7 @@ func totalBalances(dbtx walletdb.ReadTx, w *Wallet, m map[uint32]util.Amount) (e
 	for i := range unspent {
 		output := &unspent[i]
 		var outputAcct uint32
-		var addrs []util.Address
+		var addrs []btcaddr.Address
 		_, addrs, _, e = txscript.ExtractPkScriptAddrs(
 			output.PkScript, w.chainParams,
 		)

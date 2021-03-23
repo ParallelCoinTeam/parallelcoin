@@ -3,14 +3,14 @@
 package helpers
 
 import (
+	"github.com/p9c/pod/pkg/amt"
 	"github.com/p9c/pod/pkg/wire"
-	"github.com/p9c/pod/pkg/util"
 )
 
 // SumOutputValues sums up the list of TxOuts and returns an Amount.
-func SumOutputValues(outputs []*wire.TxOut) (totalOutput util.Amount) {
+func SumOutputValues(outputs []*wire.TxOut) (totalOutput amt.Amount) {
 	for _, txOut := range outputs {
-		totalOutput += util.Amount(txOut.Value)
+		totalOutput += amt.Amount(txOut.Value)
 	}
 	return totalOutput
 }

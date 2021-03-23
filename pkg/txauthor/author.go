@@ -3,23 +3,23 @@ package txauthor
 
 import (
 	"errors"
+	"github.com/p9c/pod/pkg/amt"
 	"github.com/p9c/pod/pkg/chaincfg"
 	
-	"github.com/p9c/pod/pkg/wire"
-	txsizes "github.com/p9c/pod/pkg/txsizes"
 	"github.com/p9c/pod/pkg/txrules"
 	"github.com/p9c/pod/pkg/txscript"
-	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/txsizes"
 	h "github.com/p9c/pod/pkg/util/helpers"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 type (
 	// InputSource provides transaction inputs referencing spendable outputs to construct a transaction outputting some
 	// target amount. If the target amount can not be satisified, this can be signaled by returning a total amount less
 	// than the target or by returning a more detailed error implementing InputSourceError.
-	InputSource func(target util.Amount) (
-		total util.Amount, inputs []*wire.TxIn,
-		inputValues []util.Amount, scripts [][]byte, e error,
+	InputSource func(target amt.Amount) (
+		total amt.Amount, inputs []*wire.TxIn,
+		inputValues []amt.Amount, scripts [][]byte, e error,
 	)
 	// InputSourceError describes the failure to provide enough input value from unspent transaction outputs to meet a
 	// target amount. A typed error is used so input sources can provide their own implementations describing the reason
@@ -35,8 +35,8 @@ type (
 	AuthoredTx struct {
 		Tx              *wire.MsgTx
 		PrevScripts     [][]byte
-		PrevInputValues []util.Amount
-		TotalInput      util.Amount
+		PrevInputValues []amt.Amount
+		TotalInput      amt.Amount
 		ChangeIndex     int // negative if no change
 	}
 	// ChangeSource provides P2PKH change output scripts for transaction creation.
@@ -80,7 +80,7 @@ func (insufficientFundsError) Error() string {
 //
 // BUGS: Fee estimation may be off when redeeming non-compressed P2PKH outputs.
 func NewUnsignedTransaction(
-	outputs []*wire.TxOut, relayFeePerKb util.Amount,
+	outputs []*wire.TxOut, relayFeePerKb amt.Amount,
 	fetchInputs InputSource, fetchChange ChangeSource,
 ) (*AuthoredTx, error) {
 	targetAmount := h.SumOutputValues(outputs)
@@ -174,7 +174,7 @@ func (tx *AuthoredTx) RandomizeChangePosition() {
 // inputs. Private keys and redeem scripts are looked up using a SecretsSource
 // based on the previous output script.
 func AddAllInputScripts(
-	tx *wire.MsgTx, prevPkScripts [][]byte, inputValues []util.Amount,
+	tx *wire.MsgTx, prevPkScripts [][]byte, inputValues []amt.Amount,
 	secrets SecretsSource,
 ) (e error) {
 	inputs := tx.TxIn
@@ -245,9 +245,9 @@ func AddAllInputScripts(
 // 	// Once we have the key pair, generate a p2wkh address type, respecting the compression type of the generated key.
 // 	var pubKeyHash []byte
 // 	if compressed {
-// 		pubKeyHash = util.Hash160(pubKey.SerializeCompressed())
+// 		pubKeyHash = btcaddr.Hash160(pubKey.SerializeCompressed())
 // 	} else {
-// 		pubKeyHash = util.Hash160(pubKey.SerializeUncompressed())
+// 		pubKeyHash = btcaddr.Hash160(pubKey.SerializeUncompressed())
 // 	}
 // 	p2wkhAddr, e := util.NewAddressWitnessPubKeyHash(pubKeyHash, chainParams)
 // 	if e != nil  {
@@ -292,9 +292,9 @@ func AddAllInputScripts(
 // 	pubKey := privKey.PubKey()
 // 	var pubKeyHash []byte
 // 	if compressed {
-// 		pubKeyHash = util.Hash160(pubKey.SerializeCompressed())
+// 		pubKeyHash = btcaddr.Hash160(pubKey.SerializeCompressed())
 // 	} else {
-// 		pubKeyHash = util.Hash160(pubKey.SerializeUncompressed())
+// 		pubKeyHash = btcaddr.Hash160(pubKey.SerializeUncompressed())
 // 	}
 // 	// Next, we'll generate a valid sigScript that'll allow us to spend the p2sh
 // 	// output. The sigScript will contain only a single push of the p2wkh witness

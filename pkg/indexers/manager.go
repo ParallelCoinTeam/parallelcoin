@@ -2,11 +2,11 @@ package indexers
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/block"
 	
 	"github.com/p9c/pod/pkg/blockchain"
 	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/database"
-	"github.com/p9c/pod/pkg/util"
 )
 
 var (
@@ -57,7 +57,7 @@ func dbFetchIndexerTip(dbTx database.Tx, idxKey []byte) (*chainhash.Hash, int32,
 // updates the tip of the indexer accordingly. An error will be returned if the current tip for the indexer is not the
 // previous block for the passed block.
 func dbIndexConnectBlock(
-	dbTx database.Tx, indexer Indexer, block *util.Block,
+	dbTx database.Tx, indexer Indexer, block *block.Block,
 	stxo []blockchain.SpentTxOut,
 ) (e error) {
 	// Assert that the block being connected properly connects to the current tip of the index.
@@ -66,7 +66,7 @@ func dbIndexConnectBlock(
 	if curTipHash, _, e = dbFetchIndexerTip(dbTx, idxKey); E.Chk(e) {
 		return e
 	}
-	if !curTipHash.IsEqual(&block.MsgBlock().Header.PrevBlock) {
+	if !curTipHash.IsEqual(&block.WireBlock().Header.PrevBlock) {
 		return AssertError(
 			fmt.Sprintf(
 				"dbIndexConnectBlock must be "+
@@ -88,7 +88,7 @@ func dbIndexConnectBlock(
 // and updates the tip of the indexer accordingly. An error will be returned if the current tip for the indexer is not
 // the passed block.
 func dbIndexDisconnectBlock(
-	dbTx database.Tx, indexer Indexer, block *util.Block,
+	dbTx database.Tx, indexer Indexer, block *block.Block,
 	stxo []blockchain.SpentTxOut,
 ) (e error) {
 	// Assert that the block being disconnected is the current tip of the index.
@@ -113,7 +113,7 @@ func dbIndexDisconnectBlock(
 		return e
 	}
 	// Update the current index tip.
-	prevHash := &block.MsgBlock().Header.PrevBlock
+	prevHash := &block.WireBlock().Header.PrevBlock
 	return dbPutIndexerTip(dbTx, idxKey, prevHash, block.Height()-1)
 }
 
@@ -267,18 +267,18 @@ func (m *Manager) Init(chain *blockchain.BlockChain, interrupt <-chan struct{}) 
 			// At this point the index tip is orphaned, so load the orphaned block from the database directly and
 			// disconnect it from the index. The block has to be loaded directly since it is no longer in the main chain
 			// and thus the chain. BlockByHash function would error.
-			var block *util.Block
+			var blk *block.Block
 			e := m.db.View(
 				func(dbTx database.Tx) (e error) {
 					blockBytes, e := dbTx.FetchBlock(hash)
 					if e != nil {
 						return e
 					}
-					block, e = util.NewBlockFromBytes(blockBytes)
+					blk, e = block.NewFromBytes(blockBytes)
 					if e != nil {
 						return e
 					}
-					block.SetHeight(height)
+					blk.SetHeight(height)
 					return e
 				},
 			)
@@ -286,7 +286,7 @@ func (m *Manager) Init(chain *blockchain.BlockChain, interrupt <-chan struct{}) 
 				return e
 			}
 			// We'll also grab the set of outputs spent by this block so we can remove them from the index.
-			spentTxos, e := chain.FetchSpendJournal(block)
+			spentTxos, e := chain.FetchSpendJournal(blk)
 			if e != nil {
 				return e
 			}
@@ -295,13 +295,13 @@ func (m *Manager) Init(chain *blockchain.BlockChain, interrupt <-chan struct{}) 
 				func(dbTx database.Tx) (e error) {
 					// Remove all of the index entries associated with the block and update the indexer tip.
 					e = dbIndexDisconnectBlock(
-						dbTx, indexer, block, spentTxos,
+						dbTx, indexer, blk, spentTxos,
 					)
 					if e != nil {
 						return e
 					}
 					// Update the tip to the previous block.
-					hash = &block.MsgBlock().Header.PrevBlock
+					hash = &blk.WireBlock().Header.PrevBlock
 					height--
 					return nil
 				},
@@ -454,7 +454,7 @@ func indexNeedsInputs(index Indexer) bool {
 // is managing, performs some sanity checks, and invokes each indexer. This is part of the blockchain.IndexManager
 // interface.
 func (m *Manager) ConnectBlock(
-	dbTx database.Tx, block *util.Block,
+	dbTx database.Tx, block *block.Block,
 	stxos []blockchain.SpentTxOut,
 ) (e error) {
 	// Call each of the currently active optional indexes with the block being connected so they can update accordingly.
@@ -471,7 +471,7 @@ func (m *Manager) ConnectBlock(
 // the state of each index it is managing, performs some sanity checks, and invokes each indexer to remove the index
 // entries associated with the block. This is part of the blockchain.IndexManager interface.
 func (m *Manager) DisconnectBlock(
-	dbTx database.Tx, block *util.Block,
+	dbTx database.Tx, block *block.Block,
 	stxo []blockchain.SpentTxOut,
 ) (e error) {
 	// Call each of the currently active optional indexes with the block being disconnected so they can update

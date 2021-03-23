@@ -2,13 +2,13 @@ package atom
 
 import (
 	"github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/btcaddr"
 	"time"
 	
 	"go.uber.org/atomic"
 	
-	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/btcjson"
-	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/chainhash"
 )
 
 // import all the atomics from uber atomic
@@ -117,14 +117,14 @@ type Address struct {
 }
 
 // NewAddress creates a Hash.
-func NewAddress(tt util.Address, forNet *chaincfg.Params) *Address {
+func NewAddress(tt btcaddr.Address, forNet *chaincfg.Params) *Address {
 	t := atomic.NewString(tt.EncodeAddress())
 	return &Address{String: t, ForNet: forNet}
 }
 
 // Load atomically loads the wrapped value.
-func (at *Address) Load() util.Address {
-	addr, e := util.DecodeAddress(at.String.Load(), at.ForNet)
+func (at *Address) Load() btcaddr.Address {
+	addr, e := btcaddr.Decode(at.String.Load(), at.ForNet)
 	if e != nil {
 		return nil
 	}
@@ -133,12 +133,12 @@ func (at *Address) Load() util.Address {
 
 // Store atomically stores the passed value.
 // The passed value is copied so further mutations are not propagated.
-func (at *Address) Store(h util.Address) {
+func (at *Address) Store(h btcaddr.Address) {
 	at.String.Store(h.EncodeAddress())
 }
 
 // Swap atomically swaps the wrapped util.Address and returns the old value.
-func (at *Address) Swap(n util.Address) util.Address {
+func (at *Address) Swap(n btcaddr.Address) btcaddr.Address {
 	o := at.Load()
 	at.Store(n)
 	return o

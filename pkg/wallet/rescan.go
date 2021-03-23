@@ -1,11 +1,11 @@
 package wallet
 
 import (
-	"github.com/p9c/pod/pkg/logg"
-	txs "github.com/p9c/pod/pkg/txscript"
-	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/chainclient"
-	wm "github.com/p9c/pod/pkg/wallet/waddrmgr"
+	"github.com/p9c/pod/pkg/logg"
+	"github.com/p9c/pod/pkg/btcaddr"
+	txs "github.com/p9c/pod/pkg/txscript"
+	wm "github.com/p9c/pod/pkg/waddrmgr"
 	"github.com/p9c/pod/pkg/wire"
 	tm "github.com/p9c/pod/pkg/wtxmgr"
 )
@@ -13,14 +13,14 @@ import (
 // RescanProgressMsg reports the current progress made by a rescan for a set of
 // wallet addresses.
 type RescanProgressMsg struct {
-	Addresses    []util.Address
+	Addresses    []btcaddr.Address
 	Notification *chainclient.RescanProgress
 }
 
 // RescanFinishedMsg reports the addresses that were rescanned when a
 // rescanfinished message was received rescanning a batch of addresses.
 type RescanFinishedMsg struct {
-	Addresses    []util.Address
+	Addresses    []btcaddr.Address
 	Notification *chainclient.RescanFinished
 }
 
@@ -30,8 +30,8 @@ type RescanFinishedMsg struct {
 // the error result of the rescan RPC is sent on the Err channel.
 type RescanJob struct {
 	InitialSync bool
-	Addrs       []util.Address
-	OutPoints   map[wire.OutPoint]util.Address
+	Addrs       []btcaddr.Address
+	OutPoints   map[wire.OutPoint]btcaddr.Address
 	BlockStamp  wm.BlockStamp
 	err         chan error
 }
@@ -40,8 +40,8 @@ type RescanJob struct {
 // together before a rescan is performed.
 type rescanBatch struct {
 	initialSync bool
-	addrs       []util.Address
-	outpoints   map[wire.OutPoint]util.Address
+	addrs       []btcaddr.Address
+	outpoints   map[wire.OutPoint]btcaddr.Address
 	bs          wm.BlockStamp
 	errChans    []chan error
 }
@@ -227,19 +227,19 @@ out:
 // Rescan begins a rescan for all active addresses and unspent outputs of a
 // wallet. This is intended to be used to sync a wallet back up to the current
 // best block in the main chain, and is considered an initial sync rescan.
-func (w *Wallet) Rescan(addrs []util.Address, unspent []tm.Credit) (e error) {
+func (w *Wallet) Rescan(addrs []btcaddr.Address, unspent []tm.Credit) (e error) {
 	return w.rescanWithTarget(addrs, unspent, nil)
 }
 
 // rescanWithTarget performs a rescan starting at the optional startStamp. If
 // none is provided, the rescan will begin from the manager's sync tip.
 func (w *Wallet) rescanWithTarget(
-	addrs []util.Address,
+	addrs []btcaddr.Address,
 	unspent []tm.Credit, startStamp *wm.BlockStamp,
 ) (e error) {
-	outpoints := make(map[wire.OutPoint]util.Address, len(unspent))
+	outpoints := make(map[wire.OutPoint]btcaddr.Address, len(unspent))
 	for _, output := range unspent {
-		var outputAddrs []util.Address
+		var outputAddrs []btcaddr.Address
 		_, outputAddrs, _, e = txs.ExtractPkScriptAddrs(
 			output.PkScript, w.chainParams,
 		)

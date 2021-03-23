@@ -3,18 +3,19 @@ package gui
 import (
 	"crypto/cipher"
 	"encoding/json"
+	"github.com/p9c/pod/pkg/amt"
 	"github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/btcaddr"
 	"io/ioutil"
 	"time"
 	
 	l "gioui.org/layout"
 	uberatomic "go.uber.org/atomic"
 	
+	"github.com/p9c/pod/pkg/btcjson"
 	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/gcm"
-	"github.com/p9c/pod/pkg/btcjson"
 	"github.com/p9c/pod/pkg/transport"
-	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/atom"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
@@ -51,13 +52,13 @@ func (c *CategoryFilter) Filter(s string) (include bool) {
 }
 
 type AddressEntry struct {
-	Address  string      `json:"address"`
-	Message  string      `json:"message,omitempty"`
-	Label    string      `json:"label,omitempty"`
-	Amount   util.Amount `json:"amount"`
-	Created  time.Time   `json:"created"`
-	Modified time.Time   `json:"modified"`
-	TxID     string      `json:txid,omitempty'`
+	Address  string     `json:"address"`
+	Message  string     `json:"message,omitempty"`
+	Label    string     `json:"label,omitempty"`
+	Amount   amt.Amount `json:"amount"`
+	Created  time.Time  `json:"created"`
+	Modified time.Time  `json:"modified"`
+	TxID     string     `json:txid,omitempty'`
 }
 
 type State struct {
@@ -100,7 +101,7 @@ func GetNewState(params *chaincfg.Params, activePage *uberatomic.String) *State 
 		filter:        CategoryFilter{},
 		filterChanged: fc,
 		currentReceivingAddress: atom.NewAddress(
-			&util.AddressPubKeyHash{},
+			&btcaddr.PubKeyHash{},
 			params,
 		),
 		isAddress:  &atom.Bool{Bool: uberatomic.NewBool(false)},
@@ -112,7 +113,7 @@ func (s *State) BumpLastUpdated() {
 	s.lastUpdated.Store(time.Now())
 }
 
-func (s *State) SetReceivingAddress(addr util.Address) {
+func (s *State) SetReceivingAddress(addr btcaddr.Address) {
 	s.currentReceivingAddress.Store(addr)
 }
 
@@ -232,8 +233,8 @@ func (m *Marshalled) Unmarshal(s *State) {
 	
 	if m.ReceivingAddress != "1111111111111111111114oLvT2" {
 		var e error
-		var ra util.Address
-		if ra, e = util.DecodeAddress(m.ReceivingAddress, s.currentReceivingAddress.ForNet); E.Chk(e) {
+		var ra btcaddr.Address
+		if ra, e = btcaddr.Decode(m.ReceivingAddress, s.currentReceivingAddress.ForNet); E.Chk(e) {
 		}
 		s.currentReceivingAddress.Store(ra)
 	}

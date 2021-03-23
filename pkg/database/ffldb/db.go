@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+	"github.com/p9c/pod/pkg/block"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -20,7 +21,6 @@ import (
 	
 	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/database"
-	u "github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/treap"
 	"github.com/p9c/pod/pkg/wire"
 )
@@ -1066,7 +1066,7 @@ func (tx *transaction) hasBlock(hash *chainhash.Hash) bool {
 //   - ErrTxClosed if the transaction has already been closed
 //
 // This function is part of the database.Tx interface implementation.
-func (tx *transaction) StoreBlock(block *u.Block) (e error) {
+func (tx *transaction) StoreBlock(block *block.Block) (e error) {
 	// Ensure transaction state is valid.
 	if e := tx.checkClosed(); E.Chk(e) {
 		return e
@@ -1209,7 +1209,7 @@ func (tx *transaction) FetchBlockHeaders(hashes []chainhash.Hash) ([][]byte, err
 }
 
 // FetchBlock returns the raw serialized bytes for the block identified by the given hash. The raw bytes are in the
-// format returned by Serialize on a wire.MsgBlock.
+// format returned by Serialize on a wire.Block.
 //
 // Returns the following errors as required by the interface contract:
 //
@@ -1253,7 +1253,7 @@ func (tx *transaction) FetchBlock(hash *chainhash.Hash) ([]byte, error) {
 
 // FetchBlocks returns the raw serialized bytes for the blocks identified by the given hashes.
 //
-// The raw bytes are in the format returned by Serialize on a wire.MsgBlock.
+// The raw bytes are in the format returned by Serialize on a wire.Block.
 //
 // Returns the following errors as required by the interface contract:
 //
@@ -1322,7 +1322,7 @@ func (tx *transaction) fetchPendingRegion(region *database.BlockRegion) ([]byte,
 // Depending on the backend implementation, this can provide significant savings by avoiding the need to load entire
 // blocks.
 //
-// The raw bytes are in the format returned by Serialize on a wire.MsgBlock and the Offset field in the provided
+// The raw bytes are in the format returned by Serialize on a wire.Block and the Offset field in the provided
 // BlockRegion is zero-based and relative to the start of the block (byte 0).
 //
 // Returns the following errors as required by the interface contract:
@@ -1389,7 +1389,7 @@ func (tx *transaction) FetchBlockRegion(region *database.BlockRegion) ([]byte, e
 // function. Depending on the backend implementation, this can provide significant savings by avoiding the need to load
 // entire blocks.
 //
-// The raw bytes are in the format returned by Serialize on a wire.MsgBlock and the Offset fields in the provided
+// The raw bytes are in the format returned by Serialize on a wire.Block and the Offset fields in the provided
 // BlockRegions are zero-based and relative to the start of the block (byte 0).
 //
 // Returns the following errors as required by the interface contract:

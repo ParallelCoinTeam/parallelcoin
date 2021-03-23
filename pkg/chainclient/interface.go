@@ -1,11 +1,11 @@
 package chainclient
 
 import (
+	"github.com/p9c/pod/pkg/btcaddr"
 	"time"
 	
 	"github.com/p9c/pod/pkg/chainhash"
-	"github.com/p9c/pod/pkg/util"
-	"github.com/p9c/pod/pkg/wallet/waddrmgr"
+	"github.com/p9c/pod/pkg/waddrmgr"
 	"github.com/p9c/pod/pkg/wire"
 	"github.com/p9c/pod/pkg/wtxmgr"
 )
@@ -27,14 +27,14 @@ type Interface interface {
 	Stop()
 	WaitForShutdown()
 	GetBestBlock() (*chainhash.Hash, int32, error)
-	GetBlock(*chainhash.Hash) (*wire.MsgBlock, error)
+	GetBlock(*chainhash.Hash) (*wire.Block, error)
 	GetBlockHash(int64) (*chainhash.Hash, error)
 	GetBlockHeader(*chainhash.Hash) (*wire.BlockHeader, error)
 	FilterBlocks(*FilterBlocksRequest) (*FilterBlocksResponse, error)
 	BlockStamp() (*waddrmgr.BlockStamp, error)
 	SendRawTransaction(*wire.MsgTx, bool) (*chainhash.Hash, error)
-	Rescan(*chainhash.Hash, []util.Address, map[wire.OutPoint]util.Address) error
-	NotifyReceived([]util.Address) error
+	Rescan(*chainhash.Hash, []btcaddr.Address, map[wire.OutPoint]btcaddr.Address) error
+	NotifyReceived([]btcaddr.Address) error
 	NotifyBlocks() error
 	Notifications() <-chan interface{}
 	BackEnd() string
@@ -60,9 +60,9 @@ type (
 	// monitor for spends.
 	FilterBlocksRequest struct {
 		Blocks           []wtxmgr.BlockMeta
-		ExternalAddrs    map[waddrmgr.ScopedIndex]util.Address
-		InternalAddrs    map[waddrmgr.ScopedIndex]util.Address
-		WatchedOutPoints map[wire.OutPoint]util.Address
+		ExternalAddrs    map[waddrmgr.ScopedIndex]btcaddr.Address
+		InternalAddrs    map[waddrmgr.ScopedIndex]btcaddr.Address
+		WatchedOutPoints map[wire.OutPoint]btcaddr.Address
 	}
 	// FilterBlocksResponse reports the set of all internal and external addresses found in response to a
 	// FilterBlockRequest, any outpoints found that correspond to those addresses, as well as the relevant transactions
@@ -73,7 +73,7 @@ type (
 		BlockMeta          wtxmgr.BlockMeta
 		FoundExternalAddrs map[waddrmgr.KeyScope]map[uint32]struct{}
 		FoundInternalAddrs map[waddrmgr.KeyScope]map[uint32]struct{}
-		FoundOutPoints     map[wire.OutPoint]util.Address
+		FoundOutPoints     map[wire.OutPoint]btcaddr.Address
 		RelevantTxns       []*wire.MsgTx
 	}
 	// BlockDisconnected is a notifcation that the block described by the BlockStamp was reorganized out of the best

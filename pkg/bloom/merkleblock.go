@@ -1,9 +1,9 @@
 package bloom
 
 import (
+	"github.com/p9c/pod/pkg/block"
 	"github.com/p9c/pod/pkg/blockchain"
 	"github.com/p9c/pod/pkg/chainhash"
-	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/wire"
 )
 
@@ -63,7 +63,7 @@ func (m *merkleBlock) traverseAndBuild(height, pos uint32) {
 
 // NewMerkleBlock returns a new *wire.MsgMerkleBlock and an array of the matched transaction index numbers based on the
 // passed block and filter.
-func NewMerkleBlock(block *util.Block, filter *Filter) (*wire.MsgMerkleBlock, []uint32) {
+func NewMerkleBlock(block *block.Block, filter *Filter) (*wire.MsgMerkleBlock, []uint32) {
 	numTx := uint32(len(block.Transactions()))
 	mBlock := merkleBlock{
 		numTx:       numTx,
@@ -90,7 +90,7 @@ func NewMerkleBlock(block *util.Block, filter *Filter) (*wire.MsgMerkleBlock, []
 	mBlock.traverseAndBuild(height, 0)
 	// Create and return the merkle block.
 	msgMerkleBlock := wire.MsgMerkleBlock{
-		Header:       block.MsgBlock().Header,
+		Header:       block.WireBlock().Header,
 		Transactions: mBlock.numTx,
 		Hashes:       make([]*chainhash.Hash, 0, len(mBlock.finalHashes)),
 		Flags:        make([]byte, (len(mBlock.bits)+7)/8),

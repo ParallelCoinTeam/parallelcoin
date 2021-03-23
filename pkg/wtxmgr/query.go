@@ -2,16 +2,16 @@ package wtxmgr
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/amt"
 	
-	chainhash "github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/walletdb"
-	"github.com/p9c/pod/pkg/util"
 )
 
 // CreditRecord contains metadata regarding a transaction credit for a known transaction. Further details may be looked
 // up by indexing a wire.MsgTx.TxOut with the Index field.
 type CreditRecord struct {
-	Amount util.Amount
+	Amount amt.Amount
 	Index  uint32
 	Spent  bool
 	Change bool
@@ -20,7 +20,7 @@ type CreditRecord struct {
 // DebitRecord contains metadata regarding a transaction debit for a known transaction. Further details may be looked up
 // by indexing a wire.MsgTx.TxIn with the Index field.
 type DebitRecord struct {
-	Amount util.Amount
+	Amount amt.Amount
 	Index  uint32
 }
 

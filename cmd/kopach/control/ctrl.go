@@ -13,15 +13,17 @@ import (
 	"github.com/p9c/pod/cmd/kopach/control/sol"
 	"github.com/p9c/pod/cmd/kopach/control/templates"
 	"github.com/p9c/pod/cmd/node/state"
+	"github.com/p9c/pod/pkg/amt"
+	"github.com/p9c/pod/pkg/block"
 	"github.com/p9c/pod/pkg/blockchain"
 	"github.com/p9c/pod/pkg/chainrpc"
 	"github.com/p9c/pod/pkg/fork"
 	"github.com/p9c/pod/pkg/mining"
+	"github.com/p9c/pod/pkg/btcaddr"
 	"github.com/p9c/pod/pkg/podcfg"
 	rav "github.com/p9c/pod/pkg/ring"
 	"github.com/p9c/pod/pkg/rpcclient"
 	"github.com/p9c/pod/pkg/transport"
-	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/qu"
 	"github.com/p9c/pod/pkg/util/routeable"
 	"github.com/p9c/pod/pkg/wire"
@@ -49,9 +51,9 @@ type State struct {
 	mempoolUpdateChan qu.C
 	uuid              uint64
 	start, stop, quit qu.C
-	blockUpdate       chan *util.Block
+	blockUpdate       chan *block.Block
 	generator         *mining.BlkTmplGenerator
-	nextAddress       util.Address
+	nextAddress       btcaddr.Address
 	walletClient      *rpcclient.Client
 	msgBlockTemplates *templates.RecentMessages
 	templateShards    [][]byte
@@ -93,7 +95,7 @@ func New(
 		uuid:              uuid,
 		start:             start,
 		stop:              stop,
-		blockUpdate:       make(chan *util.Block, 1),
+		blockUpdate:       make(chan *block.Block, 1),
 		hashSampleBuf:     rav.NewBufferUint64(100),
 		msgBlockTemplates: templates.NewRecentMessages(),
 	}
@@ -127,7 +129,7 @@ func New(
 			switch n.Type {
 			case blockchain.NTBlockConnected:
 				I.Ln("received block connected notification")
-				if b, ok := n.Data.(*util.Block); !ok {
+				if b, ok := n.Data.(*block.Block); !ok {
 					W.Ln("block notification is not a block")
 					break
 				} else {
@@ -181,7 +183,7 @@ func (s *State) updateBlockTemplate() (e error) {
 	I.Ln("getting current chain tip")
 	// s.node.Chain.ChainLock.Lock() // previously this was done before the above, it might be jumping the gun on a new block
 	h := s.node.Chain.BestSnapshot().Hash
-	var blk *util.Block
+	var blk *block.Block
 	if blk, e = s.node.Chain.BlockByHash(&h); E.Chk(e) {
 		return
 	}
@@ -378,7 +380,7 @@ func (s *State) checkConnectivity() {
 // 	}
 // }
 
-func (s *State) doBlockUpdate(prev *util.Block) (e error) {
+func (s *State) doBlockUpdate(prev *block.Block) (e error) {
 	I.Ln("do block update")
 	if s.nextAddress == nil {
 		I.Ln("getting new address for templates")
@@ -389,7 +391,7 @@ func (s *State) doBlockUpdate(prev *util.Block) (e error) {
 		}
 		// }
 	}
-	I.Ln("getting templates...", prev.MsgBlock().Header.Timestamp)
+	I.Ln("getting templates...", prev.WireBlock().Header.Timestamp)
 	var tpl *templates.Message
 	if tpl, e = s.GetMsgBlockTemplate(prev, s.nextAddress); E.Chk(e) {
 		s.Stop()
@@ -404,13 +406,13 @@ func (s *State) doBlockUpdate(prev *util.Block) (e error) {
 
 // GetMsgBlockTemplate gets a Message building on given block paying to a given
 // address
-func (s *State) GetMsgBlockTemplate(prev *util.Block, addr util.Address) (mbt *templates.Message, e error) {
+func (s *State) GetMsgBlockTemplate(prev *block.Block, addr btcaddr.Address) (mbt *templates.Message, e error) {
 	T.Ln("GetMsgBlockTemplate")
 	rand.Seed(time.Now().Unix())
 	mbt = &templates.Message{
 		Nonce:     rand.Uint64(),
 		UUID:      s.uuid,
-		PrevBlock: prev.MsgBlock().BlockHash(),
+		PrevBlock: prev.WireBlock().BlockHash(),
 		Height:    prev.Height() + 1,
 		Bits:      make(templates.Diffs),
 		Merkles:   make(templates.Merkles),
@@ -438,7 +440,7 @@ func (s *State) GetMsgBlockTemplate(prev *util.Block, addr util.Address) (mbt *t
 
 // GetNewAddressFromWallet gets a new address from the wallet if it is
 // connected, or returns an error
-func (s *State) GetNewAddressFromWallet() (addr util.Address, e error) {
+func (s *State) GetNewAddressFromWallet() (addr btcaddr.Address, e error) {
 	if s.walletClient != nil {
 		if !s.walletClient.Disconnected() {
 			I.Ln("have access to a wallet, generating address")
@@ -456,7 +458,7 @@ func (s *State) GetNewAddressFromWallet() (addr util.Address, e error) {
 
 // GetNewAddressFromMiningAddrs tries to get an address from the mining
 // addresses list in the configuration file
-func (s *State) GetNewAddressFromMiningAddrs() (addr util.Address, e error) {
+func (s *State) GetNewAddressFromMiningAddrs() (addr btcaddr.Address, e error) {
 	if s.cfg.MiningAddrs == nil {
 		e = errors.New("mining addresses is nil")
 		I.Ln(e)
@@ -571,10 +573,10 @@ func processSolMsg(ctx interface{}, src net.Addr, dst string, b []byte,) (e erro
 		return
 	}
 	if newHeader.PrevBlock != tpl.PrevBlock {
-		I.Ln("block submitted by kopach miner worker is stale")
+		I.Ln("blk submitted by kopach miner worker is stale")
 		return
 	}
-	var msgBlock *wire.MsgBlock
+	var msgBlock *wire.Block
 	if msgBlock, e = tpl.Reconstruct(newHeader); E.Chk(e) {
 		I.Ln("failed to construct new header")
 		return
@@ -587,57 +589,57 @@ func processSolMsg(ctx interface{}, src net.Addr, dst string, b []byte,) (e erro
 	I.Ln("signalling controller to enter pause mode")
 	s.Stop()
 	defer s.Start()
-	block := util.NewBlock(msgBlock)
-	block.SetHeight(tpl.Height)
+	blk := block.NewBlock(msgBlock)
+	blk.SetHeight(tpl.Height)
 	var isOrphan bool
-	I.Ln("submitting block for processing")
-	if isOrphan, e = s.node.SyncManager.ProcessBlock(block, blockchain.BFNone); E.Chk(e) {
+	I.Ln("submitting blk for processing")
+	if isOrphan, e = s.node.SyncManager.ProcessBlock(blk, blockchain.BFNone); E.Chk(e) {
 		// Anything other than a rule violation is an unexpected error, so log that
 		// error as an internal error.
 		if _, ok := e.(blockchain.RuleError); !ok {
 			W.F(
-				"Unexpected error while processing block submitted via kopach miner:", e,
+				"Unexpected error while processing blk submitted via kopach miner:", e,
 			)
 			return
 		} else {
-			W.Ln("block submitted via kopach miner rejected:", e)
+			W.Ln("blk submitted via kopach miner rejected:", e)
 			if isOrphan {
-				W.Ln("block is an orphan")
+				W.Ln("blk is an orphan")
 				return
 			}
 			return
 		}
 	}
-	I.Ln("the block was accepted, new height", block.Height())
+	I.Ln("the blk was accepted, new height", blk.Height())
 	I.C(
 		func() string {
-			bmb := block.MsgBlock()
+			bmb := blk.WireBlock()
 			coinbaseTx := bmb.Transactions[0].TxOut[0]
-			prevHeight := block.Height() - 1
-			var prevBlock *util.Block
+			prevHeight := blk.Height() - 1
+			var prevBlock *block.Block
 			if prevBlock, e = s.node.Chain.BlockByHeight(prevHeight); E.Chk(e){}
 			if prevBlock == nil {
 				return "prevblock nil while generating log"
 			}
-			prevTime := prevBlock.MsgBlock().Header.Timestamp.Unix()
+			prevTime := prevBlock.WireBlock().Header.Timestamp.Unix()
 			since := bmb.Header.Timestamp.Unix() - prevTime
-			bHash := bmb.BlockHashWithAlgos(block.Height())
+			bHash := bmb.BlockHashWithAlgos(blk.Height())
 			return fmt.Sprintf(
-				"new block height %d %08x %s%10d %08x %v %s %ds since prev",
-				block.Height(),
-				prevBlock.MsgBlock().Header.Bits,
+				"new blk height %d %08x %s%10d %08x %v %s %ds since prev",
+				blk.Height(),
+				prevBlock.WireBlock().Header.Bits,
 				bHash,
 				bmb.Header.Timestamp.Unix(),
 				bmb.Header.Bits,
-				util.Amount(coinbaseTx.Value),
+				amt.Amount(coinbaseTx.Value),
 				fork.GetAlgoName(
 					bmb.Header.Version,
-					block.Height(),
+					blk.Height(),
 				), since,
 			)
 		},
 	)
-	I.Ln("clearing address used for block")
+	I.Ln("clearing address used for blk")
 	s.nextAddress = nil
 	return
 }

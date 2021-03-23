@@ -2,10 +2,10 @@ package blockchain
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/block"
 	
 	"github.com/p9c/pod/pkg/database"
 	"github.com/p9c/pod/pkg/hardfork"
-	"github.com/p9c/pod/pkg/util"
 )
 
 // maybeAcceptBlock potentially accepts a block into the block chain
@@ -17,10 +17,10 @@ import (
 // The flags are also passed to checkBlockContext and connectBestChain.
 // See their documentation for how the flags modify their behavior.
 // This function MUST be called with the chain state lock held (for writes).
-func (b *BlockChain) maybeAcceptBlock(workerNumber uint32, block *util.Block, flags BehaviorFlags) (bool, error) {
+func (b *BlockChain) maybeAcceptBlock(workerNumber uint32, block *block.Block, flags BehaviorFlags) (bool, error) {
 	T.Ln("maybeAcceptBlock starting")
 	// The height of this block is one more than the referenced previous block.
-	prevHash := &block.MsgBlock().Header.PrevBlock
+	prevHash := &block.WireBlock().Header.PrevBlock
 	prevNode := b.Index.LookupNode(prevHash)
 	if prevNode == nil {
 		str := fmt.Sprintf("previous block %s is unknown", prevHash)
@@ -43,7 +43,7 @@ func (b *BlockChain) maybeAcceptBlock(workerNumber uint32, block *util.Block, fl
 	var DoNotCheckPow bool
 	var pn *BlockNode
 	var a int32 = 2
-	if block.MsgBlock().Header.Version == 514 {
+	if block.WireBlock().Header.Version == 514 {
 		a = 514
 	}
 	var aa int32 = 2
@@ -92,7 +92,7 @@ func (b *BlockChain) maybeAcceptBlock(workerNumber uint32, block *util.Block, fl
 	}
 	// Create a new block node for the block and add it to the node index. Even if the block ultimately gets connected
 	// to the main chain, it starts out on a side chain.
-	blockHeader := &block.MsgBlock().Header
+	blockHeader := &block.WireBlock().Header
 	newNode := NewBlockNode(blockHeader, prevNode)
 	newNode.status = statusDataStored
 	b.Index.AddNode(newNode)

@@ -2,7 +2,7 @@ package votingpool
 
 import (
 	"github.com/p9c/pod/pkg/util/hdkeychain"
-	"github.com/p9c/pod/pkg/wallet/waddrmgr"
+	"github.com/p9c/pod/pkg/waddrmgr"
 	"github.com/p9c/pod/pkg/walletdb"
 	"github.com/p9c/pod/pkg/wire"
 )

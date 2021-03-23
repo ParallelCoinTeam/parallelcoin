@@ -2,6 +2,8 @@ package rpctest
 
 import (
 	"errors"
+	"github.com/p9c/pod/pkg/block"
+	"github.com/p9c/pod/pkg/btcaddr"
 	"math"
 	"math/big"
 	"runtime"
@@ -11,8 +13,8 @@ import (
 	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/txscript"
-	"github.com/p9c/pod/pkg/wire"
 	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 // solveBlock attempts to find a nonce which makes the passed block header hash to a value less than the target
@@ -87,7 +89,7 @@ func standardCoinbaseScript(nextBlockHeight int32, extraNonce uint64) ([]byte, e
 func createCoinbaseTx(
 	coinbaseScript []byte,
 	nextBlockHeight int32,
-	addr util.Address,
+	addr btcaddr.Address,
 	mineTo []wire.TxOut,
 	net *chaincfg.Params,
 	version int32,
@@ -129,10 +131,10 @@ func createCoinbaseTx(
 // used. Passing nil for the previous block results in a block that builds off of the genesis block for the specified
 // chain.
 func CreateBlock(
-	prevBlock *util.Block, inclusionTxs []*util.Tx,
-	blockVersion int32, blockTime time.Time, miningAddr util.Address,
+	prevBlock *block.Block, inclusionTxs []*util.Tx,
+	blockVersion int32, blockTime time.Time, miningAddr btcaddr.Address,
 	mineTo []wire.TxOut, net *chaincfg.Params,
-) (*util.Block, error) {
+) (*block.Block, error) {
 	var (
 		prevHash      *chainhash.Hash
 		blockHeight   int32
@@ -147,7 +149,7 @@ func CreateBlock(
 	} else {
 		prevHash = prevBlock.Hash()
 		blockHeight = prevBlock.Height() + 1
-		prevBlockTime = prevBlock.MsgBlock().Header.Timestamp
+		prevBlockTime = prevBlock.WireBlock().Header.Timestamp
 	}
 	// If a target block time was specified, then use that as the header's timestamp. Otherwise, add one second to the
 	// previous block unless it's the genesis block in which case use the current time.
@@ -176,7 +178,7 @@ func CreateBlock(
 		blockTxns = append(blockTxns, inclusionTxs...)
 	}
 	merkles := blockchain.BuildMerkleTreeStore(blockTxns, false)
-	var block wire.MsgBlock
+	var block wire.Block
 	block.Header = wire.BlockHeader{
 		Version:    blockVersion,
 		PrevBlock:  *prevHash,
@@ -193,7 +195,7 @@ func CreateBlock(
 	if !found {
 		return nil, errors.New("unable to solve block")
 	}
-	utilBlock := util.NewBlock(&block)
+	utilBlock := block.NewBlock(&block)
 	utilBlock.SetHeight(blockHeight)
 	return utilBlock, nil
 }

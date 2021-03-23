@@ -4,6 +4,7 @@ import (
 	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/hardfork"
+	"github.com/p9c/pod/pkg/btcaddr"
 	"github.com/p9c/pod/pkg/txscript"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/wire"
@@ -19,7 +20,7 @@ func CreateHardForkSubsidyTx(
 	params *chaincfg.Params,
 	coinbaseScript []byte,
 	nextBlockHeight int32,
-	addr util.Address,
+	addr btcaddr.Address,
 	version int32,
 ) (*util.Tx, error) {
 	payees := hardfork.Payees

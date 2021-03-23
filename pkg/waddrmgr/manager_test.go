@@ -4,6 +4,7 @@ package waddrmgr_test
 import (
 	"encoding/hex"
 	"fmt"
+	"github.com/p9c/pod/pkg/btcaddr"
 	"os"
 	"reflect"
 	"testing"
@@ -15,7 +16,7 @@ import (
 	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/snacl"
 	"github.com/p9c/pod/pkg/util"
-	"github.com/p9c/pod/pkg/wallet/waddrmgr"
+	"github.com/p9c/pod/pkg/waddrmgr"
 	"github.com/p9c/pod/pkg/walletdb"
 )
 
@@ -406,12 +407,12 @@ func testExternalAddresses(tc *testContext) bool {
 		chainParams := tc.manager.ChainParams()
 		for i := 0; i < len(expectedExternalAddrs); i++ {
 			pkHash := expectedExternalAddrs[i].addressHash
-			utilAddr, e := util.NewAddressPubKeyHash(
+			utilAddr, e := btcaddr.NewPubKeyHash(
 				pkHash, chainParams,
 			)
 			if e != nil {
 				tc.t.Errorf(
-					"%s NewAddressPubKeyHash #%d: "+
+					"%s NewPubKeyHash #%d: "+
 						"unexpected error: %v", prefix, i, e,
 				)
 				return false
@@ -557,12 +558,12 @@ func testInternalAddresses(tc *testContext) bool {
 		chainParams := tc.manager.ChainParams()
 		for i := 0; i < len(expectedInternalAddrs); i++ {
 			pkHash := expectedInternalAddrs[i].addressHash
-			utilAddr, e := util.NewAddressPubKeyHash(
+			utilAddr, e := btcaddr.NewPubKeyHash(
 				pkHash, chainParams,
 			)
 			if e != nil {
 				tc.t.Errorf(
-					"%s NewAddressPubKeyHash #%d: "+
+					"%s NewPubKeyHash #%d: "+
 						"unexpected error: %v", prefix, i, e,
 				)
 				return false
@@ -816,12 +817,12 @@ func testImportPrivateKey(tc *testContext) bool {
 			test.expected.privKeyWIF = test.in
 			// Use the Address API to retrieve each of the expected new addresses and ensure
 			// they're accurate.
-			utilAddr, e := util.NewAddressPubKeyHash(
+			utilAddr, e := btcaddr.NewPubKeyHash(
 				test.expected.addressHash, chainParams,
 			)
 			if e != nil {
 				tc.t.Errorf(
-					"%s NewAddressPubKeyHash #%d (%s): "+
+					"%s NewPubKeyHash #%d (%s): "+
 						"unexpected error: %v", prefix, i,
 					test.name, e,
 				)
@@ -991,13 +992,13 @@ func testImportScript(tc *testContext) bool {
 			test.expected.script = test.in
 			// Use the Address API to retrieve each of the expected new addresses and ensure
 			// they're accurate.
-			utilAddr, e := util.NewAddressScriptHash(
+			utilAddr, e := btcaddr.NewScriptHash(
 				test.in,
 				chainParams,
 			)
 			if e != nil {
 				tc.t.Errorf(
-					"%s NewAddressScriptHash #%d (%s): "+
+					"%s NewScriptHash #%d (%s): "+
 						"unexpected error: %v", prefix, i,
 					test.name, e,
 				)
@@ -1081,13 +1082,13 @@ func testMarkUsed(tc *testContext) bool {
 	chainParams := tc.manager.ChainParams()
 	for i, test := range tests {
 		addrHash := test.in
-		var addr util.Address
+		var addr btcaddr.Address
 		var e error
 		switch test.typ {
 		case addrPubKeyHash:
-			addr, e = util.NewAddressPubKeyHash(addrHash, chainParams)
+			addr, e = btcaddr.NewPubKeyHash(addrHash, chainParams)
 		case addrScriptHash:
-			addr, e = util.NewAddressScriptHashFromHash(addrHash, chainParams)
+			addr, e = btcaddr.NewScriptHashFromHash(addrHash, chainParams)
 		default:
 			panic("unreachable")
 		}
@@ -1466,7 +1467,7 @@ func testLookupAccount(tc *testContext) bool {
 	// Test account lookup for default account adddress
 	var expectedAccount uint32
 	for i, addr := range expectedAddrs {
-		addr, e := util.NewAddressPubKeyHash(
+		addr, e := btcaddr.NewPubKeyHash(
 			addr.addressHash,
 			tc.manager.ChainParams(),
 		)
@@ -2216,7 +2217,7 @@ func TestEncryptDecrypt(t *testing.T) {
 // 			waddrmgr.NestedWitnessPubKey, externalAddr[0].AddrType(),
 // 		)
 // 	}
-// 	_, ok := externalAddr[0].Address().(*util.AddressScriptHash)
+// 	_, ok := externalAddr[0].Address().(*util.ScriptHash)
 // 	if !ok {
 // 		t.Fatalf("wrong type: %T", externalAddr[0].Address())
 // 	}

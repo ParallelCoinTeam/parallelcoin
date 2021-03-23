@@ -181,7 +181,7 @@ func isSupportedDbType(dbType string) bool {
 // 		t.Logf("Testing block %s (hash %s, height %d)", item.Name,
 // 			blockHash, blockHeight)
 // 		// Ensure there is an error due to deserializing the block.
-// 		var msgBlock wire.MsgBlock
+// 		var msgBlock wire.Block
 // 		e := msgBlock.BtcDecode(bytes.NewReader(item.RawBlock), 0, wire.BaseEncoding)
 // 		if _, ok := err.(*wire.MessageError); !ok {
 // 			t.Fatalf("block %q (hash %s, height %d) should have "+

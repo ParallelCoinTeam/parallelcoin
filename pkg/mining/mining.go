@@ -3,9 +3,12 @@ package mining
 import (
 	"container/heap"
 	"fmt"
+	"github.com/p9c/pod/pkg/amt"
 	"github.com/p9c/pod/pkg/bits"
+	block2 "github.com/p9c/pod/pkg/block"
 	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/fork"
+	"github.com/p9c/pod/pkg/btcaddr"
 	"math/rand"
 	"time"
 	
@@ -19,7 +22,7 @@ import (
 const (
 	// MinHighPriority is the minimum priority value that allows a transaction to be
 	// considered high priority.
-	MinHighPriority = util.SatoshiPerBitcoin * 144.0 / 250
+	MinHighPriority = amt.SatoshiPerBitcoin * 144.0 / 250
 	// blockHeaderOverhead is the max number of bytes it takes to serialize a block
 	// header and max possible transaction count.
 	blockHeaderOverhead = wire.MaxBlockHeaderPayload + wire.MaxVarIntPayload
@@ -86,7 +89,7 @@ type (
 	BlockTemplate struct {
 		// Block is a block that is ready to be solved by miners. Thus, it is completely
 		// valid with the exception of satisfying the proof-of-work requirement.
-		Block *wire.MsgBlock
+		Block *wire.Block
 		// Fees contains the amount of fees each transaction in the generated template
 		// pays in base units. Since the first transaction is the coinbase, the first
 		// entry (offset 0) will contain the negative of the sum of the fees of all
@@ -243,7 +246,7 @@ func standardCoinbaseScript(nextBlockHeight int32, extraNonce uint64) ([]byte, e
 // handling is useful.
 func createCoinbaseTx(
 	params *chaincfg.Params, coinbaseScript []byte, nextBlockHeight int32,
-	addr util.Address, version int32,
+	addr btcaddr.Address, version int32,
 ) (*util.Tx, error) {
 	// if this is the hard fork activation height coming up, we create the special
 	// disbursement coinbase
@@ -431,7 +434,7 @@ func NewBlkTmplGenerator(
 //  |  transactions (while block size   |   |
 //  |  <= policy.BlockMinSize)          |   |
 //   -----------------------------------  --
-func (g *BlkTmplGenerator) NewBlockTemplate(payToAddress util.Address, algo string,) (*BlockTemplate, error) {
+func (g *BlkTmplGenerator) NewBlockTemplate(payToAddress btcaddr.Address, algo string,) (*BlockTemplate, error) {
 	T.Ln("NewBlockTemplate", algo)
 	if algo == "" {
 		algo = "random"
@@ -852,7 +855,7 @@ mempoolLoop:
 	T.F("reqDifficulty %d %08x %064x", vers, reqDifficulty, bits.CompactToBig(reqDifficulty))
 	// Create a new block ready to be solved.
 	merkles := blockchain.BuildMerkleTreeStore(blockTxns, false)
-	var msgBlock wire.MsgBlock
+	var msgBlock wire.Block
 	msgBlock.Header = wire.BlockHeader{
 		Version:    vers,
 		PrevBlock:  best.Hash,
@@ -868,7 +871,7 @@ mempoolLoop:
 	// Finally, perform a full check on the created block against the chain
 	// consensus rules to ensure it properly connects to the current best chain with
 	// no issues.
-	block := util.NewBlock(&msgBlock)
+	block := block2.NewBlock(&msgBlock)
 	block.SetHeight(nextBlockHeight)
 	e = g.Chain.CheckConnectBlockTemplate(block)
 	if e != nil {
@@ -916,7 +919,7 @@ mempoolLoop:
 // time.
 func (g *BlkTmplGenerator) UpdateBlockTime(
 	workerNumber uint32, msgBlock *wire.
-MsgBlock,
+Block,
 ) (e error) {
 	// The new timestamp is potentially adjusted to ensure it comes after the median
 	// time of the last several blocks per the chain consensus rules.
@@ -946,7 +949,7 @@ MsgBlock,
 // It also recalculates and updates the new merkle root that results from
 // changing the coinbase script.
 func (g *BlkTmplGenerator) UpdateExtraNonce(
-	msgBlock *wire.MsgBlock,
+	msgBlock *wire.Block,
 	blockHeight int32, extraNonce uint64,
 ) (e error) {
 	var coinbaseScript []byte
@@ -965,7 +968,7 @@ func (g *BlkTmplGenerator) UpdateExtraNonce(
 	// 	recalculating all of the other transaction hashes.
 	// 	block.Transactions[0].InvalidateCache()
 	// Recalculate the merkle root with the updated extra nonce.
-	block := util.NewBlock(msgBlock)
+	block := block2.NewBlock(msgBlock)
 	merkles := blockchain.BuildMerkleTreeStore(block.Transactions(), false)
 	msgBlock.Header.MerkleRoot = *merkles.GetRoot()
 	return nil

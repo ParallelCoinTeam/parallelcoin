@@ -108,7 +108,7 @@ var Magic = []byte{'j', 'o', 'b', 1}
 // 	jrb := Job{
 // 		ControllerNonce: uuid,
 // 		Height:          bH,
-// 		PrevBlockHash:   &mB.MsgBlock().Header.PrevBlock,
+// 		PrevBlockHash:   &mB.WireBlock().Header.PrevBlock,
 // 		Diffs:           bitsMap,
 // 		Merkles:         mTS,
 // 		MinTimestamp:    tip.Header().Timestamp.Truncate(time.Second).Add(time.Second),
@@ -252,11 +252,11 @@ var Magic = []byte{'j', 'o', 'b', 1}
 // // // 	return
 // // // }
 //
-// // GetMsgBlock takes the handy go struct version and returns a wire.MsgBlock
+// // GetMsgBlock takes the handy go struct version and returns a wire.WireBlock
 // // ready for giving nonce extranonce and computing the merkel root based on the
 // // extranonce in the coinbase as needs to be done when mining, so this would be
 // // called for each round for each algorithm to start.
-// func (j *Job) GetMsgBlock(version int32) (out *wire.MsgBlock) {
+// func (j *Job) GetMsgBlock(version int32) (out *wire.WireBlock) {
 // 	found := false
 // 	for i := range j.Diffs {
 // 		if i == version {
@@ -268,7 +268,7 @@ var Magic = []byte{'j', 'o', 'b', 1}
 // 		if tn.Sub(j.MinTimestamp) < time.Second {
 // 			tn = j.MinTimestamp
 // 		}
-// 		out = &wire.MsgBlock{
+// 		out = &wire.WireBlock{
 // 			Header: wire.BlockHeader{
 // 				Version:    version,
 // 				PrevBlock:  *j.PrevBlockHash,

@@ -2,6 +2,7 @@ package indexers
 
 import (
 	"errors"
+	"github.com/p9c/pod/pkg/block"
 	"github.com/p9c/pod/pkg/chaincfg"
 	
 	"github.com/p9c/pod/pkg/util/qu"
@@ -11,7 +12,6 @@ import (
 	"github.com/p9c/pod/pkg/database"
 	"github.com/p9c/pod/pkg/gcs"
 	"github.com/p9c/pod/pkg/gcs/builder"
-	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/wire"
 )
 
@@ -126,7 +126,7 @@ func (idx *CFIndex) Create(dbTx database.Tx) (e error) {
 
 // storeFilter stores a given filter, and performs the steps needed to generate the filter's header.
 func storeFilter(
-	dbTx database.Tx, block *util.Block, f *gcs.Filter,
+	dbTx database.Tx, block *block.Block, f *gcs.Filter,
 	filterType wire.FilterType,
 ) (e error) {
 	if uint8(filterType) > maxFilterType {
@@ -157,7 +157,7 @@ func storeFilter(
 	}
 	// Then fetch the previous block's filter header.
 	var prevHeader *chainhash.Hash
-	ph := &block.MsgBlock().Header.PrevBlock
+	ph := &block.WireBlock().Header.PrevBlock
 	if ph.IsEqual(&zeroHash) {
 		prevHeader = &zeroHash
 	} else {
@@ -181,14 +181,14 @@ func storeFilter(
 // ConnectBlock is invoked by the index manager when a new block has been connected to the main chain. This indexer adds
 // a hash-to-cf mapping for every passed block. This is part of the Indexer interface.
 func (idx *CFIndex) ConnectBlock(
-	dbTx database.Tx, block *util.Block,
+	dbTx database.Tx, block *block.Block,
 	stxos []blockchain.SpentTxOut,
 ) (e error) {
 	prevScripts := make([][]byte, len(stxos))
 	for i, stxo := range stxos {
 		prevScripts[i] = stxo.PkScript
 	}
-	f, e := builder.BuildBasicFilter(block.MsgBlock(), prevScripts)
+	f, e := builder.BuildBasicFilter(block.WireBlock(), prevScripts)
 	if e != nil {
 		return e
 	}
@@ -198,7 +198,7 @@ func (idx *CFIndex) ConnectBlock(
 // DisconnectBlock is invoked by the index manager when a block has been disconnected from the main chain. This indexer
 // removes the hash-to-cf mapping for every passed block. This is part of the Indexer interface.
 func (idx *CFIndex) DisconnectBlock(
-	dbTx database.Tx, block *util.Block,
+	dbTx database.Tx, block *block.Block,
 	_ []blockchain.SpentTxOut,
 ) (e error) {
 	for _, key := range cfIndexKeys {

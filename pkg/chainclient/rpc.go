@@ -3,6 +3,7 @@ package chainclient
 import (
 	"errors"
 	"github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/btcaddr"
 	"sync"
 	"time"
 	
@@ -14,7 +15,7 @@ import (
 	"github.com/p9c/pod/pkg/gcs/builder"
 	"github.com/p9c/pod/pkg/rpcclient"
 	"github.com/p9c/pod/pkg/util"
-	wm "github.com/p9c/pod/pkg/wallet/waddrmgr"
+	wm "github.com/p9c/pod/pkg/waddrmgr"
 	"github.com/p9c/pod/pkg/wire"
 	tm "github.com/p9c/pod/pkg/wtxmgr"
 )
@@ -139,8 +140,8 @@ func (c *RPCClient) Stop() {
 // in the chain that it pays to. This is useful when using BIP 158 filters as they include the prev pkScript rather than
 // the full outpoint.
 func (c *RPCClient) Rescan(
-	startHash *chainhash.Hash, addrs []util.Address,
-	outPoints map[wire.OutPoint]util.Address,
+	startHash *chainhash.Hash, addrs []btcaddr.Address,
+	outPoints map[wire.OutPoint]btcaddr.Address,
 ) (e error) {
 	flatOutpoints := make([]*wire.OutPoint, 0, len(outPoints))
 	for ops := range outPoints {

@@ -53,7 +53,7 @@ type MsgReject struct {
 	// Reason is a human-readable string with specific details (over and above the reject code) about why the command
 	// was rejected.
 	Reason string
-	// Hash identifies a specific block or transaction that was rejected and therefore only applies the MsgBlock and
+	// Hash identifies a specific block or transaction that was rejected and therefore only applies the Block and
 	// MsgTx messages.
 	Hash chainhash.Hash
 }

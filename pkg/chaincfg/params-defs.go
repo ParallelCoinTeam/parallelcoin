@@ -148,7 +148,7 @@ type Params struct {
 	// as one method to discover peers.
 	DNSSeeds []DNSSeed
 	// GenesisBlock defines the first block of the chain.
-	GenesisBlock *wire.MsgBlock
+	GenesisBlock *wire.Block
 	// GenesisHash is the starting block hash.
 	GenesisHash *chainhash.Hash
 	// PowLimit defines the highest allowed proof of work value for a // as a uint256.

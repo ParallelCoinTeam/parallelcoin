@@ -10,7 +10,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	amount2 "github.com/p9c/pod/pkg/amt"
+	"github.com/p9c/pod/pkg/block"
 	"github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/btcaddr"
 	"io"
 	"math"
 	"sync"
@@ -22,9 +25,9 @@ import (
 	"golang.org/x/crypto/ripemd160"
 	
 	"github.com/p9c/pod/pkg/blockchain"
+	"github.com/p9c/pod/pkg/btcjson"
 	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/database"
-	"github.com/p9c/pod/pkg/btcjson"
 	"github.com/p9c/pod/pkg/txscript"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/wire"
@@ -32,8 +35,8 @@ import (
 
 // Notification types
 
-type NotificationBlockConnected util.Block
-type NotificationBlockDisconnected util.Block
+type NotificationBlockConnected block.Block
+type NotificationBlockDisconnected block.Block
 type NotificationRegisterAddr struct {
 	WSC   *WSClient
 	Addrs []string
@@ -623,15 +626,15 @@ func (c *WSClient) ServiceRequest(r *ParsedRPCCmd) {
 
 // AddAddress adds an address to a wsClientFilter, treating it correctly based on the type of address passed as an
 // argument. NOTE: This extension was ported from github.com/decred/dcrd
-func (f *WSClientFilter) AddAddress(a util.Address) {
+func (f *WSClientFilter) AddAddress(a btcaddr.Address) {
 	switch a := a.(type) {
-	case *util.AddressPubKeyHash:
+	case *btcaddr.PubKeyHash:
 		f.PubKeyHashes[*a.Hash160()] = struct{}{}
 		return
-	case *util.AddressScriptHash:
+	case *btcaddr.ScriptHash:
 		f.ScriptHashes[*a.Hash160()] = struct{}{}
 		return
-	case *util.AddressPubKey:
+	case *btcaddr.PubKey:
 		serializedPubKey := a.ScriptAddress()
 		switch len(serializedPubKey) {
 		case 33: // compressed
@@ -655,7 +658,7 @@ func (f *WSClientFilter) AddAddress(a util.Address) {
 func (f *WSClientFilter) AddAddressStr(s string, params *chaincfg.Params) {
 	// If address can't be decoded, no point in saving it since it should also impossible to create the address from an
 	// inspected transaction output script.
-	a, e := util.DecodeAddress(s, params)
+	a, e := btcaddr.Decode(s, params)
 	if e != nil {
 		return
 	}
@@ -671,15 +674,15 @@ func (f *WSClientFilter) AddUnspentOutPoint(op *wire.OutPoint) {
 
 // ExistsAddress returns true if the passed address has been added to the wsClientFilter. NOTE: This extension was
 // ported from github.com/decred/dcrd
-func (f *WSClientFilter) ExistsAddress(a util.Address) bool {
+func (f *WSClientFilter) ExistsAddress(a btcaddr.Address) bool {
 	switch a := a.(type) {
-	case *util.AddressPubKeyHash:
+	case *btcaddr.PubKeyHash:
 		_, ok := f.PubKeyHashes[*a.Hash160()]
 		return ok
-	case *util.AddressScriptHash:
+	case *btcaddr.ScriptHash:
 		_, ok := f.ScriptHashes[*a.Hash160()]
 		return ok
-	case *util.AddressPubKey:
+	case *btcaddr.PubKey:
 		serializedPubKey := a.ScriptAddress()
 		switch len(serializedPubKey) {
 		case 33: // compressed
@@ -687,7 +690,7 @@ func (f *WSClientFilter) ExistsAddress(a util.Address) bool {
 			copy(compressedPubKey[:], serializedPubKey)
 			_, ok := f.CompressedPubKeys[compressedPubKey]
 			if !ok {
-				_, ok = f.PubKeyHashes[*a.AddressPubKeyHash().Hash160()]
+				_, ok = f.PubKeyHashes[*a.PubKeyHash().Hash160()]
 			}
 			return ok
 		case 65: // uncompressed
@@ -695,7 +698,7 @@ func (f *WSClientFilter) ExistsAddress(a util.Address) bool {
 			copy(uncompressedPubKey[:], serializedPubKey)
 			_, ok := f.UncompressedPubKeys[uncompressedPubKey]
 			if !ok {
-				_, ok = f.PubKeyHashes[*a.AddressPubKeyHash().Hash160()]
+				_, ok = f.PubKeyHashes[*a.PubKeyHash().Hash160()]
 			}
 			return ok
 		}
@@ -716,13 +719,13 @@ func (f *WSClientFilter) ExistsUnspentOutPoint(op *wire.OutPoint) bool {
 // wsClientFilter. NOTE: This extension was ported from github.com/decred/dcrd
 // func (f *wsClientFilter) removeAddress(a util.Address) {
 // 	switch a := a.(type) {
-// 	case *util.AddressPubKeyHash:
+// 	case *util.PubKeyHash:
 // 		delete(f.pubKeyHashes, *a.Hash160())
 // 		return
-// 	case *util.AddressScriptHash:
+// 	case *util.ScriptHash:
 // 		delete(f.scriptHashes, *a.Hash160())
 // 		return
-// 	case *util.AddressPubKey:
+// 	case *util.PubKey:
 // 		serializedPubKey := a.ScriptAddress()
 // 		switch len(serializedPubKey) {
 // 		case 33: // compressed
@@ -743,7 +746,7 @@ func (f *WSClientFilter) ExistsUnspentOutPoint(op *wire.OutPoint) bool {
 // // the wsClientFilter using removeAddress. NOTE: This extension was ported
 // // from github.com/decred/dcrd
 // func (f *wsClientFilter) removeAddressStr(s string, netparams *chaincfg.Params) {
-// 	a, e := util.DecodeAddress(s, netparams)
+// 	a, e := util.Decode(s, netparams)
 // 	if e ==  nil {
 // 		f.removeAddress(a)
 // 	} else {
@@ -763,7 +766,7 @@ func (m *WSNtfnMgr) AddClient(wsc *WSClient) {
 
 // SendNotifyBlockConnected passes a block newly-connected to the best chain to the notification manager for block and
 // transaction notification processing.
-func (m *WSNtfnMgr) SendNotifyBlockConnected(block *util.Block) {
+func (m *WSNtfnMgr) SendNotifyBlockConnected(block *block.Block) {
 	// As NotifyBlockConnected will be called by the block manager and the RPC server may no longer be running, use a
 	// select statement to unblock enqueuing the notification once the RPC server has begun shutting down.
 	select {
@@ -774,7 +777,7 @@ func (m *WSNtfnMgr) SendNotifyBlockConnected(block *util.Block) {
 
 // SendNotifyBlockDisconnected passes a block disconnected from the best chain to the notification manager for block
 // notification processing.
-func (m *WSNtfnMgr) SendNotifyBlockDisconnected(block *util.Block) {
+func (m *WSNtfnMgr) SendNotifyBlockDisconnected(block *block.Block) {
 	// As NotifyBlockDisconnected will be called by the block manager and the RPC server may no longer be running, use a
 	// select statement to unblock enqueuing the notification once the RPC server has begun shutting down.
 	select {
@@ -970,7 +973,7 @@ out:
 			}
 			switch n := n.(type) {
 			case *NotificationBlockConnected:
-				block := (*util.Block)(n)
+				block := (*block.Block)(n)
 				// Skip iterating through all txs if no tx notification requests exist.
 				if len(watchedOutPoints) != 0 || len(watchedAddrs) != 0 {
 					for _, tx := range block.Transactions() {
@@ -991,7 +994,7 @@ out:
 					)
 				}
 			case *NotificationBlockDisconnected:
-				block := (*util.Block)(n)
+				block := (*block.Block)(n)
 				if len(blockNotifications) != 0 {
 					m.NotifyBlockDisconnected(
 						blockNotifications,
@@ -1061,11 +1064,11 @@ out:
 
 // NotifyBlockConnected notifies websocket clients that have registered for block updates when a block is connected to
 // the main chain.
-func (*WSNtfnMgr) NotifyBlockConnected(clients map[qu.C]*WSClient, block *util.Block) {
+func (*WSNtfnMgr) NotifyBlockConnected(clients map[qu.C]*WSClient, block *block.Block) {
 	// Notify interested websocket clients about the connected block.
 	ntfn := btcjson.NewBlockConnectedNtfn(
 		block.Hash().String(), block.Height(),
-		block.MsgBlock().Header.Timestamp.Unix(),
+		block.WireBlock().Header.Timestamp.Unix(),
 	)
 	marshalledJSON, e := btcjson.MarshalCmd(nil, ntfn)
 	if e != nil {
@@ -1082,7 +1085,7 @@ func (*WSNtfnMgr) NotifyBlockConnected(clients map[qu.C]*WSClient, block *util.B
 // NotifyBlockDisconnected notifies websocket clients that have registered for block updates when a block is
 // disconnected from the main chain (due to a reorganize).
 func (*WSNtfnMgr) NotifyBlockDisconnected(
-	clients map[qu.C]*WSClient, block *util.Block,
+	clients map[qu.C]*WSClient, block *block.Block,
 ) {
 	// Skip notification creation if no clients have requested block connected/ disconnected notifications.
 	if len(clients) == 0 {
@@ -1091,7 +1094,7 @@ func (*WSNtfnMgr) NotifyBlockDisconnected(
 	// Notify interested websocket clients about the disconnected block.
 	ntfn := btcjson.NewBlockDisconnectedNtfn(
 		block.Hash().String(),
-		block.Height(), block.MsgBlock().Header.Timestamp.Unix(),
+		block.Height(), block.WireBlock().Header.Timestamp.Unix(),
 	)
 	marshalledJSON, e := btcjson.MarshalCmd(nil, ntfn)
 	if e != nil {
@@ -1111,11 +1114,11 @@ func (*WSNtfnMgr) NotifyBlockDisconnected(
 // NotifyFilteredBlockConnected notifies websocket clients that have registered for block updates when a block is
 // connected to the main chain.
 func (m *WSNtfnMgr) NotifyFilteredBlockConnected(
-	clients map[qu.C]*WSClient, block *util.Block,
+	clients map[qu.C]*WSClient, block *block.Block,
 ) {
 	// Create the common portion of the notification that is the same for every client.
 	var w bytes.Buffer
-	e := block.MsgBlock().Header.Serialize(&w)
+	e := block.WireBlock().Header.Serialize(&w)
 	if e != nil {
 		E.Ln(
 			"failed to serialize header for filtered block connected"+
@@ -1158,7 +1161,7 @@ func (m *WSNtfnMgr) NotifyFilteredBlockConnected(
 // NotifyFilteredBlockDisconnected notifies websocket clients that have registered for block updates when a block is
 // disconnected from the main chain (due to a reorganize).
 func (*WSNtfnMgr) NotifyFilteredBlockDisconnected(
-	clients map[qu.C]*WSClient, block *util.Block,
+	clients map[qu.C]*WSClient, block *block.Block,
 ) {
 	// Skip notification creation if no clients have requested block connected/ disconnected notifications.
 	if len(clients) == 0 {
@@ -1166,7 +1169,7 @@ func (*WSNtfnMgr) NotifyFilteredBlockDisconnected(
 	}
 	// Notify interested websocket clients about the disconnected block.
 	var w bytes.Buffer
-	e := block.MsgBlock().Header.Serialize(&w)
+	e := block.WireBlock().Header.Serialize(&w)
 	if e != nil {
 		E.Ln("failed to serialize header for filtered block disconnected notification:", e)
 		return
@@ -1197,7 +1200,7 @@ func (m *WSNtfnMgr) NotifyForNewTx(
 	for _, txOut := range mtx.TxOut {
 		amount += txOut.Value
 	}
-	ntfn := btcjson.NewTxAcceptedNtfn(txHashStr, util.Amount(amount).ToDUO())
+	ntfn := btcjson.NewTxAcceptedNtfn(txHashStr, amount2.Amount(amount).ToDUO())
 	marshalledJSON, e := btcjson.MarshalCmd(nil, ntfn)
 	if e != nil {
 		E.Ln("failed to marshal tx notification:", e)
@@ -1246,7 +1249,7 @@ func (m *WSNtfnMgr) NotifyForNewTx(
 // spending to a watched address and inputs spending a watched outpoint.
 func (m *WSNtfnMgr) NotifyForTx(
 	ops map[wire.OutPoint]map[qu.C]*WSClient,
-	addrs map[string]map[qu.C]*WSClient, tx *util.Tx, block *util.Block,
+	addrs map[string]map[qu.C]*WSClient, tx *util.Tx, block *block.Block,
 ) {
 	if len(ops) != 0 {
 		m.NotifyForTxIns(ops, tx, block)
@@ -1260,7 +1263,7 @@ func (m *WSNtfnMgr) NotifyForTx(
 // notification if any inputs spend a watched output. If block is non-nil, any matching spent requests are removed.
 func (m *WSNtfnMgr) NotifyForTxIns(
 	ops map[wire.
-OutPoint]map[qu.C]*WSClient, tx *util.Tx, block *util.Block,
+OutPoint]map[qu.C]*WSClient, tx *util.Tx, block *block.Block,
 ) {
 	// Nothing to do if nobody is watching outpoints.
 	if len(ops) == 0 {
@@ -1302,7 +1305,7 @@ OutPoint]map[qu.C]*WSClient, tx *util.Tx, block *util.Block,
 // matching output.
 func (m *WSNtfnMgr) NotifyForTxOuts(
 	ops map[wire.OutPoint]map[qu.C]*WSClient,
-	addrs map[string]map[qu.C]*WSClient, tx *util.Tx, block *util.Block,
+	addrs map[string]map[qu.C]*WSClient, tx *util.Tx, block *block.Block,
 ) {
 	// Nothing to do if nobody is listening for address notifications.
 	if len(addrs) == 0 {
@@ -1311,7 +1314,7 @@ func (m *WSNtfnMgr) NotifyForTxOuts(
 	txHex := ""
 	wscNotified := make(map[qu.C]struct{})
 	for i, txOut := range tx.MsgTx().TxOut {
-		var txAddrs []util.Address
+		var txAddrs []btcaddr.Address
 		var e error
 		_, txAddrs, _, e = txscript.ExtractPkScriptAddrs(
 			txOut.PkScript, m.Server.Cfg.ChainParams,
@@ -1456,7 +1459,7 @@ func (m *WSNtfnMgr) GetSubscribedClients(
 	}
 	var e error
 	for i, output := range msgTx.TxOut {
-		var addrs []util.Address
+		var addrs []btcaddr.Address
 		_, addrs, _, e = txscript.ExtractPkScriptAddrs(
 			output.PkScript, m.Server.Cfg.ChainParams,
 		)
@@ -1496,7 +1499,7 @@ func (s Semaphore) Release() {
 
 // BlockDetails creates a BlockDetails struct to include in btcws notifications from a block and a transaction's block
 // index.
-func BlockDetails(block *util.Block, txIndex int) *btcjson.BlockDetails {
+func BlockDetails(block *block.Block, txIndex int) *btcjson.BlockDetails {
 	if block == nil {
 		return nil
 	}
@@ -1504,7 +1507,7 @@ func BlockDetails(block *util.Block, txIndex int) *btcjson.BlockDetails {
 		Height: block.Height(),
 		Hash:   block.Hash().String(),
 		Index:  txIndex,
-		Time:   block.MsgBlock().Header.Timestamp.Unix(),
+		Time:   block.WireBlock().Header.Timestamp.Unix(),
 	}
 }
 
@@ -1514,7 +1517,7 @@ func BlockDetails(block *util.Block, txIndex int) *btcjson.BlockDetails {
 // If any single address fails to decode properly, the function returns an error. Otherwise, nil is returned.
 func CheckAddressValidity(addrs []string, params *chaincfg.Params) (e error) {
 	for _, addr := range addrs {
-		_, e := util.DecodeAddress(addr, params)
+		_, e := btcaddr.Decode(addr, params)
 		if e != nil {
 			return &btcjson.RPCError{
 				Code: btcjson.ErrRPCInvalidAddressOrKey,
@@ -1530,8 +1533,8 @@ func CheckAddressValidity(addrs []string, params *chaincfg.Params) (e error) {
 
 // DescendantBlock returns the appropriate JSON-RPC error if a current block fetched during a reorganize is not a direct
 // child of the parent block hash.
-func DescendantBlock(prevHash *chainhash.Hash, curBlock *util.Block) (e error) {
-	curHash := &curBlock.MsgBlock().Header.PrevBlock
+func DescendantBlock(prevHash *chainhash.Hash, curBlock *block.Block) (e error) {
+	curHash := &curBlock.WireBlock().Header.PrevBlock
 	if !prevHash.IsEqual(curHash) {
 		E.F(
 			"stopping rescan for reorged block %v (replaced by block %v)",
@@ -1696,7 +1699,7 @@ func HandleRescan(wsc *WSClient, icmd interface{}) (interface{}, error) {
 	var uncompressedPubkey [65]byte
 	params := wsc.Server.Cfg.ChainParams
 	for _, addrStr := range cmd.Addresses {
-		addr, e := util.DecodeAddress(addrStr, params)
+		addr, e := btcaddr.Decode(addrStr, params)
 		if e != nil {
 			jsonErr := btcjson.RPCError{
 				Code: btcjson.ErrRPCInvalidAddressOrKey,
@@ -1706,11 +1709,11 @@ func HandleRescan(wsc *WSClient, icmd interface{}) (interface{}, error) {
 			return nil, &jsonErr
 		}
 		switch a := addr.(type) {
-		case *util.AddressPubKeyHash:
+		case *btcaddr.PubKeyHash:
 			lookups.PubKeyHashes[*a.Hash160()] = struct{}{}
-		case *util.AddressScriptHash:
+		case *btcaddr.ScriptHash:
 			lookups.ScriptHashes[*a.Hash160()] = struct{}{}
-		case *util.AddressPubKey:
+		case *btcaddr.PubKey:
 			pubkeyBytes := a.ScriptAddress()
 			switch len(pubkeyBytes) {
 			case 33: // Compressed
@@ -1763,7 +1766,7 @@ func HandleRescan(wsc *WSClient, icmd interface{}) (interface{}, error) {
 	}
 	// lastBlock and lastBlockHash track the previously-rescanned block. They equal nil when no previous blocks have
 	// been rescanned.
-	var lastBlock *util.Block
+	var lastBlock *block.Block
 	var lastBlockHash *chainhash.Hash
 	// A ticker is created to wait at least 10 seconds before notifying the websocket client of the current progress
 	// completed by the rescan.
@@ -1831,7 +1834,7 @@ fetchRange:
 		}
 	loopHashList:
 		for i := range hashList {
-			var blk *util.Block
+			var blk *block.Block
 			blk, e = chain.BlockByHash(&hashList[i])
 			if e != nil {
 				// Only handle reorgs if a block could not be found for the hash.
@@ -1894,7 +1897,7 @@ fetchRange:
 			}
 			n := btcjson.NewRescanProgressNtfn(
 				hashList[i].String(),
-				blk.Height(), blk.MsgBlock().Header.Timestamp.Unix(),
+				blk.Height(), blk.WireBlock().Header.Timestamp.Unix(),
 			)
 			mn, e := btcjson.MarshalCmd(nil, n)
 			if e != nil {
@@ -1923,7 +1926,7 @@ fetchRange:
 	n := btcjson.NewRescanFinishedNtfn(
 		lastBlockHash.String(),
 		lastBlock.Height(),
-		lastBlock.MsgBlock().Header.Timestamp.Unix(),
+		lastBlock.WireBlock().Header.Timestamp.Unix(),
 	)
 	if mn, e := btcjson.MarshalCmd(nil, n); E.Chk(e) {
 		E.F(
@@ -1977,7 +1980,7 @@ func HandleRescanBlocks(wsc *WSClient, icmd interface{}) (interface{}, error) {
 				Message: "Failed to fetch block: " + e.Error(),
 			}
 		}
-		if lastBlockHash != nil && block.MsgBlock().Header.
+		if lastBlockHash != nil && block.WireBlock().Header.
 			PrevBlock != *lastBlockHash {
 			return nil, &btcjson.RPCError{
 				Code: btcjson.ErrRPCInvalidParameter,
@@ -2110,7 +2113,7 @@ func MakeSemaphore(n int) Semaphore {
 // NewRedeemingTxNotification returns a new marshalled redeemingtx notification with the passed parameters.
 func NewRedeemingTxNotification(
 	txHex string, index int,
-	block *util.Block,
+	block *block.Block,
 ) ([]byte, error) {
 	// Create and marshal the notification.
 	ntfn := btcjson.NewRedeemingTxNtfn(txHex, BlockDetails(block, index))
@@ -2268,7 +2271,7 @@ func RecoverFromReorg(
 }
 
 // RescanBlock rescans all transactions in a single block. This is a helper function for handleRescan.
-func RescanBlock(wsc *WSClient, lookups *RescanKeys, blk *util.Block) {
+func RescanBlock(wsc *WSClient, lookups *RescanKeys, blk *block.Block) {
 	for _, tx := range blk.Transactions() {
 		// Hexadecimal representation of this tx. Only created if needed, and reused for later notifications if already
 		// made.
@@ -2311,15 +2314,15 @@ func RescanBlock(wsc *WSClient, lookups *RescanKeys, blk *util.Block) {
 			)
 			for _, addr := range addrs {
 				switch a := addr.(type) {
-				case *util.AddressPubKeyHash:
+				case *btcaddr.PubKeyHash:
 					if _, ok := lookups.PubKeyHashes[*a.Hash160()]; !ok {
 						continue
 					}
-				case *util.AddressScriptHash:
+				case *btcaddr.ScriptHash:
 					if _, ok := lookups.ScriptHashes[*a.Hash160()]; !ok {
 						continue
 					}
-				case *util.AddressPubKey:
+				case *btcaddr.PubKey:
 					found := false
 					switch sa := a.ScriptAddress(); len(sa) {
 					case 33: // Compressed
@@ -2340,7 +2343,7 @@ func RescanBlock(wsc *WSClient, lookups *RescanKeys, blk *util.Block) {
 					}
 					// If the transaction output pays to the pubkey of a rescanned P2PKH address, include it as well.
 					if !found {
-						pkh := a.AddressPubKeyHash()
+						pkh := a.PubKeyHash()
 						if _, ok := lookups.PubKeyHashes[*pkh.Hash160()]; !ok {
 							continue
 						}
@@ -2390,7 +2393,7 @@ func RescanBlock(wsc *WSClient, lookups *RescanKeys, blk *util.Block) {
 //
 // NOTE: This extension is ported from github.com/decred/dcrd
 func RescanBlockFilter(
-	filter *WSClientFilter, block *util.Block,
+	filter *WSClientFilter, block *block.Block,
 	params *chaincfg.Params,
 ) []string {
 	var transactions []string
@@ -2417,7 +2420,7 @@ func RescanBlockFilter(
 		var e error
 		// Scan outputs.
 		for i, output := range msgTx.TxOut {
-			var addrs []util.Address
+			var addrs []btcaddr.Address
 			_, addrs, _, e = txscript.ExtractPkScriptAddrs(
 				output.PkScript, params,
 			)

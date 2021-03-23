@@ -3,11 +3,12 @@ package votingpool
 import (
 	"bytes"
 	"fmt"
+	"github.com/p9c/pod/pkg/amt"
+	"github.com/p9c/pod/pkg/btcaddr"
 	"sort"
 	
 	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/txscript"
-	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/walletdb"
 	"github.com/p9c/pod/pkg/wtxmgr"
 )
@@ -80,7 +81,7 @@ func (c byAddress) Less(i, j int) bool {
 // lastSeriesID. They're reverse ordered based on their address.
 func (p *Pool) getEligibleInputs(
 	ns, addrmgrNs walletdb.ReadBucket, store *wtxmgr.Store, txmgrNs walletdb.ReadBucket, startAddress WithdrawalAddress,
-	lastSeriesID uint32, dustThreshold util.Amount, chainHeight int32,
+	lastSeriesID uint32, dustThreshold amt.Amount, chainHeight int32,
 	minConf int,
 ) ([]Credit, error) {
 	if p.Series(lastSeriesID) == nil {
@@ -205,7 +206,7 @@ func groupCreditsByAddr(credits []wtxmgr.Credit, chainParams *chaincfg.Params) (
 ) {
 	addrMap = make(map[string][]wtxmgr.Credit)
 	for _, c := range credits {
-		var addrs []util.Address
+		var addrs []btcaddr.Address
 		_, addrs, _, e = txscript.ExtractPkScriptAddrs(c.PkScript, chainParams)
 		if e != nil {
 			return nil, newError(ErrInputSelection, "failed to obtain input address", e)
@@ -229,7 +230,7 @@ func groupCreditsByAddr(credits []wtxmgr.Credit, chainParams *chaincfg.Params) (
 // that it is not the charter output.
 func (p *Pool) isCreditEligible(
 	c Credit, minConf int, chainHeight int32,
-	dustThreshold util.Amount,
+	dustThreshold amt.Amount,
 ) bool {
 	if c.Amount < dustThreshold {
 		return false

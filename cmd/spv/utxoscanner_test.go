@@ -2,6 +2,7 @@ package spv
 
 import (
 	"errors"
+	block2 "github.com/p9c/pod/pkg/block"
 	"reflect"
 	"sync"
 	"testing"
@@ -10,14 +11,13 @@ import (
 	"github.com/p9c/pod/pkg/util/qu"
 	
 	"github.com/p9c/pod/pkg/chainhash"
-	"github.com/p9c/pod/pkg/wire"
 	"github.com/p9c/pod/pkg/gcs"
-	"github.com/p9c/pod/pkg/util"
-	"github.com/p9c/pod/pkg/wallet/waddrmgr"
+	"github.com/p9c/pod/pkg/waddrmgr"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 type MockChainClient struct {
-	getBlockResponse     map[chainhash.Hash]*util.Block
+	getBlockResponse     map[chainhash.Hash]*block2.Block
 	getBlockHashResponse map[int64]*chainhash.Hash
 	getBestBlockHash     *chainhash.Hash
 	getBestBlockHeight   int32
@@ -26,18 +26,18 @@ type MockChainClient struct {
 
 func NewMockChainClient() *MockChainClient {
 	return &MockChainClient{
-		getBlockResponse:     make(map[chainhash.Hash]*util.Block),
+		getBlockResponse:     make(map[chainhash.Hash]*block2.Block),
 		getBlockHashResponse: make(map[int64]*chainhash.Hash),
 		getCFilterResponse:   make(map[chainhash.Hash]*gcs.Filter),
 	}
 }
-func (c *MockChainClient) SetBlock(hash *chainhash.Hash, block *util.Block) {
+func (c *MockChainClient) SetBlock(hash *chainhash.Hash, block *block2.Block) {
 	c.getBlockResponse[*hash] = block
 }
 func (c *MockChainClient) GetBlockFromNetwork(
 	blockHash chainhash.Hash,
 	options ...QueryOption,
-) (*util.Block, error) {
+) (*block2.Block, error) {
 	return c.getBlockResponse[blockHash], nil
 }
 func (c *MockChainClient) SetBlockHash(height int64, hash *chainhash.Hash) {
@@ -338,7 +338,7 @@ func TestUtxoScannerScanBasic(t *testing.T) {
 	mockChainClient := NewMockChainClient()
 	block100000Hash := Block100000.BlockHash()
 	mockChainClient.SetBlockHash(100000, &block100000Hash)
-	mockChainClient.SetBlock(&block100000Hash, util.NewBlock(&Block100000))
+	mockChainClient.SetBlock(&block100000Hash, block2.NewBlock(&Block100000))
 	mockChainClient.SetBestSnapshot(&block100000Hash, 100000)
 	scanner := NewUtxoScanner(
 		&UtxoScannerConfig{
@@ -383,11 +383,11 @@ func TestUtxoScannerScanAddBlocks(t *testing.T) {
 	mockChainClient := NewMockChainClient()
 	block99999Hash := Block99999.BlockHash()
 	mockChainClient.SetBlockHash(99999, &block99999Hash)
-	mockChainClient.SetBlock(&block99999Hash, util.NewBlock(&Block99999))
+	mockChainClient.SetBlock(&block99999Hash, block2.NewBlock(&Block99999))
 	mockChainClient.SetBestSnapshot(&block99999Hash, 99999)
 	block100000Hash := Block100000.BlockHash()
 	mockChainClient.SetBlockHash(100000, &block100000Hash)
-	mockChainClient.SetBlock(&block100000Hash, util.NewBlock(&Block100000))
+	mockChainClient.SetBlock(&block100000Hash, block2.NewBlock(&Block100000))
 	var snapshotLock sync.Mutex
 	waitForSnapshot := qu.T()
 	scanner := NewUtxoScanner(
@@ -448,7 +448,7 @@ func TestUtxoScannerCancelRequest(t *testing.T) {
 	mockChainClient := NewMockChainClient()
 	block100000Hash := Block100000.BlockHash()
 	mockChainClient.SetBlockHash(100000, &block100000Hash)
-	mockChainClient.SetBlock(&block100000Hash, util.NewBlock(&Block100000))
+	mockChainClient.SetBlock(&block100000Hash, block2.NewBlock(&Block100000))
 	mockChainClient.SetBestSnapshot(&block100000Hash, 100000)
 	fetchErr := errors.New("cannot fetch block")
 	// Create a mock function that will block when the utxoscanner tries to retrieve a block from the network. It will
@@ -458,7 +458,7 @@ func TestUtxoScannerCancelRequest(t *testing.T) {
 		&UtxoScannerConfig{
 			GetBlock: func(
 				chainhash.Hash, ...QueryOption,
-			) (*util.Block, error) {
+			) (*block2.Block, error) {
 				<-block
 				return nil, fetchErr
 			},
@@ -558,7 +558,7 @@ func TestUtxoScannerCancelRequest(t *testing.T) {
 }
 
 // Block99999 defines block 99,999 of the main chain. It is used to test a rescan consisting of multiple blocks.
-var Block99999 = wire.MsgBlock{
+var Block99999 = wire.Block{
 	Header: wire.BlockHeader{
 		Version: 1,
 		PrevBlock: chainhash.Hash(
@@ -623,7 +623,7 @@ var Block99999 = wire.MsgBlock{
 
 // The following is taken from the btcsuite/util project. Block100000 defines block 100,000 of the block chain. It is
 // used to test Block operations.
-var Block100000 = wire.MsgBlock{
+var Block100000 = wire.Block{
 	Header: wire.BlockHeader{
 		Version: 1,
 		PrevBlock: chainhash.Hash(

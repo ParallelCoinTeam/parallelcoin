@@ -181,7 +181,7 @@ func (c *BitcoindConn) blockEventHandler(conn *gozmq.Conn) {
 		eventType := string(msgBytes[0])
 		switch eventType {
 		case "rawblock":
-			block := &wire.MsgBlock{}
+			block := &wire.Block{}
 			r := bytes.NewReader(msgBytes[1])
 			if e := block.Deserialize(r); E.Chk(e) {
 				E.Ln(
@@ -319,7 +319,7 @@ func (c *BitcoindConn) NewBitcoindClient() *BitcoindClient {
 		watchedTxs:        make(map[chainhash.Hash]struct{}),
 		notificationQueue: NewConcurrentQueue(20),
 		zmqTxNtfns:        make(chan *wire.MsgTx),
-		zmqBlockNtfns:     make(chan *wire.MsgBlock),
+		zmqBlockNtfns:     make(chan *wire.Block),
 		mempool:           make(map[chainhash.Hash]struct{}),
 		expiredMempool:    make(map[int32]map[chainhash.Hash]struct{}),
 	}

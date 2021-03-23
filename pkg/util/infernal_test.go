@@ -1,6 +1,7 @@
 package util
 
 import (
+	"github.com/p9c/pod/pkg/btcaddr"
 	"golang.org/x/crypto/ripemd160"
 	
 	"github.com/p9c/pod/pkg/appdata"
@@ -11,7 +12,7 @@ import (
 
 // SetBlockBytes sets the internal serialized block byte buffer to the passed buffer. It is used to inject errors and is
 // only available to the test package.
-func (b *Block) SetBlockBytes(buf []byte) {
+func (b *block.Block) SetBlockBytes(buf []byte) {
 	b.serializedBlock = buf
 }
 
@@ -20,19 +21,19 @@ func TstAppDataDir(goos, appName string, roaming bool) string {
 	return appdata.GetDataDir(goos, appName, roaming)
 }
 
-// TstAddressPubKeyHash makes an AddressPubKeyHash, setting the unexported fields with the parameters hash and netID.
+// TstAddressPubKeyHash makes an PubKeyHash, setting the unexported fields with the parameters hash and netID.
 func TstAddressPubKeyHash(hash [ripemd160.Size]byte,
-	netID byte) *AddressPubKeyHash {
-	return &AddressPubKeyHash{
+	netID byte) *btcaddr.PubKeyHash {
+	return &btcaddr.PubKeyHash{
 		hash:  hash,
 		netID: netID,
 	}
 }
 
-// TstAddressScriptHash makes an AddressScriptHash, setting the unexported fields with the parameters hash and netID.
+// TstAddressScriptHash makes an ScriptHash, setting the unexported fields with the parameters hash and netID.
 func TstAddressScriptHash(hash [ripemd160.Size]byte,
-	netID byte) *AddressScriptHash {
-	return &AddressScriptHash{
+	netID byte) *btcaddr.ScriptHash {
+	return &btcaddr.ScriptHash{
 		hash:  hash,
 		netID: netID,
 	}
@@ -60,11 +61,11 @@ func TstAddressScriptHash(hash [ripemd160.Size]byte,
 // 	}
 // }
 
-// TstAddressPubKey makes an AddressPubKey, setting the unexported fields with the parameters.
-func TstAddressPubKey(serializedPubKey []byte, pubKeyFormat PubKeyFormat,
-	netID byte) *AddressPubKey {
+// TstAddressPubKey makes an PubKey, setting the unexported fields with the parameters.
+func TstAddressPubKey(serializedPubKey []byte, pubKeyFormat btcaddr.PubKeyFormat,
+	netID byte) *btcaddr.PubKey {
 	pubKey, _ := ec.ParsePubKey(serializedPubKey, ec.S256())
-	return &AddressPubKey{
+	return &btcaddr.PubKey{
 		pubKeyFormat: pubKeyFormat,
 		pubKey:       pubKey,
 		pubKeyHashID: netID,

@@ -2,7 +2,9 @@ package mempool
 
 import (
 	"bytes"
+	"github.com/p9c/pod/pkg/amt"
 	"github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/btcaddr"
 	"testing"
 	"time"
 	
@@ -17,10 +19,10 @@ import (
 func TestCalcMinRequiredTxRelayFee(t *testing.T) {
 	
 	tests := []struct {
-		name     string      // test description.
-		size     int64       // Transaction size in bytes.
-		relayFee util.Amount // minimum relay transaction fee.
-		want     int64       // Expected fee.
+		name     string     // test description.
+		size     int64      // Transaction size in bytes.
+		relayFee amt.Amount // minimum relay transaction fee.
+		want     int64      // Expected fee.
 	}{
 		{
 			// Ensure combination of size and fee that are less than 1000 produce a non-zero fee.
@@ -44,8 +46,8 @@ func TestCalcMinRequiredTxRelayFee(t *testing.T) {
 		{
 			"max standard tx size with max satoshi relay fee",
 			maxStandardTxWeight / 4,
-			util.MaxSatoshi,
-			util.MaxSatoshi.Int64(),
+			amt.MaxSatoshi,
+			amt.MaxSatoshi.Int64(),
 		},
 		{
 			"1500 bytes with 5000 relay fee",
@@ -220,7 +222,7 @@ func TestDust(t *testing.T) {
 	tests := []struct {
 		name     string // test description
 		txOut    wire.TxOut
-		relayFee util.Amount // minimum relay transaction fee.
+		relayFee amt.Amount // minimum relay transaction fee.
 		isDust   bool
 	}{
 		{
@@ -252,8 +254,8 @@ func TestDust(t *testing.T) {
 		{
 			// Maximum allowed value is never dust.
 			"max satoshi amount is never dust",
-			wire.TxOut{Value: util.MaxSatoshi.Int64(), PkScript: pkScript},
-			util.MaxSatoshi,
+			wire.TxOut{Value: amt.MaxSatoshi.Int64(), PkScript: pkScript},
+			amt.MaxSatoshi,
 			false,
 		},
 		{
@@ -303,13 +305,13 @@ func TestCheckTransactionStandard(t *testing.T) {
 		Sequence:         wire.MaxTxInSequenceNum,
 	}
 	addrHash := [20]byte{0x01}
-	addr, err := util.NewAddressPubKeyHash(
+	addr, err := btcaddr.NewPubKeyHash(
 		addrHash[:],
 		&chaincfg.TestNet3Params,
 	)
 	
 	if err != nil {
-		t.Fatalf("NewAddressPubKeyHash: unexpected error: %v", err)
+		t.Fatalf("NewPubKeyHash: unexpected error: %v", err)
 	}
 	dummyPkScript, err := txscript.PayToAddrScript(addr)
 	

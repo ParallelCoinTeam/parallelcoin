@@ -41,7 +41,7 @@ func TestRejectLatest(t *testing.T) {
 	pver := ProtocolVersion
 	enc := BaseEncoding
 	// Create reject message data.
-	rejCommand := (&MsgBlock{}).Command()
+	rejCommand := (&Block{}).Command()
 	rejCode := RejectDuplicate
 	rejReason := "duplicate block"
 	rejHash := mainNetGenesisHash
@@ -113,7 +113,7 @@ func TestRejectBeforeAdded(t *testing.T) {
 	pver := RejectVersion - 1
 	enc := BaseEncoding
 	// Create reject message data.
-	rejCommand := (&MsgBlock{}).Command()
+	rejCommand := (&Block{}).Command()
 	rejCode := RejectDuplicate
 	rejReason := "duplicate block"
 	rejHash := mainNetGenesisHash
@@ -163,7 +163,7 @@ func TestRejectBeforeAdded(t *testing.T) {
 // version before the version which introduced it (RejectVersion).
 func TestRejectCrossProtocol(t *testing.T) {
 	// Create reject message data.
-	rejCommand := (&MsgBlock{}).Command()
+	rejCommand := (&Block{}).Command()
 	rejCode := RejectDuplicate
 	rejReason := "duplicate block"
 	rejHash := mainNetGenesisHash

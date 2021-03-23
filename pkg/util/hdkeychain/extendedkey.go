@@ -10,13 +10,13 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"github.com/p9c/pod/pkg/btcaddr"
 	"math/big"
 	
 	"github.com/p9c/pod/pkg/base58"
 	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/chainhash"
 	ec "github.com/p9c/pod/pkg/ecc"
-	"github.com/p9c/pod/pkg/util"
 )
 
 const (
@@ -280,7 +280,7 @@ func (k *ExtendedKey) Child(i uint32) (*ExtendedKey, error) {
 		childKey = pk.SerializeCompressed()
 	}
 	// The fingerprint of the parent for the derived child is the first 4 bytes of the RIPEMD160(SHA256(parentPubKey)).
-	parentFP := util.Hash160(k.pubKeyBytes())[:4]
+	parentFP := btcaddr.Hash160(k.pubKeyBytes())[:4]
 	return NewExtendedKey(
 		k.version, childKey, childChainCode, parentFP,
 		k.depth+1, i, isPrivate,
@@ -331,9 +331,9 @@ func (k *ExtendedKey) ECPrivKey() (*ec.PrivateKey, error) {
 }
 
 // Address converts the extended key to a standard bitcoin pay-to-pubkey-hash address for the passed network.
-func (k *ExtendedKey) Address(net *chaincfg.Params) (*util.AddressPubKeyHash, error) {
-	pkHash := util.Hash160(k.pubKeyBytes())
-	return util.NewAddressPubKeyHash(pkHash, net)
+func (k *ExtendedKey) Address(net *chaincfg.Params) (*btcaddr.PubKeyHash, error) {
+	pkHash := btcaddr.Hash160(k.pubKeyBytes())
+	return btcaddr.NewPubKeyHash(pkHash, net)
 }
 
 // paddedAppend appends the src byte slice to dst, returning the new slice. If the length of the source is smaller than

@@ -116,7 +116,7 @@ func (c *Counter) GetAlgoVer(height int32) (ver int32) {
 // allow a worker to be configured to run on a bare metal system with a different launcher main
 func NewWithConnAndSemaphore(id string, conn *stdconn.StdConn, quit qu.C, uuid uint64) *Worker {
 	T.Ln("creating new worker")
-	// msgBlock := wire.MsgBlock{Header: wire.BlockHeader{}}
+	// msgBlock := wire.WireBlock{Header: wire.BlockHeader{}}
 	w := &Worker{
 		id:            id,
 		pipeConn:      conn,

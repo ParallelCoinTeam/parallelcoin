@@ -4,11 +4,11 @@ import (
 	"bytes"
 	"encoding/hex"
 	"github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/btcaddr"
 	"reflect"
 	"testing"
 	
 	"github.com/p9c/pod/pkg/wire"
-	"github.com/p9c/pod/pkg/util"
 )
 
 // mustParseShortForm parses the passed short form script and returns the resulting bytes. It panics if an error occurs.
@@ -25,11 +25,11 @@ func mustParseShortForm(script string) []byte {
 	return s
 }
 
-// newAddressPubKey returns a new util.AddressPubKey from the provided serialized public key. It panics if an error
+// newAddressPubKey returns a new util.PubKey from the provided serialized public key. It panics if an error
 // occurs. This is only used in the tests as a helper since the only way it can fail is if there is an error in the test
 // source code.
-func newAddressPubKey(serializedPubKey []byte) util.Address {
-	addr, e := util.NewAddressPubKey(
+func newAddressPubKey(serializedPubKey []byte) btcaddr.Address {
+	addr, e := btcaddr.NewPubKey(
 		serializedPubKey,
 		&chaincfg.MainNetParams,
 	)
@@ -39,20 +39,20 @@ func newAddressPubKey(serializedPubKey []byte) util.Address {
 	return addr
 }
 
-// newAddressPubKeyHash returns a new util.AddressPubKeyHash from the provided hash. It panics if an error occurs. This
+// newAddressPubKeyHash returns a new util.PubKeyHash from the provided hash. It panics if an error occurs. This
 // is only used in the tests as a helper since the only way it can fail is if there is an error in the test source code.
-func newAddressPubKeyHash(pkHash []byte) util.Address {
-	addr, e := util.NewAddressPubKeyHash(pkHash, &chaincfg.MainNetParams)
+func newAddressPubKeyHash(pkHash []byte) btcaddr.Address {
+	addr, e := btcaddr.NewPubKeyHash(pkHash, &chaincfg.MainNetParams)
 	if e != nil {
 		panic("invalid public key hash in test source")
 	}
 	return addr
 }
 
-// newAddressScriptHash returns a new util.AddressScriptHash from the provided hash. It panics if an error occurs. This
+// newAddressScriptHash returns a new util.ScriptHash from the provided hash. It panics if an error occurs. This
 // is only used in the tests as a helper since the only way it can fail is if there is an error in the test source code.
-func newAddressScriptHash(scriptHash []byte) util.Address {
-	addr, e := util.NewAddressScriptHashFromHash(
+func newAddressScriptHash(scriptHash []byte) btcaddr.Address {
+	addr, e := btcaddr.NewScriptHashFromHash(
 		scriptHash,
 		&chaincfg.MainNetParams,
 	)
@@ -69,7 +69,7 @@ func TestExtractPkScriptAddrs(t *testing.T) {
 	tests := []struct {
 		name    string
 		script  []byte
-		addrs   []util.Address
+		addrs   []btcaddr.Address
 		reqSigs int
 		class   ScriptClass
 	}{
@@ -79,7 +79,7 @@ func TestExtractPkScriptAddrs(t *testing.T) {
 				"2102192d74d0cb94344c9569c2e779015" +
 					"73d8d7903c3ebec3a957724895dca52c6b4ac",
 			),
-			addrs: []util.Address{
+			addrs: []btcaddr.Address{
 				newAddressPubKey(
 					hexToBytes(
 						"02192d74d0cb9434" +
@@ -99,7 +99,7 @@ func TestExtractPkScriptAddrs(t *testing.T) {
 					"b84ccf9744464f82e160bfa9b8b64f9d4c03f999b864" +
 					"3f656b412a3ac",
 			),
-			addrs: []util.Address{
+			addrs: []btcaddr.Address{
 				newAddressPubKey(
 					hexToBytes(
 						"0411db93e1dcdb8a" +
@@ -121,7 +121,7 @@ func TestExtractPkScriptAddrs(t *testing.T) {
 					"8c0bd96852662ce6a847b197376830160c6d2eb5e6a4" +
 					"c44d33f453eac",
 			),
-			addrs: []util.Address{
+			addrs: []btcaddr.Address{
 				newAddressPubKey(
 					hexToBytes(
 						"06192d74d0cb9434" +
@@ -141,7 +141,7 @@ func TestExtractPkScriptAddrs(t *testing.T) {
 				"2103b0bd634234abbb1ba1e986e884185" +
 					"c61cf43e001f9137f23c2c409273eb16e65ac",
 			),
-			addrs: []util.Address{
+			addrs: []btcaddr.Address{
 				newAddressPubKey(
 					hexToBytes(
 						"03b0bd634234abbb" +
@@ -161,7 +161,7 @@ func TestExtractPkScriptAddrs(t *testing.T) {
 					"eba668a7ef8bd3b3cfb1edb7117ab65129b8a2e681f3" +
 					"c1e0908ef7bac",
 			),
-			addrs: []util.Address{
+			addrs: []btcaddr.Address{
 				newAddressPubKey(
 					hexToBytes(
 						"04b0bd634234abbb" +
@@ -183,7 +183,7 @@ func TestExtractPkScriptAddrs(t *testing.T) {
 					"eba668a7ef8bd3b3cfb1edb7117ab65129b8a2e681f3" +
 					"c1e0908ef7bac",
 			),
-			addrs: []util.Address{
+			addrs: []btcaddr.Address{
 				newAddressPubKey(
 					hexToBytes(
 						"07b0bd634234abbb" +
@@ -203,7 +203,7 @@ func TestExtractPkScriptAddrs(t *testing.T) {
 				"76a914ad06dd6ddee55cbca9a9e3713bd" +
 					"7587509a3056488ac",
 			),
-			addrs: []util.Address{
+			addrs: []btcaddr.Address{
 				newAddressPubKeyHash(
 					hexToBytes(
 						"ad06dd6ddee5" +
@@ -220,7 +220,7 @@ func TestExtractPkScriptAddrs(t *testing.T) {
 				"a91463bcc565f9e68ee0189dd5cc67f1b" +
 					"0e5f02f45cb87",
 			),
-			addrs: []util.Address{
+			addrs: []btcaddr.Address{
 				newAddressScriptHash(
 					hexToBytes(
 						"63bcc565f9e6" +
@@ -243,7 +243,7 @@ func TestExtractPkScriptAddrs(t *testing.T) {
 					"2770f5b0e4ef8551946d8a540911abe3e7854a26f39f" +
 					"58b25c15342af52ae",
 			),
-			addrs: []util.Address{
+			addrs: []btcaddr.Address{
 				newAddressPubKey(
 					hexToBytes(
 						"04cc71eb30d653c0" +
@@ -281,7 +281,7 @@ func TestExtractPkScriptAddrs(t *testing.T) {
 					"f2ed97c1f89784a1aecdb43384f11d2acc64443c7fc2" +
 					"99cef0400421a53ae",
 			),
-			addrs: []util.Address{
+			addrs: []btcaddr.Address{
 				newAddressPubKey(
 					hexToBytes(
 						"04cb9c3c222c5f7a" +
@@ -369,7 +369,7 @@ func TestExtractPkScriptAddrs(t *testing.T) {
 					"4696f6e2036633533636439383731313965663739376" +
 					"435616463636453ae",
 			),
-			addrs:   []util.Address{},
+			addrs:   []btcaddr.Address{},
 			reqSigs: 1,
 			class:   MultiSigTy,
 		},
@@ -386,7 +386,7 @@ func TestExtractPkScriptAddrs(t *testing.T) {
 					"56465373032392131323364643432643235363339643" +
 					"338613663663530616234636434340a00000053ae",
 			),
-			addrs:   []util.Address{},
+			addrs:   []btcaddr.Address{},
 			reqSigs: 1,
 			class:   MultiSigTy,
 		},
@@ -652,7 +652,7 @@ func (b *bogusAddress) String() string {
 func TestPayToAddrScript(t *testing.T) {
 	t.Parallel()
 	// 1MirQ9bwyQcGVJPwKUgapu5ouK2E2Ey4gX
-	p2pkhMain, e := util.NewAddressPubKeyHash(
+	p2pkhMain, e := btcaddr.NewPubKeyHash(
 		hexToBytes(
 			"e34cce70c86"+
 				"373273efcc54ce7d2a491bb4a0e84",
@@ -662,7 +662,7 @@ func TestPayToAddrScript(t *testing.T) {
 		t.Fatalf("Unable to create public key hash address: %v", e)
 	}
 	// Taken from transaction: b0539a45de13b3e0403909b8bd1a555b8cbe45fd4e3f3fda76f3a5f52835c29d
-	p2shMain, e := util.NewAddressScriptHashFromHash(
+	p2shMain, e := btcaddr.NewScriptHashFromHash(
 		hexToBytes(
 			"e8c300"+
 				"c87986efa84c37c0519929019ef86eb5b4",
@@ -672,7 +672,7 @@ func TestPayToAddrScript(t *testing.T) {
 		t.Fatalf("Unable to create script hash address: %v", e)
 	}
 	//  mainnet p2pk 13CG6SJ3yHUXo4Cr2RY4THLLJrNFuG3gUg
-	p2pkCompressedMain, e := util.NewAddressPubKey(
+	p2pkCompressedMain, e := btcaddr.NewPubKey(
 		hexToBytes(
 			"02192d"+
 				"74d0cb94344c9569c2e77901573d8d7903c3ebec3a957724895dca52c6b4",
@@ -685,7 +685,7 @@ func TestPayToAddrScript(t *testing.T) {
 			e,
 		)
 	}
-	p2pkCompressed2Main, e := util.NewAddressPubKey(
+	p2pkCompressed2Main, e := btcaddr.NewPubKey(
 		hexToBytes(
 			"03b0b"+
 				"d634234abbb1ba1e986e884185c61cf43e001f9137f23c2c409273eb16e65",
@@ -698,7 +698,7 @@ func TestPayToAddrScript(t *testing.T) {
 			e,
 		)
 	}
-	p2pkUncompressedMain, e := util.NewAddressPubKey(
+	p2pkUncompressedMain, e := btcaddr.NewPubKey(
 		hexToBytes(
 			"0411"+
 				"db93e1dcdb8a016b49840f8c53bc1eb68a382e97b1482ecad7b148a6909a5"+
@@ -715,7 +715,7 @@ func TestPayToAddrScript(t *testing.T) {
 	// Errors used in the tests below defined here for convenience and to keep the horizontal test size shorter.
 	errUnsupportedAddress := scriptError(ErrUnsupportedAddress, "")
 	tests := []struct {
-		in       util.Address
+		in       btcaddr.Address
 		expected string
 		err      error
 	}{
@@ -757,9 +757,9 @@ func TestPayToAddrScript(t *testing.T) {
 			nil,
 		},
 		// Supported address types with nil pointers.
-		{(*util.AddressPubKeyHash)(nil), "", errUnsupportedAddress},
-		{(*util.AddressScriptHash)(nil), "", errUnsupportedAddress},
-		{(*util.AddressPubKey)(nil), "", errUnsupportedAddress},
+		{(*btcaddr.PubKeyHash)(nil), "", errUnsupportedAddress},
+		{(*btcaddr.ScriptHash)(nil), "", errUnsupportedAddress},
+		{(*btcaddr.PubKey)(nil), "", errUnsupportedAddress},
 		// Unsupported address type.
 		{&bogusAddress{}, "", errUnsupportedAddress},
 	}
@@ -788,7 +788,7 @@ func TestPayToAddrScript(t *testing.T) {
 func TestMultiSigScript(t *testing.T) {
 	t.Parallel()
 	//  mainnet p2pk 13CG6SJ3yHUXo4Cr2RY4THLLJrNFuG3gUg
-	p2pkCompressedMain, e := util.NewAddressPubKey(
+	p2pkCompressedMain, e := btcaddr.NewPubKey(
 		hexToBytes(
 			"02192d"+
 				"74d0cb94344c9569c2e77901573d8d7903c3ebec3a957724895dca52c6b4",
@@ -801,7 +801,7 @@ func TestMultiSigScript(t *testing.T) {
 			e,
 		)
 	}
-	p2pkCompressed2Main, e := util.NewAddressPubKey(
+	p2pkCompressed2Main, e := btcaddr.NewPubKey(
 		hexToBytes(
 			"03b0b"+
 				"d634234abbb1ba1e986e884185c61cf43e001f9137f23c2c409273eb16e65",
@@ -814,7 +814,7 @@ func TestMultiSigScript(t *testing.T) {
 			e,
 		)
 	}
-	p2pkUncompressedMain, e := util.NewAddressPubKey(
+	p2pkUncompressedMain, e := btcaddr.NewPubKey(
 		hexToBytes(
 			"0411"+
 				"db93e1dcdb8a016b49840f8c53bc1eb68a382e97b1482ecad7b148a6909a5"+
@@ -829,13 +829,13 @@ func TestMultiSigScript(t *testing.T) {
 		)
 	}
 	tests := []struct {
-		keys      []*util.AddressPubKey
+		keys      []*btcaddr.PubKey
 		nrequired int
 		expected  string
 		err       error
 	}{
 		{
-			[]*util.AddressPubKey{
+			[]*btcaddr.PubKey{
 				p2pkCompressedMain,
 				p2pkCompressed2Main,
 			},
@@ -847,7 +847,7 @@ func TestMultiSigScript(t *testing.T) {
 			nil,
 		},
 		{
-			[]*util.AddressPubKey{
+			[]*btcaddr.PubKey{
 				p2pkCompressedMain,
 				p2pkCompressed2Main,
 			},
@@ -859,7 +859,7 @@ func TestMultiSigScript(t *testing.T) {
 			nil,
 		},
 		{
-			[]*util.AddressPubKey{
+			[]*btcaddr.PubKey{
 				p2pkCompressedMain,
 				p2pkCompressed2Main,
 			},
@@ -868,7 +868,7 @@ func TestMultiSigScript(t *testing.T) {
 			scriptError(ErrTooManyRequiredSigs, ""),
 		},
 		{
-			[]*util.AddressPubKey{
+			[]*btcaddr.PubKey{
 				p2pkUncompressedMain,
 			},
 			1,
@@ -879,7 +879,7 @@ func TestMultiSigScript(t *testing.T) {
 			nil,
 		},
 		{
-			[]*util.AddressPubKey{
+			[]*btcaddr.PubKey{
 				p2pkUncompressedMain,
 			},
 			2,

@@ -36,7 +36,7 @@ following chart indicates message interactions in no particular order.
 	getaddr message (MsgGetAddr)          addr message (MsgAddr)
 	getblocks message (MsgGetBlocks)      inv message (MsgInv)
 	inv message (MsgInv)                  getdata message (MsgGetData)
-	getdata message (MsgGetData)          block message (MsgBlock) -or-
+	getdata message (MsgGetData)          block message (Block) -or-
 	                                      tx message (MsgTx) -or-
 	                                      notfound message (MsgNotFound)
 	getheaders message (MsgGetHeaders)    headers message (MsgHeaders)
@@ -87,9 +87,9 @@ assertion. An example of a type switch follows:
 
 		// The message is a pointer to a MsgVersion struct.
 		log.Printf("Protocol version: %v", msg.ProtocolVersion)
-	case *wire.MsgBlock:
+	case *wire.Block:
 
-		// The message is a pointer to a MsgBlock struct.
+		// The message is a pointer to a Block struct.
 		log.Printf("Number of tx in block: %v", msg.Header.TxnCount)
 	}
 

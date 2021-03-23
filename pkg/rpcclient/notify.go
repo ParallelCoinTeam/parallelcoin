@@ -6,12 +6,14 @@ import (
 	js "encoding/json"
 	"errors"
 	"fmt"
+	"github.com/p9c/pod/pkg/amt"
+	"github.com/p9c/pod/pkg/btcaddr"
 	"time"
 	
-	chainhash "github.com/p9c/pod/pkg/chainhash"
-	"github.com/p9c/pod/pkg/wire"
 	"github.com/p9c/pod/pkg/btcjson"
+	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 var (
@@ -133,7 +135,7 @@ type NotificationHandlers struct {
 	// OnTxAccepted is invoked when a transaction is accepted into the memory pool. It will only be invoked if a
 	// preceding call to NotifyNewTransactions with the verbose flag set to false has been made to register for the
 	// notification and the function is non-nil.
-	OnTxAccepted func(hash *chainhash.Hash, amount util.Amount)
+	OnTxAccepted func(hash *chainhash.Hash, amount amt.Amount)
 	// OnTxAccepted is invoked when a transaction is accepted into the memory pool. It will only be invoked if a
 	// preceding call to NotifyNewTransactions with the verbose flag set to true has been made to register for the
 	// notification and the function is non-nil.
@@ -143,7 +145,7 @@ type NotificationHandlers struct {
 	OnPodConnected func(connected bool)
 	// OnAccountBalance is invoked with account balance updates. This will only be available when speaking to a wallet
 	// server such as btcwallet.
-	OnAccountBalance func(account string, balance util.Amount, confirmed bool)
+	OnAccountBalance func(account string, balance amt.Amount, confirmed bool)
 	// OnWalletLockState is invoked when a wallet is locked or unlocked. This will only be available when client is
 	// connected to a wallet server such as btcwallet.
 	OnWalletLockState func(locked bool)
@@ -585,7 +587,7 @@ func parseRescanProgressParams(params []js.RawMessage) (*chainhash.Hash, int32, 
 // notification.
 func parseTxAcceptedNtfnParams(params []js.RawMessage) (
 	*chainhash.Hash,
-	util.Amount, error,
+	amt.Amount, error,
 ) {
 	if len(params) != 2 {
 		return nil, 0, wrongNumParams(len(params))
@@ -603,7 +605,7 @@ func parseTxAcceptedNtfnParams(params []js.RawMessage) (
 		return nil, 0, e
 	}
 	// Bounds check amount.
-	amt, e := util.NewAmount(fAmt)
+	amt, e := amt.NewAmount(fAmt)
 	if e != nil {
 		return nil, 0, e
 	}
@@ -655,7 +657,7 @@ func parsePodConnectedNtfnParams(params []js.RawMessage) (bool, error) {
 // or unconfirmed from the parameters of an accountbalance notification.
 func parseAccountBalanceNtfnParams(params []js.RawMessage) (
 	account string,
-	balance util.Amount, confirmed bool, e error,
+	balance amt.Amount, confirmed bool, e error,
 ) {
 	if len(params) != 3 {
 		return "", 0, false, wrongNumParams(len(params))
@@ -677,7 +679,7 @@ func parseAccountBalanceNtfnParams(params []js.RawMessage) (
 		return "", 0, false, e
 	}
 	// Bounds check amount.
-	bal, e := util.NewAmount(fBal)
+	bal, e := amt.NewAmount(fBal)
 	if e != nil {
 		return "", 0, false, e
 	}
@@ -903,7 +905,7 @@ func (c *Client) notifyReceivedInternal(addresses []string) FutureNotifyReceived
 // NOTE: This is a pod extension and requires a websocket connection.
 //
 // NOTE: Deprecated. Use LoadTxFilterAsync instead.
-func (c *Client) NotifyReceivedAsync(addresses []util.Address) FutureNotifyReceivedResult {
+func (c *Client) NotifyReceivedAsync(addresses []btcaddr.Address) FutureNotifyReceivedResult {
 	// Not supported in HTTP POST mode.
 	if c.config.HTTPPostMode {
 		return newFutureError(ErrWebsocketsRequired)
@@ -939,7 +941,7 @@ func (c *Client) NotifyReceivedAsync(addresses []util.Address) FutureNotifyRecei
 // NOTE: This is a pod extension and requires a websocket connection.
 //
 // NOTE: Deprecated. Use LoadTxFilter instead.
-func (c *Client) NotifyReceived(addresses []util.Address) (e error) {
+func (c *Client) NotifyReceived(addresses []btcaddr.Address) (e error) {
 	return c.NotifyReceivedAsync(addresses).Receive()
 }
 
@@ -971,7 +973,7 @@ func (r FutureRescanResult) Receive() (e error) {
 // NOTE: Deprecated. Use RescanBlocksAsync instead.
 func (c *Client) RescanAsync(
 	startBlock *chainhash.Hash,
-	addresses []util.Address,
+	addresses []btcaddr.Address,
 	outpoints []*wire.OutPoint,
 ) FutureRescanResult {
 	// Not supported in HTTP POST mode.
@@ -1026,7 +1028,7 @@ func (c *Client) RescanAsync(
 // NOTE: Deprecated. Use RescanBlocks instead.
 func (c *Client) Rescan(
 	startBlock *chainhash.Hash,
-	addresses []util.Address,
+	addresses []btcaddr.Address,
 	outpoints []*wire.OutPoint,
 ) (e error) {
 	return c.RescanAsync(startBlock, addresses, outpoints).Receive()
@@ -1042,7 +1044,7 @@ func (c *Client) Rescan(
 // NOTE: Deprecated. Use RescanBlocksAsync instead.
 func (c *Client) RescanEndBlockAsync(
 	startBlock *chainhash.Hash,
-	addresses []util.Address, outpoints []*wire.OutPoint,
+	addresses []btcaddr.Address, outpoints []*wire.OutPoint,
 	endBlock *chainhash.Hash,
 ) FutureRescanResult {
 	// Not supported in HTTP POST mode.
@@ -1097,7 +1099,7 @@ func (c *Client) RescanEndBlockAsync(
 // NOTE: Deprecated. Use RescanBlocks instead.
 func (c *Client) RescanEndHeight(
 	startBlock *chainhash.Hash,
-	addresses []util.Address, outpoints []*wire.OutPoint,
+	addresses []btcaddr.Address, outpoints []*wire.OutPoint,
 	endBlock *chainhash.Hash,
 ) (e error) {
 	return c.RescanEndBlockAsync(
@@ -1127,7 +1129,7 @@ func (r FutureLoadTxFilterResult) Receive() (e error) {
 //
 // NOTE: This is a pod extension ported from github. com/decred/dcrrpcclient and requires a websocket connection.
 func (c *Client) LoadTxFilterAsync(
-	reload bool, addresses []util.Address,
+	reload bool, addresses []btcaddr.Address,
 	outPoints []wire.OutPoint,
 ) FutureLoadTxFilterResult {
 	addrStrs := make([]string, len(addresses))
@@ -1151,6 +1153,6 @@ func (c *Client) LoadTxFilterAsync(
 // for all rescanned blocks.
 //
 // NOTE: This is a pod extension ported from github. com/decred/dcrrpcclient and requires a websocket connection.
-func (c *Client) LoadTxFilter(reload bool, addresses []util.Address, outPoints []wire.OutPoint) (e error) {
+func (c *Client) LoadTxFilter(reload bool, addresses []btcaddr.Address, outPoints []wire.OutPoint) (e error) {
 	return c.LoadTxFilterAsync(reload, addresses, outPoints).Receive()
 }

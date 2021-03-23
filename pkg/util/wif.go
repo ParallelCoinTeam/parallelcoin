@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/btcaddr"
 	
 	"github.com/p9c/pod/pkg/base58"
 	"github.com/p9c/pod/pkg/chainhash"
@@ -92,7 +93,7 @@ func DecodeWIF(wif string) (*WIF, error) {
 	}
 	cksum := chainhash.DoubleHashB(tosum)[:4]
 	if !bytes.Equal(cksum, decoded[decodedLen-4:]) {
-		return nil, errChecksumMismatch
+		return nil, btcaddr.ErrChecksumMismatch
 	}
 	netID := decoded[0]
 	privKeyBytes := decoded[1 : 1+ec.PrivKeyBytesLen]

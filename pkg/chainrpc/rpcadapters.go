@@ -1,6 +1,7 @@
 package chainrpc
 
 import (
+	"github.com/p9c/pod/pkg/block"
 	"sync/atomic"
 	
 	"github.com/p9c/pod/cmd/node/mempool"
@@ -8,7 +9,6 @@ import (
 	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/netsync"
 	"github.com/p9c/pod/pkg/peer"
-	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/wire"
 )
 
@@ -219,7 +219,7 @@ func (b *SyncManager) IsCurrent() bool {
 // SubmitBlock submits the provided block to the network after processing it locally.
 //
 // This function is safe for concurrent access and is part of the RPCServerSyncManager interface implementation.
-func (b *SyncManager) SubmitBlock(block *util.Block,
+func (b *SyncManager) SubmitBlock(block *block.Block,
 	flags blockchain.BehaviorFlags) (bool, error) {
 	return b.syncMgr.ProcessBlock(block, flags)
 }

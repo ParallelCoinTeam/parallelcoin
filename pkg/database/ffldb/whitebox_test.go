@@ -5,6 +5,7 @@ import (
 	"compress/bzip2"
 	"encoding/binary"
 	"fmt"
+	"github.com/p9c/pod/pkg/block"
 	"hash/crc32"
 	"io"
 	"os"
@@ -16,7 +17,6 @@ import (
 	
 	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/database"
-	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/wire"
 )
 
@@ -30,7 +30,7 @@ var (
 )
 
 // loadBlocks loads the blocks contained in the tstdata directory and returns a slice of them.
-func loadBlocks(t *testing.T, dataFile string, network wire.BitcoinNet) ([]*util.Block, error) {
+func loadBlocks(t *testing.T, dataFile string, network wire.BitcoinNet) ([]*block.Block, error) {
 	// Open the file that contains the blocks for reading.
 	fi, e := os.Open(dataFile)
 	if e != nil {
@@ -47,8 +47,8 @@ func loadBlocks(t *testing.T, dataFile string, network wire.BitcoinNet) ([]*util
 	}()
 	dr := bzip2.NewReader(fi)
 	// Set the first block as the genesis block.
-	blocks := make([]*util.Block, 0, 256)
-	genesis := util.NewBlock(chaincfg.MainNetParams.GenesisBlock)
+	blocks := make([]*block.Block, 0, 256)
+	genesis := block.NewBlock(chaincfg.MainNetParams.GenesisBlock)
 	blocks = append(blocks, genesis)
 	// Load the remaining blocks.
 	for height := 1; ; height++ {
@@ -89,7 +89,7 @@ func loadBlocks(t *testing.T, dataFile string, network wire.BitcoinNet) ([]*util
 			return nil, e
 		}
 		// Deserialize and store the block.
-		block, e := util.NewBlockFromBytes(blockBytes)
+		block, e := block.NewFromBytes(blockBytes)
 		if e != nil {
 			t.Errorf("Failed to parse block %v: %v", height, e)
 			return nil, e
@@ -126,7 +126,7 @@ type testContext struct {
 	db           database.DB
 	files        map[uint32]*lockableFile
 	maxFileSizes map[uint32]int64
-	blocks       []*util.Block
+	blocks       []*block.Block
 }
 
 // TestConvertErr ensures the leveldb error to database error conversion works as expected.

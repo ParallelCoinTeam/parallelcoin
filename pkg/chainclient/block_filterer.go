@@ -2,9 +2,10 @@ package chainclient
 
 import (
 	"github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/btcaddr"
 	"github.com/p9c/pod/pkg/txscript"
 	"github.com/p9c/pod/pkg/util"
-	am "github.com/p9c/pod/pkg/wallet/waddrmgr"
+	am "github.com/p9c/pod/pkg/waddrmgr"
 	"github.com/p9c/pod/pkg/wire"
 )
 
@@ -31,13 +32,13 @@ type BlockFilterer struct {
 	InReverseFilter map[string]am.ScopedIndex
 	// WatchedOutPoints is a global set of outpoints being tracked by the wallet. This allows the block filterer to
 	// check for spends from an outpoint we own.
-	WatchedOutPoints map[wire.OutPoint]util.Address
+	WatchedOutPoints map[wire.OutPoint]btcaddr.Address
 	// FoundExternal is a two-layer map recording the scope and index of external addresses found in a single block.
 	FoundExternal map[am.KeyScope]map[uint32]struct{}
 	// FoundInternal is a two-layer map recording the scope and index of internal addresses found in a single block.
 	FoundInternal map[am.KeyScope]map[uint32]struct{}
 	// FoundOutPoints is a set of outpoints found in a single block whose address belongs to the wallet.
-	FoundOutPoints map[wire.OutPoint]util.Address
+	FoundOutPoints map[wire.OutPoint]btcaddr.Address
 	// RelevantTxns records the transactions found in a particular block that contained matches from an address in
 	// either ExReverseFilter or InReverseFilter.
 	RelevantTxns []*wire.MsgTx
@@ -64,7 +65,7 @@ func NewBlockFilterer(
 	}
 	foundExternal := make(map[am.KeyScope]map[uint32]struct{})
 	foundInternal := make(map[am.KeyScope]map[uint32]struct{})
-	foundOutPoints := make(map[wire.OutPoint]util.Address)
+	foundOutPoints := make(map[wire.OutPoint]btcaddr.Address)
 	return &BlockFilterer{
 		Params:           params,
 		ExReverseFilter:  exReverseFilter,
@@ -79,7 +80,7 @@ func NewBlockFilterer(
 // FilterBlock parses all txns in the provided block, searching for any that contain addresses of interest in either the
 // external or internal reverse filters. This method return true iff the block contains a non-zero number of addresses
 // of interest, or a transaction in the block spends from outpoints controlled by the wallet.
-func (bf *BlockFilterer) FilterBlock(block *wire.MsgBlock) bool {
+func (bf *BlockFilterer) FilterBlock(block *wire.Block) bool {
 	var hasRelevantTxns bool
 	for _, tx := range block.Transactions {
 		if bf.FilterTx(tx) {
@@ -111,7 +112,7 @@ func (bf *BlockFilterer) FilterTx(tx *wire.MsgTx) bool {
 	// the outpoint to our set of FoundOutPoints.
 	var e error
 	for i, out := range tx.TxOut {
-		var addrs []util.Address
+		var addrs []btcaddr.Address
 		_, addrs, _, e = txscript.ExtractPkScriptAddrs(
 			out.PkScript, bf.Params,
 		)
@@ -141,7 +142,7 @@ func (bf *BlockFilterer) FilterTx(tx *wire.MsgTx) bool {
 // FilterOutputAddrs tests the set of addresses against the block filterer's external and internal reverse address
 // indexes. If any are found, they are added to set of external and internal found addresses, respectively. This method
 // returns true iff a non-zero number of the provided addresses are of interest.
-func (bf *BlockFilterer) FilterOutputAddrs(addrs []util.Address) bool {
+func (bf *BlockFilterer) FilterOutputAddrs(addrs []btcaddr.Address) bool {
 	var isRelevant bool
 	for _, addr := range addrs {
 		addrStr := addr.EncodeAddress()

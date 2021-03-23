@@ -2,10 +2,9 @@ package indexers
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/block"
 	"sync"
 	"time"
-	
-	"github.com/p9c/pod/pkg/util"
 )
 
 // blockProgressLogger provides periodic logging for other services in order to show users progress of certain "actions"
@@ -34,11 +33,11 @@ func newBlockProgressLogger(
 
 // LogBlockHeight logs a new block height as an information message to show progress to the user. In order to prevent
 // spam, it limits logging to one message every 10 seconds with duration and totals included.
-func (b *blockProgressLogger) LogBlockHeight(block *util.Block) {
+func (b *blockProgressLogger) LogBlockHeight(block *block.Block) {
 	b.Lock()
 	defer b.Unlock()
 	b.receivedLogBlocks++
-	b.receivedLogTx += int64(len(block.MsgBlock().Transactions))
+	b.receivedLogTx += int64(len(block.WireBlock().Transactions))
 	now := time.Now()
 	duration := now.Sub(b.lastBlockLogTime)
 	if duration < time.Second*10 {
@@ -65,7 +64,7 @@ func (b *blockProgressLogger) LogBlockHeight(block *util.Block) {
 		b.receivedLogTx,
 		txStr,
 		block.Height(),
-		block.MsgBlock().Header.Timestamp,
+		block.WireBlock().Header.Timestamp,
 	)
 	b.receivedLogBlocks = 0
 	b.receivedLogTx = 0

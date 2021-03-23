@@ -3,6 +3,7 @@ package blockchain_test
 import (
 	"fmt"
 	bits2 "github.com/p9c/pod/pkg/bits"
+	"github.com/p9c/pod/pkg/block"
 	"log"
 	"math/big"
 	"os"
@@ -12,7 +13,6 @@ import (
 	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/database"
 	_ "github.com/p9c/pod/pkg/database/ffldb"
-	"github.com/p9c/pod/pkg/util"
 )
 
 // This example demonstrates how to create a new chain instance and use ProcessBlock to attempt to add a block to the
@@ -54,7 +54,7 @@ func ExampleBlockChain_ProcessBlock() {
 	}
 	// Process a block. For this example, we are going to intentionally cause an error by trying to process the genesis
 	// block which already exists.
-	genesisBlock := util.NewBlock(chaincfg.MainNetParams.GenesisBlock)
+	genesisBlock := block.NewBlock(chaincfg.MainNetParams.GenesisBlock)
 	isMainChain, isOrphan, e := chain.ProcessBlock(
 		0, genesisBlock,
 		blockchain.BFNone, 0,

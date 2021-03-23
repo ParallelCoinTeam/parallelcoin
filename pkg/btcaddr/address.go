@@ -337,16 +337,16 @@ const (
 	PKFHybrid
 )
 
-// AddressPubKey is an Address for a pay-to-pubkey transaction.
-type AddressPubKey struct {
+// PubKey is an Address for a pay-to-pubkey transaction.
+type PubKey struct {
 	pubKeyFormat PubKeyFormat
 	pubKey       *ec.PublicKey
 	pubKeyHashID byte
 }
 
-// NewPubKey returns a new AddressPubKey which represents a pay-to-pubkey address. The serializedPubKey parameter
+// NewPubKey returns a new PubKey which represents a pay-to-pubkey address. The serializedPubKey parameter
 // must be a valid pubkey and can be uncompressed, compressed, or hybrid.
-func NewPubKey(serializedPubKey []byte, net *chaincfg.Params) (*AddressPubKey, error) {
+func NewPubKey(serializedPubKey []byte, net *chaincfg.Params) (*PubKey, error) {
 	pubKey, e := ec.ParsePubKey(serializedPubKey, ec.S256())
 	if e != nil {
 		return nil, e
@@ -361,7 +361,7 @@ func NewPubKey(serializedPubKey []byte, net *chaincfg.Params) (*AddressPubKey, e
 	case 0x06, 0x07:
 		pkFormat = PKFHybrid
 	}
-	return &AddressPubKey{
+	return &PubKey{
 			pubKeyFormat: pkFormat,
 			pubKey:       pubKey,
 			pubKeyHashID: net.PubKeyHashAddrID,
@@ -370,7 +370,7 @@ func NewPubKey(serializedPubKey []byte, net *chaincfg.Params) (*AddressPubKey, e
 }
 
 // serialize returns the serialization of the public key according to the format associated with the address.
-func (a *AddressPubKey) serialize() []byte {
+func (a *PubKey) serialize() []byte {
 	switch a.pubKeyFormat {
 	default:
 		fallthrough
@@ -384,44 +384,44 @@ func (a *AddressPubKey) serialize() []byte {
 }
 
 // EncodeAddress returns the string encoding of the public key as a pay-to-pubkey-hash.  Note that the public key format (uncompressed, compressed, etc) will change the resulting address.  This is expected since pay-to-pubkey-hash is a hash of the serialized public key which obviously differs with the format.  At the time of this writing, most Bitcoin addresses are pay-to-pubkey-hash constructed from the uncompressed public key. Part of the Address interface.
-func (a *AddressPubKey) EncodeAddress() string {
+func (a *PubKey) EncodeAddress() string {
 	return encode(Hash160(a.serialize()), a.pubKeyHashID)
 }
 
 // ScriptAddress returns the bytes to be included in a txout script to pay to a public key.  Setting the public key format will affect the output of this function accordingly.  Part of the Address interface.
-func (a *AddressPubKey) ScriptAddress() []byte {
+func (a *PubKey) ScriptAddress() []byte {
 	return a.serialize()
 }
 
 // IsForNet returns whether or not the pay-to-pubkey address is associated with the passed bitcoin network.
-func (a *AddressPubKey) IsForNet(net *chaincfg.Params) bool {
+func (a *PubKey) IsForNet(net *chaincfg.Params) bool {
 	return a.pubKeyHashID == net.PubKeyHashAddrID
 }
 
 // String returns the hex-encoded human-readable string for the pay-to-pubkey address.  This is not the same as calling EncodeAddress.
-func (a *AddressPubKey) String() string {
+func (a *PubKey) String() string {
 	return hex.EncodeToString(a.serialize())
 }
 
 // Format returns the format (uncompressed, compressed, etc) of the pay-to-pubkey address.
-func (a *AddressPubKey) Format() PubKeyFormat {
+func (a *PubKey) Format() PubKeyFormat {
 	return a.pubKeyFormat
 }
 
 // SetFormat sets the format (uncompressed, compressed, etc) of the pay-to-pubkey address.
-func (a *AddressPubKey) SetFormat(pkFormat PubKeyFormat) {
+func (a *PubKey) SetFormat(pkFormat PubKeyFormat) {
 	a.pubKeyFormat = pkFormat
 }
 
 // PubKeyHash returns the pay-to-pubkey address converted to a pay-to-pubkey-hash address.  Note that the public key format (uncompressed, compressed, etc) will change the resulting address.  This is expected since pay-to-pubkey-hash is a hash of the serialized public key which obviously differs with the format.  At the time of this writing, most Bitcoin addresses are pay-to-pubkey-hash constructed from the uncompressed public key.
-func (a *AddressPubKey) PubKeyHash() *PubKeyHash {
+func (a *PubKey) PubKeyHash() *PubKeyHash {
 	addr := &PubKeyHash{netID: a.pubKeyHashID}
 	copy(addr.hash[:], Hash160(a.serialize()))
 	return addr
 }
 
 // PubKey returns the underlying public key for the address.
-func (a *AddressPubKey) PubKey() *ec.PublicKey {
+func (a *PubKey) PubKey() *ec.PublicKey {
 	return a.pubKey
 }
 

@@ -4,14 +4,14 @@ package txrules
 
 import (
 	"errors"
+	"github.com/p9c/pod/pkg/amt"
 	
-	txscript "github.com/p9c/pod/pkg/txscript"
+	"github.com/p9c/pod/pkg/txscript"
 	"github.com/p9c/pod/pkg/wire"
-	"github.com/p9c/pod/pkg/util"
 )
 
 // DefaultRelayFeePerKb is the default minimum relay fee policy for a mempool.
-const DefaultRelayFeePerKb util.Amount = 1e3
+const DefaultRelayFeePerKb amt.Amount = 1e3
 
 // Transaction rule violations
 var (
@@ -22,7 +22,7 @@ var (
 
 // GetDustThreshold is used to define the amount below which output will be determined as dust. Threshold is determined
 // as 3 times the relay fee.
-func GetDustThreshold(scriptSize int, relayFeePerKb util.Amount) util.Amount {
+func GetDustThreshold(scriptSize int, relayFeePerKb amt.Amount) amt.Amount {
 	// Calculate the total (estimated) cost to the network. This is calculated using the serialize size of the output
 	// plus the serial size of a transaction input which redeems it. The output is assumed to be compressed P2PKH as
 	// this is the most common script type. Use the average size of a compressed P2PKH redeem input (148) rather than
@@ -30,19 +30,19 @@ func GetDustThreshold(scriptSize int, relayFeePerKb util.Amount) util.Amount {
 	totalSize := 8 + wire.VarIntSerializeSize(uint64(scriptSize)) +
 		scriptSize + 148
 	byteFee := relayFeePerKb / 1000
-	relayFee := util.Amount(totalSize) * byteFee
+	relayFee := amt.Amount(totalSize) * byteFee
 	return 3 * relayFee
 }
 
 // IsDustAmount determines whether a transaction output value and script length would cause the output to be considered
 // dust. Transactions with dust outputs are not standard and are rejected by mempools with default policies.
-func IsDustAmount(amount util.Amount, scriptSize int, relayFeePerKb util.Amount) bool {
+func IsDustAmount(amount amt.Amount, scriptSize int, relayFeePerKb amt.Amount) bool {
 	return amount < GetDustThreshold(scriptSize, relayFeePerKb)
 }
 
 // IsDustOutput determines whether a transaction output is considered dust. Transactions with dust outputs are not
 // standard and are rejected by mempools with default policies.
-func IsDustOutput(output *wire.TxOut, relayFeePerKb util.Amount) bool {
+func IsDustOutput(output *wire.TxOut, relayFeePerKb amt.Amount) bool {
 	// Unspendable outputs which solely carry data are not checked for dust.
 	if txscript.GetScriptClass(output.PkScript) == txscript.NullDataTy {
 		return false
@@ -51,16 +51,17 @@ func IsDustOutput(output *wire.TxOut, relayFeePerKb util.Amount) bool {
 	if txscript.IsUnspendable(output.PkScript) {
 		return true
 	}
-	return IsDustAmount(util.Amount(output.Value), len(output.PkScript),
+	return IsDustAmount(
+		amt.Amount(output.Value), len(output.PkScript),
 		relayFeePerKb)
 }
 
 // CheckOutput performs simple consensus and policy tests on a transaction output.
-func CheckOutput(output *wire.TxOut, relayFeePerKb util.Amount) (e error) {
+func CheckOutput(output *wire.TxOut, relayFeePerKb amt.Amount) (e error) {
 	if output.Value < 0 {
 		return ErrAmountNegative
 	}
-	if output.Value > int64(util.MaxSatoshi) {
+	if output.Value > int64(amt.MaxSatoshi) {
 		return ErrAmountExceedsMax
 	}
 	if IsDustOutput(output, relayFeePerKb) {
@@ -71,13 +72,13 @@ func CheckOutput(output *wire.TxOut, relayFeePerKb util.Amount) (e error) {
 
 // FeeForSerializeSize calculates the required fee for a transaction of some arbitrary size given a mempool's relay fee
 // policy.
-func FeeForSerializeSize(relayFeePerKb util.Amount, txSerializeSize int) util.Amount {
-	fee := relayFeePerKb * util.Amount(txSerializeSize) / 1000
+func FeeForSerializeSize(relayFeePerKb amt.Amount, txSerializeSize int) amt.Amount {
+	fee := relayFeePerKb * amt.Amount(txSerializeSize) / 1000
 	if fee == 0 && relayFeePerKb > 0 {
 		fee = relayFeePerKb
 	}
-	if fee < 0 || fee > util.MaxSatoshi {
-		fee = util.MaxSatoshi
+	if fee < 0 || fee > amt.MaxSatoshi {
+		fee = amt.MaxSatoshi
 	}
 	return fee
 }

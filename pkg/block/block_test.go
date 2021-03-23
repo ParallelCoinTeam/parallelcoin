@@ -18,8 +18,8 @@ import (
 func TestBlock(t *testing.T) {
 	b := block.NewBlock(&Block100000)
 	// Ensure we get the same data back out.
-	if msgBlock := b.MsgBlock(); !reflect.DeepEqual(msgBlock, &Block100000) {
-		t.Errorf("MsgBlock: mismatched MsgBlock - got %v, want %v",
+	if msgBlock := b.WireBlock(); !reflect.DeepEqual(msgBlock, &Block100000) {
+		t.Errorf("Block: mismatched Block - got %v, want %v",
 			spew.Sdump(msgBlock), spew.Sdump(&Block100000))
 	}
 	// Ensure block height set and get work properly.
@@ -151,9 +151,9 @@ func TestNewBlockFromBytes(t *testing.T) {
 	}
 	block100000Bytes := block100000Buf.Bytes()
 	// Create a new block from the serialized bytes.
-	b, e := block.NewBlockFromBytes(block100000Bytes)
+	b, e := block.NewFromBytes(block100000Bytes)
 	if e != nil  {
-		t.Errorf("NewBlockFromBytes: %v", e)
+		t.Errorf("NewFromBytes: %v", e)
 		return
 	}
 	// Ensure we get the same data back out.
@@ -167,14 +167,14 @@ func TestNewBlockFromBytes(t *testing.T) {
 			spew.Sdump(serializedBytes),
 			spew.Sdump(block100000Bytes))
 	}
-	// Ensure the generated MsgBlock is correct.
-	if msgBlock := b.MsgBlock(); !reflect.DeepEqual(msgBlock, &Block100000) {
-		t.Errorf("MsgBlock: mismatched MsgBlock - got %v, want %v",
+	// Ensure the generated Block is correct.
+	if msgBlock := b.WireBlock(); !reflect.DeepEqual(msgBlock, &Block100000) {
+		t.Errorf("Block: mismatched Block - got %v, want %v",
 			spew.Sdump(msgBlock), spew.Sdump(&Block100000))
 	}
 }
 
-// TestNewBlockFromBlockAndBytes tests creation of a Block from a MsgBlock and raw bytes.
+// TestNewBlockFromBlockAndBytes tests creation of a Block from a Block and raw bytes.
 func TestNewBlockFromBlockAndBytes(t *testing.T) {
 	// Serialize the test block.
 	var block100000Buf bytes.Buffer
@@ -184,7 +184,7 @@ func TestNewBlockFromBlockAndBytes(t *testing.T) {
 	}
 	block100000Bytes := block100000Buf.Bytes()
 	// Create a new block from the serialized bytes.
-	b := block.NewBlockFromBlockAndBytes(&Block100000, block100000Bytes)
+	b := block.NewFromBlockAndBytes(&Block100000, block100000Bytes)
 	// Ensure we get the same data back out.
 	serializedBytes, e := b.Bytes()
 	if e != nil  {
@@ -196,8 +196,8 @@ func TestNewBlockFromBlockAndBytes(t *testing.T) {
 			spew.Sdump(serializedBytes),
 			spew.Sdump(block100000Bytes))
 	}
-	if msgBlock := b.MsgBlock(); !reflect.DeepEqual(msgBlock, &Block100000) {
-		t.Errorf("MsgBlock: mismatched MsgBlock - got %v, want %v",
+	if msgBlock := b.WireBlock(); !reflect.DeepEqual(msgBlock, &Block100000) {
+		t.Errorf("Block: mismatched Block - got %v, want %v",
 			spew.Sdump(msgBlock), spew.Sdump(&Block100000))
 	}
 }
@@ -219,16 +219,16 @@ func TestBlockErrors(t *testing.T) {
 	}
 	block100000Bytes := block100000Buf.Bytes()
 	// Create a new block from the serialized bytes.
-	b, e := block.NewBlockFromBytes(block100000Bytes)
+	b, e := block.NewFromBytes(block100000Bytes)
 	if e != nil  {
-		t.Errorf("NewBlockFromBytes: %v", e)
+		t.Errorf("NewFromBytes: %v", e)
 		return
 	}
 	// Truncate the block byte buffer to force errors.
 	shortBytes := block100000Bytes[:80]
-	_, e = block.NewBlockFromBytes(shortBytes)
+	_, e = block.NewFromBytes(shortBytes)
 	if e != io.EOF {
-		t.Errorf("NewBlockFromBytes: did not get expected error - "+
+		t.Errorf("NewFromBytes: did not get expected error - "+
 			"got %v, want %v", e, io.EOF)
 	}
 	// Ensure TxHash returns expected error on invalid indices.
@@ -264,7 +264,7 @@ func TestBlockErrors(t *testing.T) {
 }
 
 // Block100000 defines block 100,000 of the block chain.  It is used to test Block operations.
-var Block100000 = wire.MsgBlock{
+var Block100000 = wire.Block{
 	Header: wire.BlockHeader{
 		Version: 1,
 		PrevBlock: chainhash.Hash([32]byte{ // Make go vet happy.

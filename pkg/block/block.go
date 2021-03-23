@@ -26,7 +26,7 @@ func (e OutOfRangeError) Error() string {
 // hashes for the block and its transactions on their first access so subsequent accesses don't have to repeat the
 // relatively expensive hashing operations.
 type Block struct {
-	msgBlock                 *wire.MsgBlock  // Underlying MsgBlock
+	msgBlock                 *wire.Block     // Underlying WireBlock
 	serializedBlock          []byte          // Serialized bytes for the block
 	serializedBlockNoWitness []byte          // Serialized bytes for block w/o witness data
 	blockHash                *chainhash.Hash // Cached block hash
@@ -35,21 +35,21 @@ type Block struct {
 	txnsGenerated            bool            // ALL wrapped transactions generated
 }
 
-// MsgBlock returns the underlying wire.MsgBlock for the Block.
-func (b *Block) MsgBlock() *wire.MsgBlock {
+// WireBlock returns the underlying wire.Block for the Block.
+func (b *Block) WireBlock() *wire.Block {
 	// Return the cached block.
 	return b.msgBlock
 }
 
 // Bytes returns the serialized bytes for the Block.
-// This is equivalent to calling Serialize on the underlying wire.MsgBlock,
+// This is equivalent to calling Serialize on the underlying wire.Block,
 // however it caches the result so subsequent calls are more efficient.
 func (b *Block) Bytes() ([]byte, error) {
 	// Return the cached serialized bytes if it has already been generated.
 	if len(b.serializedBlock) != 0 {
 		return b.serializedBlock, nil
 	}
-	// Serialize the MsgBlock.
+	// Serialize the Block.
 	w := bytes.NewBuffer(make([]byte, 0, b.msgBlock.SerializeSize()))
 	e := b.msgBlock.Serialize(w)
 	if e != nil {
@@ -68,7 +68,7 @@ func (b *Block) BytesNoWitness() ([]byte, error) {
 	if len(b.serializedBlockNoWitness) != 0 {
 		return b.serializedBlockNoWitness, nil
 	}
-	// Serialize the MsgBlock.
+	// Serialize the Block.
 	var w bytes.Buffer
 	e := b.msgBlock.SerializeNoWitness(&w)
 	if e != nil {
@@ -81,7 +81,7 @@ func (b *Block) BytesNoWitness() ([]byte, error) {
 }
 
 // Hash returns the block identifier hash for the Block. This is equivalent to calling BlockHash on the underlying
-// wire.MsgBlock, however it caches the result so subsequent calls are more efficient.
+// wire.Block, however it caches the result so subsequent calls are more efficient.
 func (b *Block) Hash() *chainhash.Hash {
 	// Return the cached block hash if it has already been generated.
 	if b.blockHash != nil {
@@ -95,7 +95,7 @@ func (b *Block) Hash() *chainhash.Hash {
 
 // Tx returns a wrapped transaction (util.Tx) for the transaction at the specified index in the Block. The supplied
 // index is 0 based. That is to say, the first transaction in the block is txNum 0. This is nearly equivalent to
-// accessing the raw transaction (wire.MsgTx) from the underlying wire.MsgBlock, however the wrapped transaction has
+// accessing the raw transaction (wire.MsgTx) from the underlying wire.Block, however the wrapped transaction has
 // some helpful properties such as caching the hash so subsequent calls are more efficient.
 func (b *Block) Tx(txNum int) (*util.Tx, error) {
 	// Ensure the requested transaction is in range.
@@ -123,7 +123,7 @@ func (b *Block) Tx(txNum int) (*util.Tx, error) {
 }
 
 // Transactions returns a slice of wrapped transactions (util.Tx) for all transactions in the Block. This is nearly
-// equivalent to accessing the raw transactions (wire.MsgTx) in the underlying wire.MsgBlock, however it instead
+// equivalent to accessing the raw transactions (wire.MsgTx) in the underlying wire.Block, however it instead
 // provides easy access to wrapped versions (util.Tx) of them.
 func (b *Block) Transactions() []*util.Tx {
 	// Return transactions if they have ALL already been generated. This flag is necessary because the wrapped
@@ -169,7 +169,7 @@ func (b *Block) TxLoc() ([]wire.TxLoc, error) {
 		return nil, e
 	}
 	rbuf := bytes.NewBuffer(rawMsg)
-	var mblock wire.MsgBlock
+	var mblock wire.Block
 	txLocs, e := mblock.DeserializeTxLoc(rbuf)
 	if e != nil {
 		return nil, e
@@ -188,18 +188,18 @@ func (b *Block) SetHeight(height int32) {
 	b.blockHeight = height
 }
 
-// NewBlock returns a new instance of a bitcoin block given an underlying wire.MsgBlock.  See Block.
-func NewBlock(msgBlock *wire.MsgBlock) *Block {
+// NewBlock returns a new instance of a bitcoin block given an underlying wire.Block.  See Block.
+func NewBlock(msgBlock *wire.Block) *Block {
 	return &Block{
 		msgBlock:    msgBlock,
 		blockHeight: BlockHeightUnknown,
 	}
 }
 
-// NewBlockFromBytes returns a new instance of a bitcoin block given the serialized bytes.  See Block.
-func NewBlockFromBytes(serializedBlock []byte) (*Block, error) {
+// NewFromBytes returns a new instance of a bitcoin block given the serialized bytes.  See Block.
+func NewFromBytes(serializedBlock []byte) (*Block, error) {
 	br := bytes.NewReader(serializedBlock)
-	b, e := NewBlockFromReader(br)
+	b, e := NewFromReader(br)
 	if e != nil {
 		return nil, e
 	}
@@ -207,10 +207,10 @@ func NewBlockFromBytes(serializedBlock []byte) (*Block, error) {
 	return b, nil
 }
 
-// NewBlockFromReader returns a new instance of a bitcoin block given a Reader to deserialize the block.  See Block.
-func NewBlockFromReader(r io.Reader) (*Block, error) {
-	// Deserialize the bytes into a MsgBlock.
-	var msgBlock wire.MsgBlock
+// NewFromReader returns a new instance of a bitcoin block given a Reader to deserialize the block.  See Block.
+func NewFromReader(r io.Reader) (*Block, error) {
+	// Deserialize the bytes into a Block.
+	var msgBlock wire.Block
 	e := msgBlock.Deserialize(r)
 	if e != nil {
 		return nil, e
@@ -222,9 +222,9 @@ func NewBlockFromReader(r io.Reader) (*Block, error) {
 	return &b, nil
 }
 
-// NewBlockFromBlockAndBytes returns a new instance of a bitcoin block given an underlying wire.MsgBlock and the
+// NewFromBlockAndBytes returns a new instance of a bitcoin block given an underlying wire.Block and the
 // serialized bytes for it. See Block.
-func NewBlockFromBlockAndBytes(msgBlock *wire.MsgBlock, serializedBlock []byte) *Block {
+func NewFromBlockAndBytes(msgBlock *wire.Block, serializedBlock []byte) *Block {
 	return &Block{
 		msgBlock:        msgBlock,
 		serializedBlock: serializedBlock,

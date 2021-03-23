@@ -3,8 +3,7 @@ package txscript
 import (
 	"fmt"
 	"github.com/p9c/pod/pkg/chaincfg"
-	
-	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/btcaddr"
 )
 
 // ScriptClass is an enumeration for the list of standard types of script.
@@ -366,10 +365,10 @@ func payToPubKeyScript(serializedPubKey []byte) ([]byte, error) {
 }
 
 // PayToAddrScript creates a new script to pay a transaction output to a the specified address.
-func PayToAddrScript(addr util.Address) ([]byte, error) {
+func PayToAddrScript(addr btcaddr.Address) ([]byte, error) {
 	const nilAddrErrStr = "unable to generate payment script for nil address"
 	switch addr := addr.(type) {
-	case *util.AddressPubKeyHash:
+	case *btcaddr.PubKeyHash:
 		if addr == nil {
 			return nil, scriptError(
 				ErrUnsupportedAddress,
@@ -377,7 +376,7 @@ func PayToAddrScript(addr util.Address) ([]byte, error) {
 			)
 		}
 		return payToPubKeyHashScript(addr.ScriptAddress())
-	case *util.AddressScriptHash:
+	case *btcaddr.ScriptHash:
 		if addr == nil {
 			return nil, scriptError(
 				ErrUnsupportedAddress,
@@ -385,7 +384,7 @@ func PayToAddrScript(addr util.Address) ([]byte, error) {
 			)
 		}
 		return payToScriptHashScript(addr.ScriptAddress())
-	case *util.AddressPubKey:
+	case *btcaddr.PubKey:
 		if addr == nil {
 			return nil, scriptError(
 				ErrUnsupportedAddress,
@@ -432,7 +431,7 @@ func NullDataScript(data []byte) ([]byte, error) {
 // nrequired of the keys in pubkeys are required to have signed the transaction
 // for success. An ScriptError with the error code errTooManyRequiredSigs will
 // be returned if nrequired is larger than the number of keys provided.
-func MultiSigScript(pubkeys []*util.AddressPubKey, nrequired int) ([]byte, error) {
+func MultiSigScript(pubkeys []*btcaddr.PubKey, nrequired int) ([]byte, error) {
 	if len(pubkeys) < nrequired {
 		str := fmt.Sprintf(
 			"unable to generate multisig script with "+
@@ -472,8 +471,8 @@ func PushedData(script []byte) ([][]byte, error) {
 // signatures associated with the passed PkScript. Note that it only works for
 // 'standard' transaction script types. Any data such as public keys which are
 // invalid are omitted from the results.
-func ExtractPkScriptAddrs(pkScript []byte, chainParams *chaincfg.Params) (ScriptClass, []util.Address, int, error) {
-	var addrs []util.Address
+func ExtractPkScriptAddrs(pkScript []byte, chainParams *chaincfg.Params) (ScriptClass, []btcaddr.Address, int, error) {
+	var addrs []btcaddr.Address
 	var requiredSigs int
 	// No valid addresses or required signatures if the script doesn't parse.
 	pops, e := parseScript(pkScript)
@@ -487,7 +486,7 @@ func ExtractPkScriptAddrs(pkScript []byte, chainParams *chaincfg.Params) (Script
 		// OP_EQUALVERIFY OP_CHECKSIG Therefore the pubkey hash is the 3rd item on the
 		// stack. Skip the pubkey hash if it's invalid for some reason.
 		requiredSigs = 1
-		addr, e := util.NewAddressPubKeyHash(
+		addr, e := btcaddr.NewPubKeyHash(
 			pops[2].data,
 			chainParams,
 		)
@@ -508,7 +507,7 @@ func ExtractPkScriptAddrs(pkScript []byte, chainParams *chaincfg.Params) (Script
 		// A pay-to-pubkey script is of the form: <pubkey> OP_CHECKSIG Therefore the pubkey is the first item on the
 		// stack. Skip the pubkey if it's invalid for some reason.
 		requiredSigs = 1
-		addr, e := util.NewAddressPubKey(pops[0].data, chainParams)
+		addr, e := btcaddr.NewPubKey(pops[0].data, chainParams)
 		if e == nil {
 			addrs = append(addrs, addr)
 		}
@@ -516,7 +515,7 @@ func ExtractPkScriptAddrs(pkScript []byte, chainParams *chaincfg.Params) (Script
 		// A pay-to-script-hash script is of the form: OP_HASH160 <scripthash> OP_EQUAL Therefore the script hash is the
 		// 2nd item on the stack. Skip the script hash if it's invalid for some reason.
 		requiredSigs = 1
-		addr, e := util.NewAddressScriptHashFromHash(
+		addr, e := btcaddr.NewScriptHashFromHash(
 			pops[1].data,
 			chainParams,
 		)
@@ -541,9 +540,9 @@ func ExtractPkScriptAddrs(pkScript []byte, chainParams *chaincfg.Params) (Script
 		requiredSigs = asSmallInt(pops[0].opcode)
 		numPubKeys := asSmallInt(pops[len(pops)-2].opcode)
 		// Extract the public keys while skipping any that are invalid.
-		addrs = make([]util.Address, 0, numPubKeys)
+		addrs = make([]btcaddr.Address, 0, numPubKeys)
 		for i := 0; i < numPubKeys; i++ {
-			addr, e := util.NewAddressPubKey(
+			addr, e := btcaddr.NewPubKey(
 				pops[i+1].data,
 				chainParams,
 			)

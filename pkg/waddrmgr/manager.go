@@ -5,14 +5,14 @@ import (
 	"crypto/sha512"
 	"fmt"
 	"github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/btcaddr"
 	"sync"
 	"time"
 	
-	"github.com/p9c/pod/pkg/walletdb"
 	"github.com/p9c/pod/pkg/snacl"
-	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/hdkeychain"
 	"github.com/p9c/pod/pkg/util/zero"
+	"github.com/p9c/pod/pkg/walletdb"
 )
 
 const (
@@ -536,7 +536,7 @@ func (m *Manager) NeuterRootKey(ns walletdb.ReadWriteBucket) (e error) {
 // pay-to-script-hash addresses.
 func (m *Manager) Address(
 	ns walletdb.ReadBucket,
-	address util.Address,
+	address btcaddr.Address,
 ) (ManagedAddress, error) {
 	m.mtx.RLock()
 	defer m.mtx.RUnlock()
@@ -554,7 +554,7 @@ func (m *Manager) Address(
 }
 
 // MarkUsed updates the used flag for the provided address.
-func (m *Manager) MarkUsed(ns walletdb.ReadWriteBucket, address util.Address) (e error) {
+func (m *Manager) MarkUsed(ns walletdb.ReadWriteBucket, address btcaddr.Address) (e error) {
 	m.mtx.RLock()
 	defer m.mtx.RUnlock()
 	// Run through all the known scoped managers, and attempt to mark the address as
@@ -578,7 +578,7 @@ func (m *Manager) MarkUsed(ns walletdb.ReadWriteBucket, address util.Address) (e
 // return the scoped manager that owns the addr+account combo.
 func (m *Manager) AddrAccount(
 	ns walletdb.ReadBucket,
-	address util.Address,
+	address btcaddr.Address,
 ) (*ScopedKeyManager, uint32, error) {
 	m.mtx.RLock()
 	defer m.mtx.RUnlock()
@@ -623,7 +623,7 @@ func (m *Manager) ForEachActiveAccountAddress(
 
 // ForEachActiveAddress calls the given function with each active address stored
 // in the manager, breaking early on error.
-func (m *Manager) ForEachActiveAddress(ns walletdb.ReadBucket, fn func(addr util.Address) error) (e error) {
+func (m *Manager) ForEachActiveAddress(ns walletdb.ReadBucket, fn func(addr btcaddr.Address) error) (e error) {
 	m.mtx.RLock()
 	defer m.mtx.RUnlock()
 	for _, scopedMgr := range m.scopedManagers {

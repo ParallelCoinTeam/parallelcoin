@@ -3,6 +3,7 @@ package bloom_test
 import (
 	"bytes"
 	"encoding/hex"
+	block2 "github.com/p9c/pod/pkg/block"
 	"testing"
 	
 	"github.com/p9c/pod/pkg/bloom"
@@ -199,7 +200,7 @@ func TestFilterInsertKey(t *testing.T) {
 	}
 	f := bloom.NewFilter(2, 0, 0.001, wire.BloomUpdateAll)
 	f.Add(wif.SerializePubKey())
-	f.Add(util.Hash160(wif.SerializePubKey()))
+	f.Add(btcaddr.Hash160(wif.SerializePubKey()))
 	want, e := hex.DecodeString("038fc16b080000000000000001")
 	if e != nil  {
 		t.Errorf("TestFilterInsertWithTweak DecodeString failed: %v\n", e)
@@ -539,9 +540,9 @@ func TestFilterInsertP2PubKeyOnly(t *testing.T) {
 		t.Errorf("TestFilterInsertP2PubKeyOnly DecodeString failed: %v", e)
 		return
 	}
-	block, e := util.NewBlockFromBytes(blockBytes)
+	block, e := block2.NewFromBytes(blockBytes)
 	if e != nil  {
-		t.Errorf("TestFilterInsertP2PubKeyOnly NewBlockFromBytes failed: %v", e)
+		t.Errorf("TestFilterInsertP2PubKeyOnly NewFromBytes failed: %v", e)
 		return
 	}
 	f := bloom.NewFilter(10, 0, 0.000001, wire.BloomUpdateP2PubkeyOnly)

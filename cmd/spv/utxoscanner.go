@@ -2,6 +2,7 @@ package spv
 
 import (
 	"container/heap"
+	"github.com/p9c/pod/pkg/block"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -9,8 +10,7 @@ import (
 	"github.com/p9c/pod/pkg/util/qu"
 	
 	"github.com/p9c/pod/pkg/chainhash"
-	"github.com/p9c/pod/pkg/util"
-	am "github.com/p9c/pod/pkg/wallet/waddrmgr"
+	am "github.com/p9c/pod/pkg/waddrmgr"
 )
 
 type (
@@ -65,7 +65,7 @@ type (
 		// against the rescan options.
 		BlockFilterMatches func(ro *rescanOptions, blockHash *chainhash.Hash) (bool, error)
 		// GetBlock fetches a block from the p2p network.
-		GetBlock func(chainhash.Hash, ...QueryOption) (*util.Block, error)
+		GetBlock func(chainhash.Hash, ...QueryOption) (*block.Block, error)
 	}
 	// getUtxoResult is a simple pair type holding a spend report and error.
 	getUtxoResult struct {
@@ -335,7 +335,7 @@ scanToEnd:
 		default:
 		}
 		D.F("processing block height=%d hash=%s %s", height, hash)
-		reporter.ProcessBlock(block.MsgBlock(), newReqs, height)
+		reporter.ProcessBlock(block.WireBlock(), newReqs, height)
 	}
 	// We've scanned up to the end height, now perform a check to see if we still
 	// have any new blocks to process. If this is the first time through, we

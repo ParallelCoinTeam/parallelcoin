@@ -3,13 +3,14 @@ package waddrmgr
 import (
 	"encoding/hex"
 	"fmt"
+	"github.com/p9c/pod/pkg/btcaddr"
 	"sync"
 	
-	"github.com/p9c/pod/pkg/walletdb"
 	ec "github.com/p9c/pod/pkg/ecc"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/hdkeychain"
 	"github.com/p9c/pod/pkg/util/zero"
+	"github.com/p9c/pod/pkg/walletdb"
 )
 
 // AddressType represents the various address types waddrmgr is currently able
@@ -46,7 +47,7 @@ type ManagedAddress interface {
 	// Account returns the account the address is associated with.
 	Account() uint32
 	// Address returns a util.Address for the backing address.
-	Address() util.Address
+	Address() btcaddr.Address
 	// AddrHash returns the key or script hash related to the address
 	AddrHash() []byte
 	// Imported returns true if the backing address was imported instead of being
@@ -99,7 +100,7 @@ type ManagedScriptAddress interface {
 // the private key associated with the public key.
 type managedAddress struct {
 	manager          *ScopedKeyManager
-	address          util.Address
+	address          btcaddr.Address
 	pubKey           *ec.PublicKey
 	privKeyEncrypted []byte
 	privKeyCT        []byte // non-nil if unlocked
@@ -165,7 +166,7 @@ func (a *managedAddress) AddrType() AddressType {
 // will be a pay-to-pubkey-hash address.
 //
 // This is part of the ManagedAddress interface implementation.
-func (a *managedAddress) Address() util.Address {
+func (a *managedAddress) Address() btcaddr.Address {
 	return a.address
 }
 
@@ -175,9 +176,9 @@ func (a *managedAddress) Address() util.Address {
 func (a *managedAddress) AddrHash() []byte {
 	var hash []byte
 	switch n := a.address.(type) {
-	case *util.AddressPubKeyHash:
+	case *btcaddr.PubKeyHash:
 		hash = n.Hash160()[:]
-	case *util.AddressScriptHash:
+	case *btcaddr.ScriptHash:
 		hash = n.Hash160()[:]
 		// case *util.AddressWitnessPubKeyHash:
 		// 	hash = n.Hash160()[:]
@@ -310,11 +311,11 @@ func newManagedAddressWithoutPrivKey(
 	// Create a pay-to-pubkey-hash address from the public key.
 	var pubKeyHash []byte
 	if compressed {
-		pubKeyHash = util.Hash160(pubKey.SerializeCompressed())
+		pubKeyHash = btcaddr.Hash160(pubKey.SerializeCompressed())
 	} else {
-		pubKeyHash = util.Hash160(pubKey.SerializeUncompressed())
+		pubKeyHash = btcaddr.Hash160(pubKey.SerializeUncompressed())
 	}
-	var address util.Address
+	var address btcaddr.Address
 	var e error
 	switch addrType {
 	// case NestedWitnessPubKey:
@@ -338,23 +339,23 @@ func newManagedAddressWithoutPrivKey(
 	// // Finally, we'll use the witness program itself as the pre-image to a p2sh
 	// // address. In order to spend, we first use the witnessProgram as the sigScript,
 	// // then present the proper <sig, pubkey> pair as the witness.
-	// if address, e = util.NewAddressScriptHash(
+	// if address, e = util.NewScriptHash(
 	// 	witnessProgram, m.rootManager.chainParams,
 	// ); E.Chk(e) {
 	// 	return nil, e
 	// }
 	case PubKeyHash:
-		if address, e = util.NewAddressPubKeyHash(
+		if address, e = btcaddr.NewPubKeyHash(
 			pubKeyHash, m.rootManager.chainParams,
 		); E.Chk(e) {
 			return nil, e
 		}
-	// case WitnessPubKey:
-	// 	if address, e = util.NewAddressWitnessPubKeyHash(
-	// 		pubKeyHash, m.rootManager.chainParams,
-	// 	); E.Chk(e) {
-	// 		return nil, e
-	// 	}
+		// case WitnessPubKey:
+		// 	if address, e = util.NewAddressWitnessPubKeyHash(
+		// 		pubKeyHash, m.rootManager.chainParams,
+		// 	); E.Chk(e) {
+		// 		return nil, e
+		// 	}
 	}
 	return &managedAddress{
 		manager:          m,
@@ -447,7 +448,7 @@ func newManagedAddressFromExtKey(
 type scriptAddress struct {
 	manager         *ScopedKeyManager
 	account         uint32
-	address         *util.AddressScriptHash
+	address         *btcaddr.ScriptHash
 	scriptEncrypted []byte
 	scriptCT        []byte
 	scriptMutex     sync.Mutex
@@ -507,7 +508,7 @@ func (a *scriptAddress) AddrType() AddressType {
 // will be a pay-to-script-hash address.
 //
 // This is part of the ManagedAddress interface implementation.
-func (a *scriptAddress) Address() util.Address {
+func (a *scriptAddress) Address() btcaddr.Address {
 	return a.address
 }
 
@@ -574,8 +575,8 @@ func newScriptAddress(
 	scriptEncrypted []byte,
 ) (*scriptAddress, error) {
 	var e error
-	var address *util.AddressScriptHash
-	if address, e = util.NewAddressScriptHashFromHash(
+	var address *btcaddr.ScriptHash
+	if address, e = btcaddr.NewScriptHashFromHash(
 		scriptHash, m.rootManager.chainParams,
 	); E.Chk(e) {
 		return nil, e

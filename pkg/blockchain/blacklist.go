@@ -2,12 +2,13 @@ package blockchain
 
 import (
 	"github.com/p9c/pod/pkg/fork"
+	"github.com/p9c/pod/pkg/btcaddr"
 	"github.com/p9c/pod/pkg/txscript"
 	"github.com/p9c/pod/pkg/util"
 )
 
 // ContainsBlacklisted returns true if one of the given addresses is found in the transaction
-func ContainsBlacklisted(b *BlockChain, tx *util.Tx, blacklist []util.Address) (hasBlacklisted bool) {
+func ContainsBlacklisted(b *BlockChain, tx *util.Tx, blacklist []btcaddr.Address) (hasBlacklisted bool) {
 	// in tests this function is not relevant
 	if b == nil {
 		return false
@@ -16,7 +17,7 @@ func ContainsBlacklisted(b *BlockChain, tx *util.Tx, blacklist []util.Address) (
 	if fork.GetCurrent(b.BestSnapshot().Height) < 1 {
 		return false
 	}
-	var addrs []util.Address
+	var addrs []btcaddr.Address
 	// first decode transaction and collect all addresses in the transaction outputs
 	txo := tx.MsgTx().TxOut
 	for i := range txo {
@@ -29,7 +30,7 @@ func ContainsBlacklisted(b *BlockChain, tx *util.Tx, blacklist []util.Address) (
 	for i := range txi {
 		bb, e := b.BlockByHash(&txi[i].PreviousOutPoint.Hash)
 		if e ==  nil {
-			txs := bb.MsgBlock().Transactions
+			txs := bb.WireBlock().Transactions
 			for j := range txs {
 				txitxo := txs[j].TxOut
 				for k := range txitxo {
@@ -45,7 +46,7 @@ func ContainsBlacklisted(b *BlockChain, tx *util.Tx, blacklist []util.Address) (
 }
 
 // Intersects returns whether one slice of byte slices contains a match in another
-func Intersects(a, b []util.Address) bool {
+func Intersects(a, b []btcaddr.Address) bool {
 	for x := range a {
 		for y := range b {
 			if a[x].EncodeAddress() == b[y].EncodeAddress() {

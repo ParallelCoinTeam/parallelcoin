@@ -10,7 +10,7 @@ import (
 	"github.com/p9c/pod/pkg/wire"
 )
 
-var Block100000 = wire.MsgBlock{
+var Block100000 = wire.Block{
 	Header: wire.BlockHeader{
 		Version: 1,
 		PrevBlock: chainhash.Hash(

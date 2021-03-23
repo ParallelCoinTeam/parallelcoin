@@ -5,6 +5,7 @@ import (
 	"container/list"
 	"fmt"
 	"github.com/p9c/pod/pkg/bits"
+	"github.com/p9c/pod/pkg/block"
 	"github.com/p9c/pod/pkg/fork"
 	"math"
 	"math/big"
@@ -22,7 +23,6 @@ import (
 	"github.com/p9c/pod/pkg/gcs"
 	"github.com/p9c/pod/pkg/gcs/builder"
 	"github.com/p9c/pod/pkg/txscript"
-	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/wire"
 )
 
@@ -602,7 +602,7 @@ func (b *blockManager) getUncheckpointedCFHeaders(
 				targetHeight, header.BlockHash(), fType,
 			)
 			badPeers, e := resolveCFHeaderMismatch(
-				block.MsgBlock(), fType, filtersFromPeers,
+				block.WireBlock(), fType, filtersFromPeers,
 			)
 			if e != nil {
 				return e
@@ -1030,7 +1030,7 @@ func (b *blockManager) resolveConflict(
 				targetHeight, header.BlockHash(), fType,
 			)
 			badPeers, e := resolveCFHeaderMismatch(
-				block.MsgBlock(), fType, filtersFromPeers,
+				block.WireBlock(), fType, filtersFromPeers,
 			)
 			if e != nil {
 				return nil, e
@@ -1106,7 +1106,7 @@ func checkForCFHeaderMismatch(
 // reconstruct and verify from the filter in question. We'll return all the peers that returned what we believe to in
 // invalid filter.
 func resolveCFHeaderMismatch(
-	block *wire.MsgBlock, fType wire.FilterType, filtersFromPeers map[string]*gcs.Filter,
+	block *wire.Block, fType wire.FilterType, filtersFromPeers map[string]*gcs.Filter,
 ) ([]string, error) {
 	badPeers := make(map[string]struct{})
 	blockHash := block.BlockHash()
@@ -1353,7 +1353,7 @@ func checkCFCheckptSanity(
 //
 // It must be run as a goroutine.
 //
-// It processes block and inv messages in a separate goroutine from the peer handlers so the block (MsgBlock) messages
+// It processes block and inv messages in a separate goroutine from the peer handlers so the block (Block) messages
 // are handled by a single thread without needing to lock memory data structures.
 //
 // This is important because the block manager controls which blocks are needed and how the fetching should proceed.
@@ -1997,8 +1997,8 @@ func (b *blockManager) checkHeaderSanity(
 		return e
 	}
 	blockHeader.Bits = diff
-	stubBlock := util.NewBlock(
-		&wire.MsgBlock{
+	stubBlock := block.NewBlock(
+		&wire.Block{
 			Header: *blockHeader,
 		},
 	)

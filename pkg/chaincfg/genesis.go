@@ -80,7 +80,7 @@ var genesisMerkleRoot = chainhash.Hash(
 
 // genesisBlock defines the genesis block of the block chain which serves as the public transaction ledger for the main
 // network.
-var genesisBlock = wire.MsgBlock{
+var genesisBlock = wire.Block{
 	Header: wire.BlockHeader{
 		Version:    2,
 		PrevBlock:  chainhash.Hash{},
@@ -108,7 +108,7 @@ var regTestGenesisMerkleRoot = genesisMerkleRoot
 
 // regTestGenesisBlock defines the genesis block of the block chain which serves as the public transaction ledger for
 // the regression test network.
-var regTestGenesisBlock = wire.MsgBlock{
+var regTestGenesisBlock = wire.Block{
 	Header: wire.BlockHeader{
 		Version:    2,
 		PrevBlock:  chainhash.Hash{}, // 0000000000000000000000000000000000000000000000000000000000000000
@@ -126,7 +126,7 @@ var testNet3GenesisMerkleRoot = genesisMerkleRoot
 
 // testNet3GenesisBlock defines the genesis block of the block chain which serves as the public transaction ledger for
 // the test network (version 3).
-var testNet3GenesisBlock = wire.MsgBlock{
+var testNet3GenesisBlock = wire.Block{
 	Header: wire.BlockHeader{
 		Version:    2,
 		PrevBlock:  chainhash.Hash{}, // 0000000000000000000000000000000000000000000000000000000000000000
@@ -164,7 +164,7 @@ var simNetGenesisMerkleRoot = genesisMerkleRoot
 
 // simNetGenesisBlock defines the genesis block of the block chain which serves as the public transaction ledger for the
 // simulation test network.
-var simNetGenesisBlock = wire.MsgBlock{
+var simNetGenesisBlock = wire.Block{
 	Header: wire.BlockHeader{
 		Version:    2,
 		PrevBlock:  chainhash.Hash{}, // 0000000000000000000000000000000000000000000000000000000000000000

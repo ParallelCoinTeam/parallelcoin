@@ -2,6 +2,7 @@ package rpctest
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/amt"
 	"os"
 	"testing"
 	"time"
@@ -16,7 +17,7 @@ import (
 )
 
 func testSendOutputs(r *Harness, t *testing.T) {
-	genSpend := func(amt util.Amount) *chainhash.Hash {
+	genSpend := func(amt amt.Amount) *chainhash.Hash {
 		// Grab a fresh address from the wallet.
 		addr, e := r.NewAddress()
 		if e != nil {
@@ -54,7 +55,7 @@ func testSendOutputs(r *Harness, t *testing.T) {
 		}
 	}
 	// First, generate a small spend which will require only a single input.
-	txid := genSpend(5 * util.SatoshiPerBitcoin)
+	txid := genSpend(5 * amt.SatoshiPerBitcoin)
 	// Generate a single block, the transaction the wallet created should be found in this block.
 	blockHashes, e := r.Node.Generate(1)
 	if e != nil {
@@ -62,7 +63,7 @@ func testSendOutputs(r *Harness, t *testing.T) {
 	}
 	assertTxMined(txid, blockHashes[0])
 	// Next, generate a spend much greater than the block reward. This transaction should also have been mined properly.
-	txid = genSpend(500 * util.SatoshiPerBitcoin)
+	txid = genSpend(500 * amt.SatoshiPerBitcoin)
 	blockHashes, e = r.Node.Generate(1)
 	if e != nil {
 		t.Fatalf("unable to generate single block: %v", e)
@@ -292,7 +293,7 @@ func testGenerateAndSubmitBlock(r *Harness, t *testing.T) {
 	if e != nil {
 		t.Fatalf("unable to create script: %v", e)
 	}
-	output := wire.NewTxOut(util.SatoshiPerBitcoin.Int64(), pkScript)
+	output := wire.NewTxOut(amt.SatoshiPerBitcoin.Int64(), pkScript)
 	const numTxns = 5
 	txns := make([]*util.Tx, 0, numTxns)
 	for i := 0; i < numTxns; i++ {
@@ -315,7 +316,7 @@ func testGenerateAndSubmitBlock(r *Harness, t *testing.T) {
 				"expected %v, got %v", numTxns+1, numBlocksTxns,
 		)
 	}
-	blockVersion := block.MsgBlock().Header.Version
+	blockVersion := block.WireBlock().Header.Version
 	if blockVersion != BlockVersion {
 		t.Fatalf(
 			"block version is not default: expected %v, got %v",
@@ -324,14 +325,14 @@ func testGenerateAndSubmitBlock(r *Harness, t *testing.T) {
 	}
 	// Next generate a block with a "non-standard" block version along with time stamp a minute after the previous
 	// block's timestamp.
-	timestamp := block.MsgBlock().Header.Timestamp.Add(time.Minute)
+	timestamp := block.WireBlock().Header.Timestamp.Add(time.Minute)
 	targetBlockVersion := uint32(1337)
 	block, e = r.GenerateAndSubmitBlock(nil, targetBlockVersion, timestamp)
 	if e != nil {
 		t.Fatalf("unable to generate block: %v", e)
 	}
 	// Finally ensure that the desired block version and timestamp were set properly.
-	header := block.MsgBlock().Header
+	header := block.WireBlock().Header
 	blockVersion = header.Version
 	if blockVersion != int32(targetBlockVersion) {
 		t.Fatalf(
@@ -359,7 +360,7 @@ func testGenerateAndSubmitBlockWithCustomCoinbaseOutputs(
 	if e != nil {
 		t.Fatalf("unable to create script: %v", e)
 	}
-	output := wire.NewTxOut(util.SatoshiPerBitcoin.Int64(), pkScript)
+	output := wire.NewTxOut(amt.SatoshiPerBitcoin.Int64(), pkScript)
 	const numTxns = 5
 	txns := make([]*util.Tx, 0, numTxns)
 	for i := 0; i < numTxns; i++ {
@@ -390,7 +391,7 @@ func testGenerateAndSubmitBlockWithCustomCoinbaseOutputs(
 				"expected %v, got %v", numTxns+1, numBlocksTxns,
 		)
 	}
-	blockVersion := block.MsgBlock().Header.Version
+	blockVersion := block.WireBlock().Header.Version
 	if blockVersion != BlockVersion {
 		t.Fatalf(
 			"block version is not default: expected %v, got %v",
@@ -399,7 +400,7 @@ func testGenerateAndSubmitBlockWithCustomCoinbaseOutputs(
 	}
 	// Next generate a block with a "non-standard" block version along with time stamp a minute after the previous
 	// block's timestamp.
-	timestamp := block.MsgBlock().Header.Timestamp.Add(time.Minute)
+	timestamp := block.WireBlock().Header.Timestamp.Add(time.Minute)
 	targetBlockVersion := uint32(1337)
 	block, e = r.GenerateAndSubmitBlockWithCustomCoinbaseOutputs(
 		nil,
@@ -414,7 +415,7 @@ func testGenerateAndSubmitBlockWithCustomCoinbaseOutputs(
 		t.Fatalf("unable to generate block: %v", e)
 	}
 	// Finally ensure that the desired block version and timestamp were set properly.
-	header := block.MsgBlock().Header
+	header := block.WireBlock().Header
 	blockVersion = header.Version
 	if blockVersion != int32(targetBlockVersion) {
 		t.Fatalf(
@@ -443,7 +444,7 @@ func testMemWalletReorg(r *Harness, t *testing.T) {
 		}
 	}()
 	// The internal wallet of this harness should now have 250 DUO.
-	expectedBalance := 250 * util.SatoshiPerBitcoin
+	expectedBalance := 250 * amt.SatoshiPerBitcoin
 	walletBalance := harness.ConfirmedBalance()
 	if expectedBalance != walletBalance {
 		t.Fatalf(
@@ -461,7 +462,7 @@ func testMemWalletReorg(r *Harness, t *testing.T) {
 	}
 	// The original wallet should now have a balance of 0 DUO as its entire chain should have been decimated in favor of
 	// the main harness' chain.
-	expectedBalance = util.Amount(0)
+	expectedBalance = amt.Amount(0)
 	walletBalance = harness.ConfirmedBalance()
 	if expectedBalance != walletBalance {
 		t.Fatalf(
@@ -482,7 +483,7 @@ func testMemWalletLockedOutputs(r *Harness, t *testing.T) {
 	if e != nil {
 		t.Fatalf("unable to create script: %v", e)
 	}
-	outputAmt := 50 * util.SatoshiPerBitcoin
+	outputAmt := 50 * amt.SatoshiPerBitcoin
 	output := wire.NewTxOut(int64(outputAmt), pkScript)
 	tx, e := r.CreateTransaction([]*wire.TxOut{output}, 10, true)
 	if e != nil {
@@ -556,7 +557,7 @@ func TestMain(m *testing.M) {
 func TestHarness(t *testing.T) {
 	// We should have (numMatureOutputs * 50 DUO) of mature unspendable
 	// outputs.
-	expectedBalance := numMatureOutputs * 50 * util.SatoshiPerBitcoin
+	expectedBalance := numMatureOutputs * 50 * amt.SatoshiPerBitcoin
 	harnessBalance := mainHarness.ConfirmedBalance()
 	if harnessBalance != expectedBalance {
 		t.Fatalf(

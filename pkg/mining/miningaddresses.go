@@ -6,7 +6,7 @@ import (
 	
 	"github.com/p9c/pod/cmd/node/state"
 	"github.com/p9c/pod/pkg/wallet"
-	wm "github.com/p9c/pod/pkg/wallet/waddrmgr"
+	wm "github.com/p9c/pod/pkg/waddrmgr"
 )
 
 // RefillMiningAddresses adds new addresses to the mining address pool for the miner

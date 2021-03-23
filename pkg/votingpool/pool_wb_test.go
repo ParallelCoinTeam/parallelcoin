@@ -6,7 +6,7 @@ import (
 	"testing"
 	
 	"github.com/p9c/pod/pkg/util/hdkeychain"
-	"github.com/p9c/pod/pkg/wallet/waddrmgr"
+	"github.com/p9c/pod/pkg/waddrmgr"
 )
 
 func TestPoolEnsureUsedAddr(t *testing.T) {

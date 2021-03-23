@@ -2,15 +2,15 @@ package hardfork
 
 import (
 	"encoding/hex"
+	"github.com/p9c/pod/pkg/amt"
 	"github.com/p9c/pod/pkg/chaincfg"
-	
-	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/btcaddr"
 )
 
 // Payee is an address and amount
 type Payee struct {
-	Address util.Address
-	Amount  util.Amount
+	Address btcaddr.Address
+	Amount  amt.Amount
 }
 
 var (
@@ -19,23 +19,23 @@ var (
 	mn = &chaincfg.MainNetParams
 	// Payees are the list of payments to be made on the hard fork activation on mainnet
 	Payees = []Payee{
-		{Addr("ag7s5bmcA8XoP1CcS1QPjiD4C5hhMWATik", mn), Amt(4400)},
+		{Addr("ag7s5bmcA8XoP1CcS1QPjiD4C5hhMWATik", mn), Amount(4400)},
 	}
 	// TestnetPayees are the list of payments to be made on the hard fork activation in the testnet
 	//
 	// these are made using the following seed for testnet
 	// f4d2c4c542bb52512ed9e6bbfa2d000e576a0c8b4ebd1acafd7efa37247366bc
 	TestnetPayees = []Payee{
-		{Addr("8K73LTaMHZmwwqe4vTHu7wm7QtwusvRCwC", tn), Amt(100)},
-		// {Addr("8JEEhaMxJf4dZh5rvVCVSA7JKeYBvy8fir", tn), Amt(15500)},
-		{Addr("8bec3m8qpMePrBPHDAyCrkSm7TanGX8yWW", tn), Amt(1223)},
-		{Addr("8MCLEWq8pjXikrpb9rF9M5DpnpaoWPUD2W", tn), Amt(4000)},
-		{Addr("8cYGvT7km339nVukTj3ztfyQDFEHFivBNk", tn), Amt(2440)},
-		{Addr("8YUAAfUeS2mqUnsfiwDwQcEbMfM3tazKr7", tn), Amt(100)},
-		{Addr("8MMam6gxH1ns5LqASfhkHfRV2vsQaoM9VC", tn), Amt(8800)},
-		{Addr("8JABYpdqqyRD5FbACtMJ3XF5HJ38jaytrk", tn), Amt(422)},
-		{Addr("8MUnJMYi5Fo7Bm5Pmpr7JjdL3ZDJ7wqmXJ", tn), Amt(5000)},
-		{Addr("8d2RLbCBE8CiF4DetVuRfFFLEJJaXYjhdH", tn), Amt(30000)},
+		{Addr("8K73LTaMHZmwwqe4vTHu7wm7QtwusvRCwC", tn), Amount(100)},
+		// {Addr("8JEEhaMxJf4dZh5rvVCVSA7JKeYBvy8fir", tn), Amount(15500)},
+		{Addr("8bec3m8qpMePrBPHDAyCrkSm7TanGX8yWW", tn), Amount(1223)},
+		{Addr("8MCLEWq8pjXikrpb9rF9M5DpnpaoWPUD2W", tn), Amount(4000)},
+		{Addr("8cYGvT7km339nVukTj3ztfyQDFEHFivBNk", tn), Amount(2440)},
+		{Addr("8YUAAfUeS2mqUnsfiwDwQcEbMfM3tazKr7", tn), Amount(100)},
+		{Addr("8MMam6gxH1ns5LqASfhkHfRV2vsQaoM9VC", tn), Amount(8800)},
+		{Addr("8JABYpdqqyRD5FbACtMJ3XF5HJ38jaytrk", tn), Amount(422)},
+		{Addr("8MUnJMYi5Fo7Bm5Pmpr7JjdL3ZDJ7wqmXJ", tn), Amount(5000)},
+		{Addr("8d2RLbCBE8CiF4DetVuRfFFLEJJaXYjhdH", tn), Amount(30000)},
 	}
 	// CorePubkeyBytes is the address and public keys for the core dev disbursement
 	CorePubkeyBytes = [][]byte{
@@ -47,7 +47,7 @@ var (
 		Key("02daf0bda15f83899f4ebb62fd837c2dd2368ec8ed90ed0f050054d75d35935c99"),
 	}
 	// CoreAmount is the amount paid into the dev pool
-	CoreAmount = Amt(30000)
+	CoreAmount = Amount(30000)
 	// TestnetCorePubkeyBytes are the addresses for the 3 of 4 multisig payment for dev costs
 	//
 	// these are made using the following seed for testnet
@@ -63,19 +63,20 @@ var (
 		Key("029ed2885ea597fddea070a5c4c9f40900a514f67f9d5f662aa7b556e8bc5a26f8"),
 	}
 	// TestnetCoreAmount is the amount paid into the dev pool
-	TestnetCoreAmount = Amt(30000)
+	TestnetCoreAmount = Amount(30000)
 )
 
-func Amt(f float64) (amt util.Amount) {
-	amt, e := util.NewAmount(f)
+func Amount(f float64) (amount amt.Amount) {
+	var e error
+	amount, e = amt.NewAmount(f)
 	if e != nil {
 		panic(e)
 	}
 	return
 }
 
-func Addr(addr string, defaultNet *chaincfg.Params) (out util.Address) {
-	out, e := util.DecodeAddress(addr, defaultNet)
+func Addr(addr string, defaultNet *chaincfg.Params) (out btcaddr.Address) {
+	out, e := btcaddr.Decode(addr, defaultNet)
 	if e != nil {
 		panic(e)
 	}

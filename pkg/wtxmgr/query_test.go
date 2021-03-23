@@ -6,11 +6,11 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"github.com/p9c/pod/pkg/amt"
 	"testing"
 	"time"
 	
 	"github.com/p9c/pod/pkg/chainhash"
-	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/walletdb"
 	"github.com/p9c/pod/pkg/wire"
 	. "github.com/p9c/pod/pkg/wtxmgr"
@@ -316,7 +316,7 @@ func TestStoreQueries(t *testing.T) {
 	newState.blocks[0][0].Credits = []CreditRecord{
 		{
 			Index:  0,
-			Amount: util.Amount(recA.MsgTx.TxOut[0].Value),
+			Amount: amt.Amount(recA.MsgTx.TxOut[0].Value),
 			Spent:  false,
 			Change: true,
 		},
@@ -346,7 +346,7 @@ func TestStoreQueries(t *testing.T) {
 			Block:    BlockMeta{Block: Block{Height: -1}},
 			Debits: []DebitRecord{
 				{
-					Amount: util.Amount(recA.MsgTx.TxOut[0].Value),
+					Amount: amt.Amount(recA.MsgTx.TxOut[0].Value),
 					Index:  0, // recB.MsgTx.TxIn index
 				},
 			},
@@ -368,7 +368,7 @@ func TestStoreQueries(t *testing.T) {
 	newState.blocks[0][1].Credits = []CreditRecord{
 		{
 			Index:  0,
-			Amount: util.Amount(recB.MsgTx.TxOut[0].Value),
+			Amount: amt.Amount(recB.MsgTx.TxOut[0].Value),
 			Spent:  false,
 			Change: false,
 		},

@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/p9c/pod/pkg/bits"
+	block2 "github.com/p9c/pod/pkg/block"
 	"github.com/p9c/pod/pkg/fork"
 	"math/big"
 	"math/rand"
@@ -16,9 +17,8 @@ import (
 	"github.com/conformal/fastsha256"
 	
 	"github.com/p9c/pod/pkg/blockchain"
-	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/btcjson"
-	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/wire"
 )
 
@@ -300,7 +300,7 @@ func HandleGetWorkSubmission(s *Server, hexData string) (interface{}, error) {
 	}
 	// Reconstruct the block using the submitted header stored block info.
 	msgBlock := state.Template.Block
-	block := util.NewBlock(msgBlock)
+	block := block2.NewBlock(msgBlock)
 	msgBlock.Header.Timestamp = submittedHeader.Timestamp
 	msgBlock.Header.Nonce = submittedHeader.Nonce
 	msgBlock.Transactions[0].TxIn[0].SignatureScript = state.Template.Block.

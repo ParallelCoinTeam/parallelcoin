@@ -11,10 +11,10 @@ import (
 	
 	"github.com/p9c/pod/pkg/blockchain"
 	"github.com/p9c/pod/pkg/chainhash"
-	"github.com/p9c/pod/pkg/wire"
 	"github.com/p9c/pod/pkg/gcs/builder"
+	"github.com/p9c/pod/pkg/waddrmgr"
 	"github.com/p9c/pod/pkg/walletdb"
-	"github.com/p9c/pod/pkg/wallet/waddrmgr"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 // BlockHeaderStore is an interface that provides an abstraction for a generic store for block headers.

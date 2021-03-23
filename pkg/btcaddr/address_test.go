@@ -743,7 +743,7 @@ func TestAddresses(t *testing.T) {
 				saddr = util.TstAddressSAddr(encoded)
 			case *btcaddr.ScriptHash:
 				saddr = util.TstAddressSAddr(encoded)
-			case *btcaddr.AddressPubKey:
+			case *btcaddr.PubKey:
 				// Ignore the error here since the script
 				// address is checked below.
 				saddr, _ = hex.DecodeString(d.String())

@@ -1,6 +1,8 @@
 package gui
 
 import (
+	"github.com/p9c/pod/pkg/amt"
+	"github.com/p9c/pod/pkg/btcaddr"
 	"image"
 	"path/filepath"
 	"strconv"
@@ -10,12 +12,11 @@ import (
 	"github.com/atotto/clipboard"
 	
 	"github.com/p9c/pod/pkg/qrcode"
-	"github.com/p9c/pod/pkg/util"
 )
 
 func (wg *WalletGUI) GetNewReceivingAddress() {
 	D.Ln("GetNewReceivingAddress")
-	var addr util.Address
+	var addr btcaddr.Address
 	var e error
 	if addr, e = wg.WalletClient.GetNewAddress("default"); !E.Chk(e) {
 		D.Ln(
@@ -25,12 +26,12 @@ func (wg *WalletGUI) GetNewReceivingAddress() {
 		// save to addressbook
 		var ae AddressEntry
 		ae.Address = addr.EncodeAddress()
-		var amt float64
-		if amt, e = strconv.ParseFloat(
+		var amount float64
+		if amount, e = strconv.ParseFloat(
 			wg.inputs["receiveAmount"].GetText(),
 			64,
 		); !E.Chk(e) {
-			if ae.Amount, e = util.NewAmount(amt); E.Chk(e) {
+			if ae.Amount, e = amt.NewAmount(amount); E.Chk(e) {
 			}
 		}
 		msg := wg.inputs["receiveMessage"].GetText()

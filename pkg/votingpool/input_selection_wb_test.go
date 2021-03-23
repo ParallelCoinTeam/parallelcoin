@@ -2,12 +2,12 @@ package votingpool
 
 import (
 	"bytes"
+	"github.com/p9c/pod/pkg/amt"
 	"reflect"
 	"sort"
 	"testing"
 	
 	"github.com/p9c/pod/pkg/chainhash"
-	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/walletdb"
 	"github.com/p9c/pod/pkg/wire"
 	"github.com/p9c/pod/pkg/wtxmgr"
@@ -15,7 +15,7 @@ import (
 
 var (
 	// random small number of satoshis used as dustThreshold
-	dustThreshold util.Amount = 1e4
+	dustThreshold amt.Amount = 1e4
 )
 
 // func TestGetEligibleInputs(// 	t *testing.T) {

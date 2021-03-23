@@ -2,6 +2,7 @@ package ffldb_test
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/block"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -10,7 +11,6 @@ import (
 	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/database"
 	"github.com/p9c/pod/pkg/database/ffldb"
-	"github.com/p9c/pod/pkg/util"
 )
 
 // dbType is the database type name for this driver.
@@ -184,7 +184,7 @@ func TestPersistence(t *testing.T) {
 		"b1key2": "foo2",
 		"b1key3": "foo3",
 	}
-	genesisBlock := util.NewBlock(chaincfg.MainNetParams.GenesisBlock)
+	genesisBlock := block.NewBlock(chaincfg.MainNetParams.GenesisBlock)
 	genesisHash := chaincfg.MainNetParams.GenesisHash
 	e = db.Update(
 		func(tx database.Tx) (e error) {

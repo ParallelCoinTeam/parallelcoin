@@ -4,7 +4,9 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"github.com/p9c/pod/pkg/amt"
 	"github.com/p9c/pod/pkg/bits"
+	"github.com/p9c/pod/pkg/block"
 	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/fork"
 	"math"
@@ -37,7 +39,7 @@ const (
 var (
 	// baseSubsidy is the starting subsidy amount for mined blocks. This value is halved every SubsidyHalvingInterval
 	// blocks.
-	baseSubsidy = 2 * util.SatoshiPerBitcoin
+	baseSubsidy = 2 * amt.SatoshiPerBitcoin
 	// block91842Hash is one of the two nodes which violate the rules set forth in BIP0030. It is defined as a package
 	// level variable to avoid the need to create a new instance every time a check is needed.
 	block91842Hash = newHashFromStr(
@@ -72,7 +74,7 @@ var (
 // This function MUST be called with the chain state lock held (for writes).
 func (b *BlockChain) checkConnectBlock(
 	node *BlockNode,
-	block *util.Block,
+	block *block.Block,
 	view *UtxoViewpoint,
 	stxos *[]SpentTxOut,
 ) (e error) {
@@ -86,7 +88,7 @@ func (b *BlockChain) checkConnectBlock(
 		return ruleError(ErrMissingTxOut, str)
 	}
 	// Ensure the view is for the node being checked.
-	parentHash := &block.MsgBlock().Header.PrevBlock
+	parentHash := &block.WireBlock().Header.PrevBlock
 	if !view.BestHash().IsEqual(parentHash) {
 		str := fmt.Sprintf(
 			"inconsistent view when checking block connection: best hash is %v instead of expected %v",
@@ -299,7 +301,7 @@ func (b *BlockChain) checkConnectBlock(
 	}
 	// // Enforce DER signatures for block versions 3+ once the historical activation threshold has been reached. This is
 	// // part of BIP0066.
-	// blockHeader := &block.MsgBlock().Header
+	// blockHeader := &block.Block().Header
 	// if blockHeader.Version >= 3 && node.height >= b.params.BIP0066Height {
 	// 	scriptFlags |= txscript.ScriptVerifyDERSignatures
 	// }
@@ -370,8 +372,8 @@ func (b *BlockChain) checkConnectBlock(
 // CheckConnectBlockTemplate fully validates that connecting the passed block to the main chain does not violate any
 // consensus rules, aside from the proof of work requirement. The block must connect to the current tip of the main
 // chain. This function is safe for concurrent access.
-func (b *BlockChain) CheckConnectBlockTemplate(block *util.Block) (e error) {
-	algo := block.MsgBlock().Header.Version
+func (b *BlockChain) CheckConnectBlockTemplate(block *block.Block) (e error) {
+	algo := block.WireBlock().Header.Version
 	height := block.Height()
 	algoname := fork.GetAlgoName(algo, height)
 	powLimit := fork.GetMinDiff(algoname, height)
@@ -382,7 +384,7 @@ func (b *BlockChain) CheckConnectBlockTemplate(block *util.Block) (e error) {
 	defer b.ChainLock.Unlock()
 	tip := b.BestChain.Tip()
 	// tip := b.BestChain.NodeByHeight(height)
-	header := block.MsgBlock().Header
+	header := block.WireBlock().Header
 	if tip.hash != header.PrevBlock {
 		str := fmt.Sprintf(
 			"previous block must be the current chain tip %v, instead got %v", tip.hash, header.PrevBlock,
@@ -424,7 +426,7 @@ func (b *BlockChain) CheckConnectBlockTemplate(block *util.Block) (e error) {
 // For more details, see https://github.com/bitcoin/bips/blob/master/bip-0030.mediawiki and http://r6.ca/blog/20120206T005236Z.html
 //
 // This function MUST be called with the chain state lock held (for reads).
-func (b *BlockChain) checkBIP0030(node *BlockNode, block *util.Block, view *UtxoViewpoint) (e error) {
+func (b *BlockChain) checkBIP0030(node *BlockNode, block *block.Block, view *UtxoViewpoint) (e error) {
 	// Fetch utxos for all of the transaction ouputs in this block. Typically, there will not be any utxos for any of
 	// the outputs.
 	fetchSet := make(map[wire.OutPoint]struct{})
@@ -467,13 +469,13 @@ func (b *BlockChain) checkBIP0030(node *BlockNode, block *util.Block, view *Utxo
 //
 // This function MUST be called with the chain state lock held (for writes).
 func (b *BlockChain) checkBlockContext(
-	block *util.Block,
+	block *block.Block,
 	prevNode *BlockNode,
 	flags BehaviorFlags,
 	DoNotCheckPow bool,
 ) (e error) {
 	// Perform all block header related validation checks.
-	header := &block.MsgBlock().Header
+	header := &block.WireBlock().Header
 	e = b.checkBlockHeaderContext(header, prevNode, flags)
 	if e != nil {
 		return e
@@ -681,7 +683,7 @@ func CalcBlockSubsidy(height int32, chainParams *chaincfg.Params, version int32)
 				SubsidyReductionInterval,
 		)
 	case 1:
-		var total util.Amount
+		var total amt.Amount
 		if (chainParams.Net == wire.MainNet &&
 			height == fork.List[1].ActivationHeight) ||
 			(chainParams.Net == wire.TestNet3 &&
@@ -693,7 +695,7 @@ func CalcBlockSubsidy(height int32, chainParams *chaincfg.Params, version int32)
 			for i := range payees {
 				total += payees[i].Amount
 			}
-			total += util.Amount(CalcBlockSubsidy(height+1, chainParams, version))
+			total += amt.Amount(CalcBlockSubsidy(height+1, chainParams, version))
 			total += hardfork.TestnetCoreAmount
 			return int64(total)
 		}
@@ -710,7 +712,7 @@ func CalcBlockSubsidy(height int32, chainParams *chaincfg.Params, version int32)
 //
 // These checks are context free.
 func CheckBlockSanity(
-	block *util.Block,
+	block *block.Block,
 	powLimit *big.Int,
 	timeSource MedianTimeSource,
 	DoNotCheckPow bool,
@@ -723,8 +725,8 @@ func CheckBlockSanity(
 
 // CheckProofOfWork ensures the block header bits which indicate the target difficulty is in min/max range and that the
 // block hash is less than the target difficulty as claimed.
-func CheckProofOfWork(block *util.Block, powLimit *big.Int, height int32) (e error) {
-	return checkProofOfWork(&block.MsgBlock().Header, powLimit, BFNone, height)
+func CheckProofOfWork(block *block.Block, powLimit *big.Int, height int32) (e error) {
+	return checkProofOfWork(&block.WireBlock().Header, powLimit, BFNone, height)
 }
 
 // CheckTransactionInputs performs a series of checks on the inputs to a transaction to ensure they are valid.
@@ -788,16 +790,16 @@ func CheckTransactionInputs(tx *util.Tx, txHeight int32, utxoView *UtxoViewpoint
 		if originTxSatoshi < 0 {
 			str := fmt.Sprintf(
 				"transaction output has negative "+
-					"value of %v", util.Amount(originTxSatoshi),
+					"value of %v", amt.Amount(originTxSatoshi),
 			)
 			return 0, ruleError(ErrBadTxOutValue, str)
 		}
-		if originTxSatoshi > int64(util.MaxSatoshi) {
+		if originTxSatoshi > int64(amt.MaxSatoshi) {
 			str := fmt.Sprintf(
 				"transaction output value of %v is "+
 					"higher than max allowed value of %v",
-				util.Amount(originTxSatoshi),
-				util.MaxSatoshi,
+				amt.Amount(originTxSatoshi),
+				amt.MaxSatoshi,
 			)
 			return 0, ruleError(ErrBadTxOutValue, str)
 		}
@@ -806,12 +808,12 @@ func CheckTransactionInputs(tx *util.Tx, txHeight int32, utxoView *UtxoViewpoint
 		lastSatoshiIn := totalSatoshiIn
 		totalSatoshiIn += originTxSatoshi
 		if totalSatoshiIn < lastSatoshiIn ||
-			totalSatoshiIn > int64(util.MaxSatoshi) {
+			totalSatoshiIn > int64(amt.MaxSatoshi) {
 			str := fmt.Sprintf(
 				"total value of all transaction "+
 					"inputs is %v which is higher than max "+
 					"allowed value of %v", totalSatoshiIn,
-				util.MaxSatoshi,
+				amt.MaxSatoshi,
 			)
 			return 0, ruleError(ErrBadTxOutValue, str)
 		}
@@ -875,11 +877,11 @@ func CheckTransactionSanity(tx *util.Tx) (e error) {
 			)
 			return ruleError(ErrBadTxOutValue, str)
 		}
-		if satoshi > int64(util.MaxSatoshi) {
+		if satoshi > int64(amt.MaxSatoshi) {
 			str := fmt.Sprintf(
 				"transaction output value of %v is "+
 					"higher than max allowed value of %v", satoshi,
-				util.MaxSatoshi,
+				amt.MaxSatoshi,
 			)
 			return ruleError(ErrBadTxOutValue, str)
 		}
@@ -890,16 +892,16 @@ func CheckTransactionSanity(tx *util.Tx) (e error) {
 			str := fmt.Sprintf(
 				"total value of all transaction "+
 					"outputs exceeds max allowed value of %v",
-				util.MaxSatoshi,
+				amt.MaxSatoshi,
 			)
 			return ruleError(ErrBadTxOutValue, str)
 		}
-		if totalSatoshi > int64(util.MaxSatoshi) {
+		if totalSatoshi > int64(amt.MaxSatoshi) {
 			str := fmt.Sprintf(
 				"total value of all transaction "+
 					"outputs is %v which is higher than max "+
 					"allowed value of %v", totalSatoshi,
-				util.MaxSatoshi,
+				amt.MaxSatoshi,
 			)
 			return ruleError(ErrBadTxOutValue, str)
 		}
@@ -1202,7 +1204,7 @@ func checkBlockHeaderSanity(
 // The flags do not modify the behavior of this function directly, however they
 // are needed to pass along to checkBlockHeaderSanity.
 func checkBlockSanity(
-	block *util.Block,
+	block *block.Block,
 	powLimit *big.Int,
 	timeSource MedianTimeSource,
 	flags BehaviorFlags,
@@ -1210,12 +1212,12 @@ func checkBlockSanity(
 	height int32,
 	prevBlockTimestamp time.Time,
 ) (e error) {
-	T.F("checkBlockSanity %08x %064x", block.MsgBlock().Header.Bits, powLimit)
-	msgBlock := block.MsgBlock()
+	T.F("checkBlockSanity %08x %064x", block.WireBlock().Header.Bits, powLimit)
+	msgBlock := block.WireBlock()
 	header := &msgBlock.Header
 	e = checkBlockHeaderSanity(header, powLimit, timeSource, flags, height, prevBlockTimestamp)
 	if e != nil {
-		D.Ln("block processing error:", block.MsgBlock().Header.Version, e)
+		D.Ln("block processing error:", block.WireBlock().Header.Version, e)
 		return e
 	}
 	// A block must have at least one transaction.
@@ -1278,7 +1280,7 @@ func checkBlockSanity(
 		str := fmt.Sprintf(
 			"block merkle root is invalid - block "+
 				"header indicates %v, but calculated value is %v with version %d",
-			header.MerkleRoot, calculatedMerkleRoot, block.MsgBlock().Header.Version,
+			header.MerkleRoot, calculatedMerkleRoot, block.WireBlock().Header.Version,
 		)
 		return ruleError(ErrBadMerkleRoot, str)
 	}

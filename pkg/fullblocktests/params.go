@@ -38,7 +38,7 @@ var (
 	// regressionPowLimit is the highest proof of work value a Bitcoin block can have for the regression test network.  It is the value 2^255 - 1.
 	regressionPowLimit = new(big.Int).Sub(new(big.Int).Lsh(bigOne, 255), bigOne)
 	// regTestGenesisBlock defines the genesis block of the block chain which serves as the public transaction ledger for the regression test network.
-	regTestGenesisBlock = wire.MsgBlock{
+	regTestGenesisBlock = wire.Block{
 		Header: wire.BlockHeader{
 			Version:    1,
 			PrevBlock:  *newHashFromStr("0000000000000000000000000000000000000000000000000000000000000000"),

@@ -1,14 +1,13 @@
 package blockchain
 
 import (
+	block2 "github.com/p9c/pod/pkg/block"
 	"testing"
-
-	"github.com/p9c/pod/pkg/util"
 )
 
 // TestMerkle tests the BuildMerkleTreeStore API.
 func TestMerkle(t *testing.T) {
-	block := util.NewBlock(&Block100000)
+	block := block2.NewBlock(&Block100000)
 	merkles := BuildMerkleTreeStore(block.Transactions(), false)
 	calculatedMerkleRoot := merkles.GetRoot()
 	wantMerkle := &Block100000.Header.MerkleRoot

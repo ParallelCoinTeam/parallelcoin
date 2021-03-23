@@ -2,6 +2,7 @@ package builder_test
 
 import (
 	"encoding/hex"
+	"github.com/p9c/pod/pkg/btcaddr"
 	"testing"
 	
 	"github.com/p9c/pod/pkg/chaincfg"
@@ -9,7 +10,6 @@ import (
 	"github.com/p9c/pod/pkg/gcs"
 	"github.com/p9c/pod/pkg/gcs/builder"
 	"github.com/p9c/pod/pkg/txscript"
-	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/wire"
 )
 
@@ -73,7 +73,7 @@ func TestUseBlockHash(t *testing.T) {
 		Index: 4321,
 	}
 	// util.Address
-	addr, e := util.DecodeAddress(testAddr, &chaincfg.MainNetParams)
+	addr, e := btcaddr.Decode(testAddr, &chaincfg.MainNetParams)
 	if e != nil {
 		t.Fatalf("Address decode failed: %s", e.Error())
 	}

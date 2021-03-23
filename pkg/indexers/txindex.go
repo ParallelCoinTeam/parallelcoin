@@ -3,14 +3,14 @@ package indexers
 import (
 	"errors"
 	"fmt"
+	"github.com/p9c/pod/pkg/block"
 	
 	"github.com/p9c/pod/pkg/util/qu"
 	
 	"github.com/p9c/pod/pkg/blockchain"
-	"github.com/p9c/pod/pkg/wire"
 	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/database"
-	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 const (
@@ -201,7 +201,7 @@ func dbFetchTxIndexEntry(dbTx database.Tx, txHash *chainhash.Hash) (*database.Bl
 
 // dbAddTxIndexEntries uses an existing database transaction to add a transaction index entry for every transaction in
 // the passed block.
-func dbAddTxIndexEntries(dbTx database.Tx, block *util.Block, blockID uint32) (e error) {
+func dbAddTxIndexEntries(dbTx database.Tx, block *block.Block, blockID uint32) (e error) {
 	// The offset and length of the transactions within the serialized block.
 	txLocs, e := block.TxLoc()
 	if e != nil {
@@ -243,7 +243,7 @@ func dbRemoveTxIndexEntry(dbTx database.Tx, txHash *chainhash.Hash) (e error) {
 
 // dbRemoveTxIndexEntries uses an existing database transaction to remove the latest transaction entry for every
 // transaction in the passed block.
-func dbRemoveTxIndexEntries(dbTx database.Tx, block *util.Block) (e error) {
+func dbRemoveTxIndexEntries(dbTx database.Tx, block *block.Block) (e error) {
 	for _, tx := range block.Transactions() {
 		e := dbRemoveTxIndexEntry(dbTx, tx.Hash())
 		if e != nil {
@@ -344,7 +344,7 @@ func (idx *TxIndex) Create(dbTx database.Tx) (e error) {
 
 // ConnectBlock is invoked by the index manager when a new block has been connected to the main chain. This indexer adds
 // a hash-to-transaction mapping for every transaction in the passed block. This is part of the Indexer interface.
-func (idx *TxIndex) ConnectBlock(dbTx database.Tx, block *util.Block, stxos []blockchain.SpentTxOut) (e error) {
+func (idx *TxIndex) ConnectBlock(dbTx database.Tx, block *block.Block, stxos []blockchain.SpentTxOut) (e error) {
 	// Increment the internal block ID to use for the block being connected and add all of the transactions in the block
 	// to the index.
 	newBlockID := idx.curBlockID + 1
@@ -367,7 +367,7 @@ func (idx *TxIndex) ConnectBlock(dbTx database.Tx, block *util.Block, stxos []bl
 //
 // This is part of the Indexer interface.
 func (idx *TxIndex) DisconnectBlock(
-	dbTx database.Tx, block *util.Block,
+	dbTx database.Tx, block *block.Block,
 	stxos []blockchain.SpentTxOut,
 ) (e error) {
 	// Remove all of the transactions in the block from the index.

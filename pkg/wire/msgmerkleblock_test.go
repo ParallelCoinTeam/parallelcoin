@@ -171,7 +171,7 @@ func TestMerkleBlockWire(t *testing.T) {
 	}
 }
 
-// TestMerkleBlockWireErrors performs negative tests against wire encode and decode of MsgBlock to confirm error paths
+// TestMerkleBlockWireErrors performs negative tests against wire encode and decode of Block to confirm error paths
 // work correctly.
 func TestMerkleBlockWireErrors(t *testing.T) {
 	// Use protocol version 70001 specifically here instead of the latest because the test data is using bytes encoded

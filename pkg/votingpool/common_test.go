@@ -5,7 +5,7 @@ import (
 	"runtime"
 	"testing"
 	
-	"github.com/p9c/pod/pkg/wallet/waddrmgr"
+	"github.com/p9c/pod/pkg/waddrmgr"
 	"github.com/p9c/pod/pkg/walletdb"
 )
 

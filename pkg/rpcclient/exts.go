@@ -6,11 +6,11 @@ import (
 	"encoding/hex"
 	js "encoding/json"
 	"fmt"
+	"github.com/p9c/pod/pkg/btcaddr"
 	
-	chainhash "github.com/p9c/pod/pkg/chainhash"
-	"github.com/p9c/pod/pkg/wire"
 	"github.com/p9c/pod/pkg/btcjson"
-	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 // FutureDebugLevelResult is a future promise to deliver the result of a DebugLevelAsync RPC invocation (or an
@@ -105,7 +105,7 @@ func (r FutureListAddressTransactionsResult) Receive() ([]btcjson.ListTransactio
 // time by invoking the Receive function on the returned instance. See ListAddressTransactions for the blocking version
 // and more details. NOTE: This is a pod extension.
 func (c *Client) ListAddressTransactionsAsync(
-	addresses []util.Address,
+	addresses []btcaddr.Address,
 	account string,
 ) FutureListAddressTransactionsResult {
 	// Convert addresses to strings.
@@ -119,7 +119,7 @@ func (c *Client) ListAddressTransactionsAsync(
 
 // ListAddressTransactions returns information about all transactions associated with the provided addresses. NOTE: This
 // is a btcwallet extension.
-func (c *Client) ListAddressTransactions(addresses []util.Address, account string) (
+func (c *Client) ListAddressTransactions(addresses []btcaddr.Address, account string) (
 	[]btcjson.ListTransactionsResult,
 	error,
 ) {

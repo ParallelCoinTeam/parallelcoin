@@ -4,10 +4,10 @@ package index
 import (
 	"encoding/binary"
 	"errors"
+	"github.com/p9c/pod/pkg/block"
 	
 	"github.com/p9c/pod/pkg/blockchain"
 	"github.com/p9c/pod/pkg/database"
-	"github.com/p9c/pod/pkg/util"
 )
 
 var (
@@ -37,10 +37,10 @@ type Indexer interface {
 	Init() error
 	// ConnectBlock is invoked when a new block has been connected to the main chain. The set of output spent within a
 	// block is also passed in so indexers can access the pevious output scripts input spent if required.
-	ConnectBlock(database.Tx, *util.Block, []blockchain.SpentTxOut) error
+	ConnectBlock(database.Tx, *block.Block, []blockchain.SpentTxOut) error
 	// DisconnectBlock is invoked when a block has been disconnected from the main chain. The set of outputs scripts
 	// that were spent within this block is also returned so indexers can clean up the prior index state for this block
-	DisconnectBlock(database.Tx, *util.Block, []blockchain.SpentTxOut) error
+	DisconnectBlock(database.Tx, *block.Block, []blockchain.SpentTxOut) error
 }
 
 // AssertError identifies an error that indicates an internal code consistency issue and should be treated as a critical

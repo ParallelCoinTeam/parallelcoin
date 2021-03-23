@@ -8,6 +8,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/p9c/pod/cmd/kopach/control/peersummary"
+	"github.com/p9c/pod/pkg/amt"
+	block2 "github.com/p9c/pod/pkg/block"
 	"github.com/p9c/pod/pkg/fork"
 	"github.com/p9c/pod/pkg/logg"
 	"github.com/p9c/pod/pkg/mining"
@@ -1184,7 +1186,7 @@ func (n *Node) PushBlockMsg(
 		return e
 	}
 	// Deserialize the block.
-	var msgBlock wire.MsgBlock
+	var msgBlock wire.Block
 	e = msgBlock.Deserialize(bytes.NewReader(blockBytes))
 	if e != nil {
 		E.F(
@@ -1265,7 +1267,7 @@ func (n *Node) PushMerkleBlockMsg(
 	}
 	sp.QueueMessage(merkle, dc)
 	// Finally, send any matched transactions.
-	blkTransactions := blk.MsgBlock().Transactions
+	blkTransactions := blk.WireBlock().Transactions
 	for i, txIndex := range matchedTxIndices {
 		// Only send the done channel on the final transaction.
 		var dc chan<- struct{}
@@ -1466,10 +1468,10 @@ func (np *NodePeer) OnAddr(
 
 // OnBlock is invoked when a peer receives a block bitcoin message. It blocks until the bitcoin block has been fully
 // processed.
-func (np *NodePeer) OnBlock(_ *peer.Peer, msg *wire.MsgBlock, buf []byte) {
-	// Convert the raw MsgBlock to a util.Block which provides some convenience
+func (np *NodePeer) OnBlock(_ *peer.Peer, msg *wire.Block, buf []byte) {
+	// Convert the raw Block to a util.Block which provides some convenience
 	// methods and things such as hash caching.
-	block := util.NewBlockFromBlockAndBytes(msg, buf)
+	block := block2.NewFromBlockAndBytes(msg, buf)
 	// Add the block to the known inventory for the peer.
 	iv := wire.NewInvVect(wire.InvTypeBlock, block.Hash())
 	np.AddKnownInventory(iv)
@@ -1494,10 +1496,10 @@ func (np *NodePeer) OnFeeFilter(
 	msg *wire.MsgFeeFilter,
 ) {
 	// Chk that the passed minimum fee is a valid amount.
-	if msg.MinFee < 0 || msg.MinFee > int64(util.MaxSatoshi) {
+	if msg.MinFee < 0 || msg.MinFee > int64(amt.MaxSatoshi) {
 		D.F(
 			"peer %v sent an invalid feefilter '%v' -- disconnecting %s",
-			np, util.Amount(msg.MinFee),
+			np, amt.Amount(msg.MinFee),
 		)
 		np.Disconnect()
 		return

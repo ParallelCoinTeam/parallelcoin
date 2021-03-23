@@ -4,11 +4,13 @@ import (
 	"bytes"
 	"encoding/hex"
 	js "encoding/json"
+	"github.com/p9c/pod/pkg/amt"
+	"github.com/p9c/pod/pkg/btcaddr"
 	
-	chainhash "github.com/p9c/pod/pkg/chainhash"
-	"github.com/p9c/pod/pkg/wire"
 	"github.com/p9c/pod/pkg/btcjson"
+	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 // SigHashType enumerates the available signature hashing types that the function accepts.
@@ -195,7 +197,7 @@ func (r FutureCreateRawTransactionResult) Receive() (*wire.MsgTx, error) {
 // more details.
 func (c *Client) CreateRawTransactionAsync(
 	inputs []btcjson.TransactionInput,
-	amounts map[util.Address]util.Amount, lockTime *int64,
+	amounts map[btcaddr.Address]amt.Amount, lockTime *int64,
 ) FutureCreateRawTransactionResult {
 	convertedAmts := make(map[string]float64, len(amounts))
 	for addr, amount := range amounts {
@@ -208,7 +210,7 @@ func (c *Client) CreateRawTransactionAsync(
 // CreateRawTransaction returns a new transaction spending the provided inputs and sending to the provided addresses.
 func (c *Client) CreateRawTransaction(
 	inputs []btcjson.TransactionInput,
-	amounts map[util.Address]util.Amount, lockTime *int64,
+	amounts map[btcaddr.Address]amt.Amount, lockTime *int64,
 ) (*wire.MsgTx, error) {
 	return c.CreateRawTransactionAsync(inputs, amounts, lockTime).Receive()
 }
@@ -479,7 +481,7 @@ func (r FutureSearchRawTransactionsResult) Receive() ([]*wire.MsgTx, error) {
 // time by invoking the Receive function on the returned instance. See SearchRawTransactions for the blocking version
 // and more details.
 func (c *Client) SearchRawTransactionsAsync(
-	address util.Address, skip, count int, reverse bool,
+	address btcaddr.Address, skip, count int, reverse bool,
 	filterAddrs []string,
 ) FutureSearchRawTransactionsResult {
 	addr := address.EncodeAddress()
@@ -498,7 +500,7 @@ func (c *Client) SearchRawTransactionsAsync(
 // See SearchRawTransactionsVerbose to retrieve a list of data structures with information about the transactions
 // instead of the transactions themselves.
 func (c *Client) SearchRawTransactions(
-	address util.Address,
+	address btcaddr.Address,
 	skip, count int,
 	reverse bool,
 	filterAddrs []string,
@@ -530,7 +532,7 @@ func (r FutureSearchRawTransactionsVerboseResult) Receive() ([]*btcjson.SearchRa
 //
 // See SearchRawTransactionsVerbose for the blocking version and more details.
 func (c *Client) SearchRawTransactionsVerboseAsync(
-	address util.Address, skip,
+	address btcaddr.Address, skip,
 	count int, includePrevOut, reverse bool, filterAddrs *[]string,
 ) FutureSearchRawTransactionsVerboseResult {
 	addr := address.EncodeAddress()
@@ -551,7 +553,7 @@ func (c *Client) SearchRawTransactionsVerboseAsync(
 //
 // See SearchRawTransactions to retrieve a list of raw transactions instead.
 func (c *Client) SearchRawTransactionsVerbose(
-	address util.Address, skip,
+	address btcaddr.Address, skip,
 	count int, includePrevOut, reverse bool, filterAddrs []string,
 ) ([]*btcjson.SearchRawTransactionsResult, error) {
 	return c.SearchRawTransactionsVerboseAsync(

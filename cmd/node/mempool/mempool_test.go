@@ -2,6 +2,8 @@ package mempool
 
 import (
 	"encoding/hex"
+	amount2 "github.com/p9c/pod/pkg/amt"
+	"github.com/p9c/pod/pkg/btcaddr"
 	"reflect"
 	"runtime"
 	"sync"
@@ -92,7 +94,7 @@ func (s *fakeChain) SetMedianTimePast(mtp time.Time) {
 // spendableOutput is a convenience type that houses a particular utxo and the amount associated with it.
 type spendableOutput struct {
 	outPoint wire.OutPoint
-	amount   util.Amount
+	amount   amount2.Amount
 }
 
 // txOutToSpendableOut returns a spendable output given a transaction and index of the output to use. This is useful as
@@ -100,7 +102,7 @@ type spendableOutput struct {
 func txOutToSpendableOut(tx *util.Tx, outputNum uint32) spendableOutput {
 	return spendableOutput{
 		outPoint: wire.OutPoint{Hash: *tx.Hash(), Index: outputNum},
-		amount:   util.Amount(tx.MsgTx().TxOut[outputNum].Value),
+		amount:   amount2.Amount(tx.MsgTx().TxOut[outputNum].Value),
 	}
 }
 
@@ -110,7 +112,7 @@ type poolHarness struct {
 	// signKey is the signing key used for creating transactions throughout the tests. payAddr is the p2sh address for
 	// the signing key and is used for the payment address throughout the tests.
 	signKey     *ec.PrivateKey
-	payAddr     util.Address
+	payAddr     btcaddr.Address
 	payScript   []byte
 	chainParams *chaincfg.Params
 	chain       *fakeChain
@@ -164,7 +166,7 @@ func (p *poolHarness) CreateCoinbaseTx(blockHeight int32, numOutputs uint32, ver
 // harness and all inputs are assumed to do the same.
 func (p *poolHarness) CreateSignedTx(inputs []spendableOutput, numOutputs uint32) (*util.Tx, error) {
 	// Calculate the total input amount and split it amongst the requested number of outputs.
-	var totalInput util.Amount
+	var totalInput amount2.Amount
 	for _, input := range inputs {
 		totalInput += input.amount
 	}
@@ -262,11 +264,11 @@ func newPoolHarness(chainParams *chaincfg.Params) (*poolHarness, []spendableOutp
 	signKey, signPub := ec.PrivKeyFromBytes(ec.S256(), keyBytes)
 	// Generate associated pay-to-script-hash address and resulting payment script.
 	pubKeyBytes := signPub.SerializeCompressed()
-	payPubKeyAddr, e := util.NewAddressPubKey(pubKeyBytes, chainParams)
+	payPubKeyAddr, e := btcaddr.NewPubKey(pubKeyBytes, chainParams)
 	if e != nil {
 		return nil, nil, e
 	}
-	payAddr := payPubKeyAddr.AddressPubKeyHash()
+	payAddr := payPubKeyAddr.PubKeyHash()
 	pkScript, e := txscript.PayToAddrScript(payAddr)
 	if e != nil {
 		return nil, nil, e
@@ -586,7 +588,7 @@ func TestBasicOrphanRemoval(t *testing.T) {
 	nonChainedOrphanTx, e := harness.CreateSignedTx(
 		[]spendableOutput{
 			{
-				amount:   util.Amount(5000000000),
+				amount:   amount2.Amount(5000000000),
 				outPoint: wire.OutPoint{Hash: chainhash.Hash{}, Index: 0},
 			},
 		}, 1,

@@ -2,15 +2,16 @@ package votingpool
 
 import (
 	"bytes"
+	"github.com/p9c/pod/pkg/amt"
+	"github.com/p9c/pod/pkg/btcaddr"
 	"reflect"
 	"sort"
 	"testing"
 	
 	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/txscript"
-	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/hdkeychain"
-	"github.com/p9c/pod/pkg/wallet/waddrmgr"
+	"github.com/p9c/pod/pkg/waddrmgr"
 	"github.com/p9c/pod/pkg/walletdb"
 	"github.com/p9c/pod/pkg/wire"
 	"github.com/p9c/pod/pkg/wtxmgr"
@@ -31,8 +32,8 @@ func TestOutputSplittingNotEnoughInputs(t *testing.T) {
 		}
 	}()
 	net := pool.Manager().ChainParams()
-	output1Amount := util.Amount(2)
-	output2Amount := util.Amount(3)
+	output1Amount := amt.Amount(2)
+	output2Amount := amt.Amount(3)
 	requests := []OutputRequest{
 		// These output requests will have the same server ID, so we know they'll be fulfilled in the order they're
 		// defined here, which is important for this test.
@@ -78,7 +79,7 @@ func TestOutputSplittingOversizeTx(t *testing.T) {
 			t.Log(e)
 		}
 	}()
-	requestAmount := util.Amount(5)
+	requestAmount := amt.Amount(5)
 	bigInput := int64(3)
 	smallInput := int64(2)
 	request := TstNewOutputRequest(
@@ -106,7 +107,7 @@ func TestOutputSplittingOversizeTx(t *testing.T) {
 	if len(tx1.outputs) != 1 {
 		t.Fatalf("Wrong number of outputs on tx1; got %d, want 1", len(tx1.outputs))
 	}
-	if tx1.outputs[0].amount != util.Amount(bigInput) {
+	if tx1.outputs[0].amount != amt.Amount(bigInput) {
 		t.Fatalf("Wrong amount for output in tx1; got %d, want %d", tx1.outputs[0].amount,
 			bigInput)
 	}
@@ -114,7 +115,7 @@ func TestOutputSplittingOversizeTx(t *testing.T) {
 	if len(tx2.outputs) != 1 {
 		t.Fatalf("Wrong number of outputs on tx2; got %d, want 1", len(tx2.outputs))
 	}
-	if tx2.outputs[0].amount != util.Amount(smallInput) {
+	if tx2.outputs[0].amount != amt.Amount(smallInput) {
 		t.Fatalf("Wrong amount for output in tx2; got %d, want %d", tx2.outputs[0].amount,
 			smallInput)
 	}
@@ -201,7 +202,7 @@ func TestFulfillRequestsNoSatisfiableOutputs(t *testing.T) {
 	}()
 	seriesID, eligible := TstCreateCreditsOnNewSeries(t, dbtx, pool, []int64{1e6})
 	request := TstNewOutputRequest(
-		t, 1, "3Qt1EaKRD9g9FeL2DGkLLswhK1AKmmXFSe", util.Amount(3e6), pool.Manager().ChainParams())
+		t, 1, "3Qt1EaKRD9g9FeL2DGkLLswhK1AKmmXFSe", amt.Amount(3e6), pool.Manager().ChainParams())
 	changeStart := TstNewChangeAddress(t, pool, seriesID, 0)
 	w := newWithdrawal(0, []OutputRequest{request}, eligible, *changeStart)
 	if e := w.fulfillRequests(); E.Chk(e) {
@@ -240,11 +241,11 @@ func TestFulfillRequestsNotEnoughCreditsForAllRequests(t *testing.T) {
 	// Create eligible inputs and the list of outputs we need to fulfil.
 	seriesID, eligible := TstCreateCreditsOnNewSeries(t, dbtx, pool, []int64{2e6, 4e6})
 	out1 := TstNewOutputRequest(
-		t, 1, "34eVkREKgvvGASZW7hkgE2uNc1yycntMK6", util.Amount(3e6), net)
+		t, 1, "34eVkREKgvvGASZW7hkgE2uNc1yycntMK6", amt.Amount(3e6), net)
 	out2 := TstNewOutputRequest(
-		t, 2, "3PbExiaztsSYgh6zeMswC49hLUwhTQ86XG", util.Amount(2e6), net)
+		t, 2, "3PbExiaztsSYgh6zeMswC49hLUwhTQ86XG", amt.Amount(2e6), net)
 	out3 := TstNewOutputRequest(
-		t, 3, "3Qt1EaKRD9g9FeL2DGkLLswhK1AKmmXFSe", util.Amount(5e6), net)
+		t, 3, "3Qt1EaKRD9g9FeL2DGkLLswhK1AKmmXFSe", amt.Amount(5e6), net)
 	outputs := []OutputRequest{out1, out2, out3}
 	changeStart := TstNewChangeAddress(t, pool, seriesID, 0)
 	w := newWithdrawal(0, outputs, eligible, *changeStart)
@@ -343,7 +344,7 @@ func TestRollbackLastOutputMultipleInputsRolledBack(t *testing.T) {
 	if len(removedInputs) != 3 {
 		t.Fatalf("Unexpected number of inputs removed; got %d, want 3", len(removedInputs))
 	}
-	for i, amount := range []util.Amount{4, 3, 2} {
+	for i, amount := range []amt.Amount{4, 3, 2} {
 		if removedInputs[i].Amount != amount {
 			t.Fatalf("Unexpected input amount; got %v, want %v", removedInputs[i].Amount, amount)
 		}
@@ -397,7 +398,7 @@ func TestRollBackLastOutputInsufficientOutputs(t *testing.T) {
 	_, _, e = tx.rollBackLastOutput()
 	TstCheckError(t, "", e, ErrPreconditionNotMet)
 	output := &WithdrawalOutput{request: TstNewOutputRequest(
-		t, 1, "34eVkREKgvvGASZW7hkgE2uNc1yycntMK6", util.Amount(3), &chaincfg.MainNetParams)}
+		t, 1, "34eVkREKgvvGASZW7hkgE2uNc1yycntMK6", amt.Amount(3), &chaincfg.MainNetParams)}
 	tx.addOutput(output.request)
 	_, _, e = tx.rollBackLastOutput()
 	TstCheckError(t, "", e, ErrPreconditionNotMet)
@@ -449,13 +450,13 @@ func TestRollbackLastOutputWhenNewOutputAdded(t *testing.T) {
 	req1 := requests[0]
 	checkTxOutputs(t, firstTx,
 		[]*withdrawalTxOut{{request: req1, amount: req1.Amount}})
-	checkTxChangeAmount(t, firstTx, util.Amount(4))
+	checkTxChangeAmount(t, firstTx, amt.Amount(4))
 	// Second tx should have one output with 2 and one changeoutput with 3 satoshis.
 	secondTx := w.transactions[1]
 	req2 := requests[1]
 	checkTxOutputs(t, secondTx,
 		[]*withdrawalTxOut{{request: req2, amount: req2.Amount}})
-	checkTxChangeAmount(t, secondTx, util.Amount(3))
+	checkTxChangeAmount(t, secondTx, amt.Amount(3))
 }
 
 // TestRollbackLastOutputWhenNewInputAdded checks that we roll back the last output if a tx becomes too big right after
@@ -596,7 +597,7 @@ func TestWithdrawalTxAddChange(t *testing.T) {
 	}()
 	input, output, fee := int64(4e6), int64(3e6), int64(10)
 	tx := createWithdrawalTx(t, dbtx, pool, []int64{input}, []int64{output})
-	tx.calculateFee = TstConstantFee(util.Amount(fee))
+	tx.calculateFee = TstConstantFee(amt.Amount(fee))
 	if !tx.addChange([]byte{}) {
 		t.Fatal("tx.addChange() returned false, meaning it did not add a change output")
 	}
@@ -628,7 +629,7 @@ func TestWithdrawalTxAddChangeNoChange(t *testing.T) {
 	}()
 	input, output, fee := int64(4e6), int64(4e6), int64(0)
 	tx := createWithdrawalTx(t, dbtx, pool, []int64{input}, []int64{output})
-	tx.calculateFee = TstConstantFee(util.Amount(fee))
+	tx.calculateFee = TstConstantFee(amt.Amount(fee))
 	if tx.addChange([]byte{}) {
 		t.Fatal("tx.addChange() returned true, meaning it added a change output")
 	}
@@ -726,8 +727,8 @@ func TestWithdrawalTxInputTotal(t *testing.T) {
 		}
 	}()
 	tx := createWithdrawalTx(t, dbtx, pool, []int64{5}, []int64{})
-	if tx.inputTotal() != util.Amount(5) {
-		t.Fatalf("Wrong total output; got %v, want %v", tx.outputTotal(), util.Amount(5))
+	if tx.inputTotal() != amt.Amount(5) {
+		t.Fatalf("Wrong total output; got %v, want %v", tx.outputTotal(), amt.Amount(5))
 	}
 }
 func TestWithdrawalTxOutputTotal(t *testing.T) {
@@ -745,8 +746,8 @@ func TestWithdrawalTxOutputTotal(t *testing.T) {
 	}()
 	tx := createWithdrawalTx(t, dbtx, pool, []int64{}, []int64{4})
 	tx.changeOutput = wire.NewTxOut(int64(1), []byte{})
-	if tx.outputTotal() != util.Amount(4) {
-		t.Fatalf("Wrong total output; got %v, want %v", tx.outputTotal(), util.Amount(4))
+	if tx.outputTotal() != amt.Amount(4) {
+		t.Fatalf("Wrong total output; got %v, want %v", tx.outputTotal(), amt.Amount(4))
 	}
 }
 func TestWithdrawalInfoMatch(t *testing.T) {
@@ -935,8 +936,8 @@ func TestSignMultiSigUTXOPkScriptNotP2SH(t *testing.T) {
 	_, addrmgrNs := TstRWNamespaces(dbtx)
 	mgr := pool.Manager()
 	tx := createWithdrawalTx(t, dbtx, pool, []int64{4e6}, []int64{})
-	addr, _ := util.DecodeAddress("1MirQ9bwyQcGVJPwKUgapu5ouK2E2Ey4gX", mgr.ChainParams())
-	pubKeyHashPkScript, _ := txscript.PayToAddrScript(addr.(*util.AddressPubKeyHash))
+	addr, _ := btcaddr.Decode("1MirQ9bwyQcGVJPwKUgapu5ouK2E2Ey4gX", mgr.ChainParams())
+	pubKeyHashPkScript, _ := txscript.PayToAddrScript(addr.(*btcaddr.PubKeyHash))
 	msgtx := tx.toMsgTx()
 	e = signMultiSigUTXO(mgr, addrmgrNs, msgtx, 0, pubKeyHashPkScript, []RawSig{{}})
 	TstCheckError(t, "", e, ErrTxSigning)
@@ -958,12 +959,12 @@ func TestSignMultiSigUTXORedeemScriptNotFound(t *testing.T) {
 	mgr := pool.Manager()
 	tx := createWithdrawalTx(t, dbtx, pool, []int64{4e6}, []int64{})
 	// This is a P2SH address for which the addr manager doesn't have the redeem script.
-	addr, _ := util.DecodeAddress("3Hb4xcebcKg4DiETJfwjh8sF4uDw9rqtVC", mgr.ChainParams())
+	addr, _ := btcaddr.Decode("3Hb4xcebcKg4DiETJfwjh8sF4uDw9rqtVC", mgr.ChainParams())
 	if _, e = mgr.Address(addrmgrNs, addr); e ==  nil {
 		t.Fatalf("Address %s found in manager when it shouldn't", addr)
 	}
 	msgtx := tx.toMsgTx()
-	pkScript, _ := txscript.PayToAddrScript(addr.(*util.AddressScriptHash))
+	pkScript, _ := txscript.PayToAddrScript(addr.(*btcaddr.ScriptHash))
 	e = signMultiSigUTXO(mgr, addrmgrNs, msgtx, 0, pkScript, []RawSig{{}})
 	TstCheckError(t, "", e, ErrTxSigning)
 }
@@ -1216,7 +1217,7 @@ func TestTxFeeEstimationForSmallTx(t *testing.T) {
 	// A tx that is smaller than 1000 bytes in size should have a fee of 10000 satoshis.
 	tx.calculateSize = func() int { return 999 }
 	fee := tx.calculateFee()
-	wantFee := util.Amount(1e3)
+	wantFee := amt.Amount(1e3)
 	if fee != wantFee {
 		t.Fatalf("Unexpected tx fee; got %v, want %v", fee, wantFee)
 	}
@@ -1226,7 +1227,7 @@ func TestTxFeeEstimationForLargeTx(t *testing.T) {
 	// A tx that is larger than 1000 bytes in size should have a fee of 1e3 satoshis plus 1e3 for every 1000 bytes.
 	tx.calculateSize = func() int { return 3000 }
 	fee := tx.calculateFee()
-	wantFee := util.Amount(4e3)
+	wantFee := amt.Amount(4e3)
 	if fee != wantFee {
 		t.Fatalf("Unexpected tx fee; got %v, want %v", fee, wantFee)
 	}
@@ -1297,12 +1298,12 @@ func TestStoreTransactionsWithChangeOutput(t *testing.T) {
 	if outputTotal != int64(2e6) {
 		t.Fatalf("Unexpected output amount; got %v, want %v", outputTotal, int64(2e6))
 	}
-	inputTotal := util.Amount(0)
+	inputTotal := amt.Amount(0)
 	for _, debit := range txDetails.Debits {
 		inputTotal += debit.Amount
 	}
-	if inputTotal != util.Amount(5e6) {
-		t.Fatalf("Unexpected input amount; got %v, want %v", inputTotal, util.Amount(5e6))
+	if inputTotal != amt.Amount(5e6) {
+		t.Fatalf("Unexpected input amount; got %v, want %v", inputTotal, amt.Amount(5e6))
 	}
 	credits, e := store.UnspentOutputs(txmgrNs)
 	if e != nil  {
@@ -1336,7 +1337,7 @@ func createWithdrawalTxWithStoreCredits(t *testing.T, dbtx walletdb.ReadWriteTx,
 	}
 	for i, amount := range outputAmounts {
 		request := TstNewOutputRequest(
-			t, uint32(i), "34eVkREKgvvGASZW7hkgE2uNc1yycntMK6", util.Amount(amount), net)
+			t, uint32(i), "34eVkREKgvvGASZW7hkgE2uNc1yycntMK6", amount.Amount(amount), net)
 		tx.addOutput(request)
 	}
 	return tx
@@ -1390,7 +1391,7 @@ func checkMsgTxOutputs(t *testing.T, msgtx *wire.MsgTx, requests []OutputRequest
 				"Unexpected pkScript for request %d; got %v, want %v", i, txOut.PkScript,
 				request.PkScript)
 		}
-		gotAmount := util.Amount(txOut.Value)
+		gotAmount := amt.Amount(txOut.Value)
 		if gotAmount != request.Amount {
 			t.Fatalf(
 				"Unexpected amount for request %d; got %v, want %v", i, gotAmount, request.Amount)
@@ -1451,7 +1452,7 @@ func compareMsgTxAndWithdrawalTxOutputs(t *testing.T, msgtx *wire.MsgTx, tx *wit
 				"Unexpected pkScript for outputRequest %d; got %x, want %x",
 				i, txOut.PkScript, outputRequest.PkScript)
 		}
-		gotAmount := util.Amount(txOut.Value)
+		gotAmount := amt.Amount(txOut.Value)
 		if gotAmount != outputRequest.Amount {
 			t.Fatalf(
 				"Unexpected amount for outputRequest %d; got %v, want %v",
@@ -1466,7 +1467,7 @@ func compareMsgTxAndWithdrawalTxOutputs(t *testing.T, msgtx *wire.MsgTx, tx *wit
 		}
 	}
 }
-func checkTxChangeAmount(t *testing.T, tx *withdrawalTx, amount util.Amount) {
+func checkTxChangeAmount(t *testing.T, tx *withdrawalTx, amount amt.Amount) {
 	if !tx.hasChange() {
 		t.Fatalf("Transaction has no change.")
 	}
@@ -1480,7 +1481,8 @@ func checkTxChangeAmount(t *testing.T, tx *withdrawalTx, amount util.Amount) {
 // splitRequest amount is equal to origAmount - newAmount. It also checks that splitRequest is identical (except for its
 // amount) to the request of the last output in the tx.
 func checkLastOutputWasSplit(t *testing.T, w *withdrawal, tx *withdrawalTx,
-	origAmount, newAmount util.Amount) {
+	origAmount, newAmount amt.Amount
+) {
 	splitRequest := w.pendingRequests[0]
 	lastOutput := tx.outputs[len(tx.outputs)-1]
 	if lastOutput.amount != newAmount {

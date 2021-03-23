@@ -3,18 +3,19 @@ package wtxmgr_test
 import (
 	"bytes"
 	"encoding/hex"
+	"github.com/p9c/pod/pkg/amt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
 	"time"
 	
-	"github.com/p9c/pod/pkg/wire"
 	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/walletdb"
 	_ "github.com/p9c/pod/pkg/walletdb/bdb"
-	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/wire"
 	"github.com/p9c/pod/pkg/wtxmgr"
 	. "github.com/p9c/pod/pkg/wtxmgr"
 )
@@ -123,7 +124,7 @@ func TestInsertsCreditsDebitsRollbacks(t *testing.T) {
 	tests := []struct {
 		name     string
 		f        func(*Store, walletdb.ReadWriteBucket) (*Store, error)
-		bal, unc util.Amount
+		bal, unc amt.Amount
 		unspents map[wire.OutPoint]struct{}
 		unmined  map[chainhash.Hash]struct{}
 	}{
@@ -152,7 +153,7 @@ func TestInsertsCreditsDebitsRollbacks(t *testing.T) {
 				return s, e
 			},
 			bal: 0,
-			unc: util.Amount(TstRecvTx.MsgTx().TxOut[0].Value),
+			unc: amt.Amount(TstRecvTx.MsgTx().TxOut[0].Value),
 			unspents: map[wire.OutPoint]struct{}{
 				{
 					Hash:  *TstRecvTx.Hash(),
@@ -178,7 +179,7 @@ func TestInsertsCreditsDebitsRollbacks(t *testing.T) {
 				return s, e
 			},
 			bal: 0,
-			unc: util.Amount(TstRecvTx.MsgTx().TxOut[0].Value),
+			unc: amt.Amount(TstRecvTx.MsgTx().TxOut[0].Value),
 			unspents: map[wire.OutPoint]struct{}{
 				{
 					Hash:  *TstRecvTx.Hash(),
@@ -203,7 +204,7 @@ func TestInsertsCreditsDebitsRollbacks(t *testing.T) {
 				e = s.AddCredit(ns, rec, TstRecvTxBlockDetails, 0, false)
 				return s, e
 			},
-			bal: util.Amount(TstRecvTx.MsgTx().TxOut[0].Value),
+			bal: amt.Amount(TstRecvTx.MsgTx().TxOut[0].Value),
 			unc: 0,
 			unspents: map[wire.OutPoint]struct{}{
 				{
@@ -227,7 +228,7 @@ func TestInsertsCreditsDebitsRollbacks(t *testing.T) {
 				e = s.AddCredit(ns, rec, TstRecvTxBlockDetails, 0, false)
 				return s, e
 			},
-			bal: util.Amount(TstRecvTx.MsgTx().TxOut[0].Value),
+			bal: amt.Amount(TstRecvTx.MsgTx().TxOut[0].Value),
 			unc: 0,
 			unspents: map[wire.OutPoint]struct{}{
 				{
@@ -244,7 +245,7 @@ func TestInsertsCreditsDebitsRollbacks(t *testing.T) {
 				return s, e
 			},
 			bal: 0,
-			unc: util.Amount(TstRecvTx.MsgTx().TxOut[0].Value),
+			unc: amt.Amount(TstRecvTx.MsgTx().TxOut[0].Value),
 			unspents: map[wire.OutPoint]struct{}{
 				{
 					Hash:  *TstRecvTx.Hash(),
@@ -269,7 +270,7 @@ func TestInsertsCreditsDebitsRollbacks(t *testing.T) {
 				e = s.AddCredit(ns, rec, TstRecvTxBlockDetails, 0, false)
 				return s, e
 			},
-			bal: util.Amount(TstDoubleSpendTx.MsgTx().TxOut[0].Value),
+			bal: amt.Amount(TstDoubleSpendTx.MsgTx().TxOut[0].Value),
 			unc: 0,
 			unspents: map[wire.OutPoint]struct{}{
 				{
@@ -328,7 +329,7 @@ func TestInsertsCreditsDebitsRollbacks(t *testing.T) {
 				return s, e
 			},
 			bal: 0,
-			unc: util.Amount(TstSpendingTx.MsgTx().TxOut[0].Value),
+			unc: amt.Amount(TstSpendingTx.MsgTx().TxOut[0].Value),
 			unspents: map[wire.OutPoint]struct{}{
 				{
 					Hash:  *TstSpendingTx.Hash(),
@@ -354,7 +355,7 @@ func TestInsertsCreditsDebitsRollbacks(t *testing.T) {
 				return s, e
 			},
 			bal: 0,
-			unc: util.Amount(TstSpendingTx.MsgTx().TxOut[0].Value + TstSpendingTx.MsgTx().TxOut[1].Value),
+			unc: amt.Amount(TstSpendingTx.MsgTx().TxOut[0].Value + TstSpendingTx.MsgTx().TxOut[1].Value),
 			unspents: map[wire.OutPoint]struct{}{
 				{
 					Hash:  *TstSpendingTx.Hash(),
@@ -379,7 +380,7 @@ func TestInsertsCreditsDebitsRollbacks(t *testing.T) {
 				e = s.InsertTx(ns, rec, TstSignedTxBlockDetails)
 				return s, e
 			},
-			bal: util.Amount(TstSpendingTx.MsgTx().TxOut[0].Value + TstSpendingTx.MsgTx().TxOut[1].Value),
+			bal: amt.Amount(TstSpendingTx.MsgTx().TxOut[0].Value + TstSpendingTx.MsgTx().TxOut[1].Value),
 			unc: 0,
 			unspents: map[wire.OutPoint]struct{}{
 				{
@@ -399,7 +400,7 @@ func TestInsertsCreditsDebitsRollbacks(t *testing.T) {
 				e := s.Rollback(ns, TstSignedTxBlockDetails.Height+1)
 				return s, e
 			},
-			bal: util.Amount(TstSpendingTx.MsgTx().TxOut[0].Value + TstSpendingTx.MsgTx().TxOut[1].Value),
+			bal: amt.Amount(TstSpendingTx.MsgTx().TxOut[0].Value + TstSpendingTx.MsgTx().TxOut[1].Value),
 			unc: 0,
 			unspents: map[wire.OutPoint]struct{}{
 				{
@@ -420,7 +421,7 @@ func TestInsertsCreditsDebitsRollbacks(t *testing.T) {
 				return s, e
 			},
 			bal: 0,
-			unc: util.Amount(TstSpendingTx.MsgTx().TxOut[0].Value + TstSpendingTx.MsgTx().TxOut[1].Value),
+			unc: amt.Amount(TstSpendingTx.MsgTx().TxOut[0].Value + TstSpendingTx.MsgTx().TxOut[1].Value),
 			unspents: map[wire.OutPoint]struct{}{
 				{
 					Hash:  *TstSpendingTx.Hash(),
@@ -442,7 +443,7 @@ func TestInsertsCreditsDebitsRollbacks(t *testing.T) {
 				return s, e
 			},
 			bal: 0,
-			unc: util.Amount(TstSpendingTx.MsgTx().TxOut[0].Value + TstSpendingTx.MsgTx().TxOut[1].Value),
+			unc: amt.Amount(TstSpendingTx.MsgTx().TxOut[0].Value + TstSpendingTx.MsgTx().TxOut[1].Value),
 			unspents: map[wire.OutPoint]struct{}{
 				*wire.NewOutPoint(TstSpendingTx.Hash(), 0): {},
 				*wire.NewOutPoint(TstSpendingTx.Hash(), 1): {},
@@ -466,7 +467,7 @@ func TestInsertsCreditsDebitsRollbacks(t *testing.T) {
 				e = s.AddCredit(ns, rec, TstRecvTxBlockDetails, 0, false)
 				return s, e
 			},
-			bal: util.Amount(TstRecvTx.MsgTx().TxOut[0].Value),
+			bal: amt.Amount(TstRecvTx.MsgTx().TxOut[0].Value),
 			unc: 0,
 			unspents: map[wire.OutPoint]struct{}{
 				*wire.NewOutPoint(TstRecvTx.Hash(), 0): {},
@@ -586,7 +587,7 @@ func TestFindingSpentCredits(t *testing.T) {
 	if e != nil  {
 		t.Fatal(e)
 	}
-	expectedBal := util.Amount(TstSpendingTx.MsgTx().TxOut[0].Value)
+	expectedBal := amt.Amount(TstSpendingTx.MsgTx().TxOut[0].Value)
 	if bal != expectedBal {
 		t.Fatalf("bad balance: %v != %v", bal, expectedBal)
 	}
@@ -688,7 +689,7 @@ func TestCoinbases(t *testing.T) {
 	type balTest struct {
 		height  int32
 		minConf int32
-		bal     util.Amount
+		bal     amt.Amount
 	}
 	balTests := []balTest{
 		// Next block it is still immature
@@ -1142,7 +1143,7 @@ func TestMoveMultipleToSameBlock(t *testing.T) {
 	balTests := []struct {
 		height  int32
 		minConf int32
-		bal     util.Amount
+		bal     amt.Amount
 	}{
 		// Maturity height
 		{
@@ -1303,7 +1304,7 @@ func TestRemoveUnminedTx(t *testing.T) {
 	maturityHeight := b100.Block.Height + coinbaseMaturity
 	// checkBalance is a helper function that compares the balance of the store with the expected value. The
 	// includeUnconfirmed boolean can be used to include the unconfirmed balance as a part of the total balance.
-	checkBalance := func(expectedBalance util.Amount,
+	checkBalance := func(expectedBalance amt.Amount,
 		includeUnconfirmed bool) {
 		t.Helper()
 		minConfs := int32(1)
@@ -1324,8 +1325,8 @@ func TestRemoveUnminedTx(t *testing.T) {
 	}
 	// Since we don't have any unconfirmed transactions within the store, the total balance reflecting confirmed and
 	// unconfirmed outputs should match the initial balance.
-	checkBalance(util.Amount(initialBalance), false)
-	checkBalance(util.Amount(initialBalance), true)
+	checkBalance(amt.Amount(initialBalance), false)
+	checkBalance(amt.Amount(initialBalance), true)
 	// Then, we'll create an unconfirmed spend for the coinbase output and insert it into the store.
 	b101 := &BlockMeta{
 		Block: Block{Height: 201},
@@ -1367,7 +1368,7 @@ func TestRemoveUnminedTx(t *testing.T) {
 	// Now that an unconfirmed spend exists, there should no longer be any confirmed balance. The total balance should
 	// now all be unconfirmed and it should match the change amount of the unconfirmed spend tranasction.
 	checkBalance(0, false)
-	checkBalance(util.Amount(changeAmount), true)
+	checkBalance(amt.Amount(changeAmount), true)
 	// Now, we'll remove the unconfirmed spend tranaction from the store.
 	commitDBTx(t, store, db, func(ns walletdb.ReadWriteBucket) {
 		if e := store.RemoveUnminedTx(ns, spendTxRec); E.Chk(e) {
@@ -1388,8 +1389,8 @@ func TestRemoveUnminedTx(t *testing.T) {
 	})
 	// Finally, the total balance (including confirmed and unconfirmed) should once again match the initial balance, as
 	// the uncofirmed spend has already been removed.
-	checkBalance(util.Amount(initialBalance), false)
-	checkBalance(util.Amount(initialBalance), true)
+	checkBalance(amt.Amount(initialBalance), false)
+	checkBalance(amt.Amount(initialBalance), true)
 }
 
 // commitDBTx is a helper function that allows us to perform multiple operations on a specific database's bucket as a

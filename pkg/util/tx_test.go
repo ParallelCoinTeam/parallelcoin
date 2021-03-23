@@ -2,19 +2,20 @@ package util_test
 
 import (
 	"bytes"
+	"github.com/p9c/pod/pkg/block"
 	"io"
 	"reflect"
 	"testing"
-
+	
 	"github.com/davecgh/go-spew/spew"
 	
-	chainhash "github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/util"
 )
 
 // TestTx tests the API for Tx.
 func TestTx(t *testing.T) {
-	testTx := Block100000.Transactions[0]
+	testTx := block.Block100000.Transactions[0]
 	tx := util.NewTx(testTx)
 	// Ensure we get the same data back out.
 	if msgTx := tx.MsgTx(); !reflect.DeepEqual(msgTx, testTx) {
@@ -47,7 +48,7 @@ func TestTx(t *testing.T) {
 // TestNewTxFromBytes tests creation of a Tx from serialized bytes.
 func TestNewTxFromBytes(t *testing.T) {
 	// Serialize the test transaction.
-	testTx := Block100000.Transactions[0]
+	testTx := block.Block100000.Transactions[0]
 	var testTxBuf bytes.Buffer
 	e := testTx.Serialize(&testTxBuf)
 	if e != nil  {
@@ -70,7 +71,7 @@ func TestNewTxFromBytes(t *testing.T) {
 // TestTxErrors tests the error paths for the Tx API.
 func TestTxErrors(t *testing.T) {
 	// Serialize the test transaction.
-	testTx := Block100000.Transactions[0]
+	testTx := block.Block100000.Transactions[0]
 	var testTxBuf bytes.Buffer
 	e := testTx.Serialize(&testTxBuf)
 	if e != nil  {

@@ -5,10 +5,11 @@ import (
 	"encoding/binary"
 	"encoding/gob"
 	"fmt"
+	"github.com/p9c/pod/pkg/amt"
+	"github.com/p9c/pod/pkg/btcaddr"
 	
 	"github.com/p9c/pod/pkg/snacl"
 	"github.com/p9c/pod/pkg/txscript"
-	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/walletdb"
 	"github.com/p9c/pod/pkg/wire"
 )
@@ -47,7 +48,7 @@ type (
 		StartAddress  dbWithdrawalAddress
 		ChangeStart   dbChangeAddress
 		LastSeriesID  uint32
-		DustThreshold util.Amount
+		DustThreshold amt.Amount
 		Status        dbWithdrawalStatus
 	}
 	dbWithdrawalAddress struct {
@@ -61,7 +62,7 @@ type (
 	}
 	dbOutputRequest struct {
 		Addr        string
-		Amount      util.Amount
+		Amount      amt.Amount
 		Server      string
 		Transaction uint32
 	}
@@ -75,7 +76,7 @@ type (
 	dbOutBailmentOutpoint struct {
 		Ntxid  Ntxid
 		Index  uint32
-		Amount util.Amount
+		Amount amt.Amount
 	}
 	dbChangeAwareTx struct {
 		SerializedMsgTx []byte
@@ -84,7 +85,7 @@ type (
 	dbWithdrawalStatus struct {
 		NextInputAddr  dbWithdrawalAddress
 		NextChangeAddr dbChangeAddress
-		Fees           util.Amount
+		Fees           amt.Amount
 		Outputs        map[OutBailmentID]dbWithdrawalOutput
 		Sigs           map[Ntxid]TxSigs
 		Transactions   map[Ntxid]dbChangeAwareTx
@@ -363,7 +364,7 @@ func serializeSeriesRow(row *dbSeriesRow) ([]byte, error) {
 // serializeWithdrawal constructs a dbWithdrawalRow and serializes it (using encoding/gob) so that it can be stored in
 // the DB.
 func serializeWithdrawal(requests []OutputRequest, startAddress WithdrawalAddress,
-	lastSeriesID uint32, changeStart ChangeAddress, dustThreshold util.Amount,
+	lastSeriesID uint32, changeStart ChangeAddress, dustThreshold amt.Amount,
 	status WithdrawalStatus
 ) ([]byte, error) {
 	dbStartAddr := dbWithdrawalAddress{
@@ -456,7 +457,7 @@ func deserializeWithdrawal(p *Pool, ns, addrmgrNs walletdb.ReadBucket, serialize
 	// A map of requests indexed by OutBailmentID; needed to populate WithdrawalStatus.Outputs later on.
 	requestsByOID := make(map[OutBailmentID]OutputRequest)
 	for i, req := range row.Requests {
-		addr, e := util.DecodeAddress(req.Addr, chainParams)
+		addr, e := btcaddr.Decode(req.Addr, chainParams)
 		if e != nil  {
 						return nil, newError(
 							ErrWithdrawalStorage,

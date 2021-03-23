@@ -12,7 +12,7 @@ import (
 	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/walletdb"
 	_ "github.com/p9c/pod/pkg/walletdb/bdb"
-	"github.com/p9c/pod/pkg/wallet/waddrmgr"
+	"github.com/p9c/pod/pkg/waddrmgr"
 )
 
 var (

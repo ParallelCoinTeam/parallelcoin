@@ -2,16 +2,16 @@
 package txauthor_test
 
 import (
+	"github.com/p9c/pod/pkg/amt"
 	"testing"
 	
 	. "github.com/p9c/pod/pkg/txauthor"
-	txrules "github.com/p9c/pod/pkg/txrules"
-	txsizes "github.com/p9c/pod/pkg/txsizes"
+	"github.com/p9c/pod/pkg/txrules"
+	"github.com/p9c/pod/pkg/txsizes"
 	"github.com/p9c/pod/pkg/wire"
-	"github.com/p9c/pod/pkg/util"
 )
 
-func p2pkhOutputs(amounts ...util.Amount) []*wire.TxOut {
+func p2pkhOutputs(amounts ...amt.Amount) []*wire.TxOut {
 	v := make([]*wire.TxOut, 0, len(amounts))
 	for _, a := range amounts {
 		outScript := make([]byte, txsizes.P2PKHOutputSize)
@@ -21,17 +21,17 @@ func p2pkhOutputs(amounts ...util.Amount) []*wire.TxOut {
 }
 func makeInputSource(unspents []*wire.TxOut) InputSource {
 	// Return outputs in order.
-	currentTotal := util.Amount(0)
+	currentTotal := amt.Amount(0)
 	currentInputs := make([]*wire.TxIn, 0, len(unspents))
-	currentInputValues := make([]util.Amount, 0, len(unspents))
-	f := func(target util.Amount) (util.Amount, []*wire.TxIn, []util.Amount, [][]byte, error) {
+	currentInputValues := make([]amt.Amount, 0, len(unspents))
+	f := func(target amt.Amount) (amt.Amount, []*wire.TxIn, []amt.Amount, [][]byte, error) {
 		for currentTotal < target && len(unspents) != 0 {
 			u := unspents[0]
 			unspents = unspents[1:]
 			nextInput := wire.NewTxIn(&wire.OutPoint{}, nil, nil)
-			currentTotal += util.Amount(u.Value)
+			currentTotal += amt.Amount(u.Value)
 			currentInputs = append(currentInputs, nextInput)
-			currentInputValues = append(currentInputValues, util.Amount(u.Value))
+			currentInputValues = append(currentInputValues, amt.Amount(u.Value))
 		}
 		return currentTotal, currentInputs, currentInputValues, make([][]byte, len(currentInputs)), nil
 	}
@@ -41,8 +41,8 @@ func TestNewUnsignedTransaction(t *testing.T) {
 	tests := []struct {
 		UnspentOutputs   []*wire.TxOut
 		Outputs          []*wire.TxOut
-		RelayFee         util.Amount
-		ChangeAmount     util.Amount
+		RelayFee         amt.Amount
+		ChangeAmount     amt.Amount
 		InputSourceError bool
 		InputCount       int
 	}{
@@ -184,7 +184,7 @@ func TestNewUnsignedTransaction(t *testing.T) {
 				continue
 			}
 		} else {
-			changeAmount := util.Amount(tx.Tx.TxOut[tx.ChangeIndex].Value)
+			changeAmount := amt.Amount(tx.Tx.TxOut[tx.ChangeIndex].Value)
 			if test.ChangeAmount == 0 {
 				t.Errorf("Test %d: Included change output with value %v but expected no change",
 					i, changeAmount)

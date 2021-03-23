@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/btcaddr"
 	"testing"
 	
 	"github.com/p9c/pod/pkg/chainhash"
@@ -20,7 +21,7 @@ type addressToKey struct {
 func mkGetKey(keys map[string]addressToKey) KeyDB {
 	if keys == nil {
 		return KeyClosure(
-			func(addr util.Address) (
+			func(addr btcaddr.Address) (
 				*ec.PrivateKey,
 				bool, error,
 			) {
@@ -29,7 +30,7 @@ func mkGetKey(keys map[string]addressToKey) KeyDB {
 		)
 	}
 	return KeyClosure(
-		func(addr util.Address) (
+		func(addr btcaddr.Address) (
 			*ec.PrivateKey,
 			bool, error,
 		) {
@@ -44,13 +45,13 @@ func mkGetKey(keys map[string]addressToKey) KeyDB {
 func mkGetScript(scripts map[string][]byte) ScriptDB {
 	if scripts == nil {
 		return ScriptClosure(
-			func(addr util.Address) ([]byte, error) {
+			func(addr btcaddr.Address) ([]byte, error) {
 				return nil, errors.New("nope")
 			},
 		)
 	}
 	return ScriptClosure(
-		func(addr util.Address) ([]byte, error) {
+		func(addr btcaddr.Address) ([]byte, error) {
 			script, ok := scripts[addr.EncodeAddress()]
 			if !ok {
 				return nil, errors.New("nope")
@@ -161,8 +162,8 @@ func TestSignTxOutput(t *testing.T) {
 			}
 			pk := (*ec.PublicKey)(&key.PublicKey).
 				SerializeUncompressed()
-			address, e := util.NewAddressPubKeyHash(
-				util.Hash160(pk), &chaincfg.TestNet3Params,
+			address, e := btcaddr.NewPubKeyHash(
+				btcaddr.Hash160(pk), &chaincfg.TestNet3Params,
 			)
 			if e != nil {
 				t.Errorf(
@@ -204,8 +205,8 @@ func TestSignTxOutput(t *testing.T) {
 			}
 			pk := (*ec.PublicKey)(&key.PublicKey).
 				SerializeUncompressed()
-			address, e := util.NewAddressPubKeyHash(
-				util.Hash160(pk), &chaincfg.TestNet3Params,
+			address, e := btcaddr.NewPubKeyHash(
+				btcaddr.Hash160(pk), &chaincfg.TestNet3Params,
 			)
 			if e != nil {
 				t.Errorf(
@@ -278,8 +279,8 @@ func TestSignTxOutput(t *testing.T) {
 			}
 			pk := (*ec.PublicKey)(&key.PublicKey).
 				SerializeCompressed()
-			address, e := util.NewAddressPubKeyHash(
-				util.Hash160(pk), &chaincfg.TestNet3Params,
+			address, e := btcaddr.NewPubKeyHash(
+				btcaddr.Hash160(pk), &chaincfg.TestNet3Params,
 			)
 			if e != nil {
 				t.Errorf(
@@ -322,8 +323,8 @@ func TestSignTxOutput(t *testing.T) {
 			}
 			pk := (*ec.PublicKey)(&key.PublicKey).
 				SerializeCompressed()
-			address, e := util.NewAddressPubKeyHash(
-				util.Hash160(pk), &chaincfg.TestNet3Params,
+			address, e := btcaddr.NewPubKeyHash(
+				btcaddr.Hash160(pk), &chaincfg.TestNet3Params,
 			)
 			if e != nil {
 				t.Errorf(
@@ -399,7 +400,7 @@ func TestSignTxOutput(t *testing.T) {
 			}
 			pk := (*ec.PublicKey)(&key.PublicKey).
 				SerializeUncompressed()
-			address, e := util.NewAddressPubKey(
+			address, e := btcaddr.NewPubKey(
 				pk,
 				&chaincfg.TestNet3Params,
 			)
@@ -444,7 +445,7 @@ func TestSignTxOutput(t *testing.T) {
 			}
 			pk := (*ec.PublicKey)(&key.PublicKey).
 				SerializeUncompressed()
-			address, e := util.NewAddressPubKey(
+			address, e := btcaddr.NewPubKey(
 				pk,
 				&chaincfg.TestNet3Params,
 			)
@@ -519,7 +520,7 @@ func TestSignTxOutput(t *testing.T) {
 			}
 			pk := (*ec.PublicKey)(&key.PublicKey).
 				SerializeCompressed()
-			address, e := util.NewAddressPubKey(
+			address, e := btcaddr.NewPubKey(
 				pk,
 				&chaincfg.TestNet3Params,
 			)
@@ -564,7 +565,7 @@ func TestSignTxOutput(t *testing.T) {
 			}
 			pk := (*ec.PublicKey)(&key.PublicKey).
 				SerializeCompressed()
-			address, e := util.NewAddressPubKey(
+			address, e := btcaddr.NewPubKey(
 				pk,
 				&chaincfg.TestNet3Params,
 			)
@@ -642,8 +643,8 @@ func TestSignTxOutput(t *testing.T) {
 			}
 			pk := (*ec.PublicKey)(&key.PublicKey).
 				SerializeUncompressed()
-			address, e := util.NewAddressPubKeyHash(
-				util.Hash160(pk), &chaincfg.TestNet3Params,
+			address, e := btcaddr.NewPubKeyHash(
+				btcaddr.Hash160(pk), &chaincfg.TestNet3Params,
 			)
 			if e != nil {
 				t.Errorf(
@@ -660,7 +661,7 @@ func TestSignTxOutput(t *testing.T) {
 				)
 				break
 			}
-			scriptAddr, e := util.NewAddressScriptHash(
+			scriptAddr, e := address.NewAddressScriptHash(
 				pkScript, &chaincfg.TestNet3Params,
 			)
 			if e != nil {
@@ -711,8 +712,8 @@ func TestSignTxOutput(t *testing.T) {
 			}
 			pk := (*ec.PublicKey)(&key.PublicKey).
 				SerializeUncompressed()
-			address, e := util.NewAddressPubKeyHash(
-				util.Hash160(pk), &chaincfg.TestNet3Params,
+			address, e := btcaddr.NewPubKeyHash(
+				btcaddr.Hash160(pk), &chaincfg.TestNet3Params,
 			)
 			if e != nil {
 				t.Errorf(
@@ -729,7 +730,7 @@ func TestSignTxOutput(t *testing.T) {
 				)
 				break
 			}
-			scriptAddr, e := util.NewAddressScriptHash(
+			scriptAddr, e := address.NewAddressScriptHash(
 				pkScript, &chaincfg.TestNet3Params,
 			)
 			if e != nil {
@@ -817,8 +818,8 @@ func TestSignTxOutput(t *testing.T) {
 			}
 			pk := (*ec.PublicKey)(&key.PublicKey).
 				SerializeCompressed()
-			address, e := util.NewAddressPubKeyHash(
-				util.Hash160(pk), &chaincfg.TestNet3Params,
+			address, e := btcaddr.NewPubKeyHash(
+				btcaddr.Hash160(pk), &chaincfg.TestNet3Params,
 			)
 			if e != nil {
 				t.Errorf(
@@ -834,7 +835,7 @@ func TestSignTxOutput(t *testing.T) {
 						"for %s: %v", msg, e,
 				)
 			}
-			scriptAddr, e := util.NewAddressScriptHash(
+			scriptAddr, e := address.NewAddressScriptHash(
 				pkScript, &chaincfg.TestNet3Params,
 			)
 			if e != nil {
@@ -885,8 +886,8 @@ func TestSignTxOutput(t *testing.T) {
 			}
 			pk := (*ec.PublicKey)(&key.PublicKey).
 				SerializeCompressed()
-			address, e := util.NewAddressPubKeyHash(
-				util.Hash160(pk), &chaincfg.TestNet3Params,
+			address, e := btcaddr.NewPubKeyHash(
+				btcaddr.Hash160(pk), &chaincfg.TestNet3Params,
 			)
 			if e != nil {
 				t.Errorf(
@@ -902,7 +903,7 @@ func TestSignTxOutput(t *testing.T) {
 						"for %s: %v", msg, e,
 				)
 			}
-			scriptAddr, e := util.NewAddressScriptHash(
+			scriptAddr, e := address.NewAddressScriptHash(
 				pkScript, &chaincfg.TestNet3Params,
 			)
 			if e != nil {
@@ -990,7 +991,7 @@ func TestSignTxOutput(t *testing.T) {
 			}
 			pk := (*ec.PublicKey)(&key.PublicKey).
 				SerializeUncompressed()
-			address, e := util.NewAddressPubKey(
+			address, e := btcaddr.NewPubKey(
 				pk,
 				&chaincfg.TestNet3Params,
 			)
@@ -1008,7 +1009,7 @@ func TestSignTxOutput(t *testing.T) {
 						"for %s: %v", msg, e,
 				)
 			}
-			scriptAddr, e := util.NewAddressScriptHash(
+			scriptAddr, e := address.NewAddressScriptHash(
 				pkScript, &chaincfg.TestNet3Params,
 			)
 			if e != nil {
@@ -1059,7 +1060,7 @@ func TestSignTxOutput(t *testing.T) {
 			}
 			pk := (*ec.PublicKey)(&key.PublicKey).
 				SerializeUncompressed()
-			address, e := util.NewAddressPubKey(
+			address, e := btcaddr.NewPubKey(
 				pk,
 				&chaincfg.TestNet3Params,
 			)
@@ -1077,7 +1078,7 @@ func TestSignTxOutput(t *testing.T) {
 						"for %s: %v", msg, e,
 				)
 			}
-			scriptAddr, e := util.NewAddressScriptHash(
+			scriptAddr, e := address.NewAddressScriptHash(
 				pkScript, &chaincfg.TestNet3Params,
 			)
 			if e != nil {
@@ -1163,7 +1164,7 @@ func TestSignTxOutput(t *testing.T) {
 			}
 			pk := (*ec.PublicKey)(&key.PublicKey).
 				SerializeCompressed()
-			address, e := util.NewAddressPubKey(
+			address, e := btcaddr.NewPubKey(
 				pk,
 				&chaincfg.TestNet3Params,
 			)
@@ -1181,7 +1182,7 @@ func TestSignTxOutput(t *testing.T) {
 						"for %s: %v", msg, e,
 				)
 			}
-			scriptAddr, e := util.NewAddressScriptHash(
+			scriptAddr, e := address.NewAddressScriptHash(
 				pkScript, &chaincfg.TestNet3Params,
 			)
 			if e != nil {
@@ -1230,7 +1231,7 @@ func TestSignTxOutput(t *testing.T) {
 			}
 			pk := (*ec.PublicKey)(&key.PublicKey).
 				SerializeCompressed()
-			address, e := util.NewAddressPubKey(
+			address, e := btcaddr.NewPubKey(
 				pk,
 				&chaincfg.TestNet3Params,
 			)
@@ -1248,7 +1249,7 @@ func TestSignTxOutput(t *testing.T) {
 						"for %s: %v", msg, e,
 				)
 			}
-			scriptAddr, e := util.NewAddressScriptHash(
+			scriptAddr, e := address.NewAddressScriptHash(
 				pkScript, &chaincfg.TestNet3Params,
 			)
 			if e != nil {
@@ -1334,7 +1335,7 @@ func TestSignTxOutput(t *testing.T) {
 			}
 			pk1 := (*ec.PublicKey)(&key1.PublicKey).
 				SerializeCompressed()
-			address1, e := util.NewAddressPubKey(
+			address1, e := btcaddr.NewPubKey(
 				pk1,
 				&chaincfg.TestNet3Params,
 			)
@@ -1355,7 +1356,7 @@ func TestSignTxOutput(t *testing.T) {
 			}
 			pk2 := (*ec.PublicKey)(&key2.PublicKey).
 				SerializeCompressed()
-			address2, e := util.NewAddressPubKey(
+			address2, e := btcaddr.NewPubKey(
 				pk2,
 				&chaincfg.TestNet3Params,
 			)
@@ -1367,7 +1368,7 @@ func TestSignTxOutput(t *testing.T) {
 				break
 			}
 			pkScript, e := MultiSigScript(
-				[]*util.AddressPubKey{address1, address2},
+				[]*btcaddr.PubKey{address1, address2},
 				2,
 			)
 			if e != nil {
@@ -1376,7 +1377,7 @@ func TestSignTxOutput(t *testing.T) {
 						"for %s: %v", msg, e,
 				)
 			}
-			scriptAddr, e := util.NewAddressScriptHash(
+			scriptAddr, e := btcaddr.NewScriptHash(
 				pkScript, &chaincfg.TestNet3Params,
 			)
 			if e != nil {
@@ -1426,7 +1427,7 @@ func TestSignTxOutput(t *testing.T) {
 			}
 			pk1 := (*ec.PublicKey)(&key1.PublicKey).
 				SerializeCompressed()
-			address1, e := util.NewAddressPubKey(
+			address1, e := btcaddr.NewPubKey(
 				pk1,
 				&chaincfg.TestNet3Params,
 			)
@@ -1447,7 +1448,7 @@ func TestSignTxOutput(t *testing.T) {
 			}
 			pk2 := (*ec.PublicKey)(&key2.PublicKey).
 				SerializeCompressed()
-			address2, e := util.NewAddressPubKey(
+			address2, e := btcaddr.NewPubKey(
 				pk2,
 				&chaincfg.TestNet3Params,
 			)
@@ -1459,7 +1460,7 @@ func TestSignTxOutput(t *testing.T) {
 				break
 			}
 			pkScript, e := MultiSigScript(
-				[]*util.AddressPubKey{address1, address2},
+				[]*btcaddr.PubKey{address1, address2},
 				2,
 			)
 			if e != nil {
@@ -1468,7 +1469,7 @@ func TestSignTxOutput(t *testing.T) {
 						"for %s: %v", msg, e,
 				)
 			}
-			scriptAddr, e := util.NewAddressScriptHash(
+			scriptAddr, e := btcaddr.NewScriptHash(
 				pkScript, &chaincfg.TestNet3Params,
 			)
 			if e != nil {
@@ -1559,7 +1560,7 @@ func TestSignTxOutput(t *testing.T) {
 			}
 			pk1 := (*ec.PublicKey)(&key1.PublicKey).
 				SerializeCompressed()
-			address1, e := util.NewAddressPubKey(
+			address1, e := btcaddr.NewPubKey(
 				pk1,
 				&chaincfg.TestNet3Params,
 			)
@@ -1580,7 +1581,7 @@ func TestSignTxOutput(t *testing.T) {
 			}
 			pk2 := (*ec.PublicKey)(&key2.PublicKey).
 				SerializeCompressed()
-			address2, e := util.NewAddressPubKey(
+			address2, e := btcaddr.NewPubKey(
 				pk2,
 				&chaincfg.TestNet3Params,
 			)
@@ -1592,7 +1593,7 @@ func TestSignTxOutput(t *testing.T) {
 				break
 			}
 			pkScript, e := MultiSigScript(
-				[]*util.AddressPubKey{address1, address2},
+				[]*btcaddr.PubKey{address1, address2},
 				2,
 			)
 			if e != nil {
@@ -1601,7 +1602,7 @@ func TestSignTxOutput(t *testing.T) {
 						"for %s: %v", msg, e,
 				)
 			}
-			scriptAddr, e := util.NewAddressScriptHash(
+			scriptAddr, e := btcaddr.NewScriptHash(
 				pkScript, &chaincfg.TestNet3Params,
 			)
 			if e != nil {

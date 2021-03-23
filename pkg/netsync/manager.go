@@ -3,6 +3,7 @@ package netsync
 import (
 	"container/list"
 	"fmt"
+	block2 "github.com/p9c/pod/pkg/block"
 	"net"
 	"sync"
 	"sync/atomic"
@@ -54,7 +55,7 @@ type (
 	// blockMsg packages a bitcoin block message and the peer it came from together
 	// so the block handler has access to that information.
 	blockMsg struct {
-		block *util.Block
+		block *block2.Block
 		peer  *peerpkg.Peer
 		reply qu.C
 	}
@@ -115,7 +116,7 @@ type (
 	// handling whereas this message essentially is just a concurrent safe way to
 	// call ProcessBlock on the internal block chain instance.
 	processBlockMsg struct {
-		block *util.Block
+		block *block2.Block
 		flags blockchain.BehaviorFlags
 		reply chan processBlockResponse
 	}
@@ -189,7 +190,7 @@ func (sm *SyncManager) Pause() chan<- struct{} {
 
 // ProcessBlock makes use of ProcessBlock on an internal instance of a block
 // chain.
-func (sm *SyncManager) ProcessBlock(block *util.Block, flags blockchain.BehaviorFlags) (bool, error) {
+func (sm *SyncManager) ProcessBlock(block *block2.Block, flags blockchain.BehaviorFlags) (bool, error) {
 	T.Ln("processing block")
 	// Traces(block)
 	reply := make(chan processBlockResponse, 1)
@@ -203,7 +204,7 @@ func (sm *SyncManager) ProcessBlock(block *util.Block, flags blockchain.Behavior
 // QueueBlock adds the passed block message and peer to the block handling
 // queue. Responds to the done channel argument after the block message is
 // processed.
-func (sm *SyncManager) QueueBlock(block *util.Block, peer *peerpkg.Peer, done qu.C) {
+func (sm *SyncManager) QueueBlock(block *block2.Block, peer *peerpkg.Peer, done qu.C) {
 	// Don't accept more blocks if we're shutting down.
 	if atomic.LoadInt32(&sm.shutdown) != 0 {
 		done <- struct{}{}
@@ -277,7 +278,7 @@ func (sm *SyncManager) SyncPeerID() int32 {
 
 // blockHandler is the main handler for the sync manager. It must be run as a
 // goroutine. It processes block and inv messages in a separate goroutine from
-// the peer handlers so the block (MsgBlock) messages are handled by a single
+// the peer handlers so the block (Block) messages are handled by a single
 // thread without needing to lock memory data structures. This is important
 // because the sync manager controls which blocks are needed and how the
 // fetching should proceed.
@@ -310,7 +311,7 @@ out:
 			case processBlockMsg:
 				T.Ln("received processBlockMsg")
 				var heightUpdate int32
-				header := &msg.block.MsgBlock().Header
+				header := &msg.block.WireBlock().Header
 				T.Ln("checking if have should have serialized block height")
 				if blockchain.ShouldHaveSerializedBlockHeight(header) {
 					T.Ln("reading coinbase transaction")
@@ -523,7 +524,7 @@ func (sm *SyncManager) handleBlockMsg(workerNumber uint32, bmsg *blockMsg) {
 	delete(sm.requestedBlocks, *blockHash)
 	var heightUpdate int32
 	var blkHashUpdate *chainhash.Hash
-	header := &bmsg.block.MsgBlock().Header
+	header := &bmsg.block.WireBlock().Header
 	if blockchain.ShouldHaveSerializedBlockHeight(header) {
 		coinbaseTx := bmsg.block.Transactions()[0]
 		cbHeight, e := blockchain.ExtractCoinbaseHeight(coinbaseTx)
@@ -578,7 +579,7 @@ func (sm *SyncManager) handleBlockMsg(workerNumber uint32, bmsg *blockMsg) {
 		// height of the peer, we try to extract the block height from the scriptSig of
 		// the coinbase transaction. Extraction is only attempted if the block's version
 		// is high enough (ver 2+).
-		header := &bmsg.block.MsgBlock().Header
+		header := &bmsg.block.WireBlock().Header
 		if blockchain.ShouldHaveSerializedBlockHeight(header) {
 			coinbaseTx := bmsg.block.Transactions()[0]
 			cbHeight, e := blockchain.ExtractCoinbaseHeight(coinbaseTx)
@@ -695,17 +696,17 @@ func (sm *SyncManager) handleBlockchainNotification(notification *blockchain.Not
 		if !sm.current() {
 			return
 		}
-		block, ok := notification.Data.(*util.Block)
+		block, ok := notification.Data.(*block2.Block)
 		if !ok {
 			D.Ln("chain accepted notification is not a block")
 			break
 		}
 		// Generate the inventory vector and relay it.
 		iv := wire.NewInvVect(wire.InvTypeBlock, block.Hash())
-		sm.peerNotifier.RelayInventory(iv, block.MsgBlock().Header)
+		sm.peerNotifier.RelayInventory(iv, block.WireBlock().Header)
 	// A block has been connected to the main block chain.
 	case blockchain.NTBlockConnected:
-		block, ok := notification.Data.(*util.Block)
+		block, ok := notification.Data.(*block2.Block)
 		if !ok {
 			D.Ln("chain connected notification is not a block")
 			break
@@ -738,7 +739,7 @@ func (sm *SyncManager) handleBlockchainNotification(notification *blockchain.Not
 		}
 	// A block has been disconnected from the main block chain.
 	case blockchain.NTBlockDisconnected:
-		block, ok := notification.Data.(*util.Block)
+		block, ok := notification.Data.(*block2.Block)
 		if !ok {
 			D.Ln("chain disconnected notification is not a block.")
 			break

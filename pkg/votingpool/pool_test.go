@@ -9,7 +9,7 @@ import (
 	
 	"github.com/p9c/pod/pkg/util/hdkeychain"
 	vp "github.com/p9c/pod/pkg/votingpool"
-	"github.com/p9c/pod/pkg/wallet/waddrmgr"
+	"github.com/p9c/pod/pkg/waddrmgr"
 	"github.com/p9c/pod/pkg/walletdb"
 	_ "github.com/p9c/pod/pkg/walletdb/bdb"
 )

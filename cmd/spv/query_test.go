@@ -75,7 +75,7 @@ func TestBigFilterEvictsEverything(t *testing.T) {
 // 	var size uint64
 // 	for i, b := range blocks {
 // 		header := headerfs.BlockHeader{
-// 			BlockHeader: &b.MsgBlock().Header,
+// 			BlockHeader: &b.WireBlock().Header,
 // 			Height:      uint32(i),
 // 		}
 // 		headers.WriteHeaders(header)
@@ -118,7 +118,7 @@ func TestBigFilterEvictsEverything(t *testing.T) {
 // 				// Execute the callback with the found block,
 // 				// and wait for the quit channel to be closed.
 // 				quit := qu.T()
-// 				f(nil, b.MsgBlock(), quit)
+// 				f(nil, b.WireBlock(), quit)
 // 				select {
 // 				case <-quit:
 // 				case <-time.After(1 * time.Second):

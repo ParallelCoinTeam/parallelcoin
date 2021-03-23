@@ -3,6 +3,8 @@ package votingpool_test
 import (
 	"bytes"
 	"fmt"
+	"github.com/p9c/pod/pkg/amt"
+	"github.com/p9c/pod/pkg/btcaddr"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -10,9 +12,8 @@ import (
 	
 	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/txscript"
-	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/votingpool"
-	"github.com/p9c/pod/pkg/wallet/waddrmgr"
+	"github.com/p9c/pod/pkg/waddrmgr"
 	"github.com/p9c/pod/pkg/walletdb"
 	_ "github.com/p9c/pod/pkg/walletdb/bdb"
 	"github.com/p9c/pod/pkg/wtxmgr"
@@ -181,7 +182,7 @@ func Example_startWithdrawal() {
 				if E.Chk(e) {
 				}
 			}()
-			addr, _ := util.DecodeAddress("1MirQ9bwyQcGVJPwKUgapu5ouK2E2Ey4gX", mgr.ChainParams())
+			addr, _ := btcaddr.Decode("1MirQ9bwyQcGVJPwKUgapu5ouK2E2Ey4gX", mgr.ChainParams())
 			pkScript, _ := txscript.PayToAddrScript(addr)
 			requests := []votingpool.OutputRequest{
 				{
@@ -208,7 +209,7 @@ func Example_startWithdrawal() {
 				return e
 			}
 			lastSeriesID := seriesID
-			dustThreshold := util.Amount(1e4)
+			dustThreshold := amt.Amount(1e4)
 			currentBlock := int32(19432)
 			roundID := uint32(0)
 			_, e = pool.StartWithdrawal(

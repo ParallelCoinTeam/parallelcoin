@@ -3,11 +3,11 @@ package bloom_test
 import (
 	"bytes"
 	"encoding/hex"
+	"github.com/p9c/pod/pkg/block"
 	"testing"
 	
 	"github.com/p9c/pod/pkg/bloom"
 	"github.com/p9c/pod/pkg/chainhash"
-	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/wire"
 )
 
@@ -25,9 +25,9 @@ func TestMerkleBlock3(t *testing.T) {
 		t.Errorf("TestMerkleBlock3 DecodeString failed: %v", e)
 		return
 	}
-	blk, e := util.NewBlockFromBytes(blockBytes)
+	blk, e := block.NewFromBytes(blockBytes)
 	if e != nil  {
-		t.Errorf("TestMerkleBlock3 NewBlockFromBytes failed: %v", e)
+		t.Errorf("TestMerkleBlock3 NewFromBytes failed: %v", e)
 		return
 	}
 	f := bloom.NewFilter(10, 0, 0.000001, wire.BloomUpdateAll)

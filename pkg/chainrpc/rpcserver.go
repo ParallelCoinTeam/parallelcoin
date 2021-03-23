@@ -9,9 +9,12 @@ import (
 	js "encoding/json"
 	"errors"
 	"fmt"
+	"github.com/p9c/pod/pkg/amt"
 	"github.com/p9c/pod/pkg/bits"
+	"github.com/p9c/pod/pkg/block"
 	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/fork"
+	"github.com/p9c/pod/pkg/btcaddr"
 	"github.com/p9c/pod/pkg/podcfg"
 	"io"
 	"io/ioutil"
@@ -34,12 +37,12 @@ import (
 	"github.com/p9c/pod/cmd/node/mempool"
 	"github.com/p9c/pod/cmd/node/state"
 	"github.com/p9c/pod/pkg/blockchain"
+	"github.com/p9c/pod/pkg/btcjson"
 	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/database"
 	"github.com/p9c/pod/pkg/indexers"
 	"github.com/p9c/pod/pkg/mining"
 	p "github.com/p9c/pod/pkg/peer"
-	"github.com/p9c/pod/pkg/btcjson"
 	"github.com/p9c/pod/pkg/txscript"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/wire"
@@ -229,7 +232,7 @@ type ServerSyncManager interface {
 	// network.
 	IsCurrent() bool
 	// SubmitBlock submits the provided block to the network after processing it locally.
-	SubmitBlock(block *util.Block, flags blockchain.BehaviorFlags) (bool, error)
+	SubmitBlock(block *block.Block, flags blockchain.BehaviorFlags) (bool, error)
 	// Pause pauses the sync manager until the returned channel is closed.
 	Pause() chan<- struct{}
 	// SyncPeerID returns the ID of the peer that is currently the peer being used to sync from or 0 if there is none.
@@ -950,7 +953,7 @@ func (state *GBTWorkState) UpdateBlockTemplate(
 	}
 	// Generate a new block template when the current best block has changed or the transactions in the memory pool have
 	// been updated and it has been at least gbtRegenerateSecond since the last template was generated.
-	var msgBlock *wire.MsgBlock
+	var msgBlock *wire.Block
 	var targetDifficulty string
 	latestHash := &s.Cfg.Chain.BestSnapshot().Hash
 	template := state.Template
@@ -968,7 +971,7 @@ func (state *GBTWorkState) UpdateBlockTemplate(
 		state.prevHash = nil
 		// Choose a payment address at random if the caller requests a full coinbase as opposed to only the pertinent
 		// details needed to create their own coinbase.
-		var payAddr util.Address
+		var payAddr btcaddr.Address
 		if !useCoinbaseValue {
 			payAddr = s.StateCfg.ActiveMiningAddrs[rand.Intn(
 				len(
@@ -1042,7 +1045,7 @@ func (state *GBTWorkState) UpdateBlockTemplate(
 			template.Block.Transactions[0].TxOut[0].PkScript = pkScript
 			template.ValidPayAddress = true
 			// Update the merkle root.
-			block := util.NewBlock(template.Block)
+			block := block.NewBlock(template.Block)
 			merkles := blockchain.BuildMerkleTreeStore(block.Transactions(), false)
 			template.Block.Header.MerkleRoot = *merkles.GetRoot()
 		}
@@ -1232,7 +1235,7 @@ func (s *Server) HandleBlockchainNotification(notification *blockchain.Notificat
 	if s.Cfg.Chain.IsCurrent() {
 		switch notification.Type {
 		case blockchain.NTBlockAccepted:
-			block, ok := notification.Data.(*util.Block)
+			block, ok := notification.Data.(*block.Block)
 			if !ok {
 				W.Ln("chain accepted notification is not a block")
 				break
@@ -1241,7 +1244,7 @@ func (s *Server) HandleBlockchainNotification(notification *blockchain.Notificat
 			// causes their old block template to become stale.
 			s.GBTWorkState.NotifyBlockConnected(block.Hash())
 		case blockchain.NTBlockConnected:
-			block, ok := notification.Data.(*util.Block)
+			block, ok := notification.Data.(*block.Block)
 			if !ok {
 				W.Ln("chain connected notification is not a block")
 				break
@@ -1249,7 +1252,7 @@ func (s *Server) HandleBlockchainNotification(notification *blockchain.Notificat
 			// Notify registered websocket clients of incoming block.
 			s.NtfnMgr.SendNotifyBlockConnected(block)
 		case blockchain.NTBlockDisconnected:
-			block, ok := notification.Data.(*util.Block)
+			block, ok := notification.Data.(*block.Block)
 			if !ok {
 				W.Ln("chain disconnected notification is not a block.")
 				break
@@ -1784,7 +1787,7 @@ func CreateVinListPrevOut(
 			vinListEntry := &vinList[len(vinList)-1]
 			vinListEntry.PrevOut = &btcjson.PrevOut{
 				Addresses: encodedAddrs,
-				Value:     util.Amount(originTxOut.Value).ToDUO(),
+				Value:     amt.Amount(originTxOut.Value).ToDUO(),
 			}
 		}
 	}
@@ -1823,7 +1826,7 @@ func CreateVoutList(
 		}
 		var vout btcjson.Vout
 		vout.N = uint32(i)
-		vout.Value = util.Amount(v.Value).ToDUO()
+		vout.Value = amt.Amount(v.Value).ToDUO()
 		vout.ScriptPubKey.Addresses = encodedAddrs
 		vout.ScriptPubKey.Asm = disbuf
 		vout.ScriptPubKey.Hex = hex.EncodeToString(v.PkScript)
@@ -1922,7 +1925,7 @@ func FetchInputTxos(s *Server, tx *wire.MsgTx) (map[wire.OutPoint]wire.TxOut, er
 // FetchMempoolTxnsForAddress queries the address index for all unconfirmed transactions that involve the provided
 // address. The results will be limited by the number to skip and the number requested.
 func FetchMempoolTxnsForAddress(
-	s *Server, addr util.Address, numToSkip,
+	s *Server, addr btcaddr.Address, numToSkip,
 	numRequested uint32,
 ) ([]*util.Tx, uint32) {
 	// There are no entries to return when there are less available than the
@@ -2176,38 +2179,38 @@ func VerifyChain(s *Server, level, depth int32) (e error) {
 		level,
 	)
 	
-	var block *util.Block
+	var blk *block.Block
 	for height := best.Height; height > finishHeight; height-- {
 		// Level 0 just looks up the block.
-		block, e = s.Cfg.Chain.BlockByHeight(height)
+		blk, e = s.Cfg.Chain.BlockByHeight(height)
 		if e != nil {
 			E.F("verify is unable to fetch block at height %d: %v", height, e)
 			return e
 		}
 		powLimit := fork.GetMinDiff(
 			fork.GetAlgoName(
-				block.MsgBlock().Header.
+				blk.WireBlock().Header.
 					Version, height,
 			), height,
 		)
-		var pb *util.Block
-		if pb, e = s.Cfg.Chain.BlockByHash(&block.MsgBlock().Header.PrevBlock); E.Chk(e) {
+		var pb *block.Block
+		if pb, e = s.Cfg.Chain.BlockByHash(&blk.WireBlock().Header.PrevBlock); E.Chk(e) {
 			return
 		}
 		// Level 1 does basic chain sanity checks.
 		if level > 0 {
 			e = blockchain.CheckBlockSanity(
-				block,
+				blk,
 				powLimit,
 				s.Cfg.TimeSource,
 				true,
-				block.Height(),
-				pb.MsgBlock().Header.Timestamp,
+				blk.Height(),
+				pb.WireBlock().Header.Timestamp,
 			)
 			if e != nil {
 				E.F(
 					"verify is unable to validate block at hash %v height %d: %v %s",
-					block.Hash(), height, e,
+					blk.Hash(), height, e,
 				)
 				return e
 			}

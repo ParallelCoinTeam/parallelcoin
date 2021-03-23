@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/btcaddr"
 	"sync"
 	"time"
 	
@@ -16,7 +17,7 @@ import (
 	"github.com/p9c/pod/pkg/rpcclient"
 	"github.com/p9c/pod/pkg/txscript"
 	"github.com/p9c/pod/pkg/util"
-	"github.com/p9c/pod/pkg/wallet/waddrmgr"
+	"github.com/p9c/pod/pkg/waddrmgr"
 	"github.com/p9c/pod/pkg/wire"
 	"github.com/p9c/pod/pkg/wtxmgr"
 )
@@ -99,7 +100,7 @@ func (s *NeutrinoClient) WaitForShutdown() {
 }
 
 // GetBlock replicates the RPC client's GetBlock command.
-func (s *NeutrinoClient) GetBlock(hash *chainhash.Hash) (*wire.MsgBlock, error) {
+func (s *NeutrinoClient) GetBlock(hash *chainhash.Hash) (*wire.Block, error) {
 	// TODO(roasbeef): add a block cache?
 	//  * which evication strategy? depends on use case
 	//  Should the block cache be INSIDE neutrino instead of in btcwallet?
@@ -107,7 +108,7 @@ func (s *NeutrinoClient) GetBlock(hash *chainhash.Hash) (*wire.MsgBlock, error) 
 	if e != nil {
 		return nil, e
 	}
-	return block.MsgBlock(), nil
+	return block.WireBlock(), nil
 }
 
 // GetBlockHeight gets the height of a block by its hash. It serves as a replacement for the use of
@@ -282,8 +283,8 @@ func (s *NeutrinoClient) pollCFilter(hash *chainhash.Hash) (filter *gcs.Filter, 
 
 // Rescan replicates the RPC client's Rescan command.
 func (s *NeutrinoClient) Rescan(
-	startHash *chainhash.Hash, addrs []util.Address,
-	outPoints map[wire.OutPoint]util.Address,
+	startHash *chainhash.Hash, addrs []btcaddr.Address,
+	outPoints map[wire.OutPoint]btcaddr.Address,
 ) (e error) {
 	s.clientMtx.Lock()
 	defer s.clientMtx.Unlock()
@@ -371,14 +372,14 @@ func (s *NeutrinoClient) NotifyBlocks() (e error) {
 	// If we're scanning, we're already notifying on blocks. Otherwise, start a rescan without watching any addresses.
 	if !s.scanning {
 		s.clientMtx.Unlock()
-		return s.NotifyReceived([]util.Address{})
+		return s.NotifyReceived([]btcaddr.Address{})
 	}
 	s.clientMtx.Unlock()
 	return nil
 }
 
 // NotifyReceived replicates the RPC client's NotifyReceived command.
-func (s *NeutrinoClient) NotifyReceived(addrs []util.Address) (e error) {
+func (s *NeutrinoClient) NotifyReceived(addrs []btcaddr.Address) (e error) {
 	s.clientMtx.Lock()
 	// If we have a rescan running, we just need to add the appropriate addresses to the watch list.
 	if s.scanning {
