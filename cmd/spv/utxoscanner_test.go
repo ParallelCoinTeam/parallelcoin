@@ -489,13 +489,13 @@ func TestUtxoScannerCancelRequest(t *testing.T) {
 	err100000 := make(chan error, 1)
 	go func() {
 		_, e := req100000.Result(cancel100000)
-		err100000 <- err
+		err100000 <- e
 	}()
 	// Spawn our second task without a cancel chan, we'll be testing it's ability to break if the scanner is stopped.
 	err100001 := make(chan error, 1)
 	go func() {
 		_, e := req100001.Result(nil)
-		err100001 <- err
+		err100001 <- e
 	}()
 	// Chk that neither succeed without any further action.
 	select {
@@ -512,7 +512,7 @@ func TestUtxoScannerCancelRequest(t *testing.T) {
 	cancel100000.Q()
 	select {
 	case e := <-err100000:
-		if err != ErrGetUtxoCancelled {
+		if e != ErrGetUtxoCancelled {
 			t.Fatalf("unexpected error returned from Result, want: %v, got %v", ErrGetUtxoCancelled, e)
 		}
 	case <-time.After(50 * time.Millisecond):
@@ -538,7 +538,7 @@ func TestUtxoScannerCancelRequest(t *testing.T) {
 	// The second request should be cancelled as soon as the utxoscanner begins shut down, returning ErrShuttingDown.
 	select {
 	case e := <-err100001:
-		if err != ErrShuttingDown {
+		if e != ErrShuttingDown {
 			t.Fatalf(
 				"unexpected error returned "+
 					"from Result, want: %v, got %v",

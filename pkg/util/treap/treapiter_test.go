@@ -251,21 +251,21 @@ func TestMutableEmptyIterator(t *testing.T) {
 	iter := testTreap.Iterator(nil, nil)
 	// Ensure Valid on empty iterator reports it as exhausted.
 	if iter.Valid() {
-		t.F.Ln("Valid: iterator should be exhausted")
+		t.Fatal("Valid: iterator should be exhausted")
 	}
 	// Ensure First and Last on empty iterator report it as exhausted.
 	if iter.First() {
-		t.F.Ln("First: iterator should be exhausted")
+		t.Fatal("First: iterator should be exhausted")
 	}
 	if iter.Last() {
-		t.F.Ln("Last: iterator should be exhausted")
+		t.Fatal("Last: iterator should be exhausted")
 	}
 	// Ensure Next and Prev on empty iterator report it as exhausted.
 	if iter.Next() {
-		t.F.Ln("Next: iterator should be exhausted")
+		t.Fatal("Next: iterator should be exhausted")
 	}
 	if iter.Prev() {
-		t.F.Ln("Prev: iterator should be exhausted")
+		t.Fatal("Prev: iterator should be exhausted")
 	}
 	// Ensure Key and value on empty iterator are nil.
 	if gotKey := iter.Key(); gotKey != nil {
@@ -277,11 +277,11 @@ func TestMutableEmptyIterator(t *testing.T) {
 	// Ensure Next and Prev report exhausted after forcing a reseek on an empty iterator.
 	iter.ForceReseek()
 	if iter.Next() {
-		t.F.Ln("Next: iterator should be exhausted")
+		t.Fatal("Next: iterator should be exhausted")
 	}
 	iter.ForceReseek()
 	if iter.Prev() {
-		t.F.Ln("Prev: iterator should be exhausted")
+		t.Fatal("Prev: iterator should be exhausted")
 	}
 }
 
@@ -307,7 +307,7 @@ func TestIteratorUpdates(t *testing.T) {
 	// Ensure that calling Next on the iterator after the forced reseek gives the expected key. The limited set of keys
 	// at this point is (4, 7, 18) and the iterator has not yet been positioned.
 	if !iter.Next() {
-		t.F.Ln("ForceReseek.Next: unexpected exhausted iterator")
+		t.Fatal("ForceReseek.Next: unexpected exhausted iterator")
 	}
 	wantKey := serializeUint32(4)
 	gotKey := iter.Key()
@@ -321,7 +321,7 @@ func TestIteratorUpdates(t *testing.T) {
 	// Ensure that calling Next on the iterator after the forced reseek gives the expected key. The limited set of keys
 	// at this point is (7, 18) and the iterator is positioned at a deleted entry before 7.
 	if !iter.Next() {
-		t.F.Ln("ForceReseek.Next: unexpected exhausted iterator")
+		t.Fatal("ForceReseek.Next: unexpected exhausted iterator")
 	}
 	wantKey = serializeUint32(7)
 	gotKey = iter.Key()
@@ -335,7 +335,7 @@ func TestIteratorUpdates(t *testing.T) {
 	// Ensure that calling Prev on the iterator after the forced reseek gives the expected key. The limited set of keys
 	// at this point is (4, 7, 18) and the iterator is positioned at 7.
 	if !iter.Prev() {
-		t.F.Ln("ForceReseek.Prev: unexpected exhausted iterator")
+		t.Fatal("ForceReseek.Prev: unexpected exhausted iterator")
 	}
 	wantKey = serializeUint32(4)
 	gotKey = iter.Key()
@@ -349,7 +349,7 @@ func TestIteratorUpdates(t *testing.T) {
 	// Ensure that calling Next on the iterator after the forced reseek gives the expected key. The limited set of keys
 	// at this point is (4, 18) and the iterator is positioned at 4.
 	if !iter.Next() {
-		t.F.Ln("ForceReseek.Next: unexpected exhausted iterator")
+		t.Fatal("ForceReseek.Next: unexpected exhausted iterator")
 	}
 	wantKey = serializeUint32(18)
 	gotKey = iter.Key()
@@ -604,21 +604,21 @@ func TestImmutableEmptyIterator(t *testing.T) {
 	iter := testTreap.Iterator(nil, nil)
 	// Ensure Valid on empty iterator reports it as exhausted.
 	if iter.Valid() {
-		t.F.Ln("Valid: iterator should be exhausted")
+		t.Fatal("Valid: iterator should be exhausted")
 	}
 	// Ensure First and Last on empty iterator report it as exhausted.
 	if iter.First() {
-		t.F.Ln("First: iterator should be exhausted")
+		t.Fatal("First: iterator should be exhausted")
 	}
 	if iter.Last() {
-		t.F.Ln("Last: iterator should be exhausted")
+		t.Fatal("Last: iterator should be exhausted")
 	}
 	// Ensure Next and Prev on empty iterator report it as exhausted.
 	if iter.Next() {
-		t.F.Ln("Next: iterator should be exhausted")
+		t.Fatal("Next: iterator should be exhausted")
 	}
 	if iter.Prev() {
-		t.F.Ln("Prev: iterator should be exhausted")
+		t.Fatal("Prev: iterator should be exhausted")
 	}
 	// Ensure Key and value on empty iterator are nil.
 	if gotKey := iter.Key(); gotKey != nil {
@@ -631,10 +631,10 @@ func TestImmutableEmptyIterator(t *testing.T) {
 	// mutable treap iterators.
 	iter.ForceReseek()
 	if iter.Next() {
-		t.F.Ln("Next: iterator should be exhausted")
+		t.Fatal("Next: iterator should be exhausted")
 	}
 	iter.ForceReseek()
 	if iter.Prev() {
-		t.F.Ln("Prev: iterator should be exhausted")
+		t.Fatal("Prev: iterator should be exhausted")
 	}
 }

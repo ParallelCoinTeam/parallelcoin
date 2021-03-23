@@ -1,7 +1,7 @@
 package gui
 
 import (
-	"github.com/p9c/pod/pkg/rpc/btcjson"
+	"github.com/p9c/pod/pkg/btcjson"
 	"time"
 	
 	"github.com/p9c/pod/pkg/util/qu"

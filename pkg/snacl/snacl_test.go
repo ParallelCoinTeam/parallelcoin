@@ -17,7 +17,7 @@ func TestNewSecretKey(t *testing.T) {
 	var e error
 	key, e = NewSecretKey(&password, DefaultN, DefaultR, DefaultP)
 	if e != nil  {
-		t.		return
+			return
 	}
 }
 func TestMarshalSecretKey(t *testing.T) {
@@ -26,11 +26,11 @@ func TestMarshalSecretKey(t *testing.T) {
 func TestUnmarshalSecretKey(t *testing.T) {
 	var sk SecretKey
 	if e := sk.Unmarshal(params); E.Chk(e) {
-		t.Errorf("unexpected unmarshal error: %v", err)
+		t.Errorf("unexpected unmarshal error: %v", e)
 		return
 	}
 	if e := sk.DeriveKey(&password); E.Chk(e) {
-		t.Errorf("unexpected DeriveKey error: %v", err)
+		t.Errorf("unexpected DeriveKey error: %v", e)
 		return
 	}
 	if !bytes.Equal(sk.Key[:], key.Key[:]) {
@@ -40,11 +40,11 @@ func TestUnmarshalSecretKey(t *testing.T) {
 func TestUnmarshalSecretKeyInvalid(t *testing.T) {
 	var sk SecretKey
 	if e := sk.Unmarshal(params); E.Chk(e) {
-		t.Errorf("unexpected unmarshal error: %v", err)
+		t.Errorf("unexpected unmarshal error: %v", e)
 		return
 	}
 	p := []byte("wrong password")
-	if e := sk.DeriveKey(&p); err != ErrInvalidPassword {
+	if e := sk.DeriveKey(&p); e != ErrInvalidPassword {
 		t.Errorf("wrong password didn't fail")
 		return
 	}
@@ -53,13 +53,13 @@ func TestEncrypt(t *testing.T) {
 	var e error
 	blob, e = key.Encrypt(message)
 	if e != nil  {
-		t.		return
+				return
 	}
 }
 func TestDecrypt(t *testing.T) {
 	decryptedMessage, e := key.Decrypt(blob)
 	if e != nil  {
-		t.		return
+		return
 	}
 	if !bytes.Equal(decryptedMessage, message) {
 		t.Errorf("decryption failed")
@@ -83,12 +83,12 @@ func TestZero(t *testing.T) {
 }
 func TestDeriveKey(t *testing.T) {
 	if e := key.DeriveKey(&password); E.Chk(e) {
-		t.Errorf("unexpected DeriveKey key failure: %v", err)
+		t.Errorf("unexpected DeriveKey key failure: %v", e)
 	}
 }
 func TestDeriveKeyInvalid(t *testing.T) {
 	bogusPass := []byte("bogus")
-	if e := key.DeriveKey(&bogusPass); err != ErrInvalidPassword {
-		t.Errorf("unexpected DeriveKey key failure: %v", err)
+	if e := key.DeriveKey(&bogusPass); e != ErrInvalidPassword {
+		t.Errorf("unexpected DeriveKey key failure: %v", e)
 	}
 }

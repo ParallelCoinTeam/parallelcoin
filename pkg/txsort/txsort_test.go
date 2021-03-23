@@ -62,20 +62,20 @@ func TestSort(t *testing.T) {
 		txHexBytes, e := ioutil.ReadFile(filePath)
 		if e != nil  {
 			t.Errorf("ReadFile (%s): failed to read test file: %v",
-				test.name, err)
+				test.name, e)
 			continue
 		}
 		txBytes, e := hex.DecodeString(string(txHexBytes))
 		if e != nil  {
 			t.Errorf("DecodeString (%s): failed to decode tx: %v",
-				test.name, err)
+				test.name, e)
 			continue
 		}
 		var tx wire.MsgTx
 		e = tx.Deserialize(bytes.NewReader(txBytes))
 		if e != nil  {
 			t.Errorf("Deserialize (%s): unexpected error %v",
-				test.name, err)
+				test.name, e)
 			continue
 		}
 		// Ensure the txsort order of the original transaction matches the expected value.

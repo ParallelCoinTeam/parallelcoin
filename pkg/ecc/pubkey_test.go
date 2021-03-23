@@ -216,7 +216,7 @@ func TestPubKeys(t *testing.T) {
 		if e != nil  {
 			if test.isValid {
 				t.Errorf("%s pubkey failed when shouldn't %v",
-					test.name, err)
+					test.name, e)
 			}
 			continue
 		}
@@ -252,7 +252,7 @@ func TestPublicKeyIsEqual(t *testing.T) {
 		S256(),
 	)
 	if e != nil  {
-		t.Fatalf("failed to parse raw bytes for pubKey1: %v", err)
+		t.Fatalf("failed to parse raw bytes for pubKey1: %v", e)
 	}
 	pubKey2, e := ParsePubKey(
 		[]byte{0x02, 0xce, 0x0b, 0x14, 0xfb, 0x84, 0x2b, 0x1b,
@@ -263,7 +263,7 @@ func TestPublicKeyIsEqual(t *testing.T) {
 		S256(),
 	)
 	if e != nil  {
-		t.Fatalf("failed to parse raw bytes for pubKey2: %v", err)
+		t.Fatalf("failed to parse raw bytes for pubKey2: %v", e)
 	}
 	if !pubKey1.IsEqual(pubKey1) {
 		t.Fatalf("value of IsEqual is incorrect, %v is "+

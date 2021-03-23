@@ -24,17 +24,15 @@ import (
 	"github.com/urfave/cli"
 	"go.uber.org/atomic"
 	
-	"github.com/p9c/pod/pkg/data/ring"
-	
 	"github.com/p9c/pod/cmd/kopach/client"
 	"github.com/p9c/pod/cmd/kopach/control"
 	"github.com/p9c/pod/cmd/kopach/control/hashrate"
 	"github.com/p9c/pod/cmd/kopach/control/job"
 	"github.com/p9c/pod/cmd/kopach/control/pause"
 	"github.com/p9c/pod/pkg/chainhash"
-	"github.com/p9c/pod/pkg/comm/transport"
-	rav "github.com/p9c/pod/pkg/data/ring"
 	"github.com/p9c/pod/pkg/pipe/stdconn/worker"
+	rav "github.com/p9c/pod/pkg/ring"
+	"github.com/p9c/pod/pkg/transport"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
@@ -149,7 +147,7 @@ func Handle(cx *pod.State) func(c *cli.Context) (e error) {
 			SetThreads:    make(chan int),
 			solutions:     make([]SolutionData, 0, 2048),
 			Update:        qu.T(),
-			hashSampleBuf: ring.NewBufferUint64(1000),
+			hashSampleBuf: rav.NewBufferUint64(1000),
 		}
 		w.lastSent.Store(time.Now().UnixNano())
 		w.active.Store(false)

@@ -122,7 +122,7 @@ func TestAddAddressByIP(t *testing.T) {
 			t.Errorf("TestGood test %d failed expected an error and got none", i)
 			continue
 		}
-		if test.e ==  nil && err != nil {
+		if test.err ==  nil && e != nil {
 			t.Errorf("TestGood test %d failed expected no error and got one", i)
 			continue
 		}

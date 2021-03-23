@@ -17,18 +17,18 @@ import (
 	"github.com/davecgh/go-spew/spew"
 	
 	"github.com/p9c/pod/pkg/blockchain"
+	"github.com/p9c/pod/pkg/btcjson"
+	"github.com/p9c/pod/pkg/chainclient"
 	"github.com/p9c/pod/pkg/chainhash"
-	"github.com/p9c/pod/pkg/database/walletdb"
 	ec "github.com/p9c/pod/pkg/ecc"
-	"github.com/p9c/pod/pkg/rpc/btcjson"
-	"github.com/p9c/pod/pkg/rpc/rpcclient"
+	"github.com/p9c/pod/pkg/rpcclient"
 	"github.com/p9c/pod/pkg/txauthor"
 	"github.com/p9c/pod/pkg/txrules"
 	"github.com/p9c/pod/pkg/txscript"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/hdkeychain"
-	"github.com/p9c/pod/pkg/wallet/chain"
 	"github.com/p9c/pod/pkg/wallet/waddrmgr"
+	"github.com/p9c/pod/pkg/walletdb"
 	"github.com/p9c/pod/pkg/wire"
 	"github.com/p9c/pod/pkg/wtxmgr"
 )
@@ -64,7 +64,7 @@ type Wallet struct {
 	db                 walletdb.DB
 	Manager            *waddrmgr.Manager
 	TxStore            *wtxmgr.Store
-	chainClient        chain.Interface
+	chainClient        chainclient.Interface
 	chainClientLock    sync.Mutex
 	chainClientSynced  bool
 	chainClientSyncMtx sync.Mutex
@@ -131,7 +131,7 @@ func (w *Wallet) Start() {
 // to the blockchain, and continuously updates the wallet through RPC notifications.
 //
 // This method is unstable and will be removed when all syncing logic is moved outside of the wallet package.
-func (w *Wallet) SynchronizeRPC(chainClient chain.Interface) {
+func (w *Wallet) SynchronizeRPC(chainClient chainclient.Interface) {
 	T.Ln("SynchronizeRPC")
 	w.quitMu.Lock()
 	select {
@@ -154,9 +154,9 @@ func (w *Wallet) SynchronizeRPC(chainClient chain.Interface) {
 	w.chainClient = chainClient
 	// If the chain client is a NeutrinoClient instance, set a birthday so we don't download all the filters as we go.
 	switch cc := chainClient.(type) {
-	case *chain.NeutrinoClient:
+	case *chainclient.NeutrinoClient:
 		cc.SetStartTime(w.Manager.Birthday())
-	case *chain.BitcoindClient:
+	case *chainclient.BitcoindClient:
 		cc.SetBirthday(w.Manager.Birthday())
 	}
 	T.Ln("unlocking wallet chain client mutex")
@@ -175,7 +175,7 @@ func (w *Wallet) SynchronizeRPC(chainClient chain.Interface) {
 // requireChainClient marks that a wallet method can only be completed when the consensus RPC server is set. This
 // function and all functions that call it are unstable and will need to be moved when the syncing code is moved out of
 // the wallet.
-func (w *Wallet) requireChainClient() (chain.Interface, error) {
+func (w *Wallet) requireChainClient() (chainclient.Interface, error) {
 	T.Ln(">>>>>>>>> requireChainClient")
 	w.chainClientLock.Lock()
 	T.Ln("chainclient is nil:", w.chainClient == nil)
@@ -190,7 +190,7 @@ func (w *Wallet) requireChainClient() (chain.Interface, error) {
 // ChainClient returns the optional consensus RPC client associated with the wallet.
 //
 // This function is unstable and will be removed once sync logic is moved out of the wallet.
-func (w *Wallet) ChainClient() chain.Interface {
+func (w *Wallet) ChainClient() chainclient.Interface {
 	T.Ln(">>>>>>>>>>>>> wallet acquiring connect to chain RPC")
 	w.chainClientLock.Lock()
 	T.Ln("chainClientLock locked", w.chainClient == nil)
@@ -410,7 +410,7 @@ func (w *Wallet) syncWithChain() (e error) {
 			// it is current if the best height has reached the last checkpoint.
 			isCurrent := func(bestHeight int32) bool {
 				switch c := chainClient.(type) {
-				case *chain.NeutrinoClient:
+				case *chainclient.NeutrinoClient:
 					return c.CS.IsCurrent()
 				}
 				return bestHeight >= checkHeight
@@ -624,7 +624,7 @@ func (w *Wallet) defaultScopeManagers() (
 //
 // TODO(conner): parallelize/pipeline/cache intermediate network requests
 func (w *Wallet) recoverDefaultScopes(
-	chainClient chain.Interface,
+	chainClient chainclient.Interface,
 	tx walletdb.ReadWriteTx,
 	ns walletdb.ReadWriteBucket,
 	batch []wtxmgr.BlockMeta,
@@ -654,7 +654,7 @@ func (w *Wallet) recoverDefaultScopes(
 //
 //  6) Repeat from (1) if there are still more blocks in the range.
 func (w *Wallet) recoverScopedAddresses(
-	chainClient chain.Interface,
+	chainClient chainclient.Interface,
 	tx walletdb.ReadWriteTx,
 	ns walletdb.ReadWriteBucket,
 	batch []wtxmgr.BlockMeta,
@@ -814,8 +814,8 @@ func newFilterBlocksRequest(
 	batch []wtxmgr.BlockMeta,
 	scopedMgrs map[waddrmgr.KeyScope]*waddrmgr.ScopedKeyManager,
 	recoveryState *RecoveryState,
-) *chain.FilterBlocksRequest {
-	filterReq := &chain.FilterBlocksRequest{
+) *chainclient.FilterBlocksRequest {
+	filterReq := &chainclient.FilterBlocksRequest{
 		Blocks:           batch,
 		ExternalAddrs:    make(map[waddrmgr.ScopedIndex]util.Address),
 		InternalAddrs:    make(map[waddrmgr.ScopedIndex]util.Address),
@@ -847,7 +847,7 @@ func newFilterBlocksRequest(
 // of all relevant derivation paths to match the highest found child index for each branch.
 func extendFoundAddresses(
 	ns walletdb.ReadWriteBucket,
-	filterResp *chain.FilterBlocksResponse,
+	filterResp *chainclient.FilterBlocksResponse,
 	scopedMgrs map[waddrmgr.KeyScope]*waddrmgr.ScopedKeyManager,
 	recoveryState *RecoveryState,
 ) (e error) {
@@ -923,7 +923,7 @@ func extendFoundAddresses(
 // logFilterBlocksResp provides useful logging information when filtering succeeded in finding relevant transactions.
 func logFilterBlocksResp(
 	block wtxmgr.BlockMeta,
-	resp *chain.FilterBlocksResponse,
+	resp *chainclient.FilterBlocksResponse,
 ) {
 	// Log the number of external addresses found in this block.
 	var nFoundExternal int
@@ -1148,13 +1148,13 @@ out:
 // unlocked and the new passphrase is correct, the current timeout is replaced with the new one. The wallet will be
 // locked if the passphrase is incorrect or any other error occurs during the unlock.
 func (w *Wallet) Unlock(passphrase []byte, lock <-chan time.Time) (e error) {
-	ec := make(chan error, 1)
+	eC := make(chan error, 1)
 	w.unlockRequests <- unlockRequest{
 		passphrase: passphrase,
 		lockAfter:  lock,
-		err:        ec,
+		err:        eC,
 	}
-	return <-ec
+	return <-eC
 }
 
 // Lock locks the wallet's address manager.
@@ -1953,15 +1953,15 @@ func (w *Wallet) GetTransactions(startBlock, endBlock *BlockIdentifier, cancel q
 				return nil, errors.New("no chain server client")
 			}
 			switch client := chainClient.(type) {
-			case *chain.RPCClient:
+			case *chainclient.RPCClient:
 				startResp = client.GetBlockVerboseTxAsync(startBlock.hash)
-			case *chain.BitcoindClient:
+			case *chainclient.BitcoindClient:
 				var e error
 				start, e = client.GetBlockHeight(startBlock.hash)
 				if e != nil {
 					return nil, e
 				}
-			case *chain.NeutrinoClient:
+			case *chainclient.NeutrinoClient:
 				var e error
 				start, e = client.GetBlockHeight(startBlock.hash)
 				if e != nil {
@@ -1978,9 +1978,9 @@ func (w *Wallet) GetTransactions(startBlock, endBlock *BlockIdentifier, cancel q
 				return nil, errors.New("no chain server client")
 			}
 			switch client := chainClient.(type) {
-			case *chain.RPCClient:
+			case *chainclient.RPCClient:
 				endResp = client.GetBlockVerboseTxAsync(endBlock.hash)
-			case *chain.NeutrinoClient:
+			case *chainclient.NeutrinoClient:
 				var e error
 				end, e = client.GetBlockHeight(endBlock.hash)
 				if e != nil {
@@ -2644,7 +2644,7 @@ func (w *Wallet) NewAddress(
 	nochain bool,
 ) (addr util.Address, e error) {
 	var (
-		chainClient chain.Interface
+		chainClient chainclient.Interface
 		props       *waddrmgr.AccountProperties
 	)
 	if !nochain {

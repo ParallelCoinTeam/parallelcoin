@@ -47,7 +47,7 @@ func Decode(bech string) (string, []byte, error) {
 	decoded, e := toBytes(data)
 	if e != nil  {
 				return "", nil, fmt.Errorf("failed converting data to bytes: "+
-			"%v", err)
+			"%v", e)
 	}
 	if !bech32VerifyChecksum(hrp, decoded) {
 		moreInfo := ""
@@ -76,7 +76,7 @@ func Encode(hrp string, data []byte) (string, error) {
 	dataChars, e := toChars(combined)
 	if e != nil  {
 				return "", fmt.Errorf("unable to convert data bytes to chars: "+
-			"%v", err)
+			"%v", e)
 	}
 	return hrp + "1" + dataChars, nil
 }

@@ -80,7 +80,7 @@ func loadConfig() (*config, []string, error) {
 	parser := flags.NewParser(&cfg, flags.Default)
 	remainingArgs, e := parser.Parse()
 	if e != nil {
-		if e, ok := err.(*flags.Error); !ok || e.Type != flags.ErrHelp {
+		if e, ok := e.(*flags.Error); !ok || e.Type != flags.ErrHelp {
 			parser.WriteHelp(os.Stderr)
 		}
 		return nil, nil, e
@@ -105,7 +105,7 @@ func loadConfig() (*config, []string, error) {
 		str := "%s: The testnet, regtest, and simnet netparams can't be " +
 			"used together -- choose one of the three"
 		e := fmt.Errorf(str, funcName)
-		_, _ = fmt.Fprintln(os.Stderr, err)
+		_, _ = fmt.Fprintln(os.Stderr, e)
 		parser.WriteHelp(os.Stderr)
 		return nil, nil, e
 	}
@@ -114,7 +114,7 @@ func loadConfig() (*config, []string, error) {
 		str := "%s: The specified database type [%v] is invalid -- " +
 			"supported types %v"
 		e := fmt.Errorf(str, "loadConfig", cfg.DbType, knownDbTypes)
-		_, _ = fmt.Fprintln(os.Stderr, err)
+		_, _ = fmt.Fprintln(os.Stderr, e)
 		parser.WriteHelp(os.Stderr)
 		return nil, nil, e
 	}
@@ -128,7 +128,7 @@ func loadConfig() (*config, []string, error) {
 		str := "%s: The specified number of candidates is out of " +
 			"range -- parsed [%v]"
 		e = fmt.Errorf(str, "loadConfig", cfg.NumCandidates)
-		_, _ = fmt.Fprintln(os.Stderr, err)
+		_, _ = fmt.Fprintln(os.Stderr, e)
 		parser.WriteHelp(os.Stderr)
 		return nil, nil, e
 	}

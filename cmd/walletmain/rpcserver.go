@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/p9c/pod/pkg/podcfg"
+	walletrpc2 "github.com/p9c/pod/pkg/walletrpc"
 	"io/ioutil"
 	"net"
 	"os"
@@ -14,7 +15,6 @@ import (
 	"time"
 	
 	"github.com/p9c/pod/pkg/pod"
-	"github.com/p9c/pod/pkg/rpc/legacy"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/wallet"
 )
@@ -178,10 +178,10 @@ func OpenRPCKeyPair(config *podcfg.Config) (tls.Certificate, error) {
 		return tls.LoadX509KeyPair(*config.RPCCert, *config.RPCKey)
 	}
 }
-func startRPCServers(cx *pod.State, walletLoader *wallet.Loader) (*legacy.Server, error) {
+func startRPCServers(cx *pod.State, walletLoader *wallet.Loader) (*walletrpc2.Server, error) {
 	T.Ln("startRPCServers")
 	var (
-		legacyServer *legacy.Server
+		legacyServer *walletrpc2.Server
 		walletListen = net.Listen
 		keyPair      tls.Certificate
 		e            error
@@ -212,13 +212,13 @@ func startRPCServers(cx *pod.State, walletLoader *wallet.Loader) (*legacy.Server
 			e := errors.New("failed to create listeners for legacy RPC server")
 			return nil, e
 		}
-		opts := legacy.Options{
+		opts := walletrpc2.Options{
 			Username:            *cx.Config.Username,
 			Password:            *cx.Config.Password,
 			MaxPOSTClients:      int64(*cx.Config.WalletRPCMaxClients),
 			MaxWebsocketClients: int64(*cx.Config.WalletRPCMaxWebsockets),
 		}
-		legacyServer = legacy.NewServer(&opts, walletLoader, listeners, nil)
+		legacyServer = walletrpc2.NewServer(&opts, walletLoader, listeners, nil)
 	}
 	// Error when no legacy RPC servers can be started.
 	if legacyServer == nil {
@@ -229,7 +229,7 @@ func startRPCServers(cx *pod.State, walletLoader *wallet.Loader) (*legacy.Server
 
 // startWalletRPCServices associates each of the (optionally-nil) RPC servers with a wallet to enable remote wallet
 // access. For the legacy JSON-RPC server it enables methods that require a loaded wallet.
-func startWalletRPCServices(wallet *wallet.Wallet, legacyServer *legacy.Server) {
+func startWalletRPCServices(wallet *wallet.Wallet, legacyServer *walletrpc2.Server) {
 	if legacyServer != nil {
 		D.Ln("starting legacy wallet rpc server")
 		legacyServer.RegisterWallet(wallet)

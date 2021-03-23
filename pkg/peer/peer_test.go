@@ -769,7 +769,7 @@ func TestOutboundPeer(t *testing.T) {
 // 			t.Fatalf("Expected version message, got [%s]", msg.Command())
 // 		}
 // 	case <-time.After(time.Second):
-// 		t.F.Ln("Peer did not send version message")
+// 		t.Fatal("Peer did not send version message")
 // 	}
 // 	// Remote peer writes version message advertising invalid protocol version 1
 // 	invalidVersionMsg := wire.NewMsgVersion(remoteNA, localNA, 0, 0)
@@ -793,7 +793,7 @@ func TestOutboundPeer(t *testing.T) {
 // 	case <-disconnected:
 // 		close(disconnected)
 // 	case <-time.After(time.Second):
-// 		t.F.Ln("Peer did not automatically disconnect")
+// 		t.Fatal("Peer did not automatically disconnect")
 // 	}
 // 	// Expect no further outbound messages from peer
 // 	select {
@@ -802,7 +802,7 @@ func TestOutboundPeer(t *testing.T) {
 // 			t.Fatalf("Expected no further messages, received [%s]", msg.Command())
 // 		}
 // 	case <-time.After(time.Second):
-// 		t.F.Ln("Timeout waiting for remote reader to close")
+// 		t.Fatal("Timeout waiting for remote reader to close")
 // 	}
 // }
 

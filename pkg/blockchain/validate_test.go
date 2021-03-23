@@ -99,7 +99,7 @@ import (
 // 	// Block 3 should fail to connect since it's already inserted.
 // 	e = chain.CheckConnectBlockTemplate(blocks[3])
 // 	if e ==  nil {
-// 		t.F.Ln("CheckConnectBlockTemplate: Did not received expected error " +
+// 		t.Fatal("CheckConnectBlockTemplate: Did not received expected error " +
 // 			"on block 3")
 // 	}
 // 	// Block 4 should connect successfully to tip of chain.
@@ -111,7 +111,7 @@ import (
 // 	// Block 3a should fail to connect since does not build on chain tip.
 // 	e = chain.CheckConnectBlockTemplate(blocks[5])
 // 	if e ==  nil {
-// 		t.F.Ln("CheckConnectBlockTemplate: Did not received expected error " +
+// 		t.Fatal("CheckConnectBlockTemplate: Did not received expected error " +
 // 			"on block 3a")
 // 	}
 // 	// Block 4 should connect even if proof of work is invalid.
@@ -127,7 +127,7 @@ import (
 // 	invalidBlock.Header.Bits--
 // 	e = chain.CheckConnectBlockTemplate(util.NewBlock(&invalidBlock))
 // 	if e ==  nil {
-// 		t.F.Ln("CheckConnectBlockTemplate: Did not received expected error " +
+// 		t.Fatal("CheckConnectBlockTemplate: Did not received expected error " +
 // 			"on block 4 with invalid difficulty bits")
 // 	}
 // }
@@ -181,7 +181,7 @@ func TestCheckSerializedHeight(t *testing.T) {
 	tests := []struct {
 		sigScript  []byte // Serialized data
 		wantHeight int32  // Expected height
-		err        error  // Expected error type
+		e        error  // Expected error type
 	}{
 		// No serialized height length.
 		{[]byte{}, 0, missingHeightError},
@@ -206,15 +206,15 @@ func TestCheckSerializedHeight(t *testing.T) {
 		msgTx.TxIn[0].SignatureScript = test.sigScript
 		tx := util.NewTx(msgTx)
 		e := checkSerializedHeight(tx, test.wantHeight)
-		if reflect.TypeOf(err) != reflect.TypeOf(test.err) {
+		if reflect.TypeOf(e) != reflect.TypeOf(test.e) {
 			t.Errorf(
 				"checkSerializedHeight #%d wrong error type "+
-					"got: %v <%T>, want: %T", i, e, e, test.err,
+					"got: %v <%T>, want: %T", i, e, e, test.e,
 			)
 			continue
 		}
-		if rerr, ok := err.(RuleError); ok {
-			trerr := test.err.(RuleError)
+		if rerr, ok := e.(RuleError); ok {
+			trerr := test.e.(RuleError)
 			if rerr.ErrorCode != trerr.ErrorCode {
 				t.Errorf(
 					"checkSerializedHeight #%d wrong "+

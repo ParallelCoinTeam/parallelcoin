@@ -11,8 +11,8 @@ import (
 	"github.com/jessevdk/go-flags"
 	
 	"github.com/p9c/pod/pkg/appdata"
-	"github.com/p9c/pod/pkg/database/walletdb"
-	_ "github.com/p9c/pod/pkg/database/walletdb/bdb"
+	"github.com/p9c/pod/pkg/walletdb"
+	_ "github.com/p9c/pod/pkg/walletdb/bdb"
 	"github.com/p9c/pod/pkg/wtxmgr"
 )
 
@@ -100,7 +100,7 @@ func mainInt() int {
 	}
 	db, e := walletdb.Open("bdb", opts.DbPath)
 	if e != nil {
-		fmt.Println("failed to open database:", err)
+		fmt.Println("failed to open database:", e)
 		return 1
 	}
 	defer func() {
@@ -111,8 +111,8 @@ func mainInt() int {
 	fmt.Println("dropping wtxmgr namespace")
 	e = walletdb.Update(
 		db, func(tx walletdb.ReadWriteTx) (e error) {
-			e := tx.DeleteTopLevelBucket(wtxmgrNamespace)
-			if e != nil && err != walletdb.ErrBucketNotFound {
+			e = tx.DeleteTopLevelBucket(wtxmgrNamespace)
+			if e != nil && e != walletdb.ErrBucketNotFound {
 				return e
 			}
 			ns, e := tx.CreateTopLevelBucket(wtxmgrNamespace)
@@ -137,7 +137,7 @@ func mainInt() int {
 		},
 	)
 	if e != nil {
-		fmt.Println("Failed to drop and re-create namespace:", err)
+		fmt.Println("Failed to drop and re-create namespace:", e)
 		return 1
 	}
 	return 0

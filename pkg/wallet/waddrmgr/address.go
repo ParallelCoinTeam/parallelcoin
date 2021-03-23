@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"sync"
 	
-	"github.com/p9c/pod/pkg/database/walletdb"
+	"github.com/p9c/pod/pkg/walletdb"
 	ec "github.com/p9c/pod/pkg/ecc"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/hdkeychain"

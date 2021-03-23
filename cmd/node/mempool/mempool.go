@@ -19,7 +19,7 @@ import (
 	"github.com/p9c/pod/pkg/hardfork"
 	"github.com/p9c/pod/pkg/indexers"
 	
-	"github.com/p9c/pod/pkg/rpc/btcjson"
+	"github.com/p9c/pod/pkg/btcjson"
 	"github.com/p9c/pod/pkg/util"
 )
 

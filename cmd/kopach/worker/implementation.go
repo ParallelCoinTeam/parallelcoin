@@ -20,9 +20,9 @@ import (
 	"go.uber.org/atomic"
 	
 	"github.com/p9c/pod/cmd/kopach/control"
-	"github.com/p9c/pod/pkg/comm/transport"
-	"github.com/p9c/pod/pkg/data/ring"
 	"github.com/p9c/pod/pkg/pipe/stdconn"
+	"github.com/p9c/pod/pkg/ring"
+	"github.com/p9c/pod/pkg/transport"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
 

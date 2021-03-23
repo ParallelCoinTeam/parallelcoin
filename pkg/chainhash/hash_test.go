@@ -20,7 +20,7 @@ func TestHash(t *testing.T) {
 	blockHashStr := "14a0810ac680a3eb3f82edc878cea25ec41d6b790744e5daeef"
 	blockHash, e := NewHashFromStr(blockHashStr)
 	if e != nil  {
-		t.Errorf("NewHashFromStr: %v", err)
+		t.Errorf("NewHashFromStr: %v", e)
 	}
 	// Hash of block 234440 as byte slice.
 	buf := []byte{
@@ -31,7 +31,7 @@ func TestHash(t *testing.T) {
 	}
 	hash, e := NewHash(buf)
 	if e != nil  {
-		t.Errorf("NewHash: unexpected error %v", err)
+		t.Errorf("NewHash: unexpected error %v", e)
 	}
 	// Ensure proper size.
 	if len(hash) != HashSize {
@@ -51,7 +51,7 @@ func TestHash(t *testing.T) {
 	// Set hash from byte slice and ensure contents match.
 	e = hash.SetBytes(blockHash.CloneBytes())
 	if e != nil  {
-		t.Errorf("SetBytes: %v", err)
+		t.Errorf("SetBytes: %v", e)
 	}
 	if !hash.IsEqual(blockHash) {
 		t.Errorf("IsEqual: hash contents mismatch - got: %v, want: %v",
@@ -67,13 +67,13 @@ func TestHash(t *testing.T) {
 	// Invalid size for SetBytes.
 	e = hash.SetBytes([]byte{0x00})
 	if e ==  nil {
-		t.Errorf("SetBytes: failed to received expected err - got: nil")
+		t.Errorf("SetBytes: failed to received expected e - got: nil")
 	}
 	// Invalid size for NewHash.
 	invalidHash := make([]byte, HashSize+1)
 	_, e = NewHash(invalidHash)
 	if e ==  nil {
-		t.Errorf("NewHash: failed to received expected err - got: nil")
+		t.Errorf("NewHash: failed to received expected e - got: nil")
 	}
 }
 
@@ -99,7 +99,7 @@ func TestNewHashFromStr(t *testing.T) {
 	tests := []struct {
 		in   string
 		want Hash
-		err  error
+		e  error
 	}{
 		// Genesis hash.
 		{
@@ -159,8 +159,8 @@ func TestNewHashFromStr(t *testing.T) {
 	t.Logf("Running %d tests", len(tests))
 	for i, test := range tests {
 		result, e := NewHashFromStr(test.in)
-		if err != test.err {
-			t.Errorf(unexpectedErrStr, i, e, test.err)
+		if e != test.e {
+			t.Errorf(unexpectedErrStr, i, e, test.e)
 			continue
 		} else if e != nil  {
 

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+	"github.com/p9c/pod/pkg/chaincfg"
 	"sync"
 	
 	"github.com/p9c/pod/pkg/util/qu"
@@ -11,7 +12,7 @@ import (
 	"github.com/p9c/pod/pkg/blockchain"
 	"github.com/p9c/pod/pkg/chainhash"
 	ec "github.com/p9c/pod/pkg/ecc"
-	"github.com/p9c/pod/pkg/rpc/rpcclient"
+	"github.com/p9c/pod/pkg/rpcclient"
 	"github.com/p9c/pod/pkg/txscript"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/hdkeychain"

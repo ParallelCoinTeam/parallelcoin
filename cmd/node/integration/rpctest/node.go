@@ -9,7 +9,7 @@ import (
 	"runtime"
 	"time"
 	
-	rpc "github.com/p9c/pod/pkg/rpc/rpcclient"
+	rpc "github.com/p9c/pod/pkg/rpcclient"
 	"github.com/p9c/pod/pkg/util"
 )
 
@@ -154,10 +154,9 @@ func (n *nodeConfig) cleanup() (e error) {
 		n.logDir,
 		n.dataDir,
 	}
-	var e error
 	for _, dir := range dirs {
 		if e = os.RemoveAll(dir); E.Chk(e) {
-			Errorf("Cannot remove dir %s: %v", dir, e)
+			E.F("Cannot remove dir %s: %v", dir, e)
 		}
 	}
 	return e
@@ -230,7 +229,7 @@ func (n *node) stop() (e error) {
 func (n *node) cleanup() (e error) {
 	if n.pidFile != "" {
 		if e := os.Remove(n.pidFile); E.Chk(e) {
-			Errorf("unable to remove file %s: %v", n.pidFile, e)
+			E.F("unable to remove file %s: %v", n.pidFile, e)
 		}
 	}
 	return n.config.cleanup()

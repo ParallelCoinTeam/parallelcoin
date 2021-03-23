@@ -24,17 +24,17 @@ func TestPrivKeys(t *testing.T) {
 		priv, pub := PrivKeyFromBytes(S256(), test.key)
 		_, e := ParsePubKey(pub.SerializeUncompressed(), S256())
 		if e != nil  {
-			t.Errorf("%s privkey: %v", test.name, err)
+			t.Errorf("%s privkey: %v", test.name, e)
 			continue
 		}
 		hash := []byte{0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9}
 		sig, e := priv.Sign(hash)
 		if e != nil  {
-			t.Errorf("%s could not sign: %v", test.name, err)
+			t.Errorf("%s could not sign: %v", test.name, e)
 			continue
 		}
 		if !sig.Verify(hash, pub) {
-			t.Errorf("%s could not verify: %v", test.name, err)
+			t.Errorf("%s could not verify: %v", test.name, e)
 			continue
 		}
 		serializedKey := priv.Serialize()

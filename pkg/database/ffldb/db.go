@@ -18,11 +18,11 @@ import (
 	"github.com/btcsuite/goleveldb/leveldb/opt"
 	"github.com/btcsuite/goleveldb/leveldb/util"
 	
-	chainhash "github.com/p9c/pod/pkg/chainhash"
-	"github.com/p9c/pod/pkg/wire"
-	database "github.com/p9c/pod/pkg/database"
+	"github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/database"
 	u "github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/treap"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 const (

@@ -10,8 +10,8 @@ import (
 	"os"
 	"strings"
 	
-	"github.com/p9c/pod/pkg/rpc/btcjson"
-	"github.com/p9c/pod/pkg/rpc/ctl"
+	"github.com/p9c/pod/pkg/btcjson"
+	"github.com/p9c/pod/pkg/rpcctl"
 )
 
 // HelpPrint is the uninitialized help print function
@@ -59,7 +59,7 @@ func Main(args []string, cx *pod.State) {
 		params = append(params, arg)
 	}
 	var result []byte
-	if result, e = ctl.Call(cx, *cx.Config.Wallet, method, params...); E.Chk(e) {
+	if result, e = rpcctl.Call(cx, *cx.Config.Wallet, method, params...); E.Chk(e) {
 		return
 	}
 	// // Attempt to create the appropriate command using the arguments provided by the user.

@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"sync"
 	"time"
-
+	
 	"github.com/btcsuite/goleveldb/leveldb"
 	"github.com/btcsuite/goleveldb/leveldb/iterator"
 	"github.com/btcsuite/goleveldb/leveldb/util"
-
+	
 	"github.com/p9c/pod/pkg/util/treap"
 )
 
@@ -286,7 +286,7 @@ func (snap *dbCacheSnapshot) Get(key []byte) []byte {
 	}
 	// Consult the database.
 	value, e := snap.dbSnapshot.Get(key, nil)
-	if e != nil  {
+	if e != nil {
 		// F.Ln(err)
 		return nil
 	}
@@ -361,8 +361,8 @@ type dbCache struct {
 // The snapshot must be released after use by calling Release.
 func (c *dbCache) Snapshot() (*dbCacheSnapshot, error) {
 	dbSnapshot, e := c.ldb.GetSnapshot()
-	if e != nil  {
-				str := "failed to open transaction"
+	if e != nil {
+		str := "failed to open transaction"
 		return nil, convertErr(str, e)
 	}
 	// Since the cached keys to be added and removed use an immutable treap, a snapshot is simply obtaining the root of
@@ -383,8 +383,8 @@ func (c *dbCache) Snapshot() (*dbCacheSnapshot, error) {
 func (c *dbCache) updateDB(fn func(ldbTx *leveldb.Transaction) error) (e error) {
 	// Start a leveldb transaction.
 	ldbTx, e := c.ldb.OpenTransaction()
-	if e != nil  {
-				return convertErr("failed to open ldb transaction", e)
+	if e != nil {
+		return convertErr("failed to open ldb transaction", e)
 	}
 	if e := fn(ldbTx); E.Chk(e) {
 		ldbTx.Discard()
@@ -409,32 +409,42 @@ type TreapForEacher interface {
 // commitTreaps atomically commits all of the passed pending add/update/remove updates to the underlying database.
 func (c *dbCache) commitTreaps(pendingKeys, pendingRemove TreapForEacher) (e error) {
 	// Perform all leveldb updates using an atomic transaction.
-	return c.updateDB(func(ldbTx *leveldb.Transaction) (e error) {
-		var innerErr error
-		pendingKeys.ForEach(func(k, v []byte) bool {
-			if dbErr := ldbTx.Put(k, v, nil); dbErr != nil {
-				str := fmt.Sprintf("failed to put key %q to "+
-					"ldb transaction", k)
-				innerErr = convertErr(str, dbErr)
-				return false
+	return c.updateDB(
+		func(ldbTx *leveldb.Transaction) (e error) {
+			var innerErr error
+			pendingKeys.ForEach(
+				func(k, v []byte) bool {
+					if dbErr := ldbTx.Put(k, v, nil); dbErr != nil {
+						str := fmt.Sprintf(
+							"failed to put key %q to "+
+								"ldb transaction", k,
+						)
+						innerErr = convertErr(str, dbErr)
+						return false
+					}
+					return true
+				},
+			)
+			if innerErr != nil {
+				return innerErr
 			}
-			return true
-		})
-		if innerErr != nil {
+			pendingRemove.ForEach(
+				func(k, v []byte) bool {
+					if dbErr := ldbTx.Delete(k, nil); dbErr != nil {
+						str := fmt.Sprintf(
+							"failed to delete "+
+								"key %q from ldb transaction",
+							k,
+						)
+						innerErr = convertErr(str, dbErr)
+						return false
+					}
+					return true
+				},
+			)
 			return innerErr
-		}
-		pendingRemove.ForEach(func(k, v []byte) bool {
-			if dbErr := ldbTx.Delete(k, nil); dbErr != nil {
-				str := fmt.Sprintf("failed to delete "+
-					"key %q from ldb transaction",
-					k)
-				innerErr = convertErr(str, dbErr)
-				return false
-			}
-			return true
-		})
-		return innerErr
-	})
+		},
+	)
 }
 
 // flush flushes the database cache to persistent storage.
@@ -517,8 +527,8 @@ func (c *dbCache) commitTx(tx *transaction) (e error) {
 		}
 		// Perform all leveldb updates using an atomic transaction.
 		e := c.commitTreaps(tx.pendingKeys, tx.pendingRemove)
-		if e != nil  {
-						return e
+		if e != nil {
+			return e
 		}
 		// Clear the transaction entries since they have been committed.
 		tx.pendingKeys = nil
@@ -534,18 +544,22 @@ func (c *dbCache) commitTx(tx *transaction) (e error) {
 	newCachedRemove := c.cachedRemove
 	c.cacheLock.RUnlock()
 	// Apply every key to add in the database transaction to the cache.
-	tx.pendingKeys.ForEach(func(k, v []byte) bool {
-		newCachedRemove = newCachedRemove.Delete(k)
-		newCachedKeys = newCachedKeys.Put(k, v)
-		return true
-	})
+	tx.pendingKeys.ForEach(
+		func(k, v []byte) bool {
+			newCachedRemove = newCachedRemove.Delete(k)
+			newCachedKeys = newCachedKeys.Put(k, v)
+			return true
+		},
+	)
 	tx.pendingKeys = nil
 	// Apply every key to remove in the database transaction to the cache.
-	tx.pendingRemove.ForEach(func(k, v []byte) bool {
-		newCachedKeys = newCachedKeys.Delete(k)
-		newCachedRemove = newCachedRemove.Put(k, nil)
-		return true
-	})
+	tx.pendingRemove.ForEach(
+		func(k, v []byte) bool {
+			newCachedKeys = newCachedKeys.Delete(k)
+			newCachedRemove = newCachedRemove.Put(k, nil)
+			return true
+		},
+	)
 	tx.pendingRemove = nil
 	// Atomically replace the immutable treaps which hold the cached keys to add and delete.
 	c.cacheLock.Lock()

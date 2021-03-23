@@ -49,7 +49,7 @@ pod_mon*
 go_build*
 pod.exe
 
-pkg/comm/transport/cmd/example/example.exe
+pkg/transport/cmd/listenservemulticast/example.exe
 
 app/launcher/launcher.exe
 

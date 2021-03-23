@@ -16,8 +16,8 @@ import (
 	"github.com/p9c/pod/pkg/wire"
 	"github.com/p9c/pod/pkg/gcs"
 	"github.com/p9c/pod/pkg/gcs/builder"
-	"github.com/p9c/pod/pkg/rpc/btcjson"
-	"github.com/p9c/pod/pkg/rpc/rpcclient"
+	"github.com/p9c/pod/pkg/btcjson"
+	"github.com/p9c/pod/pkg/rpcclient"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/wallet/waddrmgr"
 )

@@ -6,7 +6,7 @@ import (
 	"math/big"
 	"strings"
 	"testing"
-
+	
 	. "github.com/p9c/pod/pkg/util/zero"
 )
 
@@ -49,7 +49,7 @@ func TestBytes(t *testing.T) {
 		b := makeOneBytes(n)
 		Bytes(b)
 		e := checkZeroBytes(b)
-		if e != nil  {
+		if e != nil {
 			t.Errorf("Test %d (n=%d) failed: %v", i, n, e)
 			continue
 		}
@@ -93,7 +93,7 @@ func TestBigInt(t *testing.T) {
 		}
 		BigInt(v)
 		e := checkZeroWords(v.Bits())
-		if e != nil  {
+		if e != nil {
 			t.Errorf("Test %d (s=%s) failed: %v", i, s, e)
 			continue
 		}
@@ -109,8 +109,8 @@ func TestBytea32(t *testing.T) {
 	copy(b[:], makeOneBytes(sz))
 	Bytea32(&b)
 	e := checkZeroBytes(b[:])
-	if e != nil  {
-		t.	}
+	if e != nil {
+	}
 }
 func TestBytea64(t *testing.T) {
 	const sz = 64
@@ -118,6 +118,6 @@ func TestBytea64(t *testing.T) {
 	copy(b[:], makeOneBytes(sz))
 	Bytea64(&b)
 	e := checkZeroBytes(b[:])
-	if e != nil  {
-		t.	}
+	if e != nil {
+	}
 }

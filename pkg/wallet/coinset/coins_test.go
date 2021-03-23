@@ -7,10 +7,10 @@ import (
 	"fmt"
 	"testing"
 	
-	chainhash "github.com/p9c/pod/pkg/chainhash"
-	"github.com/p9c/pod/pkg/wire"
+	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/wallet/coinset"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 type TestCoin struct {
@@ -29,8 +29,8 @@ func (c *TestCoin) ValueAge() int64       { return int64(c.TxValue) * c.TxNumCon
 func NewCoin(index int64, value util.Amount, numConfs int64) coinset.Coin {
 	h := sha256.New()
 	_, e := h.Write([]byte(fmt.Sprintf("%d", index)))
-	if e != nil  {
-		coinset.	}
+	if e != nil {
+	}
 	hash, _ := chainhash.NewHash(h.Sum(nil))
 	c := &TestCoin{
 		TxHash:     hash,
@@ -52,7 +52,7 @@ type coinSelectTest struct {
 func testCoinSelector(tests []coinSelectTest, t *testing.T) {
 	for testIndex, test := range tests {
 		cs, e := test.selector.CoinSelect(test.targetValue, test.inputCoins)
-		if err != test.expectedError {
+		if e != test.expectedError {
 			t.Errorf("[%d] expected a different error: got=%v, expected=%v", testIndex, e, test.expectedError)
 			continue
 		}
@@ -63,12 +63,23 @@ func testCoinSelector(tests []coinSelectTest, t *testing.T) {
 			}
 			coins := cs.Coins()
 			if len(coins) != len(test.expectedCoins) {
-				t.Errorf("[%d] expected different number of coins: got=%d, expected=%d", testIndex, len(coins), len(test.expectedCoins))
+				t.Errorf(
+					"[%d] expected different number of coins: got=%d, expected=%d",
+					testIndex,
+					len(coins),
+					len(test.expectedCoins),
+				)
 				continue
 			}
 			for n := 0; n < len(test.expectedCoins); n++ {
 				if coins[n] != test.expectedCoins[n] {
-					t.Errorf("[%d] expected different coins at coin index %d: got=%#v, expected=%#v", testIndex, n, coins[n], test.expectedCoins[n])
+					t.Errorf(
+						"[%d] expected different coins at coin index %d: got=%#v, expected=%#v",
+						testIndex,
+						n,
+						coins[n],
+						test.expectedCoins[n],
+					)
 					continue
 				}
 			}
@@ -120,8 +131,20 @@ var minIndexSelectors = []coinset.MinIndexCoinSelector{
 	{MaxInputs: 2, MinChangeAmount: 10000},
 }
 var minIndexTests = []coinSelectTest{
-	{minIndexSelectors[0], coins, coins[0].Value() - minIndexSelectors[0].MinChangeAmount, []coinset.Coin{coins[0]}, nil},
-	{minIndexSelectors[0], coins, coins[0].Value() - minIndexSelectors[0].MinChangeAmount + 1, []coinset.Coin{coins[0], coins[1]}, nil},
+	{
+		minIndexSelectors[0],
+		coins,
+		coins[0].Value() - minIndexSelectors[0].MinChangeAmount,
+		[]coinset.Coin{coins[0]},
+		nil,
+	},
+	{
+		minIndexSelectors[0],
+		coins,
+		coins[0].Value() - minIndexSelectors[0].MinChangeAmount + 1,
+		[]coinset.Coin{coins[0], coins[1]},
+		nil,
+	},
 	{minIndexSelectors[0], coins, 100000000, []coinset.Coin{coins[0]}, nil},
 	{minIndexSelectors[0], coins, 110000000, []coinset.Coin{coins[0], coins[1]}, nil},
 	{minIndexSelectors[0], coins, 140000000, []coinset.Coin{coins[0], coins[1], coins[2]}, nil},
@@ -140,8 +163,20 @@ var minNumberSelectors = []coinset.MinNumberCoinSelector{
 	{MaxInputs: 2, MinChangeAmount: 10000},
 }
 var minNumberTests = []coinSelectTest{
-	{minNumberSelectors[0], coins, coins[0].Value() - minNumberSelectors[0].MinChangeAmount, []coinset.Coin{coins[0]}, nil},
-	{minNumberSelectors[0], coins, coins[0].Value() - minNumberSelectors[0].MinChangeAmount + 1, []coinset.Coin{coins[0], coins[2]}, nil},
+	{
+		minNumberSelectors[0],
+		coins,
+		coins[0].Value() - minNumberSelectors[0].MinChangeAmount,
+		[]coinset.Coin{coins[0]},
+		nil,
+	},
+	{
+		minNumberSelectors[0],
+		coins,
+		coins[0].Value() - minNumberSelectors[0].MinChangeAmount + 1,
+		[]coinset.Coin{coins[0], coins[2]},
+		nil,
+	},
 	{minNumberSelectors[0], coins, 100000000, []coinset.Coin{coins[0]}, nil},
 	{minNumberSelectors[0], coins, 110000000, []coinset.Coin{coins[0], coins[2]}, nil},
 	{minNumberSelectors[0], coins, 160000000, []coinset.Coin{coins[0], coins[2], coins[3]}, nil},

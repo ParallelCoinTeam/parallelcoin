@@ -12,7 +12,7 @@ func FileExists(filePath string) (bool, error) {
 		if os.IsNotExist(e) {
 			return false, nil
 		}
-		return false, err
+		return false, e
 	}
 	return true, nil
 }

@@ -4,7 +4,7 @@ import (
 	"github.com/p9c/pod/pkg/logg"
 	txs "github.com/p9c/pod/pkg/txscript"
 	"github.com/p9c/pod/pkg/util"
-	"github.com/p9c/pod/pkg/wallet/chain"
+	"github.com/p9c/pod/pkg/chainclient"
 	wm "github.com/p9c/pod/pkg/wallet/waddrmgr"
 	"github.com/p9c/pod/pkg/wire"
 	tm "github.com/p9c/pod/pkg/wtxmgr"
@@ -14,14 +14,14 @@ import (
 // wallet addresses.
 type RescanProgressMsg struct {
 	Addresses    []util.Address
-	Notification *chain.RescanProgress
+	Notification *chainclient.RescanProgress
 }
 
 // RescanFinishedMsg reports the addresses that were rescanned when a
 // rescanfinished message was received rescanning a batch of addresses.
 type RescanFinishedMsg struct {
 	Addresses    []util.Address
-	Notification *chain.RescanFinished
+	Notification *chainclient.RescanFinished
 }
 
 // RescanJob is a job to be processed by the RescanManager. The job includes a
@@ -117,7 +117,7 @@ out:
 			}
 		case n := <-w.rescanNotifications:
 			switch n := n.(type) {
-			case *chain.RescanProgress:
+			case *chainclient.RescanProgress:
 				if curBatch == nil {
 					W.Ln(
 						"received rescan progress notification but no rescan currently running",
@@ -128,7 +128,7 @@ out:
 					Addresses:    curBatch.addrs,
 					Notification: n,
 				}
-			case *chain.RescanFinished:
+			case *chainclient.RescanFinished:
 				if curBatch == nil {
 					W.Ln(
 						"received rescan finished notification but no rescan currently running",

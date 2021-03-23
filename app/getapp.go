@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 	"github.com/p9c/pod/pkg/pod"
+	walletrpc2 "github.com/p9c/pod/pkg/walletrpc"
 	"github.com/p9c/pod/version"
 	"os"
 	"path/filepath"
@@ -18,7 +19,6 @@ import (
 	"github.com/p9c/pod/pkg/base58"
 	"github.com/p9c/pod/pkg/database/blockdb"
 	"github.com/p9c/pod/pkg/podconfig"
-	"github.com/p9c/pod/pkg/rpc/legacy"
 	"github.com/p9c/pod/pkg/util/hdkeychain"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
@@ -229,7 +229,7 @@ func getApp(cx *pod.State) (a *cli.App) {
 							// D.Ln("waiting for walletChan")
 							// cx.WalletServer = <-cx.WalletChan
 							// D.Ln("walletChan sent")
-							e = legacy.DropWalletHistory(cx.WalletServer, cx.Config)(c)
+							e = walletrpc2.DropWalletHistory(cx.WalletServer, cx.Config)(c)
 							return
 						}, au.SubCommands(), nil,
 					),

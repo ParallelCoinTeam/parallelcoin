@@ -11,9 +11,9 @@ import (
 	
 	"github.com/p9c/pod/pkg/util/qu"
 	
-	"github.com/p9c/pod/pkg/database/walletdb"
 	"github.com/p9c/pod/pkg/util/prompt"
 	"github.com/p9c/pod/pkg/wallet/waddrmgr"
+	"github.com/p9c/pod/pkg/walletdb"
 )
 
 // Loader implements the creating of new and opening of existing wallets, while providing a callback system for other

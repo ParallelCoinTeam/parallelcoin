@@ -368,7 +368,7 @@ func TestCompressedTxOut(t *testing.T) {
 			test.compressed)
 		if e != nil  {
 			t.Errorf("decodeCompressedTxOut (%s): unexpected "+
-				"error: %v", test.name, err)
+				"error: %v", test.name, e)
 			continue
 		}
 		if gotAmount != test.amount {
@@ -398,18 +398,18 @@ func TestTxOutCompressionErrors(t *testing.T) {
 	t.Parallel()
 	// A compressed txout with missing compressed script must error.
 	compressedTxOut := hexToBytes("00")
-	_, _, _, e = decodeCompressedTxOut(compressedTxOut)
-	if !isDeserializeErr(err) {
+	_, _, _, e := decodeCompressedTxOut(compressedTxOut)
+	if !isDeserializeErr(e) {
 		t.Fatalf("decodeCompressedTxOut with missing compressed script "+
 			"did not return expected error type - got %T, want "+
-			"errDeserialize", err)
+			"errDeserialize", e)
 	}
 	// A compressed txout with short compressed script must error.
 	compressedTxOut = hexToBytes("0010")
 	_, _, _, e = decodeCompressedTxOut(compressedTxOut)
-	if !isDeserializeErr(err) {
+	if !isDeserializeErr(e) {
 		t.Fatalf("decodeCompressedTxOut with short compressed script "+
 			"did not return expected error type - got %T, want "+
-			"errDeserialize", err)
+			"errDeserialize", e)
 	}
 }

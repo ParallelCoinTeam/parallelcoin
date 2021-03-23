@@ -5,6 +5,7 @@ import (
 	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/logg"
 	"github.com/p9c/pod/pkg/podcfg"
+	walletrpc2 "github.com/p9c/pod/pkg/walletrpc"
 	
 	// This enables pprof
 	// _ "net/http/pprof"
@@ -13,10 +14,9 @@ import (
 	"github.com/p9c/pod/pkg/util/qu"
 	
 	"github.com/p9c/pod/pkg/pod"
-	"github.com/p9c/pod/pkg/rpc/legacy"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/wallet"
-	"github.com/p9c/pod/pkg/wallet/chain"
+	"github.com/p9c/pod/pkg/chainclient"
 )
 
 // Main is a work-around main function that is required since deferred functions
@@ -41,7 +41,7 @@ func Main(cx *pod.State) (e error) {
 	// Create and start HTTP server to serve wallet client connections. This will be updated with the wallet and chain
 	// server RPC client created below after each is created.
 	D.Ln("starting RPC servers")
-	var legacyServer *legacy.Server
+	var legacyServer *walletrpc2.Server
 	if legacyServer, e = startRPCServers(cx, loader); E.Chk(e) {
 		E.Ln("unable to create RPC servers:", e)
 		return
@@ -90,7 +90,7 @@ func Main(cx *pod.State) (e error) {
 }
 
 // LoadWallet ...
-func LoadWallet(loader *wallet.Loader, cx *pod.State, legacyServer *legacy.Server) (e error) {
+func LoadWallet(loader *wallet.Loader, cx *pod.State, legacyServer *walletrpc2.Server) (e error) {
 	D.Ln("starting rpc client connection handler", *cx.Config.WalletPass)
 	// Create and start chain RPC client so it's ready to connect to the wallet when
 	// loaded later. Load the wallet database. It must have been created already or
@@ -154,7 +154,7 @@ func LoadWallet(loader *wallet.Loader, cx *pod.State, legacyServer *legacy.Serve
 // associated with the server for RPC pass-through and to enable additional
 // methods.
 func rpcClientConnectLoop(
-	cx *pod.State, legacyServer *legacy.Server,
+	cx *pod.State, legacyServer *walletrpc2.Server,
 	loader *wallet.Loader,
 ) {
 	D.Ln("^^^^^^^^^^^^^^^ rpcClientConnectLoop", logg.Caller("which was started at:", 2))
@@ -164,7 +164,7 @@ func rpcClientConnectLoop(
 	// }
 	for {
 		var (
-			chainClient chain.Interface
+			chainClient chainclient.Interface
 			e           error
 		)
 		// if cx.PodConfig.UseSPV {
@@ -198,7 +198,7 @@ func rpcClientConnectLoop(
 		// 		log<-cl.Errorf{"couldn't start Neutrino client: %s", e)
 		// 	}
 		// } else {
-		var cc *chain.RPCClient
+		var cc *chainclient.RPCClient
 		D.Ln("starting wallet's ChainClient")
 		cc, e = StartChainRPC(cx.Config, cx.ActiveNet, certs, cx.KillAll)
 		if e != nil {
@@ -265,11 +265,11 @@ func rpcClientConnectLoop(
 // services. This function uses the RPC options from the global config and there
 // is no recovery in case the server is not available or if there is an
 // authentication error. Instead, all requests to the client will simply error.
-func StartChainRPC(config *podcfg.Config, activeNet *chaincfg.Params, certs []byte, quit qu.C) (*chain.RPCClient, error) {
+func StartChainRPC(config *podcfg.Config, activeNet *chaincfg.Params, certs []byte, quit qu.C) (*chainclient.RPCClient, error) {
 	D.Ln(
 		">>>>>>>>>>>>>>> attempting RPC client connection to %v, TLS: %s", *config.RPCConnect, fmt.Sprint(*config.TLS),
 	)
-	rpcC, e := chain.NewRPCClient(
+	rpcC, e := chainclient.NewRPCClient(
 		activeNet,
 		*config.RPCConnect,
 		*config.Username,

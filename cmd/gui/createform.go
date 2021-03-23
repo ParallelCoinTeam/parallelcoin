@@ -5,7 +5,7 @@ import (
 	l "gioui.org/layout"
 	"gioui.org/text"
 	"github.com/p9c/pod/pkg/gui"
-	p9icons "github.com/p9c/pod/pkg/gui/ico/svg"
+	p9icons "github.com/p9c/pod/pkg/icons/svg"
 	"github.com/p9c/pod/pkg/podcfg"
 	"github.com/tyler-smith/go-bip39"
 	"golang.org/x/exp/shiny/materialdesign/icons"

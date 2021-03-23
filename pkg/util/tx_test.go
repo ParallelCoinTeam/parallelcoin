@@ -32,7 +32,7 @@ func TestTx(t *testing.T) {
 	wantHashStr := "8c14f0db3df150123e6f3dbbf30f8b955a8249b62ac1d1ff16284aefa3d06d87"
 	wantHash, e := chainhash.NewHashFromStr(wantHashStr)
 	if e != nil  {
-		t.Errorf("NewHashFromStr: %v", err)
+		t.Errorf("NewHashFromStr: %v", e)
 	}
 	// Request the hash multiple times to test generation and caching.
 	for i := 0; i < 2; i++ {
@@ -51,13 +51,13 @@ func TestNewTxFromBytes(t *testing.T) {
 	var testTxBuf bytes.Buffer
 	e := testTx.Serialize(&testTxBuf)
 	if e != nil  {
-		t.Errorf("Serialize: %v", err)
+		t.Errorf("Serialize: %v", e)
 	}
 	testTxBytes := testTxBuf.Bytes()
 	// Create a new transaction from the serialized bytes.
 	tx, e := util.NewTxFromBytes(testTxBytes)
 	if e != nil  {
-		t.Errorf("NewTxFromBytes: %v", err)
+		t.Errorf("NewTxFromBytes: %v", e)
 		return
 	}
 	// Ensure the generated MsgTx is correct.
@@ -74,7 +74,7 @@ func TestTxErrors(t *testing.T) {
 	var testTxBuf bytes.Buffer
 	e := testTx.Serialize(&testTxBuf)
 	if e != nil  {
-		t.Errorf("Serialize: %v", err)
+		t.Errorf("Serialize: %v", e)
 	}
 	testTxBytes := testTxBuf.Bytes()
 	// Truncate the transaction byte buffer to force errors.

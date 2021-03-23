@@ -87,13 +87,13 @@ func main() {
 			os.Exit(1)
 		}
 		if n != 65 {
-			Error("For some reason did not get 65 random bytes")
+			E.Ln("For some reason did not get 65 random bytes")
 			os.Exit(1)
 		}
 		fmt.Printf("\nGenerated random public key:\n0x%x\n", pubkey)
 	} else {
 		if len(args[1]) != 130 {
-			Error("Invalid public key length. Should be 130 hex digits,")
+			E.Ln("Invalid public key length. Should be 130 hex digits,")
 			os.Exit(1)
 		}
 		var e error
@@ -104,7 +104,7 @@ func main() {
 	}
 	timestamp := args[2]
 	if len(timestamp) > 254 || len(timestamp) < 1 {
-		Error(
+		E.Ln(
 			"Timestamp was either longer than 254 characters or zero" +
 				" length",
 		)
@@ -113,7 +113,7 @@ func main() {
 	tx := initTransaction()
 	nbits, e := strconv.ParseInt(args[3], 10, 32)
 	if e != nil {
-		Error("nBits was not a decimal number or exceeded the precision of 32 bits")
+		E.Ln("nBits was not a decimal number or exceeded the precision of 32 bits")
 		os.Exit(0)
 	}
 	nBits := uint32(nbits)

@@ -34,7 +34,7 @@ func TestBase58Check(t *testing.T) {
 		// test decoding
 		res, version, e := base58.CheckDecode(test.out)
 		if e != nil  {
-			t.Errorf("CheckDecode test #%d failed with err: %v", x, err)
+			t.Errorf("CheckDecode test #%d failed with e: %v", x, e)
 		} else if version != test.version {
 			t.Errorf("CheckDecode test #%d failed: got version: %d want: %d", x, version, test.version)
 		} else if string(res) != test.in {
@@ -43,8 +43,9 @@ func TestBase58Check(t *testing.T) {
 	}
 	// test the two decoding failure cases
 	// case 1: checksum error
+	var e error
 	_, _, e = base58.CheckDecode("3MNQE1Y")
-	if err != base58.ErrChecksum {
+	if e != base58.ErrChecksum {
 		t.Error("Checkdecode test failed, expected ErrChecksum")
 	}
 	// case 2: invalid formats (string lengths below 5 mean the version byte and/or the checksum bytes are missing).
@@ -52,7 +53,7 @@ func TestBase58Check(t *testing.T) {
 	for length := 0; length < 4; length++ {
 		// make a string of length `len`
 		_, _, e = base58.CheckDecode(testString)
-		if err != base58.ErrInvalidFormat {
+		if e != base58.ErrInvalidFormat {
 			t.Error("Checkdecode test failed, expected ErrInvalidFormat")
 		}
 	}

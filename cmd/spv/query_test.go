@@ -241,7 +241,7 @@ func assertEqual(t *testing.T, a interface{}, b interface{}, message string) {
 	if len(message) == 0 {
 		message = fmt.Sprintf("%v != %v", a, b)
 	}
-	t.F.Ln(message)
+	t.Fatal(message)
 }
 
 // getRandFilter generates a random GCS filter that contains numElements. It will then convert that filter into
@@ -251,6 +251,7 @@ func assertEqual(t *testing.T, a interface{}, b interface{}, message string) {
 func genRandFilter(numElements uint32, t *testing.T) (
 	*chainhash.Hash, *gcs.Filter, uint64,
 ) {
+	var e error
 	elements := make([][]byte, numElements)
 	for i := uint32(0); i < numElements; i++ {
 		var elem [20]byte
@@ -295,7 +296,7 @@ func genRandomBlockHash() *chainhash.Hash {
 func getFilter(cs *ChainService, b *chainhash.Hash, t *testing.T) *gcs.Filter {
 	val, e := cs.getFilterFromCache(b, filterdb.RegularFilter)
 	if e != nil {
-		t.F.Ln(e)
+		t.Fatal(e)
 	}
 	return val
 }

@@ -8,7 +8,7 @@ import (
 	
 	chainhash "github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/wire"
-	"github.com/p9c/pod/pkg/database/walletdb"
+	"github.com/p9c/pod/pkg/walletdb"
 	"github.com/p9c/pod/pkg/util"
 )
 

@@ -4,7 +4,7 @@ import (
 	"time"
 	
 	chainhash "github.com/p9c/pod/pkg/chainhash"
-	"github.com/p9c/pod/pkg/database/walletdb"
+	"github.com/p9c/pod/pkg/walletdb"
 )
 
 // BlockStamp defines a block (by height and a unique hash) and is used to mark

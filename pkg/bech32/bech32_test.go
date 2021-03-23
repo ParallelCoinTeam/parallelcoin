@@ -38,12 +38,12 @@ func TestBech32(t *testing.T) {
 		}
 		// Valid string decoding should result in no error.
 		if e != nil  {
-			t.Errorf("expected string to be valid bech32: %v", err)
+			t.Errorf("expected string to be valid bech32: %v", e)
 		}
 		// Chk that it encodes to the same string
 		encoded, e := bech32.Encode(hrp, decoded)
 		if e != nil  {
-			t.Errorf("encoding failed: %v", err)
+			t.Errorf("encoding failed: %v", e)
 		}
 		if encoded != strings.ToLower(str) {
 			t.Errorf("expected data to encode to %v, but got %v",

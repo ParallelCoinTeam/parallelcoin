@@ -6,7 +6,7 @@ import (
 	"golang.org/x/exp/shiny/materialdesign/icons"
 	
 	"github.com/p9c/pod/pkg/gui"
-	p9icons "github.com/p9c/pod/pkg/gui/ico/svg"
+	p9icons "github.com/p9c/pod/pkg/icons/svg"
 )
 
 func (wg *WalletGUI) getLoadingPage() (a *gui.App) {

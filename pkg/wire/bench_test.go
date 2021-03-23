@@ -291,7 +291,7 @@ func BenchmarkDeserializeTxLarge(b *testing.B) {
 	// tx bb41a757f405890fb0f5856228e23b715702d714d59bf2b1feb70d8b2b4e3e08 from the main block chain.
 	fi, e := os.Open("tstdata/megatx.bin.bz2")
 	if e != nil  {
-		b.Fatalf("Failed to read transaction data: %v", err)
+		b.Fatalf("Failed to read transaction data: %v", e)
 	}
 	defer func() {
 		if e := fi.Close(); E.Chk(e) {
@@ -299,7 +299,7 @@ func BenchmarkDeserializeTxLarge(b *testing.B) {
 	}()
 	buf, e := ioutil.ReadAll(bzip2.NewReader(fi))
 	if e != nil  {
-		b.Fatalf("Failed to read transaction data: %v", err)
+		b.Fatalf("Failed to read transaction data: %v", e)
 	}
 	r := bytes.NewReader(buf)
 	var tx MsgTx
@@ -359,14 +359,14 @@ func BenchmarkDecodeGetHeaders(b *testing.B) {
 	for i := 0; i < MaxBlockLocatorsPerMsg; i++ {
 		hash, e := chainhash.NewHashFromStr(fmt.Sprintf("%x", i))
 		if e != nil  {
-			b.Fatalf("NewHashFromStr: unexpected error: %v", err)
+			b.Fatalf("NewHashFromStr: unexpected error: %v", e)
 		}
 		_ = m.AddBlockLocatorHash(hash)
 	}
 	// Serialize it so the bytes are available to test the decode below.
 	var bb bytes.Buffer
 	if e := m.BtcEncode(&bb, pver, LatestEncoding); E.Chk(e) {
-		b.Fatalf("MsgGetHeaders.BtcEncode: unexpected error: %v", err)
+		b.Fatalf("MsgGetHeaders.BtcEncode: unexpected error: %v", e)
 	}
 	buf := bb.Bytes()
 	r := bytes.NewReader(buf)
@@ -387,14 +387,14 @@ func BenchmarkDecodeHeaders(b *testing.B) {
 	for i := 0; i < MaxBlockHeadersPerMsg; i++ {
 		hash, e := chainhash.NewHashFromStr(fmt.Sprintf("%x", i))
 		if e != nil  {
-			b.Fatalf("NewHashFromStr: unexpected error: %v", err)
+			b.Fatalf("NewHashFromStr: unexpected error: %v", e)
 		}
 		_ = m.AddBlockHeader(NewBlockHeader(1, hash, hash, 0, uint32(i)))
 	}
 	// Serialize it so the bytes are available to test the decode below.
 	var bb bytes.Buffer
 	if e := m.BtcEncode(&bb, pver, LatestEncoding); E.Chk(e) {
-		b.Fatalf("MsgHeaders.BtcEncode: unexpected error: %v", err)
+		b.Fatalf("MsgHeaders.BtcEncode: unexpected error: %v", e)
 	}
 	buf := bb.Bytes()
 	r := bytes.NewReader(buf)
@@ -415,14 +415,14 @@ func BenchmarkDecodeGetBlocks(b *testing.B) {
 	for i := 0; i < MaxBlockLocatorsPerMsg; i++ {
 		hash, e := chainhash.NewHashFromStr(fmt.Sprintf("%x", i))
 		if e != nil  {
-			b.Fatalf("NewHashFromStr: unexpected error: %v", err)
+			b.Fatalf("NewHashFromStr: unexpected error: %v", e)
 		}
 		_ = m.AddBlockLocatorHash(hash)
 	}
 	// Serialize it so the bytes are available to test the decode below.
 	var bb bytes.Buffer
 	if e := m.BtcEncode(&bb, pver, LatestEncoding); E.Chk(e) {
-		b.Fatalf("MsgGetBlocks.BtcEncode: unexpected error: %v", err)
+		b.Fatalf("MsgGetBlocks.BtcEncode: unexpected error: %v", e)
 	}
 	buf := bb.Bytes()
 	r := bytes.NewReader(buf)
@@ -447,7 +447,7 @@ func BenchmarkDecodeAddr(b *testing.B) {
 	// Serialize it so the bytes are available to test the decode below.
 	var bb bytes.Buffer
 	if e := ma.BtcEncode(&bb, pver, LatestEncoding); E.Chk(e) {
-		b.Fatalf("MsgAddr.BtcEncode: unexpected error: %v", err)
+		b.Fatalf("MsgAddr.BtcEncode: unexpected error: %v", e)
 	}
 	buf := bb.Bytes()
 	r := bytes.NewReader(buf)
@@ -468,14 +468,14 @@ func BenchmarkDecodeInv(b *testing.B) {
 	for i := 0; i < MaxInvPerMsg; i++ {
 		hash, e := chainhash.NewHashFromStr(fmt.Sprintf("%x", i))
 		if e != nil  {
-			b.Fatalf("NewHashFromStr: unexpected error: %v", err)
+			b.Fatalf("NewHashFromStr: unexpected error: %v", e)
 		}
 		_ = m.AddInvVect(NewInvVect(InvTypeBlock, hash))
 	}
 	// Serialize it so the bytes are available to test the decode below.
 	var bb bytes.Buffer
 	if e := m.BtcEncode(&bb, pver, LatestEncoding); E.Chk(e) {
-		b.Fatalf("MsgInv.BtcEncode: unexpected error: %v", err)
+		b.Fatalf("MsgInv.BtcEncode: unexpected error: %v", e)
 	}
 	buf := bb.Bytes()
 	r := bytes.NewReader(buf)
@@ -496,14 +496,14 @@ func BenchmarkDecodeNotFound(b *testing.B) {
 	for i := 0; i < MaxInvPerMsg; i++ {
 		hash, e := chainhash.NewHashFromStr(fmt.Sprintf("%x", i))
 		if e != nil  {
-			b.Fatalf("NewHashFromStr: unexpected error: %v", err)
+			b.Fatalf("NewHashFromStr: unexpected error: %v", e)
 		}
 		_ = m.AddInvVect(NewInvVect(InvTypeBlock, hash))
 	}
 	// Serialize it so the bytes are available to test the decode below.
 	var bb bytes.Buffer
 	if e := m.BtcEncode(&bb, pver, LatestEncoding); E.Chk(e) {
-		b.Fatalf("MsgNotFound.BtcEncode: unexpected error: %v", err)
+		b.Fatalf("MsgNotFound.BtcEncode: unexpected error: %v", e)
 	}
 	buf := bb.Bytes()
 	r := bytes.NewReader(buf)
@@ -523,13 +523,13 @@ func BenchmarkDecodeMerkleBlock(b *testing.B) {
 	var m MsgMerkleBlock
 	hash, e := chainhash.NewHashFromStr(fmt.Sprintf("%x", 10000))
 	if e != nil  {
-		b.Fatalf("NewHashFromStr: unexpected error: %v", err)
+		b.Fatalf("NewHashFromStr: unexpected error: %v", e)
 	}
 	m.Header = *NewBlockHeader(1, hash, hash, 0, uint32(10000))
 	for i := 0; i < 105; i++ {
 		hash, e := chainhash.NewHashFromStr(fmt.Sprintf("%x", i))
 		if e != nil  {
-			b.Fatalf("NewHashFromStr: unexpected error: %v", err)
+			b.Fatalf("NewHashFromStr: unexpected error: %v", e)
 		}
 		_ = m.AddTxHash(hash)
 		if i%8 == 0 {
@@ -539,7 +539,7 @@ func BenchmarkDecodeMerkleBlock(b *testing.B) {
 	// Serialize it so the bytes are available to test the decode below.
 	var bb bytes.Buffer
 	if e := m.BtcEncode(&bb, pver, LatestEncoding); E.Chk(e) {
-		b.Fatalf("MsgMerkleBlock.BtcEncode: unexpected error: %v", err)
+		b.Fatalf("MsgMerkleBlock.BtcEncode: unexpected error: %v", e)
 	}
 	buf := bb.Bytes()
 	r := bytes.NewReader(buf)
@@ -562,7 +562,7 @@ func BenchmarkTxHash(b *testing.B) {
 func BenchmarkDoubleHashB(b *testing.B) {
 	var buf bytes.Buffer
 	if e := genesisCoinbaseTx.Serialize(&buf); E.Chk(e) {
-		b.Errorf("Serialize: unexpected error: %v", err)
+		b.Errorf("Serialize: unexpected error: %v", e)
 		return
 	}
 	txBytes := buf.Bytes()
@@ -576,7 +576,7 @@ func BenchmarkDoubleHashB(b *testing.B) {
 func BenchmarkDoubleHashH(b *testing.B) {
 	var buf bytes.Buffer
 	if e := genesisCoinbaseTx.Serialize(&buf); E.Chk(e) {
-		b.Errorf("Serialize: unexpected error: %v", err)
+		b.Errorf("Serialize: unexpected error: %v", e)
 		return
 	}
 	txBytes := buf.Bytes()

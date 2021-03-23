@@ -34,6 +34,7 @@ func genTestTx() (*wire.MsgTx, error) {
 			Value:    rand.Int63(),
 			PkScript: make([]byte, rand.Intn(30)),
 		}
+		var e error
 		if _, e = rand.Read(randTxOut.PkScript); E.Chk(e) {
 			return nil, e
 		}
@@ -56,7 +57,7 @@ func TestHashCacheAddContainsHashes(t *testing.T) {
 	for i := 0; i < numTxns; i++ {
 		txns[i], e = genTestTx()
 		if e != nil  {
-			t.Fatalf("unable to generate test tx: %v", err)
+			t.Fatalf("unable to generate test tx: %v", e)
 		}
 	}
 	// With the transactions generated, we'll add each of them to the hash cache.
@@ -74,7 +75,7 @@ func TestHashCacheAddContainsHashes(t *testing.T) {
 	}
 	randTx, e := genTestTx()
 	if e != nil  {
-		t.Fatalf("unable to generate tx: %v", err)
+		t.Fatalf("unable to generate tx: %v", e)
 	}
 	// Finally, we'll assert that a transaction that wasn't added to the cache won't be reported as being present by the
 	// ContainsHashes method.
@@ -94,7 +95,7 @@ func TestHashCacheAddGet(t *testing.T) {
 	// To start, we'll generate a random transaction and compute the set of sighashes for the transaction.
 	randTx, e := genTestTx()
 	if e != nil  {
-		t.Fatalf("unable to generate tx: %v", err)
+		t.Fatalf("unable to generate tx: %v", e)
 	}
 	sigHashes := NewTxSigHashes(randTx)
 	// Next, add the transaction to the hash cache.
@@ -124,7 +125,7 @@ func TestHashCachePurge(t *testing.T) {
 	for i := 0; i < numTxns; i++ {
 		txns[i], e = genTestTx()
 		if e != nil  {
-			t.Fatalf("unable to generate test tx: %v", err)
+			t.Fatalf("unable to generate test tx: %v", e)
 		}
 	}
 	for _, tx := range txns {

@@ -5,7 +5,7 @@ package votingpool_test
 // 	defer tearDown()
 // 	dbtx, e := db.BeginReadWriteTx()
 // 	if e != nil  {
-// 		t.F.Ln(e)
+// 		t.Fatal(e)
 // 	}
 // 	defer dbtx.Commit()
 // 	ns, addrmgrNs := vp.TstRWNamespaces(dbtx)
@@ -36,7 +36,7 @@ package votingpool_test
 // 			store, txmgrNs, currentBlock, dustThreshold)
 // 	})
 // 	if e != nil  {
-// 		t.F.Ln(e)
+// 		t.Fatal(e)
 // 	}
 // 	// Chk that all outputs were successfully fulfilled.
 // 	checkWithdrawalOutputs(t, status, map[string]util.Amount{address1: 4e6, address2: 1e6})
@@ -67,7 +67,7 @@ package votingpool_test
 // 	msgtx := status.TstGetMsgTx(ntxid)
 // 	vp.TstRunWithManagerUnlocked(t, mgr, addrmgrNs, func() {
 // 		if e = vp.SignTx(msgtx, txSigs, mgr, addrmgrNs, store, txmgrNs); E.Chk(e) {
-// 			t.F.Ln(e)
+// 			t.Fatal(e)
 // 		}
 // 	})
 // 	// Any subsequent StartWithdrawal() calls with the same parameters will
@@ -78,7 +78,7 @@ package votingpool_test
 // 			store, txmgrNs, currentBlock, dustThreshold)
 // 	})
 // 	if e != nil  {
-// 		t.F.Ln(e)
+// 		t.Fatal(e)
 // 	}
 // 	vp.TstCheckWithdrawalStatusMatches(t, *status, *status2)
 // }

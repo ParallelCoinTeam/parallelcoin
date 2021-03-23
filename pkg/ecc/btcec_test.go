@@ -738,11 +738,11 @@ func TestSplitKRand(t *testing.T) {
 func testKeyGeneration(t *testing.T, c *KoblitzCurve, tag string) {
 	priv, e := NewPrivateKey(c)
 	if e != nil  {
-		t.Errorf("%s: error: %s", tag, err)
+		t.Errorf("%s: error: %s", tag, e)
 		return
 	}
 	if !c.IsOnCurve(priv.PublicKey.X, priv.PublicKey.Y) {
-		t.Errorf("%s: public key invalid: %s", tag, err)
+		t.Errorf("%s: public key invalid: %s", tag, e)
 	}
 }
 func TestKeyGeneration(t *testing.T) {
@@ -754,7 +754,7 @@ func testSignAndVerify(t *testing.T, c *KoblitzCurve, tag string) {
 	hashed := []byte("testing")
 	sig, e := priv.Sign(hashed)
 	if e != nil  {
-		t.Errorf("%s: error signing: %s", tag, err)
+		t.Errorf("%s: error signing: %s", tag, e)
 		return
 	}
 	if !sig.Verify(hashed, pub) {

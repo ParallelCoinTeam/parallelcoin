@@ -18,10 +18,10 @@ import (
 	"github.com/p9c/pod/cmd/spv"
 	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/gcs/builder"
-	_ "github.com/p9c/pod/pkg/database/walletdb/bdb"
+	_ "github.com/p9c/pod/pkg/walletdb/bdb"
 	ec "github.com/p9c/pod/pkg/ecc"
-	"github.com/p9c/pod/pkg/rpc/btcjson"
-	"github.com/p9c/pod/pkg/rpc/rpcclient"
+	"github.com/p9c/pod/pkg/btcjson"
+	"github.com/p9c/pod/pkg/rpcclient"
 	"github.com/p9c/pod/pkg/txauthor"
 	"github.com/p9c/pod/pkg/txscript"
 	"github.com/p9c/pod/pkg/util"
@@ -1003,7 +1003,7 @@ func testRandomBlocks(harness *neutrinoHarness, t *testing.T) {
 		)
 	}
 	if lastErr != nil {
-		t.F.Ln(lastErr)
+		t.Fatal(lastErr)
 	}
 }
 

@@ -11,8 +11,8 @@ import (
 	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/txscript"
-	"github.com/p9c/pod/pkg/wire"
 	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 func testSendOutputs(r *Harness, t *testing.T) {
@@ -71,7 +71,7 @@ func testSendOutputs(r *Harness, t *testing.T) {
 }
 
 func assertConnectedTo(t *testing.T, nodeA *Harness, nodeB *Harness) {
-	nodeAPeers, e := nodeA.Node.GetPeerI.Ln()
+	nodeAPeers, e := nodeA.Node.GetPeerInfo()
 	if e != nil {
 		t.Fatalf("unable to get nodeA's peer info")
 	}
@@ -84,7 +84,7 @@ func assertConnectedTo(t *testing.T, nodeA *Harness, nodeB *Harness) {
 		}
 	}
 	if !addrFound {
-		t.F.Ln("nodeA not connected to nodeB")
+		t.Fatal("nodeA not connected to nodeB")
 	}
 }
 
@@ -92,7 +92,7 @@ func testConnectNode(r *Harness, t *testing.T) {
 	// Create a fresh test harness.
 	harness, e := New(&chaincfg.SimNetParams, nil, nil)
 	if e != nil {
-		t.F.Ln(e)
+		t.Fatal(e)
 	}
 	if e := harness.SetUp(false, 0); E.Chk(e) {
 		t.Fatalf("unable to complete rpctest setup: %v", e)
@@ -103,7 +103,7 @@ func testConnectNode(r *Harness, t *testing.T) {
 	}()
 	// Establish a p2p connection from our new local harness to the main harness.
 	if e := ConnectNode(harness, r); E.Chk(e) {
-		t.Fatalf("unable to connect local to main harness: %v", err)
+		t.Fatalf("unable to connect local to main harness: %v", e)
 	}
 	// The main harness should show up in our local harness' peer's list, and vice verse.
 	assertConnectedTo(t, harness, r)
@@ -114,7 +114,7 @@ func testTearDownAll(t *testing.T) {
 	initialActiveHarnesses := ActiveHarnesses()
 	// Tear down all currently active harnesses.
 	if e := TearDownAll(); E.Chk(e) {
-		t.Fatalf("unable to teardown all harnesses: %v", err)
+		t.Fatalf("unable to teardown all harnesses: %v", e)
 	}
 	// The global testInstances map should now be fully purged with no active test harnesses remaining.
 	if len(ActiveHarnesses()) != 0 {
@@ -122,6 +122,7 @@ func testTearDownAll(t *testing.T) {
 	}
 	for _, harness := range initialActiveHarnesses {
 		// Ensure all test directories have been deleted.
+		var e error
 		if _, e = os.Stat(harness.testNodeDir); e == nil {
 			t.Errorf("created test datadir was not deleted.")
 		}
@@ -132,7 +133,7 @@ func testActiveHarnesses(r *Harness, t *testing.T) {
 	// Create a single test harness.
 	harness1, e := New(&chaincfg.SimNetParams, nil, nil)
 	if e != nil {
-		t.F.Ln(e)
+		t.Fatal(e)
 	}
 	defer func() {
 		if e := harness1.TearDown(); E.Chk(e) {
@@ -151,19 +152,19 @@ func testJoinMempools(r *Harness, t *testing.T) {
 	// Assert main test harness has no transactions in its mempool.
 	pooledHashes, e := r.Node.GetRawMempool()
 	if e != nil {
-		t.Fatalf("unable to get mempool for main test harness: %v", err)
+		t.Fatalf("unable to get mempool for main test harness: %v", e)
 	}
 	if len(pooledHashes) != 0 {
-		t.F.Ln("main test harness mempool not empty")
+		t.Fatal("main test harness mempool not empty")
 	}
 	// Create a local test harness with only the genesis block. The nodes will be synced below so the same transaction
 	// can be sent to both nodes without it being an orphan.
 	harness, e := New(&chaincfg.SimNetParams, nil, nil)
 	if e != nil {
-		t.F.Ln(e)
+		t.Fatal(e)
 	}
 	if e := harness.SetUp(false, 0); E.Chk(e) {
-		t.Fatalf("unable to complete rpctest setup: %v", err)
+		t.Fatalf("unable to complete rpctest setup: %v", e)
 	}
 	defer func() {
 		if e := harness.TearDown(); E.Chk(e) {
@@ -172,21 +173,21 @@ func testJoinMempools(r *Harness, t *testing.T) {
 	nodeSlice := []*Harness{r, harness}
 	// Both mempools should be considered synced as they are empty. Therefore, this should return instantly.
 	if e := JoinNodes(nodeSlice, Mempools); E.Chk(e) {
-		t.Fatalf("unable to join node on mempools: %v", err)
+		t.Fatalf("unable to join node on mempools: %v", e)
 	}
 	// Generate a coinbase spend to a new address within the main harness' mempool.
 	addr, e := r.NewAddress()
 	addrScript, e := txscript.PayToAddrScript(addr)
 	if e != nil {
-		t.Fatalf("unable to generate pkscript to addr: %v", err)
+		t.Fatalf("unable to generate pkscript to addr: %v", e)
 	}
 	output := wire.NewTxOut(5e8, addrScript)
 	testTx, e := r.CreateTransaction([]*wire.TxOut{output}, 10, true)
 	if e != nil {
-		t.Fatalf("coinbase spend failed: %v", err)
+		t.Fatalf("coinbase spend failed: %v", e)
 	}
 	if _, e = r.Node.SendRawTransaction(testTx, true); E.Chk(e) {
-		t.Fatalf("send transaction failed: %v", err)
+		t.Fatalf("send transaction failed: %v", e)
 	}
 	// Wait until the transaction shows up to ensure the two mempools are not the same.
 	harnessSynced := qu.T()
@@ -194,7 +195,7 @@ func testJoinMempools(r *Harness, t *testing.T) {
 		for {
 			poolHashes, e := r.Node.GetRawMempool()
 			if e != nil {
-				t.Fatalf("failed to retrieve harness mempool: %v", err)
+				t.Fatalf("failed to retrieve harness mempool: %v", e)
 			}
 			if len(poolHashes) > 0 {
 				break
@@ -212,7 +213,7 @@ func testJoinMempools(r *Harness, t *testing.T) {
 	poolsSynced := qu.T()
 	go func() {
 		if e := JoinNodes(nodeSlice, Mempools); E.Chk(e) {
-			t.Fatalf("unable to join node on mempools: %v", err)
+			t.Fatalf("unable to join node on mempools: %v", e)
 		}
 		poolsSynced <- struct{}{}
 	}()
@@ -223,14 +224,14 @@ func testJoinMempools(r *Harness, t *testing.T) {
 	}
 	// Establish an outbound connection from the local harness to the main harness and wait for the chains to be synced.
 	if e := ConnectNode(harness, r); E.Chk(e) {
-		t.Fatalf("unable to connect harnesses: %v", err)
+		t.Fatalf("unable to connect harnesses: %v", e)
 	}
 	if e := JoinNodes(nodeSlice, Blocks); E.Chk(e) {
-		t.Fatalf("unable to join node on blocks: %v", err)
+		t.Fatalf("unable to join node on blocks: %v", e)
 	}
 	// Send the transaction to the local harness which will result in synced mempools.
 	if _, e = harness.Node.SendRawTransaction(testTx, true); E.Chk(e) {
-		t.Fatalf("send transaction failed: %v", err)
+		t.Fatalf("send transaction failed: %v", e)
 	}
 	// Select once again with a special timeout case after 1 minute. The goroutine above should now be blocked on
 	// sending into the unbuffered channel. The send should immediately succeed. In order to avoid the test hanging
@@ -245,10 +246,10 @@ func testJoinBlocks(r *Harness, t *testing.T) {
 	// Create a second harness with only the genesis block so it is behind the main harness.
 	harness, e := New(&chaincfg.SimNetParams, nil, nil)
 	if e != nil {
-		t.F.Ln(e)
+		t.Fatal(e)
 	}
 	if e := harness.SetUp(false, 0); E.Chk(e) {
-		t.Fatalf("unable to complete rpctest setup: %v", err)
+		t.Fatalf("unable to complete rpctest setup: %v", e)
 	}
 	defer func() {
 		if e := harness.TearDown(); E.Chk(e) {
@@ -258,7 +259,7 @@ func testJoinBlocks(r *Harness, t *testing.T) {
 	blocksSynced := qu.T()
 	go func() {
 		if e := JoinNodes(nodeSlice, Blocks); E.Chk(e) {
-			t.Fatalf("unable to join node on blocks: %v", err)
+			t.Fatalf("unable to join node on blocks: %v", e)
 		}
 		blocksSynced <- struct{}{}
 	}()
@@ -270,7 +271,7 @@ func testJoinBlocks(r *Harness, t *testing.T) {
 	}
 	// Connect the local harness to the main harness which will sync the chains.
 	if e := ConnectNode(harness, r); E.Chk(e) {
-		t.Fatalf("unable to connect harnesses: %v", err)
+		t.Fatalf("unable to connect harnesses: %v", e)
 	}
 	// Select once again with a special timeout case after 1 minute. The goroutine above should now be blocked on
 	// sending into the unbuffered channel. The send should immediately succeed. In order to avoid the test hanging
@@ -285,11 +286,11 @@ func testGenerateAndSubmitBlock(r *Harness, t *testing.T) {
 	// Generate a few test spend transactions.
 	addr, e := r.NewAddress()
 	if e != nil {
-		t.Fatalf("unable to generate new address: %v", err)
+		t.Fatalf("unable to generate new address: %v", e)
 	}
 	pkScript, e := txscript.PayToAddrScript(addr)
 	if e != nil {
-		t.Fatalf("unable to create script: %v", err)
+		t.Fatalf("unable to create script: %v", e)
 	}
 	output := wire.NewTxOut(util.SatoshiPerBitcoin.Int64(), pkScript)
 	const numTxns = 5
@@ -297,14 +298,14 @@ func testGenerateAndSubmitBlock(r *Harness, t *testing.T) {
 	for i := 0; i < numTxns; i++ {
 		tx, e := r.CreateTransaction([]*wire.TxOut{output}, 10, true)
 		if e != nil {
-			t.Fatalf("unable to create tx: %v", err)
+			t.Fatalf("unable to create tx: %v", e)
 		}
 		txns = append(txns, util.NewTx(tx))
 	}
 	// Now generate a block with the default block version, and a zeroed out time.
 	block, e := r.GenerateAndSubmitBlock(txns, ^uint32(0), time.Time{})
 	if e != nil {
-		t.Fatalf("unable to generate block: %v", err)
+		t.Fatalf("unable to generate block: %v", e)
 	}
 	// Ensure that all created transactions were included, and that the block version was properly set to the default.
 	numBlocksTxns := len(block.Transactions())
@@ -327,7 +328,7 @@ func testGenerateAndSubmitBlock(r *Harness, t *testing.T) {
 	targetBlockVersion := uint32(1337)
 	block, e = r.GenerateAndSubmitBlock(nil, targetBlockVersion, timestamp)
 	if e != nil {
-		t.Fatalf("unable to generate block: %v", err)
+		t.Fatalf("unable to generate block: %v", e)
 	}
 	// Finally ensure that the desired block version and timestamp were set properly.
 	header := block.MsgBlock().Header
@@ -352,11 +353,11 @@ func testGenerateAndSubmitBlockWithCustomCoinbaseOutputs(
 	// Generate a few test spend transactions.
 	addr, e := r.NewAddress()
 	if e != nil {
-		t.Fatalf("unable to generate new address: %v", err)
+		t.Fatalf("unable to generate new address: %v", e)
 	}
 	pkScript, e := txscript.PayToAddrScript(addr)
 	if e != nil {
-		t.Fatalf("unable to create script: %v", err)
+		t.Fatalf("unable to create script: %v", e)
 	}
 	output := wire.NewTxOut(util.SatoshiPerBitcoin.Int64(), pkScript)
 	const numTxns = 5
@@ -364,7 +365,7 @@ func testGenerateAndSubmitBlockWithCustomCoinbaseOutputs(
 	for i := 0; i < numTxns; i++ {
 		tx, e := r.CreateTransaction([]*wire.TxOut{output}, 10, true)
 		if e != nil {
-			t.Fatalf("unable to create tx: %v", err)
+			t.Fatalf("unable to create tx: %v", e)
 		}
 		txns = append(txns, util.NewTx(tx))
 	}
@@ -379,7 +380,7 @@ func testGenerateAndSubmitBlockWithCustomCoinbaseOutputs(
 		},
 	)
 	if e != nil {
-		t.Fatalf("unable to generate block: %v", err)
+		t.Fatalf("unable to generate block: %v", e)
 	}
 	// Ensure that all created transactions were included, and that the block version was properly set to the default.
 	numBlocksTxns := len(block.Transactions())
@@ -410,7 +411,7 @@ func testGenerateAndSubmitBlockWithCustomCoinbaseOutputs(
 		},
 	)
 	if e != nil {
-		t.Fatalf("unable to generate block: %v", err)
+		t.Fatalf("unable to generate block: %v", e)
 	}
 	// Finally ensure that the desired block version and timestamp were set properly.
 	header := block.MsgBlock().Header
@@ -432,10 +433,10 @@ func testMemWalletReorg(r *Harness, t *testing.T) {
 	// Create a fresh harness, we'll be using the main harness to force a re-org on this local harness.
 	harness, e := New(&chaincfg.SimNetParams, nil, nil)
 	if e != nil {
-		t.F.Ln(e)
+		t.Fatal(e)
 	}
 	if e := harness.SetUp(true, 5); E.Chk(e) {
-		t.Fatalf("unable to complete rpctest setup: %v", err)
+		t.Fatalf("unable to complete rpctest setup: %v", e)
 	}
 	defer func() {
 		if e := harness.TearDown(); E.Chk(e) {
@@ -452,11 +453,11 @@ func testMemWalletReorg(r *Harness, t *testing.T) {
 	}
 	// Now connect this local harness to the main harness then wait for their chains to synchronize.
 	if e := ConnectNode(harness, r); E.Chk(e) {
-		t.Fatalf("unable to connect harnesses: %v", err)
+		t.Fatalf("unable to connect harnesses: %v", e)
 	}
 	nodeSlice := []*Harness{r, harness}
 	if e := JoinNodes(nodeSlice, Blocks); E.Chk(e) {
-		t.Fatalf("unable to join node on blocks: %v", err)
+		t.Fatalf("unable to join node on blocks: %v", e)
 	}
 	// The original wallet should now have a balance of 0 DUO as its entire chain should have been decimated in favor of
 	// the main harness' chain.
@@ -475,17 +476,17 @@ func testMemWalletLockedOutputs(r *Harness, t *testing.T) {
 	// First, create a signed transaction spending some outputs.
 	addr, e := r.NewAddress()
 	if e != nil {
-		t.Fatalf("unable to generate new address: %v", err)
+		t.Fatalf("unable to generate new address: %v", e)
 	}
 	pkScript, e := txscript.PayToAddrScript(addr)
 	if e != nil {
-		t.Fatalf("unable to create script: %v", err)
+		t.Fatalf("unable to create script: %v", e)
 	}
 	outputAmt := 50 * util.SatoshiPerBitcoin
 	output := wire.NewTxOut(int64(outputAmt), pkScript)
 	tx, e := r.CreateTransaction([]*wire.TxOut{output}, 10, true)
 	if e != nil {
-		t.Fatalf("unable to create transaction: %v", err)
+		t.Fatalf("unable to create transaction: %v", e)
 	}
 	// The current wallet balance should now be at least 50 DUO less (accounting for fees) than the period balance
 	currentBalance := r.ConfirmedBalance()
@@ -529,13 +530,13 @@ func TestMain(m *testing.M) {
 	var e error
 	mainHarness, e = New(&chaincfg.SimNetParams, nil, nil)
 	if e != nil {
-		fmt.Println("unable to create main harness: ", err)
+		fmt.Println("unable to create main harness: ", e)
 		os.Exit(1)
 	}
 	// Initialize the main mining node with a chain of length 125, providing 25 mature coinbases to allow spending from
 	// for testing purposes.
 	if e = mainHarness.SetUp(true, numMatureOutputs); E.Chk(e) {
-		fmt.Println("unable to setup test chain: ", err)
+		fmt.Println("unable to setup test chain: ", e)
 		// Even though the harness was not fully setup, it still needs to be torn down to ensure all resources such as
 		// temp directories are cleaned up. The error is intentionally ignored since this is already an error path and
 		// nothing else could be done about it anyways.
@@ -546,7 +547,7 @@ func TestMain(m *testing.M) {
 	// Clean up any active harnesses that are still currently running.
 	if len(ActiveHarnesses()) > 0 {
 		if e := TearDownAll(); E.Chk(e) {
-			fmt.Println("unable to tear down chain: ", err)
+			fmt.Println("unable to tear down chain: ", e)
 			os.Exit(1)
 		}
 	}
@@ -564,9 +565,9 @@ func TestHarness(t *testing.T) {
 		)
 	}
 	// Current tip should be at a height of numMatureOutputs plus the required number of blocks for coinbase maturity.
-	nodeInfo, e := mainHarness.Node.GetI.Ln()
+	nodeInfo, e := mainHarness.Node.GetInfo()
 	if e != nil {
-		t.Fatalf("unable to execute getinfo on node: %v", err)
+		t.Fatalf("unable to execute getinfo on node: %v", e)
 	}
 	expectedChainHeight := numMatureOutputs + uint32(mainHarness.ActiveNet.CoinbaseMaturity)
 	if uint32(nodeInfo.Blocks) != expectedChainHeight {

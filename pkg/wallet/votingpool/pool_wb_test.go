@@ -14,7 +14,7 @@ func TestPoolEnsureUsedAddr(t *testing.T) {
 	defer tearDown()
 	dbtx, e := db.BeginReadWriteTx()
 	if e != nil  {
-		t.F.Ln(e)
+		t.Fatal(e)
 	}
 	defer func() {
 		e := dbtx.Commit()
@@ -31,17 +31,17 @@ func TestPoolEnsureUsedAddr(t *testing.T) {
 		e = pool.EnsureUsedAddr(ns, addrmgrNs, 1, 0, idx)
 	})
 	if e != nil  {
-		t.Fatalf("Failed to ensure used addresses: %v", err)
+		t.Fatalf("Failed to ensure used addresses: %v", e)
 	}
 	addr, e = pool.getUsedAddr(ns, addrmgrNs, 1, 0, 0)
 	if e != nil  {
-		t.Fatalf("Failed to get addr from used addresses set: %v", err)
+		t.Fatalf("Failed to get addr from used addresses set: %v", e)
 	}
 	TstRunWithManagerUnlocked(t, pool.Manager(), addrmgrNs, func() {
 		script, e = addr.Script()
 	})
 	if e != nil  {
-		t.Fatalf("Failed to get script: %v", err)
+		t.Fatalf("Failed to get script: %v", e)
 	}
 	wantScript, _ := pool.DepositScript(1, 0, 0)
 	if !bytes.Equal(script, wantScript) {
@@ -52,18 +52,18 @@ func TestPoolEnsureUsedAddr(t *testing.T) {
 		e = pool.EnsureUsedAddr(ns, addrmgrNs, 1, 0, idx)
 	})
 	if e != nil  {
-		t.Fatalf("Failed to ensure used addresses: %v", err)
+		t.Fatalf("Failed to ensure used addresses: %v", e)
 	}
 	for _, i := range []int{0, 1, 2, 3} {
 		addr, e = pool.getUsedAddr(ns, addrmgrNs, 1, 0, Index(i))
 		if e != nil  {
-			t.Fatalf("Failed to get addr from used addresses set: %v", err)
+			t.Fatalf("Failed to get addr from used addresses set: %v", e)
 		}
 		TstRunWithManagerUnlocked(t, pool.Manager(), addrmgrNs, func() {
 			script, e = addr.Script()
 		})
 		if e != nil  {
-			t.Fatalf("Failed to get script: %v", err)
+			t.Fatalf("Failed to get script: %v", e)
 		}
 		wantScript, _ := pool.DepositScript(1, 0, Index(i))
 		if !bytes.Equal(script, wantScript) {
@@ -76,7 +76,7 @@ func TestPoolGetUsedAddr(t *testing.T) {
 	defer tearDown()
 	dbtx, e := db.BeginReadWriteTx()
 	if e != nil  {
-		t.F.Ln(e)
+		t.Fatal(e)
 	}
 	defer func() {
 		e := dbtx.Commit()
@@ -89,7 +89,7 @@ func TestPoolGetUsedAddr(t *testing.T) {
 	// Addr with series=1, branch=0, index=10 has never been used, so it should return nil.
 	addr, e := pool.getUsedAddr(ns, addrmgrNs, 1, 0, 10)
 	if e != nil  {
-		t.Fatalf("VPError when looking up used addr: %v", err)
+		t.Fatalf("VPError when looking up used addr: %v", e)
 	}
 	if addr != nil {
 		t.Fatalf("Unused address found in used addresses DB: %v", addr)
@@ -100,18 +100,18 @@ func TestPoolGetUsedAddr(t *testing.T) {
 		e = pool.addUsedAddr(ns, addrmgrNs, 1, 0, 10)
 	})
 	if e != nil  {
-		t.Fatalf("VPError when storing addr in used addresses DB: %v", err)
+		t.Fatalf("VPError when storing addr in used addresses DB: %v", e)
 	}
 	var script []byte
 	addr, e = pool.getUsedAddr(ns, addrmgrNs, 1, 0, 10)
 	if e != nil  {
-		t.Fatalf("VPError when looking up used addr: %v", err)
+		t.Fatalf("VPError when looking up used addr: %v", e)
 	}
 	TstRunWithManagerUnlocked(t, pool.Manager(), addrmgrNs, func() {
 		script, e = addr.Script()
 	})
 	if e != nil  {
-		t.Fatalf("Failed to get script: %v", err)
+		t.Fatalf("Failed to get script: %v", e)
 	}
 	wantScript, _ := pool.DepositScript(1, 0, 10)
 	if !bytes.Equal(script, wantScript) {
@@ -123,7 +123,7 @@ func TestSerializationErrors(t *testing.T) {
 	defer tearDown()
 	dbtx, e := db.BeginReadWriteTx()
 	if e != nil  {
-		t.F.Ln(e)
+		t.Fatal(e)
 	}
 	defer func() {
 		e := dbtx.Commit()
@@ -137,43 +137,43 @@ func TestSerializationErrors(t *testing.T) {
 		pubKeys  []string
 		privKeys []string
 		reqSigs  uint32
-		err      ErrorCode
+		e      ErrorCode
 	}{
 		{
 			version: 2,
 			pubKeys: TstPubKeys[0:3],
-			err:     ErrSeriesVersion,
+			e:     ErrSeriesVersion,
 		},
 		{
 			pubKeys: []string{"NONSENSE"},
 			// Not a valid length public key.
-			err: ErrSeriesSerialization,
+			e: ErrSeriesSerialization,
 		},
 		{
 			pubKeys:  TstPubKeys[0:3],
 			privKeys: TstPrivKeys[0:1],
 			// The number of public and private keys should be the same.
-			err: ErrSeriesSerialization,
+			e: ErrSeriesSerialization,
 		},
 		{
 			pubKeys:  TstPubKeys[0:1],
 			privKeys: []string{"NONSENSE"},
 			// Not a valid length private key.
-			err: ErrSeriesSerialization,
+			e: ErrSeriesSerialization,
 		},
 	}
 	active := true
 	for testNum, test := range tests {
 		encryptedPubs, e := encryptKeys(test.pubKeys, pool.Manager(), waddrmgr.CKTPublic)
 		if e != nil  {
-			t.Fatalf("Test #%d - VPError encrypting pubkeys: %v", testNum, err)
+			t.Fatalf("Test #%d - VPError encrypting pubkeys: %v", testNum, e)
 		}
 		var encryptedPrivs [][]byte
 		TstRunWithManagerUnlocked(t, pool.Manager(), addrmgrNs, func() {
 			encryptedPrivs, e = encryptKeys(test.privKeys, pool.Manager(), waddrmgr.CKTPrivate)
 		})
 		if e != nil  {
-			t.Fatalf("Test #%d - VPError encrypting privkeys: %v", testNum, err)
+			t.Fatalf("Test #%d - VPError encrypting privkeys: %v", testNum, e)
 		}
 		row := &dbSeriesRow{
 			version:           test.version,
@@ -182,7 +182,7 @@ func TestSerializationErrors(t *testing.T) {
 			pubKeysEncrypted:  encryptedPubs,
 			privKeysEncrypted: encryptedPrivs}
 		_, e = serializeSeriesRow(row)
-		TstCheckError(t, fmt.Sprintf("Test #%d", testNum), err, test.err)
+		TstCheckError(t, fmt.Sprintf("Test #%d", testNum), e, test.e)
 	}
 }
 func TestSerialization(t *testing.T) {
@@ -190,7 +190,7 @@ func TestSerialization(t *testing.T) {
 	defer tearDown()
 	dbtx, e := db.BeginReadWriteTx()
 	if e != nil  {
-		t.F.Ln(e)
+		t.Fatal(e)
 	}
 	defer func() {
 		e := dbtx.Commit()
@@ -238,13 +238,13 @@ func TestSerialization(t *testing.T) {
 	for testNum, test := range tests {
 		encryptedPubs, e := encryptKeys(test.pubKeys, pool.Manager(), waddrmgr.CKTPublic)
 		if e != nil  {
-			t.Fatalf("Test #%d - VPError encrypting pubkeys: %v", testNum, err)
+			t.Fatalf("Test #%d - VPError encrypting pubkeys: %v", testNum, e)
 		}
 		TstRunWithManagerUnlocked(t, pool.Manager(), addrmgrNs, func() {
 			encryptedPrivs, e = encryptKeys(test.privKeys, pool.Manager(), waddrmgr.CKTPrivate)
 		})
 		if e != nil  {
-			t.Fatalf("Test #%d - VPError encrypting privkeys: %v", testNum, err)
+			t.Fatalf("Test #%d - VPError encrypting privkeys: %v", testNum, e)
 		}
 		row := &dbSeriesRow{
 			version:           test.version,
@@ -255,11 +255,11 @@ func TestSerialization(t *testing.T) {
 		}
 		serialized, e := serializeSeriesRow(row)
 		if e != nil  {
-			t.Fatalf("Test #%d - VPError in serialization %v", testNum, err)
+			t.Fatalf("Test #%d - VPError in serialization %v", testNum, e)
 		}
 		row, e = deserializeSeriesRow(serialized)
 		if e != nil  {
-			t.Fatalf("Test #%d - Failed to deserialize %v %v", testNum, serialized, err)
+			t.Fatalf("Test #%d - Failed to deserialize %v %v", testNum, serialized, e)
 		}
 		if row.version != test.version {
 			t.Errorf("Serialization #%d - version mismatch: got %d want %d",
@@ -301,17 +301,17 @@ func TestDeserializationErrors(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
 		serialized []byte
-		err        ErrorCode
+		e        ErrorCode
 	}{
 		{
 			serialized: make([]byte, seriesMaxSerial+1),
 			// Too many bytes (over seriesMaxSerial).
-			err: ErrSeriesSerialization,
+			e: ErrSeriesSerialization,
 		},
 		{
 			serialized: make([]byte, seriesMinSerial-1),
 			// Not enough bytes (under seriesMinSerial).
-			err: ErrSeriesSerialization,
+			e: ErrSeriesSerialization,
 		},
 		{
 			serialized: []byte{
@@ -321,17 +321,17 @@ func TestDeserializationErrors(t *testing.T) {
 				3, 0, 0, 0, // 4 bytes (nKeys)
 			},
 			// Here we have the constant data but are missing any public/private keys.
-			err: ErrSeriesSerialization,
+			e: ErrSeriesSerialization,
 		},
 		{
 			serialized: []byte{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 			// Unsupported version.
-			err: ErrSeriesVersion,
+			e: ErrSeriesVersion,
 		},
 	}
 	for testNum, test := range tests {
 		_, e := deserializeSeriesRow(test.serialized)
-		TstCheckError(t, fmt.Sprintf("Test #%d", testNum), err, test.err)
+		TstCheckError(t, fmt.Sprintf("Test #%d", testNum), e, test.e)
 	}
 }
 func TestValidateAndDecryptKeys(t *testing.T) {
@@ -339,7 +339,7 @@ func TestValidateAndDecryptKeys(t *testing.T) {
 	defer tearDown()
 	dbtx, e := db.BeginReadWriteTx()
 	if e != nil  {
-		t.F.Ln(e)
+		t.Fatal(e)
 	}
 	defer func() {
 		e := dbtx.Commit()
@@ -350,21 +350,21 @@ func TestValidateAndDecryptKeys(t *testing.T) {
 	_, addrmgrNs := TstRWNamespaces(dbtx)
 	rawPubKeys, e := encryptKeys(TstPubKeys[0:2], pool.Manager(), waddrmgr.CKTPublic)
 	if e != nil  {
-		t.Fatalf("Failed to encrypt public keys: %v", err)
+		t.Fatalf("Failed to encrypt public keys: %v", e)
 	}
 	var rawPrivKeys [][]byte
 	TstRunWithManagerUnlocked(t, pool.Manager(), addrmgrNs, func() {
 		rawPrivKeys, e = encryptKeys([]string{TstPrivKeys[0], ""}, pool.Manager(), waddrmgr.CKTPrivate)
 	})
 	if e != nil  {
-		t.Fatalf("Failed to encrypt private keys: %v", err)
+		t.Fatalf("Failed to encrypt private keys: %v", e)
 	}
 	var pubKeys, privKeys []*hdkeychain.ExtendedKey
 	TstRunWithManagerUnlocked(t, pool.Manager(), addrmgrNs, func() {
 		pubKeys, privKeys, e = validateAndDecryptKeys(rawPubKeys, rawPrivKeys, pool)
 	})
 	if e != nil  {
-		t.Fatalf("VPError when validating/decrypting keys: %v", err)
+		t.Fatalf("VPError when validating/decrypting keys: %v", e)
 	}
 	if len(pubKeys) != 2 {
 		t.Fatalf("Unexpected number of decrypted public keys: got %d, want 2", len(pubKeys))
@@ -380,7 +380,7 @@ func TestValidateAndDecryptKeys(t *testing.T) {
 	}
 	neuteredKey, e := privKeys[0].Neuter()
 	if e != nil  {
-		t.Fatalf("Unable to neuter private key: %v", err)
+		t.Fatalf("Unable to neuter private key: %v", e)
 	}
 	if pubKeys[0].String() != neuteredKey.String() {
 		t.Errorf("Public key (%v) does not match neutered private key (%v)",
@@ -392,7 +392,7 @@ func TestValidateAndDecryptKeysErrors(t *testing.T) {
 	defer tearDown()
 	dbtx, e := db.BeginReadWriteTx()
 	if e != nil  {
-		t.F.Ln(e)
+		t.Fatal(e)
 	}
 	defer func() {
 		e := dbtx.Commit()
@@ -403,50 +403,50 @@ func TestValidateAndDecryptKeysErrors(t *testing.T) {
 	_, addrmgrNs := TstRWNamespaces(dbtx)
 	encryptedPubKeys, e := encryptKeys(TstPubKeys[0:1], pool.Manager(), waddrmgr.CKTPublic)
 	if e != nil  {
-		t.Fatalf("Failed to encrypt public key: %v", err)
+		t.Fatalf("Failed to encrypt public key: %v", e)
 	}
 	var encryptedPrivKeys [][]byte
 	TstRunWithManagerUnlocked(t, pool.Manager(), addrmgrNs, func() {
 		encryptedPrivKeys, e = encryptKeys(TstPrivKeys[1:2], pool.Manager(), waddrmgr.CKTPrivate)
 	})
 	if e != nil  {
-		t.Fatalf("Failed to encrypt private key: %v", err)
+		t.Fatalf("Failed to encrypt private key: %v", e)
 	}
 	tests := []struct {
 		rawPubKeys  [][]byte
 		rawPrivKeys [][]byte
-		err         ErrorCode
+		e         ErrorCode
 	}{
 		{
 			// Number of public keys does not match number of private keys.
 			rawPubKeys:  [][]byte{[]byte(TstPubKeys[0])},
 			rawPrivKeys: [][]byte{},
-			err:         ErrKeysPrivatePublicMismatch,
+			e:         ErrKeysPrivatePublicMismatch,
 		},
 		{
 			// Failure to decrypt public key.
 			rawPubKeys:  [][]byte{[]byte(TstPubKeys[0])},
 			rawPrivKeys: [][]byte{[]byte(TstPrivKeys[0])},
-			err:         ErrCrypto,
+			e:         ErrCrypto,
 		},
 		{
 			// Failure to decrypt private key.
 			rawPubKeys:  encryptedPubKeys,
 			rawPrivKeys: [][]byte{[]byte(TstPrivKeys[0])},
-			err:         ErrCrypto,
+			e:         ErrCrypto,
 		},
 		{
 			// One public and one private key, but they don't match.
 			rawPubKeys:  encryptedPubKeys,
 			rawPrivKeys: encryptedPrivKeys,
-			err:         ErrKeyMismatch,
+			e:         ErrKeyMismatch,
 		},
 	}
 	for i, test := range tests {
 		TstRunWithManagerUnlocked(t, pool.Manager(), addrmgrNs, func() {
 			_, _, e = validateAndDecryptKeys(test.rawPubKeys, test.rawPrivKeys, pool)
 		})
-		TstCheckError(t, fmt.Sprintf("Test #%d", i), err, test.err)
+		TstCheckError(t, fmt.Sprintf("Test #%d", i), e, test.e)
 	}
 }
 func encryptKeys(keys []string, mgr *waddrmgr.Manager, keyType waddrmgr.CryptoKeyType) ([][]byte, error) {

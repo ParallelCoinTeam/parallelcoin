@@ -9,7 +9,7 @@ import (
 	chainhash "github.com/p9c/pod/pkg/chainhash"
 	wtxmgr "github.com/p9c/pod/pkg/wtxmgr"
 	"github.com/p9c/pod/pkg/wire"
-	"github.com/p9c/pod/pkg/database/walletdb"
+	"github.com/p9c/pod/pkg/walletdb"
 	"github.com/p9c/pod/pkg/util"
 )
 
@@ -23,7 +23,7 @@ var (
 // 	defer tearDown()
 // 	dbtx, e := db.BeginReadWriteTx()
 // 	if e != nil  {
-// 		t.F.Ln(e)
+// 		t.Fatal(e)
 // 	}
 // 	defer func() {
 // 	e := dbtx.Commit()
@@ -59,7 +59,7 @@ var (
 // 			eligibleInputMinConfirmations)
 // 	})
 // 	if e != nil  {
-// 		t.F.Ln("InputSelection failed:", e)
+// 		t.Fatal("InputSelection failed:", e)
 // 	}
 // 	// Chk we got the expected number of eligible inputs.
 // 	if len(eligibles) != expNoEligibleInputs {
@@ -68,7 +68,7 @@ var (
 // 	}
 // 	// Chk that the returned eligibles are reverse sorted by address.
 // 	if !sort.IsSorted(sort.Reverse(byAddress(eligibles))) {
-// 		t.F.Ln("Eligible inputs are not sorted.")
+// 		t.Fatal("Eligible inputs are not sorted.")
 // 	}
 // 	// Chk that all credits are unique
 // 	checkUniqueness(t, eligibles)
@@ -78,7 +78,7 @@ func TestNextAddrWithVaryingHighestIndices(t *testing.T) {
 	defer tearDown()
 	dbtx, e := db.BeginReadWriteTx()
 	if e != nil  {
-		t.F.Ln(e)
+		t.Fatal(e)
 	}
 	defer func() {
 		e := dbtx.Commit()
@@ -130,7 +130,7 @@ func TestNextAddr(t *testing.T) {
 	defer tearDown()
 	dbtx, e := db.BeginReadWriteTx()
 	if e != nil  {
-		t.F.Ln(e)
+		t.Fatal(e)
 	}
 	defer func() {
 		e := dbtx.Commit()
@@ -205,7 +205,7 @@ func TestEligibleInputsAreEligible(t *testing.T) {
 	defer tearDown()
 	dbtx, e := db.BeginReadWriteTx()
 	if e != nil  {
-		t.ftl.Ln(e)
+		t.Fatal(e)
 	}
 	defer func() {
 		e := dbtx.Commit()
@@ -227,7 +227,7 @@ func TestNonEligibleInputsAreNotEligible(t *testing.T) {
 	defer tearDown()
 	dbtx, e := db.BeginReadWriteTx()
 	if e != nil  {
-		t.ftl.Ln(e)
+		t.Fatal(e)
 	}
 	defer func() {
 		e := dbtx.Commit()
@@ -259,7 +259,7 @@ func TestCreditSortingByAddress(t *testing.T) {
 	defer teardown()
 	dbtx, e := db.BeginReadWriteTx()
 	if e != nil  {
-		t.ftl.Ln(e)
+		t.Fatal(e)
 	}
 	defer func() {
 		e := dbtx.Commit()
@@ -310,7 +310,7 @@ func newDummyCredit(t *testing.T, dbtx walletdb.ReadWriteTx, pool *Pool, series 
 	txHash []byte, outpointIdx uint32) Credit {
 	var hash chainhash.Hash
 	if e := hash.SetBytes(txHash); E.Chk(e) {
-		t.ftl.Ln(e)
+		t.Fatal(e)
 	}
 	// Ensure the address defined by the given series/branch/index is present on the set of used addresses as that's a
 	// requirement of WithdrawalAddress.

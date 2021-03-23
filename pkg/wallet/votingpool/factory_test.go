@@ -15,7 +15,7 @@ import (
 	wtxmgr "github.com/p9c/pod/pkg/wtxmgr"
 	txscript "github.com/p9c/pod/pkg/txscript"
 	"github.com/p9c/pod/pkg/wire"
-	"github.com/p9c/pod/pkg/database/walletdb"
+	"github.com/p9c/pod/pkg/walletdb"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/hdkeychain"
 	waddrmgr "github.com/p9c/pod/pkg/wallet/waddrmgr"
@@ -95,14 +95,14 @@ func TstEnsureUsedAddr(t *testing.T, dbtx walletdb.ReadWriteTx, p *Pool, seriesI
 	ns, addrmgrNs := TstRWNamespaces(dbtx)
 	addr, e := p.getUsedAddr(ns, addrmgrNs, seriesID, branch, idx)
 	if e != nil  {
-		t.ftl.Ln(e)
+		t.Fatal(e)
 	} else if addr != nil {
 		var script []byte
 		TstRunWithManagerUnlocked(t, p.Manager(), addrmgrNs, func() {
 			script, e = addr.Script()
 		})
 		if e != nil  {
-			t.ftl.Ln(e)
+			t.Fatal(e)
 		}
 		return script
 	}
@@ -110,7 +110,7 @@ func TstEnsureUsedAddr(t *testing.T, dbtx walletdb.ReadWriteTx, p *Pool, seriesI
 		e = p.EnsureUsedAddr(ns, addrmgrNs, seriesID, branch, idx)
 	})
 	if e != nil  {
-		t.ftl.Ln(e)
+		t.Fatal(e)
 	}
 	return TstNewDepositScript(t, p, seriesID, branch, idx)
 }
@@ -118,11 +118,11 @@ func TstCreatePkScript(t *testing.T, dbtx walletdb.ReadWriteTx, p *Pool, seriesI
 	script := TstEnsureUsedAddr(t, dbtx, p, seriesID, branch, idx)
 	addr, e := p.addressFor(script)
 	if e != nil  {
-		t.ftl.Ln(e)
+		t.Fatal(e)
 	}
 	pkScript, e := txscript.PayToAddrScript(addr)
 	if e != nil  {
-		t.ftl.Ln(e)
+		t.Fatal(e)
 	}
 	return pkScript
 }
@@ -147,7 +147,7 @@ func TstCreateSeries(t *testing.T, dbtx walletdb.ReadWriteTx, pool *Pool, defini
 		TstRunWithManagerUnlocked(t, pool.Manager(), addrmgrNs, func() {
 			for _, key := range def.PrivKeys {
 				if e := pool.EmpowerSeries(ns, def.SeriesID, key); E.Chk(e) {
-					t.ftl.Ln(e)
+					t.Fatal(e)
 				}
 			}
 		})
@@ -157,7 +157,7 @@ func TstCreateSeries(t *testing.T, dbtx walletdb.ReadWriteTx, pool *Pool, defini
 func TstCreateMasterKey(t *testing.T, seed []byte) *hdkeychain.ExtendedKey {
 	key, e := hdkeychain.NewMaster(seed, &chaincfg.MainNetParams)
 	if e != nil  {
-		t.ftl.Ln(e)
+		t.Fatal(e)
 	}
 	return key
 }
@@ -211,7 +211,7 @@ func TstCreateSeriesCredits(t *testing.T, dbtx walletdb.ReadWriteTx, pool *Pool,
 	addr := TstNewWithdrawalAddress(t, dbtx, pool, seriesID, Branch(1), Index(0))
 	pkScript, e := txscript.PayToAddrScript(addr.addr)
 	if e != nil  {
-		t.ftl.Ln(e)
+		t.Fatal(e)
 	}
 	msgTx := createMsgTx(pkScript, amounts)
 	txHash := msgTx.TxHash()
@@ -255,16 +255,16 @@ func TstCreateCreditsOnStore(t *testing.T, dbtx walletdb.ReadWriteTx, s *wtxmgr.
 	}
 	rec, e := wtxmgr.NewTxRecordFromMsgTx(msgTx, time.Now())
 	if e != nil  {
-		t.ftl.Ln(e)
+		t.Fatal(e)
 	}
 	txmgrNs := dbtx.ReadWriteBucket(txmgrNamespaceKey)
 	if e := s.InsertTx(txmgrNs, rec, meta); E.Chk(e) {
-		t.ftl.Ln("Failed to create inputs: ", e)
+		t.Fatal("Failed to create inputs: ", e)
 	}
 	credits := make([]wtxmgr.Credit, len(msgTx.TxOut))
 	for i := range msgTx.TxOut {
 		if e := s.AddCredit(txmgrNs, rec, meta, uint32(i), false); E.Chk(e) {
-			t.ftl.Ln("Failed to create inputs: ", e)
+			t.Fatal("Failed to create inputs: ", e)
 		}
 		credits[i] = wtxmgr.Credit{
 			OutPoint: wire.OutPoint{
@@ -418,7 +418,7 @@ func createAndFulfillWithdrawalRequests(t *testing.T, dbtx walletdb.ReadWriteTx,
 	lastSeriesID := seriesID
 	w := newWithdrawal(roundID, requests, eligible, *changeStart)
 	if e := w.fulfillRequests(); E.Chk(e) {
-		t.ftl.Ln(e)
+		t.Fatal(e)
 	}
 	return withdrawalInfo{
 		requests:      requests,

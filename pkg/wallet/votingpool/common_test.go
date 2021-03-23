@@ -5,12 +5,12 @@ import (
 	"runtime"
 	"testing"
 	
-	"github.com/p9c/pod/pkg/database/walletdb"
-	waddrmgr "github.com/p9c/pod/pkg/wallet/waddrmgr"
+	"github.com/p9c/pod/pkg/wallet/waddrmgr"
+	"github.com/p9c/pod/pkg/walletdb"
 )
 
 func init() {
-
+	
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	// Enable logging (Debug level) to aid debugging failing tests.
 	// Log.SetLevel("debug")
@@ -20,30 +20,34 @@ func init() {
 func TstCheckError(t *testing.T, testName string, gotErr error, wantErrCode ErrorCode) {
 	vpErr, ok := gotErr.(VPError)
 	if !ok {
-		t.Errorf("%s: unexpected error type - got %T (%s), want %T",
-			testName, gotErr, gotErr, VPError{})
+		t.Errorf(
+			"%s: unexpected error type - got %T (%s), want %T",
+			testName, gotErr, gotErr, VPError{},
+		)
 	}
 	if vpErr.ErrorCode != wantErrCode {
-		t.Errorf("%s: unexpected error code - got %s (%s), want %s",
-			testName, vpErr.ErrorCode, vpErr, wantErrCode)
+		t.Errorf(
+			"%s: unexpected error code - got %s (%s), want %s",
+			testName, vpErr.ErrorCode, vpErr, wantErrCode,
+		)
 	}
 }
 
 // TstRunWithManagerUnlocked calls the given callback with the manager unlocked, and locks it again before returning.
 func TstRunWithManagerUnlocked(t *testing.T, mgr *waddrmgr.Manager, addrmgrNs walletdb.ReadBucket, callback func()) {
 	if e := mgr.Unlock(addrmgrNs, privPassphrase); E.Chk(e) {
-		t.F.Ln(e)
+		t.Fatal(e)
 	}
 	defer func() {
 		e := mgr.Lock()
-		if e != nil  {
+		if e != nil {
 			t.Log(e)
 		}
 	}()
 	callback()
 }
 
-// TstCheckWithdrawalStatusMatches compares s1 and s2 using reflect.DeepEqual and calls t.F.Ln() if they're not
+// TstCheckWithdrawalStatusMatches compares s1 and s2 using reflect.DeepEqual and calls t.Fatal() if they're not
 // identical.
 func TstCheckWithdrawalStatusMatches(t *testing.T, s1, s2 WithdrawalStatus) {
 	if s1.Fees() != s2.Fees() {

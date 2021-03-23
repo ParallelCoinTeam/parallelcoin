@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"time"
 	
-	"github.com/p9c/pod/pkg/database/walletdb"
+	"github.com/p9c/pod/pkg/walletdb"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/legacy/keystore"
 	"github.com/p9c/pod/pkg/util/prompt"
@@ -17,7 +17,7 @@ import (
 	"github.com/p9c/pod/pkg/wire"
 	
 	// This initializes the bdb driver
-	_ "github.com/p9c/pod/pkg/database/walletdb/bdb"
+	_ "github.com/p9c/pod/pkg/walletdb/bdb"
 )
 
 const slash = string(os.PathSeparator)

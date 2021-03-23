@@ -15,7 +15,7 @@ import (
 	
 	"github.com/p9c/pod/pkg/gui"
 	"github.com/p9c/pod/pkg/gui/cfg"
-	p9icons "github.com/p9c/pod/pkg/gui/ico/svg"
+	p9icons "github.com/p9c/pod/pkg/icons/svg"
 )
 
 func (wg *WalletGUI) GetAppWidget() (a *gui.App) {

@@ -3,16 +3,16 @@ package gui
 import (
 	"encoding/json"
 	"github.com/p9c/pod/cmd/kopach/control/p2padvt"
-	"github.com/p9c/pod/pkg/comm/transport"
 	"github.com/p9c/pod/pkg/podcfg"
+	"github.com/p9c/pod/pkg/transport"
 	"github.com/p9c/pod/pkg/wire"
 	"io/ioutil"
 	"path/filepath"
 	"time"
 	
 	"github.com/p9c/pod/pkg/chainhash"
-	"github.com/p9c/pod/pkg/rpc/btcjson"
-	"github.com/p9c/pod/pkg/rpc/rpcclient"
+	"github.com/p9c/pod/pkg/btcjson"
+	"github.com/p9c/pod/pkg/rpcclient"
 	"github.com/p9c/pod/pkg/util"
 )
 

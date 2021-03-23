@@ -160,12 +160,12 @@ func TestNewUnsignedTransaction(t *testing.T) {
 	}
 	changeSource := func() ([]byte, error) {
 		// Only length matters for these tests.
-		return make([]byte, txsizes.P2WPKHPkScriptSize), nil
+		return make([]byte, txsizes.P2PKHPkScriptSize), nil
 	}
 	for i, test := range tests {
 		inputSource := makeInputSource(test.UnspentOutputs)
 		tx, e := NewUnsignedTransaction(test.Outputs, test.RelayFee, inputSource, changeSource)
-		switch e := err.(type) {
+		switch e := e.(type) {
 		case nil:
 		case InputSourceError:
 			if !test.InputSourceError {

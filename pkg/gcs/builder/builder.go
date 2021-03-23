@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"math"
 	
-	chainhash "github.com/p9c/pod/pkg/chainhash"
-	txscript "github.com/p9c/pod/pkg/txscript"
-	"github.com/p9c/pod/pkg/wire"
+	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/gcs"
+	"github.com/p9c/pod/pkg/txscript"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 const (
@@ -18,8 +18,8 @@ const (
 	DefaultM uint64 = 784931
 )
 
-// GCSBuilder is a utility class that makes building GCS filters convenient.
-type GCSBuilder struct {
+// GCS is a utility class that makes building GCS filters convenient.
+type GCS struct {
 	p   uint8
 	m   uint64
 	key [gcs.KeySize]byte
@@ -53,7 +53,7 @@ func DeriveKey(keyHash *chainhash.Hash) [gcs.KeySize]byte {
 
 // Key retrieves the key with which the builder will build a filter. This is useful if the builder is created with a
 // random initial key.
-func (b *GCSBuilder) Key() ([gcs.KeySize]byte, error) {
+func (b *GCS) Key() ([gcs.KeySize]byte, error) {
 	// Do nothing if the builder's errored out.
 	if b.err != nil {
 		return [gcs.KeySize]byte{}, b.err
@@ -62,7 +62,7 @@ func (b *GCSBuilder) Key() ([gcs.KeySize]byte, error) {
 }
 
 // SetKey sets the key with which the builder will build a filter to the passed [gcs.KeySize]byte.
-func (b *GCSBuilder) SetKey(key [gcs.KeySize]byte) *GCSBuilder {
+func (b *GCS) SetKey(key [gcs.KeySize]byte) *GCS {
 	// Do nothing if the builder's already errored out.
 	if b.err != nil {
 		return b
@@ -73,7 +73,7 @@ func (b *GCSBuilder) SetKey(key [gcs.KeySize]byte) *GCSBuilder {
 
 // SetKeyFromHash sets the key with which the builder will build a filter to a key derived from the passed
 // chainhash.Hash using DeriveKey().
-func (b *GCSBuilder) SetKeyFromHash(keyHash *chainhash.Hash) *GCSBuilder {
+func (b *GCS) SetKeyFromHash(keyHash *chainhash.Hash) *GCS {
 	// Do nothing if the builder's already errored out.
 	if b.err != nil {
 		return b
@@ -82,7 +82,7 @@ func (b *GCSBuilder) SetKeyFromHash(keyHash *chainhash.Hash) *GCSBuilder {
 }
 
 // SetP sets the filter's probability after calling Builder().
-func (b *GCSBuilder) SetP(p uint8) *GCSBuilder {
+func (b *GCS) SetP(p uint8) *GCS {
 	// Do nothing if the builder's already errored out.
 	if b.err != nil {
 		return b
@@ -97,7 +97,7 @@ func (b *GCSBuilder) SetP(p uint8) *GCSBuilder {
 }
 
 // SetM sets the filter's modulous value after calling Builder().
-func (b *GCSBuilder) SetM(m uint64) *GCSBuilder {
+func (b *GCS) SetM(m uint64) *GCS {
 	// Do nothing if the builder's already errored out.
 	if b.err != nil {
 		return b
@@ -113,7 +113,7 @@ func (b *GCSBuilder) SetM(m uint64) *GCSBuilder {
 
 // Preallocate sets the estimated filter size after calling Builder() to reduce the probability of memory reallocations.
 // If the builder has already had data added to it, Preallocate has no effect.
-func (b *GCSBuilder) Preallocate(n uint32) *GCSBuilder {
+func (b *GCS) Preallocate(n uint32) *GCS {
 	// Do nothing if the builder's already errored out.
 	if b.err != nil {
 		return b
@@ -125,7 +125,7 @@ func (b *GCSBuilder) Preallocate(n uint32) *GCSBuilder {
 }
 
 // AddEntry adds a []byte to the list of entries to be included in the GCS filter when it's built.
-func (b *GCSBuilder) AddEntry(data []byte) *GCSBuilder {
+func (b *GCS) AddEntry(data []byte) *GCS {
 	// Do nothing if the builder's already errored out.
 	if b.err != nil {
 		return b
@@ -136,7 +136,7 @@ func (b *GCSBuilder) AddEntry(data []byte) *GCSBuilder {
 
 // AddEntries adds all the []byte entries in a [][]byte to the list of entries to be included in the GCS filter when
 // it's built.
-func (b *GCSBuilder) AddEntries(data [][]byte) *GCSBuilder {
+func (b *GCS) AddEntries(data [][]byte) *GCS {
 	// Do nothing if the builder's already errored out.
 	if b.err != nil {
 		return b
@@ -148,7 +148,7 @@ func (b *GCSBuilder) AddEntries(data [][]byte) *GCSBuilder {
 }
 
 // AddHash adds a chainhash.Hash to the list of entries to be included in the GCS filter when it's built.
-func (b *GCSBuilder) AddHash(hash *chainhash.Hash) *GCSBuilder {
+func (b *GCS) AddHash(hash *chainhash.Hash) *GCS {
 	// Do nothing if the builder's already errored out.
 	if b.err != nil {
 		return b
@@ -158,7 +158,7 @@ func (b *GCSBuilder) AddHash(hash *chainhash.Hash) *GCSBuilder {
 
 // AddWitness adds each item of the passed filter stack to the filter, and then
 // adds each item as a script.
-func (b *GCSBuilder) AddWitness(witness wire.TxWitness) *GCSBuilder {
+func (b *GCS) AddWitness(witness wire.TxWitness) *GCS {
 	// Do nothing if the builder's already errored out.
 	if b.err != nil {
 		return b
@@ -167,7 +167,7 @@ func (b *GCSBuilder) AddWitness(witness wire.TxWitness) *GCSBuilder {
 }
 
 // Build returns a function which builds a GCS filter with the given parameters and data.
-func (b *GCSBuilder) Build() (*gcs.Filter, error) {
+func (b *GCS) Build() (*gcs.Filter, error) {
 	// Do nothing if the builder's already errored out.
 	if b.err != nil {
 		return nil, b.err
@@ -186,66 +186,66 @@ func (b *GCSBuilder) Build() (*gcs.Filter, error) {
 	return gcs.BuildGCSFilter(b.p, b.m, b.key, dataSlice)
 }
 
-// WithKeyPNM creates a GCSBuilder with specified key and the passed probability, modulus and estimated filter size.
-func WithKeyPNM(key [gcs.KeySize]byte, p uint8, n uint32, m uint64) *GCSBuilder {
-	b := GCSBuilder{}
+// WithKeyPNM creates a GCS with specified key and the passed probability, modulus and estimated filter size.
+func WithKeyPNM(key [gcs.KeySize]byte, p uint8, n uint32, m uint64) *GCS {
+	b := GCS{}
 	return b.SetKey(key).SetP(p).SetM(m).Preallocate(n)
 }
 
-// WithKeyPM creates a GCSBuilder with specified key and the passed probability. Estimated filter size is set to zero,
+// WithKeyPM creates a GCS with specified key and the passed probability. Estimated filter size is set to zero,
 // which means more reallocations are done when building the filter.
-func WithKeyPM(key [gcs.KeySize]byte, p uint8, m uint64) *GCSBuilder {
+func WithKeyPM(key [gcs.KeySize]byte, p uint8, m uint64) *GCS {
 	return WithKeyPNM(key, p, 0, m)
 }
 
-// WithKey creates a GCSBuilder with specified key. Probability is set to 19 (2^-19 collision probability). Estimated
+// WithKey creates a GCS with specified key. Probability is set to 19 (2^-19 collision probability). Estimated
 // filter size is set to zero, which means more reallocations are done when building the filter.
-func WithKey(key [gcs.KeySize]byte) *GCSBuilder {
+func WithKey(key [gcs.KeySize]byte) *GCS {
 	return WithKeyPNM(key, DefaultP, 0, DefaultM)
 }
 
-// WithKeyHashPNM creates a GCSBuilder with key derived from the specified chainhash.Hash and the passed probability and
+// WithKeyHashPNM creates a GCS with key derived from the specified chainhash.Hash and the passed probability and
 // estimated filter size.
 func WithKeyHashPNM(
 	keyHash *chainhash.Hash, p uint8, n uint32,
 	m uint64,
-) *GCSBuilder {
+) *GCS {
 	return WithKeyPNM(DeriveKey(keyHash), p, n, m)
 }
 
-// WithKeyHashPM creates a GCSBuilder with key derived from the specified chainhash.Hash and the passed probability.
+// WithKeyHashPM creates a GCS with key derived from the specified chainhash.Hash and the passed probability.
 // Estimated filter size is set to zero, which means more reallocations are done when building the filter.
-func WithKeyHashPM(keyHash *chainhash.Hash, p uint8, m uint64) *GCSBuilder {
+func WithKeyHashPM(keyHash *chainhash.Hash, p uint8, m uint64) *GCS {
 	return WithKeyHashPNM(keyHash, p, 0, m)
 }
 
-// WithKeyHash creates a GCSBuilder with key derived from the specified chainhash.Hash. Probability is set to 20 (2^-20
+// WithKeyHash creates a GCS with key derived from the specified chainhash.Hash. Probability is set to 20 (2^-20
 // collision probability). Estimated filter size is set to zero, which means more reallocations are done when building
 // the filter.
-func WithKeyHash(keyHash *chainhash.Hash) *GCSBuilder {
+func WithKeyHash(keyHash *chainhash.Hash) *GCS {
 	return WithKeyHashPNM(keyHash, DefaultP, 0, DefaultM)
 }
 
-// WithRandomKeyPNM creates a GCSBuilder with a cryptographically random key and the passed probability and estimated
+// WithRandomKeyPNM creates a GCS with a cryptographically random key and the passed probability and estimated
 // filter size.
-func WithRandomKeyPNM(p uint8, n uint32, m uint64) *GCSBuilder {
+func WithRandomKeyPNM(p uint8, n uint32, m uint64) *GCS {
 	key, e := RandomKey()
 	if e != nil {
-		b := GCSBuilder{err: e}
+		b := GCS{err: e}
 		return &b
 	}
 	return WithKeyPNM(key, p, n, m)
 }
 
-// WithRandomKeyPM creates a GCSBuilder with a cryptographically random key and the passed probability. Estimated filter
+// WithRandomKeyPM creates a GCS with a cryptographically random key and the passed probability. Estimated filter
 // size is set to zero, which means more reallocations are done when building the filter.
-func WithRandomKeyPM(p uint8, m uint64) *GCSBuilder {
+func WithRandomKeyPM(p uint8, m uint64) *GCS {
 	return WithRandomKeyPNM(p, 0, m)
 }
 
-// WithRandomKey creates a GCSBuilder with a cryptographically random key. Probability is set to 20 (2^-20 collision
+// WithRandomKey creates a GCS with a cryptographically random key. Probability is set to 20 (2^-20 collision
 // probability). Estimated filter size is set to zero, which means more reallocations are done when building the filter.
-func WithRandomKey() *GCSBuilder {
+func WithRandomKey() *GCS {
 	return WithRandomKeyPNM(DefaultP, 0, DefaultM)
 }
 

@@ -126,6 +126,8 @@ func showCandidate(
 }
 func main() {
 	// Load configuration and parse command line.
+	var tcfg *config
+	var e error
 	tcfg, _, e = loadConfig()
 	if e != nil {
 		return
@@ -134,7 +136,7 @@ func main() {
 	// Load the block database.
 	db, e := loadBlockDB()
 	if e != nil {
-		Error("failed to load database:", err)
+		E.Ln("failed to load database:", e)
 		return
 	}
 	defer func() {
@@ -150,7 +152,7 @@ func main() {
 		},
 	)
 	if e != nil {
-		Error("failed to initialize chain: %v\n", err)
+		E.Ln("failed to initialize chain: %v\n", e)
 		return
 	}
 	// Get the latest block hash and height from the database and report status.
@@ -159,12 +161,12 @@ func main() {
 	// Find checkpoint candidates.
 	candidates, e := findCandidates(chain, &best.Hash)
 	if e != nil {
-		Error("Unable to identify candidates:", err)
+		E.Ln("Unable to identify candidates:", e)
 		return
 	}
 	// No candidates.
 	if len(candidates) == 0 {
-		Error("No candidates found.")
+		E.Ln("No candidates found.")
 		return
 	}
 	// Show the candidates.

@@ -86,7 +86,7 @@ func TestBIP0113Activation(t *testing.T) {
 	podCfg := []string{"--rejectnonstd"}
 	r, e := rpctest.New(&netparams.SimNetParams, nil, podCfg)
 	if e != nil  {
-		t.ftl.Ln("unable to create primary harness: ", err)
+		t.Fatal("unable to create primary harness: ", err)
 	}
 	if e := r.SetUp(true, 1); dbg.Chk(e) {
 		t.Fatalf("unable to setup test chain: %v", err)
@@ -204,7 +204,7 @@ func TestBIP0113Activation(t *testing.T) {
 		// _before_ the current MTP.
 		_, e = r.Node.SendRawTransaction(tx, true)
 		if e ==  nil && timeLockDelta >= 0 {
-			t.ftl.Ln("transaction was accepted into the mempool " +
+			t.Fatal("transaction was accepted into the mempool " +
 				"but should be rejected!")
 		} else if e != nil  && !strings.Contains(err.Error(), "not finalized") {
 			t.Fatalf("transaction should be rejected from mempool "+
@@ -213,7 +213,7 @@ func TestBIP0113Activation(t *testing.T) {
 		txns = []*util.Tx{util.NewTx(tx)}
 		_, e := r.GenerateAndSubmitBlock(txns, ^uint32(0), time.Time{})
 		if e ==  nil && timeLockDelta >= 0 {
-			t.ftl.Ln("block should be rejected due to non-final " +
+			t.Fatal("block should be rejected due to non-final " +
 				"txn, but was accepted")
 		} else if e != nil  && !strings.Contains(err.Error(), "unfinalized") {
 			t.Fatalf("block should be rejected due to non-final "+
@@ -297,7 +297,7 @@ func assertTxInBlock(r *rpctest.Harness, t *testing.T, blockHash *chainhash.Hash
 		t.Fatalf("unable to get block: %v", err)
 	}
 	if len(block.Transactions) < 2 {
-		t.ftl.Ln("target transaction was not mined")
+		t.Fatal("target transaction was not mined")
 	}
 	for _, txn := range block.Transactions {
 		txHash := txn.TxHash()
@@ -329,7 +329,7 @@ func TestBIP0068AndBIP0112Activation(t *testing.T) {
 	podCfg := []string{"--rejectnonstd"}
 	r, e := rpctest.New(&netparams.SimNetParams, nil, podCfg)
 	if e != nil  {
-		t.ftl.Ln("unable to create primary harness: ", err)
+		t.Fatal("unable to create primary harness: ", err)
 	}
 	if e := r.SetUp(true, 1); dbg.Chk(e) {
 		t.Fatalf("unable to setup test chain: %v", err)

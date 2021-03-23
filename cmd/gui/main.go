@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"github.com/niubaoshu/gotiny"
 	"github.com/p9c/pod/cmd/kopach/control/p2padvt"
-	"github.com/p9c/pod/pkg/comm/transport"
 	"github.com/p9c/pod/pkg/logg"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/podcfg"
+	"github.com/p9c/pod/pkg/transport"
 	"github.com/tyler-smith/go-bip39"
 	"net"
 	"os"
@@ -21,7 +21,7 @@ import (
 	uberatomic "go.uber.org/atomic"
 	
 	"github.com/p9c/pod/pkg/gui"
-	"github.com/p9c/pod/pkg/rpc/btcjson"
+	"github.com/p9c/pod/pkg/btcjson"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/util/qu"
 	
@@ -35,7 +35,7 @@ import (
 	"github.com/p9c/pod/pkg/apputil"
 	
 	"github.com/p9c/pod/pkg/gui/cfg"
-	"github.com/p9c/pod/pkg/rpc/rpcclient"
+	"github.com/p9c/pod/pkg/rpcclient"
 )
 
 func Main(cx *pod.State, c *cli.Context) (e error) {

@@ -59,11 +59,11 @@ const maxHeight = 20 * uint32(wire.CFCheckptInterval)
 // 		// is created, we query it to add to the slices.
 // 		genesisBlockHeader, _, e = hdrStore.ChainTip()
 // 		if e != nil  {
-// 			t.F.Ln(e)
+// 			t.Fatal(e)
 // 		}
 // 		genesisFilterHeader, _, e = cfStore.ChainTip()
 // 		if e != nil  {
-// 			t.F.Ln(e)
+// 			t.Fatal(e)
 // 		}
 // 		headers, e := generateHeaders(genesisBlockHeader,
 // 			genesisFilterHeader, nil)
@@ -136,7 +136,7 @@ const maxHeight = 20 * uint32(wire.CFCheckptInterval)
 // 		// Finally make sure the filter header tip is what we expect.
 // 		tip, tipHeight, e := cfStore.ChainTip()
 // 		if e != nil  {
-// 			t.F.Ln(e)
+// 			t.Fatal(e)
 // 		}
 // 		if tipHeight != maxHeight {
 // 			t.Fatalf("expected tip height to be %v, was %v",
@@ -219,11 +219,11 @@ const maxHeight = 20 * uint32(wire.CFCheckptInterval)
 // 		// is created, we query it to add to the slices.
 // 		genesisBlockHeader, _, e = hdrStore.ChainTip()
 // 		if e != nil  {
-// 			t.F.Ln(e)
+// 			t.Fatal(e)
 // 		}
 // 		genesisFilterHeader, _, e = cfStore.ChainTip()
 // 		if e != nil  {
-// 			t.F.Ln(e)
+// 			t.Fatal(e)
 // 		}
 // 		// To emulate a full node serving us filter headers derived
 // 		// from different genesis than what we have, we flip a bit in

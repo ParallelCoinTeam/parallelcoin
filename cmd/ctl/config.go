@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	
 	"github.com/p9c/pod/pkg/appdata"
-	"github.com/p9c/pod/pkg/rpc/btcjson"
+	"github.com/p9c/pod/pkg/btcjson"
 )
 
 // unusableFlags are the command usage flags which this utility are not able to use. In particular it doesn't support

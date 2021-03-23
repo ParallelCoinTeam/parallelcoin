@@ -43,7 +43,7 @@ func BenchmarkGCSFilterBuild50000(b *testing.B) {
 			P, M, key, randFilterElems,
 		)
 		if e != nil  {
-			b.Fatalf("unable to generate filter: %v", err)
+			b.Fatalf("unable to generate filter: %v", e)
 		}
 	}
 	generatedFilter = localFilter
@@ -67,7 +67,7 @@ func BenchmarkGCSFilterBuild100000(b *testing.B) {
 			P, M, key, randFilterElems,
 		)
 		if e != nil  {
-			b.Fatalf("unable to generate filter: %v", err)
+			b.Fatalf("unable to generate filter: %v", e)
 		}
 	}
 	generatedFilter = localFilter
@@ -91,11 +91,11 @@ func BenchmarkGCSFilterMatch(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		_, e = filter.Match(key, []byte("Nate"))
 		if e != nil  {
-			b.Fatalf("unable to match filter: %v", err)
+			b.Fatalf("unable to match filter: %v", e)
 		}
 		localMatch, e = filter.Match(key, []byte("Nates"))
 		if e != nil  {
-			b.Fatalf("unable to match filter: %v", err)
+			b.Fatalf("unable to match filter: %v", e)
 		}
 	}
 	match = localMatch
@@ -115,7 +115,7 @@ func BenchmarkGCSFilterMatchAny(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		localMatch, e = filter.MatchAny(key, contents2)
 		if e != nil  {
-			b.Fatalf("unable to match filter: %v", err)
+			b.Fatalf("unable to match filter: %v", e)
 		}
 	}
 	match = localMatch

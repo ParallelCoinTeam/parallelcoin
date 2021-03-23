@@ -11,8 +11,8 @@ import (
 	"sync"
 	
 	"github.com/p9c/pod/pkg/chainhash"
-	"github.com/p9c/pod/pkg/wire"
 	"github.com/p9c/pod/pkg/database"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 const (

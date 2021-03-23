@@ -81,8 +81,8 @@ func TestScriptNumBytes(t *testing.T) {
 func TestMakeScriptNum(t *testing.T) {
 	t.Parallel()
 	// Errors used in the tests below defined here for convenience and to keep the horizontal test size shorter.
-	errNumTooBig := scriptError(errNumberTooBig, "")
-	errMinimalData := scriptError(errMinimalData, "")
+	errNumTooBig := scriptError(ErrNumberTooBig, "")
+	errMinimalData := scriptError(ErrMinimalData, "")
 	tests := []struct {
 		serialized      []byte
 		num             scriptNum
@@ -176,7 +176,7 @@ func TestMakeScriptNum(t *testing.T) {
 		// instance.
 		gotNum, e := makeScriptNum(test.serialized, test.minimalEncoding,
 			test.numLen)
-		if e := tstCheckScriptError(err, test.err); e != nil {
+		if e := tstCheckScriptError(e, test.err); e != nil {
 			t.Errorf("makeScriptNum(%#x): %v", test.serialized, e)
 			continue
 		}

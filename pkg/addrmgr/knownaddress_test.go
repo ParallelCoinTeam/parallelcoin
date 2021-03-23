@@ -45,7 +45,7 @@ func TestChance(t *testing.T) {
 	e := .0001
 	for i, test := range tests {
 		chance := addrmgr.TstKnownAddressChance(test.addr)
-		if math.Abs(test.expected-chance) >= err {
+		if math.Abs(test.expected-chance) >= e {
 			t.Errorf("case %d: got %f, expected %f", i, chance, test.expected)
 		}
 	}

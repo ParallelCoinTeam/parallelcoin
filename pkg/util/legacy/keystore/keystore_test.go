@@ -3,6 +3,7 @@ package keystore
 import (
 	"bytes"
 	"crypto/rand"
+	"github.com/p9c/pod/pkg/chaincfg"
 	"math/big"
 	"reflect"
 	"testing"
@@ -31,41 +32,42 @@ func TestBtcAddressSerializer(t *testing.T) {
 		mem:   1024,
 		nIter: 5,
 	}
+	var e error
 	if _, e = rand.Read(kdfp.salt[:]); E.Chk(e) {
-		t.Error(err.Error())
+		t.Error(e.Error())
 		return
 	}
 	key := kdf([]byte("banana"), kdfp)
 	privKey := make([]byte, 32)
 	if _, e = rand.Read(privKey); E.Chk(e) {
-		t.Error(err.Error())
+		t.Error(e.Error())
 		return
 	}
 	addr, e := newBtcAddress(fakeWallet, privKey, nil,
 		makeBS(0), true)
 	if e != nil  {
-		t.Error(err.Error())
+		t.Error(e.Error())
 		return
 	}
 	e = addr.encrypt(key)
 	if e != nil  {
-		t.Error(err.Error())
+		t.Error(e.Error())
 		return
 	}
 	buf := new(bytes.Buffer)
 	if _, e = addr.WriteTo(buf); E.Chk(e) {
-		t.Error(err.Error())
+		t.Error(e.Error())
 		return
 	}
 	var readAddr btcAddress
 	readAddr.store = fakeWallet
 	_, e = readAddr.ReadFrom(buf)
 	if e != nil  {
-		t.Error(err.Error())
+		t.Error(e.Error())
 		return
 	}
 	if _, e = readAddr.unlock(key); E.Chk(e) {
-		t.Error(err.Error())
+		t.Error(e.Error())
 		return
 	}
 	if !reflect.DeepEqual(addr, &readAddr) {
@@ -78,19 +80,19 @@ func TestScriptAddressSerializer(t *testing.T) {
 		txscript.OP_DROP}
 	addr, e := newScriptAddress(fakeWallet, script, makeBS(0))
 	if e != nil  {
-		t.Error(err.Error())
+		t.Error(e.Error())
 		return
 	}
 	buf := new(bytes.Buffer)
 	if _, e = addr.WriteTo(buf); E.Chk(e) {
-		t.Error(err.Error())
+		t.Error(e.Error())
 		return
 	}
 	var readAddr scriptAddress
 	readAddr.store = fakeWallet
 	_, e = readAddr.ReadFrom(buf)
 	if e != nil  {
-		t.Error(err.Error())
+		t.Error(e.Error())
 		return
 	}
 	if !reflect.DeepEqual(addr, &readAddr) {
@@ -102,18 +104,18 @@ func TestWalletCreationSerialization(t *testing.T) {
 	w1, e := New(dummyDir, "A wallet for testing.",
 		[]byte("banana"), tstNetParams, createdAt)
 	if e != nil  {
-		t.Error("ScriptError creating new wallet: " + err.Error())
+		t.Error("ScriptError creating new wallet: " + e.Error())
 		return
 	}
 	buf := new(bytes.Buffer)
 	if _, e = w1.WriteTo(buf); E.Chk(e) {
-		t.Error("ScriptError writing new wallet: " + err.Error())
+		t.Error("ScriptError writing new wallet: " + e.Error())
 		return
 	}
 	w2 := new(Store)
 	_, e = w2.ReadFrom(buf)
 	if e != nil  {
-		t.Error("ScriptError reading newly written wallet: " + err.Error())
+		t.Error("ScriptError reading newly written wallet: " + e.Error())
 		return
 	}
 	e = w1.Lock()
@@ -125,11 +127,11 @@ func TestWalletCreationSerialization(t *testing.T) {
 		t.Log(e)
 	}
 	if e = w1.Unlock([]byte("banana")); E.Chk(e) {
-		t.Error("Decrypting original wallet failed: " + err.Error())
+		t.Error("Decrypting original wallet failed: " + e.Error())
 		return
 	}
 	if e = w2.Unlock([]byte("banana")); E.Chk(e) {
-		t.Error("Decrypting newly read wallet failed: " + err.Error())
+		t.Error("Decrypting newly read wallet failed: " + e.Error())
 		return
 	}
 	//	if !reflect.DeepEqual(w1, w2) {
@@ -194,13 +196,13 @@ func TestChaining(t *testing.T) {
 		nextPrivUncompressed, e := chainedPrivKey(test.origPrivateKey,
 			origPubUncompressed, test.cc)
 		if e != nil  {
-			t.Errorf("%s: Uncompressed chainedPrivKey failed: %v", test.name, err)
+			t.Errorf("%s: Uncompressed chainedPrivKey failed: %v", test.name, e)
 			return
 		}
 		nextPrivCompressed, e := chainedPrivKey(test.origPrivateKey,
 			origPubCompressed, test.cc)
 		if e != nil  {
-			t.Errorf("%s: Compressed chainedPrivKey failed: %v", test.name, err)
+			t.Errorf("%s: Compressed chainedPrivKey failed: %v", test.name, e)
 			return
 		}
 		// Verify that the new private keys match the expected values
@@ -222,12 +224,12 @@ func TestChaining(t *testing.T) {
 		// pubkeys (without using the original's private key).
 		nextPubUncompressedFromPub, e := chainedPubKey(origPubUncompressed, test.cc)
 		if e != nil  {
-			t.Errorf("%s: Uncompressed chainedPubKey failed: %v", test.name, err)
+			t.Errorf("%s: Uncompressed chainedPubKey failed: %v", test.name, e)
 			return
 		}
 		nextPubCompressedFromPub, e := chainedPubKey(origPubCompressed, test.cc)
 		if e != nil  {
-			t.Errorf("%s: Compressed chainedPubKey failed: %v", test.name, err)
+			t.Errorf("%s: Compressed chainedPubKey failed: %v", test.name, e)
 			return
 		}
 		// Public keys (used to generate the bitcoin address) MUST match.
@@ -253,12 +255,12 @@ func TestChaining(t *testing.T) {
 		// the next pubkeys.
 		pubkeyUncompressed, e := ec.ParsePubKey(nextPubUncompressedFromPub, ec.S256())
 		if e != nil  {
-			t.Errorf("%s: Unable to parse next uncompressed pubkey: %v", test.name, err)
+			t.Errorf("%s: Unable to parse next uncompressed pubkey: %v", test.name, e)
 			return
 		}
 		pubkeyCompressed, e := ec.ParsePubKey(nextPubCompressedFromPub, ec.S256())
 		if e != nil  {
-			t.Errorf("%s: Unable to parse next compressed pubkey: %v", test.name, err)
+			t.Errorf("%s: Unable to parse next compressed pubkey: %v", test.name, e)
 			return
 		}
 		privkeyUncompressed := &ec.PrivateKey{
@@ -273,7 +275,7 @@ func TestChaining(t *testing.T) {
 		sig, e := privkeyUncompressed.Sign([]byte(data))
 		if e != nil  {
 			t.Errorf("%s: Unable to sign data with next private key (chained from uncompressed pubkey): %v",
-				test.name, err)
+				test.name, e)
 			return
 		}
 		ok := sig.Verify([]byte(data), privkeyUncompressed.PubKey())
@@ -285,7 +287,7 @@ func TestChaining(t *testing.T) {
 		sig, e = privkeyCompressed.Sign([]byte(data))
 		if e != nil  {
 			t.Errorf("%s: Unable to sign data with next private key (chained from compressed pubkey): %v",
-				test.name, err)
+				test.name, e)
 			return
 		}
 		ok = sig.Verify([]byte(data), privkeyCompressed.PubKey())
@@ -300,7 +302,7 @@ func TestWalletPubkeyChaining(t *testing.T) {
 	w, e := New(dummyDir, "A wallet for testing.",
 		[]byte("banana"), tstNetParams, makeBS(0))
 	if e != nil  {
-		t.Error("ScriptError creating new wallet: " + err.Error())
+		t.Error("ScriptError creating new wallet: " + e.Error())
 		return
 	}
 	if !w.IsLocked() {
@@ -310,14 +312,14 @@ func TestWalletPubkeyChaining(t *testing.T) {
 	// off the last pubkey, not privkey.
 	addrWithoutPrivkey, e := w.NextChainedAddress(makeBS(0))
 	if e != nil  {
-		t.Errorf("Failed to extend address chain from pubkey: %v", err)
+		t.Errorf("Failed to extend address chain from pubkey: %v", e)
 		return
 	}
 	// Lookup address info.  This should succeed even without the private
 	// key available.
 	info, e := w.Address(addrWithoutPrivkey)
 	if e != nil  {
-		t.Errorf("Failed to get info about address without private key: %v", err)
+		t.Errorf("Failed to get info about address without private key: %v", e)
 		return
 	}
 	pkinfo := info.(PubKeyAddress)
@@ -343,23 +345,23 @@ func TestWalletPubkeyChaining(t *testing.T) {
 	serializedWallet := new(bytes.Buffer)
 	_, e = w.WriteTo(serializedWallet)
 	if e != nil  {
-		t.Errorf("ScriptError writing wallet with missing private key: %v", err)
+		t.Errorf("ScriptError writing wallet with missing private key: %v", e)
 		return
 	}
 	w2 := new(Store)
 	_, e = w2.ReadFrom(serializedWallet)
 	if e != nil  {
-		t.Errorf("ScriptError reading wallet with missing private key: %v", err)
+		t.Errorf("ScriptError reading wallet with missing private key: %v", e)
 		return
 	}
 	// Unlock wallet.  This should trigger creating the private key for
 	// the address.
 	if e = w.Unlock([]byte("banana")); E.Chk(e) {
-		t.Errorf("Can't unlock original wallet: %v", err)
+		t.Errorf("Can't unlock original wallet: %v", e)
 		return
 	}
 	if e = w2.Unlock([]byte("banana")); E.Chk(e) {
-		t.Errorf("Can't unlock re-read wallet: %v", err)
+		t.Errorf("Can't unlock re-read wallet: %v", e)
 		return
 	}
 	// Same address, better variable name.
@@ -367,7 +369,7 @@ func TestWalletPubkeyChaining(t *testing.T) {
 	// Try a private key lookup again.  The private key should now be available.
 	key1, e := pka.PrivKey()
 	if e != nil  {
-		t.Errorf("Private key for original wallet was not created! %v", err)
+		t.Errorf("Private key for original wallet was not created! %v", e)
 		return
 	}
 	info2, e := w.Address(addrWithPrivKey)
@@ -377,7 +379,7 @@ func TestWalletPubkeyChaining(t *testing.T) {
 	pka2 := info2.(PubKeyAddress)
 	key2, e := pka2.PrivKey()
 	if e != nil  {
-		t.Errorf("Private key for re-read wallet was not created! %v", err)
+		t.Errorf("Private key for re-read wallet was not created! %v", e)
 		return
 	}
 	// Keys returned by both wallets must match.
@@ -389,7 +391,7 @@ func TestWalletPubkeyChaining(t *testing.T) {
 	hash := []byte("hash to sign")
 	sig, e := key1.Sign(hash)
 	if e != nil  {
-		t.Errorf("Unable to sign hash with the created private key: %v", err)
+		t.Errorf("Unable to sign hash with the created private key: %v", e)
 		return
 	}
 	pubKey := pkinfo.PubKey()
@@ -400,25 +402,25 @@ func TestWalletPubkeyChaining(t *testing.T) {
 	}
 	nextAddr, e := w.NextChainedAddress(makeBS(0))
 	if e != nil  {
-		t.Errorf("Unable to create next address after finding the privkey: %v", err)
+		t.Errorf("Unable to create next address after finding the privkey: %v", e)
 		return
 	}
 	nextInfo, e := w.Address(nextAddr)
 	if e != nil  {
-		t.Errorf("Couldn't get info about the next address in the chain: %v", err)
+		t.Errorf("Couldn't get info about the next address in the chain: %v", e)
 		return
 	}
 	nextPkInfo := nextInfo.(PubKeyAddress)
 	nextKey, e := nextPkInfo.PrivKey()
 	if e != nil  {
-		t.Errorf("Couldn't get private key for the next address in the chain: %v", err)
+		t.Errorf("Couldn't get private key for the next address in the chain: %v", e)
 		return
 	}
 	// Do a signature check here as well, this time for the next
 	// address after the one made without the private key.
 	sig, e = nextKey.Sign(hash)
 	if e != nil  {
-		t.Errorf("Unable to sign hash with the created private key: %v", err)
+		t.Errorf("Unable to sign hash with the created private key: %v", e)
 		return
 	}
 	pubKey = nextPkInfo.PubKey()
@@ -440,7 +442,7 @@ func TestWalletPubkeyChaining(t *testing.T) {
 	}
 	e = w2.Unlock([]byte("banana"))
 	if e != nil  {
-		t.Errorf("Unlock after serialize/deserialize failed: %v", err)
+		t.Errorf("Unlock after serialize/deserialize failed: %v", e)
 		return
 	}
 }
@@ -449,7 +451,7 @@ func TestWatchingWalletExport(t *testing.T) {
 	w, e := New(dummyDir, "A wallet for testing.",
 		[]byte("banana"), tstNetParams, createdAt)
 	if e != nil  {
-		t.Error("ScriptError creating new wallet: " + err.Error())
+		t.Error("ScriptError creating new wallet: " + e.Error())
 		return
 	}
 	// Maintain a set of the active addresses in the wallet.
@@ -459,7 +461,7 @@ func TestWatchingWalletExport(t *testing.T) {
 	// Create watching wallet from w.
 	ww, e := w.ExportWatchingWallet()
 	if e != nil  {
-		t.Errorf("Could not create watching wallet: %v", err)
+		t.Errorf("Could not create watching wallet: %v", e)
 		return
 	}
 	// Verify correctness of wallet flags.
@@ -527,7 +529,7 @@ func TestWatchingWalletExport(t *testing.T) {
 	// Chk that the new addresses created by each wallet match.  The
 	// original wallet is unlocked so addresses are chained with privkeys.
 	if e := w.Unlock([]byte("banana")); E.Chk(e) {
-		t.Errorf("Unlocking original wallet failed: %v", err)
+		t.Errorf("Unlocking original wallet failed: %v", e)
 	}
 	// Test that ExtendActiveAddresses for the watching wallet match
 	// manually requested addresses of the original wallet.
@@ -535,14 +537,14 @@ func TestWatchingWalletExport(t *testing.T) {
 	for i := 0; i < 10; i++ {
 		addr, e := w.NextChainedAddress(createdAt)
 		if e != nil  {
-			t.Errorf("Cannot get next chained address for original wallet: %v", err)
+			t.Errorf("Cannot get next chained address for original wallet: %v", e)
 			return
 		}
 		newAddrs = append(newAddrs, addr)
 	}
 	newWWAddrs, e := ww.ExtendActiveAddresses(10)
 	if e != nil  {
-		t.Errorf("Cannot extend active addresses for watching wallet: %v", err)
+		t.Errorf("Cannot extend active addresses for watching wallet: %v", e)
 		return
 	}
 	for i := range newAddrs {
@@ -557,14 +559,14 @@ func TestWatchingWalletExport(t *testing.T) {
 	for i := 0; i < 10; i++ {
 		addr, e := ww.NextChainedAddress(createdAt)
 		if e != nil  {
-			t.Errorf("Cannot get next chained address for watching wallet: %v", err)
+			t.Errorf("Cannot get next chained address for watching wallet: %v", e)
 			return
 		}
 		newWWAddrs = append(newWWAddrs, addr)
 	}
 	newAddrs, e = w.ExtendActiveAddresses(10)
 	if e != nil  {
-		t.Errorf("Cannot extend active addresses for original wallet: %v", err)
+		t.Errorf("Cannot extend active addresses for original wallet: %v", e)
 		return
 	}
 	for i := range newAddrs {
@@ -577,13 +579,13 @@ func TestWatchingWalletExport(t *testing.T) {
 	buf := new(bytes.Buffer)
 	_, e = ww.WriteTo(buf)
 	if e != nil  {
-		t.Errorf("Cannot write watching wallet: %v", err)
+		t.Errorf("Cannot write watching wallet: %v", e)
 		return
 	}
 	ww2 := new(Store)
 	_, e = ww2.ReadFrom(buf)
 	if e != nil  {
-		t.Errorf("Cannot read watching wallet: %v", err)
+		t.Errorf("Cannot read watching wallet: %v", e)
 		return
 	}
 	// Chk that (de)serialized watching wallet matches the exported wallet.
@@ -592,12 +594,12 @@ func TestWatchingWalletExport(t *testing.T) {
 		return
 	}
 	// Verify that nonsensical functions fail with correct error.
-	if e := ww.Lock(); err != ErrWatchingOnly {
-		t.Errorf("Nonsensical func Lock returned no or incorrect error: %v", err)
+	if e := ww.Lock(); e != ErrWatchingOnly {
+		t.Errorf("Nonsensical func Lock returned no or incorrect error: %v", e)
 		return
 	}
-	if e := ww.Unlock([]byte("banana")); err != ErrWatchingOnly {
-		t.Errorf("Nonsensical func Unlock returned no or incorrect error: %v", err)
+	if e := ww.Unlock([]byte("banana")); e != ErrWatchingOnly {
+		t.Errorf("Nonsensical func Unlock returned no or incorrect error: %v", e)
 		return
 	}
 	generator, e := ww.Address(w.keyGenerator.Address())
@@ -605,21 +607,21 @@ func TestWatchingWalletExport(t *testing.T) {
 		t.Errorf("generator isnt' present in wallet")
 	}
 	gpk := generator.(PubKeyAddress)
-	if _, e = gpk.PrivKey(); err != ErrWatchingOnly {
-		t.Errorf("Nonsensical func AddressKey returned no or incorrect error: %v", err)
+	if _, e = gpk.PrivKey(); e != ErrWatchingOnly {
+		t.Errorf("Nonsensical func AddressKey returned no or incorrect error: %v", e)
 		return
 	}
-	if _, e = ww.ExportWatchingWallet(); err != ErrWatchingOnly {
-		t.Errorf("Nonsensical func ExportWatchingWallet returned no or incorrect error: %v", err)
+	if _, e = ww.ExportWatchingWallet(); e != ErrWatchingOnly {
+		t.Errorf("Nonsensical func ExportWatchingWallet returned no or incorrect error: %v", e)
 		return
 	}
 	pk, _ := ec.PrivKeyFromBytes(ec.S256(), make([]byte, 32))
 	wif, e := util.NewWIF(pk, tstNetParams, true)
 	if e != nil  {
-		t.F.Ln(e)
+		t.Fatal(e)
 	}
-	if _, e = ww.ImportPrivateKey(wif, createdAt); err != ErrWatchingOnly {
-		t.Errorf("Nonsensical func ImportPrivateKey returned no or incorrect error: %v", err)
+	if _, e = ww.ImportPrivateKey(wif, createdAt); e != ErrWatchingOnly {
+		t.Errorf("Nonsensical func ImportPrivateKey returned no or incorrect error: %v", e)
 		return
 	}
 }
@@ -629,16 +631,16 @@ func TestImportPrivateKey(t *testing.T) {
 	w, e := New(dummyDir, "A wallet for testing.",
 		[]byte("banana"), tstNetParams, createdAt)
 	if e != nil  {
-		t.Error("ScriptError creating new wallet: " + err.Error())
+		t.Error("ScriptError creating new wallet: " + e.Error())
 		return
 	}
 	if e = w.Unlock([]byte("banana")); E.Chk(e) {
-		t.Errorf("Can't unlock original wallet: %v", err)
+		t.Errorf("Can't unlock original wallet: %v", e)
 		return
 	}
 	pk, e := ec.NewPrivateKey(ec.S256())
 	if e != nil  {
-		t.Error("ScriptError generating private key: " + err.Error())
+		t.Error("ScriptError generating private key: " + e.Error())
 		return
 	}
 	// verify that the entire wallet's sync height matches the
@@ -650,25 +652,25 @@ func TestImportPrivateKey(t *testing.T) {
 	// import priv key
 	wif, e := util.NewWIF(pk, tstNetParams, false)
 	if e != nil  {
-		t.F.Ln(e)
+		t.Fatal(e)
 	}
 	importHeight := int32(50)
 	importedAt := makeBS(importHeight)
 	address, e := w.ImportPrivateKey(wif, importedAt)
 	if e != nil  {
-		t.Error("importing private key: " + err.Error())
+		t.Error("importing private key: " + e.Error())
 		return
 	}
 	addr, e := w.Address(address)
 	if e != nil  {
-		t.Error("privkey just imported missing: " + err.Error())
+		t.Error("privkey just imported missing: " + e.Error())
 		return
 	}
 	pka := addr.(PubKeyAddress)
 	// lookup address
 	pk2, e := pka.PrivKey()
 	if e != nil  {
-		t.Error("error looking up key: " + err.Error())
+		t.Error("error looking up key: " + e.Error())
 	}
 	if !reflect.DeepEqual(pk, pk2) {
 		t.Error("original and looked-up private keys do not match.")
@@ -684,13 +686,13 @@ func TestImportPrivateKey(t *testing.T) {
 	buf := new(bytes.Buffer)
 	_, e = w.WriteTo(buf)
 	if e != nil  {
-		t.Errorf("Cannot write wallet: %v", err)
+		t.Errorf("Cannot write wallet: %v", e)
 		return
 	}
 	w2 := new(Store)
 	_, e = w2.ReadFrom(buf)
 	if e != nil  {
-		t.Errorf("Cannot read wallet: %v", err)
+		t.Errorf("Cannot read wallet: %v", e)
 		return
 	}
 	// Verify that the  sync height match expected after the reserialization.
@@ -702,7 +704,7 @@ func TestImportPrivateKey(t *testing.T) {
 	// the import height and the chain height.
 	partialHeight := (createHeight-importHeight)/2 + importHeight
 	if e := w2.SetSyncStatus(address, PartialSync(partialHeight)); E.Chk(e) {
-		t.Errorf("Cannot mark address partially synced: %v", err)
+		t.Errorf("Cannot mark address partially synced: %v", e)
 		return
 	}
 	if _, h := w2.SyncedTo(); h != partialHeight {
@@ -713,13 +715,13 @@ func TestImportPrivateKey(t *testing.T) {
 	buf.Reset()
 	_, e = w2.WriteTo(buf)
 	if e != nil  {
-		t.Errorf("Cannot write wallet: %v", err)
+		t.Errorf("Cannot write wallet: %v", e)
 		return
 	}
 	w3 := new(Store)
 	_, e = w3.ReadFrom(buf)
 	if e != nil  {
-		t.Errorf("Cannot read wallet: %v", err)
+		t.Errorf("Cannot read wallet: %v", e)
 		return
 	}
 	// Test correct partial height after serialization.
@@ -731,7 +733,7 @@ func TestImportPrivateKey(t *testing.T) {
 	// Mark imported address as not synced at all, and verify sync height is now
 	// the import height.
 	if e := w3.SetSyncStatus(address, Unsynced(0)); E.Chk(e) {
-		t.Errorf("Cannot mark address synced: %v", err)
+		t.Errorf("Cannot mark address synced: %v", e)
 		return
 	}
 	if _, h := w3.SyncedTo(); h != importHeight {
@@ -742,7 +744,7 @@ func TestImportPrivateKey(t *testing.T) {
 	// that the sync height now equals the most recent block (the one at wallet
 	// creation).
 	if e := w3.SetSyncStatus(address, FullSync{}); E.Chk(e) {
-		t.Errorf("Cannot mark address synced: %v", err)
+		t.Errorf("Cannot mark address synced: %v", e)
 		return
 	}
 	if _, h := w3.SyncedTo(); h != createHeight {
@@ -750,20 +752,20 @@ func TestImportPrivateKey(t *testing.T) {
 		return
 	}
 	if e = w3.Unlock([]byte("banana")); E.Chk(e) {
-		t.Errorf("Can't unlock deserialised wallet: %v", err)
+		t.Errorf("Can't unlock deserialised wallet: %v", e)
 		return
 	}
 	addr3, e := w3.Address(address)
 	if e != nil  {
 		t.Error("privkey in deserialised wallet missing : " +
-			err.Error())
+			e.Error())
 		return
 	}
 	pka3 := addr3.(PubKeyAddress)
 	// lookup address
 	pk2, e = pka3.PrivKey()
 	if e != nil  {
-		t.Error("error looking up key in deserialized wallet: " + err.Error())
+		t.Error("error looking up key in deserialized wallet: " + e.Error())
 	}
 	if !reflect.DeepEqual(pk, pk2) {
 		t.Error("original and deserialized private keys do not match.")
@@ -776,11 +778,11 @@ func TestImportScript(t *testing.T) {
 	w, e := New(dummyDir, "A wallet for testing.",
 		[]byte("banana"), tstNetParams, createdAt)
 	if e != nil  {
-		t.Error("ScriptError creating new wallet: " + err.Error())
+		t.Error("ScriptError creating new wallet: " + e.Error())
 		return
 	}
 	if e = w.Unlock([]byte("banana")); E.Chk(e) {
-		t.Errorf("Can't unlock original wallet: %v", err)
+		t.Errorf("Can't unlock original wallet: %v", e)
 		return
 	}
 	// verify that the entire wallet's sync height matches the
@@ -795,13 +797,13 @@ func TestImportScript(t *testing.T) {
 	stamp := makeBS(importHeight)
 	address, e := w.ImportScript(script, stamp)
 	if e != nil  {
-		t.Error("error importing script: " + err.Error())
+		t.Error("error importing script: " + e.Error())
 		return
 	}
 	// lookup address
 	ainfo, e := w.Address(address)
 	if e != nil  {
-		t.Error("error looking up script: " + err.Error())
+		t.Error("error looking up script: " + e.Error())
 	}
 	sinfo := ainfo.(ScriptAddress)
 	if !bytes.Equal(script, sinfo.Script()) {
@@ -870,13 +872,13 @@ func TestImportScript(t *testing.T) {
 	buf := new(bytes.Buffer)
 	_, e = w.WriteTo(buf)
 	if e != nil  {
-		t.Errorf("Cannot write wallet: %v", err)
+		t.Errorf("Cannot write wallet: %v", e)
 		return
 	}
 	w2 := new(Store)
 	_, e = w2.ReadFrom(buf)
 	if e != nil  {
-		t.Errorf("Cannot read wallet: %v", err)
+		t.Errorf("Cannot read wallet: %v", e)
 		return
 	}
 	// Verify that the sync height matches expected after the reserialization.
@@ -887,7 +889,7 @@ func TestImportScript(t *testing.T) {
 	// lookup address
 	ainfo2, e := w2.Address(address)
 	if e != nil  {
-		t.Error("error looking up info in deserialized wallet: " + err.Error())
+		t.Error("error looking up info in deserialized wallet: " + e.Error())
 	}
 	sinfo2 := ainfo2.(ScriptAddress)
 	// Chk all the same again. We can't use reflect.DeepEquals since
@@ -961,7 +963,7 @@ func TestImportScript(t *testing.T) {
 	// the import height and the chain height.
 	partialHeight := (createHeight-importHeight)/2 + importHeight
 	if e := w2.SetSyncStatus(address, PartialSync(partialHeight)); E.Chk(e) {
-		t.Errorf("Cannot mark address partially synced: %v", err)
+		t.Errorf("Cannot mark address partially synced: %v", e)
 		return
 	}
 	if _, h := w2.SyncedTo(); h != partialHeight {
@@ -972,13 +974,13 @@ func TestImportScript(t *testing.T) {
 	buf.Reset()
 	_, e = w2.WriteTo(buf)
 	if e != nil  {
-		t.Errorf("Cannot write wallet: %v", err)
+		t.Errorf("Cannot write wallet: %v", e)
 		return
 	}
 	w3 := new(Store)
 	_, e = w3.ReadFrom(buf)
 	if e != nil  {
-		t.Errorf("Cannot read wallet: %v", err)
+		t.Errorf("Cannot read wallet: %v", e)
 		return
 	}
 	// Test correct partial height after serialization.
@@ -990,7 +992,7 @@ func TestImportScript(t *testing.T) {
 	// Mark imported address as not synced at all, and verify sync height is now
 	// the import height.
 	if e := w3.SetSyncStatus(address, Unsynced(0)); E.Chk(e) {
-		t.Errorf("Cannot mark address synced: %v", err)
+		t.Errorf("Cannot mark address synced: %v", e)
 		return
 	}
 	if _, h := w3.SyncedTo(); h != importHeight {
@@ -1001,7 +1003,7 @@ func TestImportScript(t *testing.T) {
 	// that the sync height now equals the most recent block (the one at wallet
 	// creation).
 	if e := w3.SetSyncStatus(address, FullSync{}); E.Chk(e) {
-		t.Errorf("Cannot mark address synced: %v", err)
+		t.Errorf("Cannot mark address synced: %v", e)
 		return
 	}
 	if _, h := w3.SyncedTo(); h != createHeight {
@@ -1009,7 +1011,7 @@ func TestImportScript(t *testing.T) {
 		return
 	}
 	if e = w3.Unlock([]byte("banana")); E.Chk(e) {
-		t.Errorf("Can't unlock deserialised wallet: %v", err)
+		t.Errorf("Can't unlock deserialised wallet: %v", e)
 		return
 	}
 }
@@ -1018,17 +1020,17 @@ func TestChangePassphrase(t *testing.T) {
 	w, e := New(dummyDir, "A wallet for testing.",
 		[]byte("banana"), tstNetParams, createdAt)
 	if e != nil  {
-		t.Error("ScriptError creating new wallet: " + err.Error())
+		t.Error("ScriptError creating new wallet: " + e.Error())
 		return
 	}
 	// Changing the passphrase with a locked wallet must fail with ErrWalletLocked.
-	if e := w.ChangePassphrase([]byte("potato")); err != ErrLocked {
-		t.Errorf("Changing passphrase on a locked wallet did not fail correctly: %v", err)
+	if e := w.ChangePassphrase([]byte("potato")); e != ErrLocked {
+		t.Errorf("Changing passphrase on a locked wallet did not fail correctly: %v", e)
 		return
 	}
 	// Unlock wallet so the passphrase can be changed.
 	if e := w.Unlock([]byte("banana")); E.Chk(e) {
-		t.Errorf("Cannot unlock: %v", err)
+		t.Errorf("Cannot unlock: %v", e)
 		return
 	}
 	// Get root address and its private key.  This is compared to the private
@@ -1036,18 +1038,18 @@ func TestChangePassphrase(t *testing.T) {
 	rootAddr := w.LastChainedAddress()
 	rootAddrInfo, e := w.Address(rootAddr)
 	if e != nil  {
-		t.Error("can't find root address: " + err.Error())
+		t.Error("can't find root address: " + e.Error())
 		return
 	}
 	rapka := rootAddrInfo.(PubKeyAddress)
 	rootPrivKey, e := rapka.PrivKey()
 	if e != nil  {
-		t.Errorf("Cannot get root address' private key: %v", err)
+		t.Errorf("Cannot get root address' private key: %v", e)
 		return
 	}
 	// Change passphrase.
 	if e := w.ChangePassphrase([]byte("potato")); E.Chk(e) {
-		t.Errorf("Changing passphrase failed: %v", err)
+		t.Errorf("Changing passphrase failed: %v", e)
 		return
 	}
 	// Wallet should still be unlocked.
@@ -1057,29 +1059,29 @@ func TestChangePassphrase(t *testing.T) {
 	}
 	// Lock it.
 	if e := w.Lock(); E.Chk(e) {
-		t.Errorf("Cannot lock wallet after passphrase change: %v", err)
+		t.Errorf("Cannot lock wallet after passphrase change: %v", e)
 		return
 	}
 	// Unlock with old passphrase.  This must fail with ErrWrongPassphrase.
-	if e := w.Unlock([]byte("banana")); err != ErrWrongPassphrase {
-		t.Errorf("Unlocking with old passphrases did not fail correctly: %v", err)
+	if e := w.Unlock([]byte("banana")); e != ErrWrongPassphrase {
+		t.Errorf("Unlocking with old passphrases did not fail correctly: %v", e)
 		return
 	}
 	// Unlock with new passphrase.  This must succeed.
 	if e := w.Unlock([]byte("potato")); E.Chk(e) {
-		t.Errorf("Unlocking with new passphrase failed: %v", err)
+		t.Errorf("Unlocking with new passphrase failed: %v", e)
 		return
 	}
 	// Get root address' private key again.
 	rootAddrInfo2, e := w.Address(rootAddr)
 	if e != nil  {
-		t.Error("can't find root address: " + err.Error())
+		t.Error("can't find root address: " + e.Error())
 		return
 	}
 	rapka2 := rootAddrInfo2.(PubKeyAddress)
 	rootPrivKey2, e := rapka2.PrivKey()
 	if e != nil  {
-		t.Errorf("Cannot get root address' private key after passphrase change: %v", err)
+		t.Errorf("Cannot get root address' private key after passphrase change: %v", e)
 		return
 	}
 	// Private keys must match.

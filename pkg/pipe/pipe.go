@@ -18,7 +18,7 @@ func Consume(quit qu.C, handler func([]byte) error, args ...string) *worker.Work
 	D.Ln("spawning worker process", args)
 	w, _ := worker.Spawn(quit, args...)
 	data := make([]byte, 8192)
-	onBackup := false
+	// onBackup := false
 	go func() {
 	out:
 		for {
@@ -35,14 +35,14 @@ func Consume(quit qu.C, handler func([]byte) error, args ...string) *worker.Work
 			n, e = w.StdConn.Read(data)
 			if n == 0 {
 				F.Ln("read zero from stdconn", args)
-				onBackup = true
+				// onBackup = true
 				logg.LogChanDisabled.Store(true)
 				break out
 			}
 			if E.Chk(e) && e != io.EOF {
 				// Probably the child process has died, so quit
 				E.Ln("err:", e)
-				onBackup = true
+				// onBackup = true
 				break out
 			} else if n > 0 {
 				if e = handler(data[:n]); E.Chk(e) {

@@ -3,9 +3,9 @@ package blockchain_test
 import (
 	"os"
 	
-	"github.com/p9c/pod/pkg/wire"
-	database "github.com/p9c/pod/pkg/database"
+	"github.com/p9c/pod/pkg/database"
 	_ "github.com/p9c/pod/pkg/database/ffldb"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 const (
@@ -19,8 +19,9 @@ const (
 
 // filesExists returns whether or not the named file or directory exists.
 func fileExists(name string) bool {
+	var e error
 	if _, e = os.Stat(name); E.Chk(e) {
-		if os.IsNotExist(err) {
+		if os.IsNotExist(e) {
 			return false
 		}
 	}

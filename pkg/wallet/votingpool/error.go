@@ -147,5 +147,5 @@ func (e VPError) Error() string {
 
 // newError creates a new VPError.
 func newError(c ErrorCode, desc string, e error) VPError {
-	return VPError{ErrorCode: c, Description: desc, Err: err}
+	return VPError{ErrorCode: c, Description: desc, Err: e}
 }

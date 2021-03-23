@@ -17,7 +17,7 @@ func BenchmarkBlockHeader(b *testing.B) {
 	_ = os.RemoveAll(dbPath)
 	db, e := database.Create("ffldb", dbPath, blockDataNet)
 	if e != nil  {
-		b.F.Ln(err)
+		b.Fatal(e)
 	}
 	defer func() {
 		if e := os.RemoveAll(dbPath); E.Chk(e) {
@@ -32,7 +32,7 @@ func BenchmarkBlockHeader(b *testing.B) {
 		return tx.StoreBlock(block)
 	})
 	if e != nil  {
-		b.F.Ln(err)
+		b.Fatal(e)
 	}
 	b.ReportAllocs()
 	b.ResetTimer()
@@ -47,7 +47,7 @@ func BenchmarkBlockHeader(b *testing.B) {
 		return nil
 	})
 	if e != nil  {
-		b.F.Ln(err)
+		b.Fatal(e)
 	}
 	// Don't benchmark teardown.
 	b.StopTimer()
@@ -60,7 +60,7 @@ func BenchmarkBlock(b *testing.B) {
 	_ = os.RemoveAll(dbPath)
 	db, e := database.Create("ffldb", dbPath, blockDataNet)
 	if e != nil  {
-		b.F.Ln(err)
+		b.Fatal(e)
 	}
 	defer func() {
 		if e := os.RemoveAll(dbPath); E.Chk(e) {
@@ -75,7 +75,7 @@ func BenchmarkBlock(b *testing.B) {
 		return tx.StoreBlock(block)
 	})
 	if e != nil  {
-		b.F.Ln(err)
+		b.Fatal(e)
 	}
 	b.ReportAllocs()
 	b.ResetTimer()
@@ -90,7 +90,7 @@ func BenchmarkBlock(b *testing.B) {
 		return nil
 	})
 	if e != nil  {
-		b.F.Ln(err)
+		b.Fatal(e)
 	}
 	// Don't benchmark teardown.
 	b.StopTimer()

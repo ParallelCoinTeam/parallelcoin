@@ -9,6 +9,7 @@ import (
 	"time"
 	
 	"github.com/p9c/pod/pkg/blockchain"
+	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/chainhash"
 	ec "github.com/p9c/pod/pkg/ecc"
 	"github.com/p9c/pod/pkg/txscript"
@@ -454,7 +455,7 @@ func TestOrphanReject(t *testing.T) {
 		if reflect.TypeOf(e) != reflect.TypeOf(expectedErr) {
 			t.Fatalf(
 				"ProcessTransaction: wrong error got: <%T> %v, "+
-					"want: <%T>", e, err, expectedErr,
+					"want: <%T>", e, e, expectedErr,
 			)
 		}
 		code, extracted := extractRejectCode(e)
@@ -619,14 +620,14 @@ func TestOrphanChainRemoval(t *testing.T) {
 	const maxOrphans = 10
 	harness, spendableOuts, e := newPoolHarness(&chaincfg.MainNetParams)
 	if e != nil {
-		t.Fatalf("unable to create test pool: %v", err)
+		t.Fatalf("unable to create test pool: %v", e)
 	}
 	harness.txPool.cfg.Policy.MaxOrphanTxs = maxOrphans
 	tc := &testContext{t, harness}
 	// Create a chain of transactions rooted with the first spendable output provided by the harness.
 	chainedTxns, e := harness.CreateTxChain(spendableOuts[0], maxOrphans+1)
 	if e != nil {
-		t.Fatalf("unable to create transaction chain: %v", err)
+		t.Fatalf("unable to create transaction chain: %v", e)
 	}
 	// Ensure the orphans are accepted (only up to the maximum allowed so none are evicted).
 	for _, tx := range chainedTxns[1 : maxOrphans+1] {
@@ -677,14 +678,14 @@ func TestMultiInputOrphanDoubleSpend(t *testing.T) {
 	const maxOrphans = 4
 	harness, outputs, e := newPoolHarness(&chaincfg.MainNetParams)
 	if e != nil {
-		t.Fatalf("unable to create test pool: %v", err)
+		t.Fatalf("unable to create test pool: %v", e)
 	}
 	harness.txPool.cfg.Policy.MaxOrphanTxs = maxOrphans
 	tc := &testContext{t, harness}
 	// Create a chain of transactions rooted with the first spendable output provided by the harness.
 	chainedTxns, e := harness.CreateTxChain(outputs[0], maxOrphans+1)
 	if e != nil {
-		t.Fatalf("unable to create transaction chain: %v", err)
+		t.Fatalf("unable to create transaction chain: %v", e)
 	}
 	// Start by adding the orphan transactions from the generated chain except the final one.
 	for _, tx := range chainedTxns[1:maxOrphans] {
@@ -717,7 +718,7 @@ func TestMultiInputOrphanDoubleSpend(t *testing.T) {
 		}, 1,
 	)
 	if e != nil {
-		t.Fatalf("unable to create signed tx: %v", err)
+		t.Fatalf("unable to create signed tx: %v", e)
 	}
 	acceptedTxns, e := harness.txPool.ProcessTransaction(
 		nil, doubleSpendTx,
@@ -745,7 +746,7 @@ func TestMultiInputOrphanDoubleSpend(t *testing.T) {
 		false, false, 0,
 	)
 	if e != nil {
-		t.Fatalf("ProcessTransaction: failed to accept valid tx %v", err)
+		t.Fatalf("ProcessTransaction: failed to accept valid tx %v", e)
 	}
 	if len(acceptedTxns) != maxOrphans {
 		t.Fatalf(
@@ -768,7 +769,7 @@ func TestCheckSpend(t *testing.T) {
 	t.Parallel()
 	harness, outputs, e := newPoolHarness(&chaincfg.MainNetParams)
 	if e != nil {
-		t.Fatalf("unable to create test pool: %v", err)
+		t.Fatalf("unable to create test pool: %v", e)
 	}
 	// The mempool is empty, so none of the spendable outputs should have a spend there.
 	for _, op := range outputs {
@@ -781,7 +782,7 @@ func TestCheckSpend(t *testing.T) {
 	const txChainLength = 5
 	chainedTxns, e := harness.CreateTxChain(outputs[0], txChainLength)
 	if e != nil {
-		t.Fatalf("unable to create transaction chain: %v", err)
+		t.Fatalf("unable to create transaction chain: %v", e)
 	}
 	for _, tx := range chainedTxns {
 		_, e := harness.txPool.ProcessTransaction(

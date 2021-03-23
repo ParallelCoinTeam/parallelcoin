@@ -23,7 +23,7 @@ type signatureTest struct {
 func decodeHex(hexStr string) []byte {
 	b, e := hex.DecodeString(hexStr)
 	if e != nil  {
-		panic("invalid hex string in test source: err " + e.Error() +
+		panic("invalid hex string in test source: e " + e.Error() +
 			", hex: " + hexStr)
 	}
 	return b
@@ -331,9 +331,9 @@ func TestSignatures(t *testing.T) {
 		if e != nil  {
 			if test.isValid {
 				t.Errorf("%s signature failed when shouldn't %v",
-					test.name, err)
+					test.name, e)
 			} /* else {
-			t.Errorf("%s got error %v", test.name, err)
+			t.Errorf("%s got error %v", test.name, e)
 						} */
 			continue
 		}
@@ -451,12 +451,12 @@ func testSignCompact(t *testing.T, tag string, curve *KoblitzCurve,
 	hashed := []byte("testing")
 	sig, e := SignCompact(curve, priv, hashed, isCompressed)
 	if e != nil  {
-		t.Errorf("%s: error signing: %s", tag, err)
+		t.Errorf("%s: error signing: %s", tag, e)
 		return
 	}
 	pk, wasCompressed, e := RecoverCompact(curve, sig, hashed)
 	if e != nil  {
-		t.Errorf("%s: error recovering: %s", tag, err)
+		t.Errorf("%s: error recovering: %s", tag, e)
 		return
 	}
 	if pk.X.Cmp(priv.X) != 0 || pk.Y.Cmp(priv.Y) != 0 {
@@ -477,7 +477,7 @@ func testSignCompact(t *testing.T, tag string, curve *KoblitzCurve,
 	}
 	pk, wasCompressed, e = RecoverCompact(curve, sig, hashed)
 	if e != nil  {
-		t.Errorf("%s: error recovering (2): %s", tag, err)
+		t.Errorf("%s: error recovering (2): %s", tag, e)
 		return
 	}
 	if pk.X.Cmp(priv.X) != 0 || pk.Y.Cmp(priv.Y) != 0 {
@@ -627,7 +627,7 @@ func TestRFC6979(t *testing.T) {
 		gotSig, e := privKey.Sign(hash[:])
 		if e != nil  {
 			t.Errorf("Sign #%d (%s): unexpected error: %v", i,
-				test.msg, err)
+				test.msg, e)
 			continue
 		}
 		gotSigBytes := gotSig.Serialize()

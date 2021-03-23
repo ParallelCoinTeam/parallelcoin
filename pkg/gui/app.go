@@ -10,7 +10,7 @@ import (
 	"gioui.org/text"
 	"gioui.org/unit"
 	
-	p9icons "github.com/p9c/pod/pkg/gui/ico/svg"
+	p9icons "github.com/p9c/pod/pkg/icons/svg"
 )
 
 // App defines an application with a header, sidebar/menu, right side button bar, changeable body page widget and

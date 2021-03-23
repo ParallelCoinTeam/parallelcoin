@@ -9,12 +9,12 @@ import (
 func TestGenerateSharedSecret(t *testing.T) {
 	privKey1, e := NewPrivateKey(S256())
 	if e != nil  {
-		t.Errorf("private key generation error: %s", err)
+		t.Errorf("private key generation error: %s", e)
 		return
 	}
 	privKey2, e := NewPrivateKey(S256())
 	if e != nil  {
-		t.Errorf("private key generation error: %s", err)
+		t.Errorf("private key generation error: %s", e)
 		return
 	}
 	secret1 := GenerateSharedSecret(privKey1, privKey2.PubKey())
@@ -34,11 +34,11 @@ func TestCipheringBasic(t *testing.T) {
 	in := []byte("Hey there dude. How are you doing? This is a test.")
 	out, e := Encrypt(privkey.PubKey(), in)
 	if e != nil  {
-		F.Ln("failed to encrypt:", err)
+		F.Ln("failed to encrypt:", e)
 	}
 	dec, e := Decrypt(privkey, out)
 	if e != nil  {
-		F.Ln("failed to decrypt:", err)
+		F.Ln("failed to decrypt:", e)
 	}
 	if !bytes.Equal(in, dec) {
 		t.Error("decrypted data doesn't match original")
@@ -58,7 +58,7 @@ func TestCiphering(t *testing.T) {
 		"6c3f11ff572ddd5b2bedf9f9c0b327c54da02a28fcdce1f8369ffec")
 	dec, e := Decrypt(privkey, out)
 	if e != nil  {
-		F.Ln("failed to decrypt:", err)
+		F.Ln("failed to decrypt:", e)
 	}
 	if !bytes.Equal(in, dec) {
 		t.Error("decrypted data doesn't match original")

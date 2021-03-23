@@ -12,7 +12,7 @@ func ExampleDecode() {
 	encoded := "bc1pw508d6qejxtdg4y5r3zarvary0c5xw7kw508d6qejxtdg4y5r3zarvary0c5xw7k7grplx"
 	hrp, decoded, e := bech32.Decode(encoded)
 	if e != nil  {
-		bech32.Error("Error:", err)
+		E.Ln("Error:", e)
 	}
 	// Show the decoded data.
 	fmt.Println("Decoded human-readable part:", hrp)
@@ -28,11 +28,11 @@ func ExampleEncode() {
 	// Convert test data to base32:
 	conv, e := bech32.ConvertBits(data, 8, 5, true)
 	if e != nil  {
-		bech32.Error("Error:", err)
+		E.Ln("Error:", e)
 	}
 	encoded, e := bech32.Encode("customHrp!11111q", conv)
 	if e != nil  {
-		bech32.Error("Error:", err)
+		E.Ln("Error:", e)
 	}
 	// Show the encoded data.
 	fmt.Println("Encoded Data:", encoded)

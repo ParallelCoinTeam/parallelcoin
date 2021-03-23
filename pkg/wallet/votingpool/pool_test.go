@@ -7,8 +7,8 @@ import (
 	"reflect"
 	"testing"
 	
-	"github.com/p9c/pod/pkg/database/walletdb"
-	_ "github.com/p9c/pod/pkg/database/walletdb/bdb"
+	"github.com/p9c/pod/pkg/walletdb"
+	_ "github.com/p9c/pod/pkg/walletdb/bdb"
 	"github.com/p9c/pod/pkg/util/hdkeychain"
 	waddrmgr "github.com/p9c/pod/pkg/wallet/waddrmgr"
 	vp "github.com/p9c/pod/pkg/wallet/votingpool"
@@ -19,7 +19,7 @@ func TestLoadPoolAndDepositScript(t *testing.T) {
 	defer tearDown()
 	dbtx, e := db.BeginReadWriteTx()
 	if e != nil  {
-		t.F.Ln(e)
+		t.Fatal(e)
 	}
 	defer func() {
 		e := dbtx.Commit()
@@ -33,12 +33,12 @@ func TestLoadPoolAndDepositScript(t *testing.T) {
 	pubKeys := vp.TstPubKeys[0:3]
 	e = vp.LoadAndCreateSeries(ns, pool.Manager(), 1, poolID, 1, 2, pubKeys)
 	if e != nil  {
-		t.Fatalf("Failed to create voting pool and series: %v", err)
+		t.Fatalf("Failed to create voting pool and series: %v", e)
 	}
 	// execute
 	script, e := vp.LoadAndGetDepositScript(ns, pool.Manager(), poolID, 1, 0, 0)
 	if e != nil  {
-		t.Fatalf("Failed to get deposit script: %v", err)
+		t.Fatalf("Failed to get deposit script: %v", e)
 	}
 	// validate
 	strScript := hex.EncodeToString(script)
@@ -53,7 +53,7 @@ func TestLoadPoolAndCreateSeries(t *testing.T) {
 	defer tearDown()
 	dbtx, e := db.BeginReadWriteTx()
 	if e != nil  {
-		t.F.Ln(e)
+		t.Fatal(e)
 	}
 	defer func() {
 		e := dbtx.Commit()
@@ -67,13 +67,13 @@ func TestLoadPoolAndCreateSeries(t *testing.T) {
 	pubKeys := vp.TstPubKeys[0:3]
 	e = vp.LoadAndCreateSeries(ns, pool.Manager(), 1, poolID, 1, 2, pubKeys)
 	if e != nil  {
-		t.Fatalf("Creating voting pool and Creating series failed: %v", err)
+		t.Fatalf("Creating voting pool and Creating series failed: %v", e)
 	}
 	// create another series where the voting pool is loaded this time
 	pubKeys = vp.TstPubKeys[3:6]
 	e = vp.LoadAndCreateSeries(ns, pool.Manager(), 1, poolID, 2, 2, pubKeys)
 	if e != nil  {
-		t.Fatalf("Loading voting pool and Creating series failed: %v", err)
+		t.Fatalf("Loading voting pool and Creating series failed: %v", e)
 	}
 }
 func TestLoadPoolAndReplaceSeries(t *testing.T) {
@@ -81,7 +81,7 @@ func TestLoadPoolAndReplaceSeries(t *testing.T) {
 	defer tearDown()
 	dbtx, e := db.BeginReadWriteTx()
 	if e != nil  {
-		t.F.Ln(e)
+		t.Fatal(e)
 	}
 	defer func() {
 		e := dbtx.Commit()
@@ -95,12 +95,12 @@ func TestLoadPoolAndReplaceSeries(t *testing.T) {
 	pubKeys := vp.TstPubKeys[0:3]
 	e = vp.LoadAndCreateSeries(ns, pool.Manager(), 1, poolID, 1, 2, pubKeys)
 	if e != nil  {
-		t.Fatalf("Failed to create voting pool and series: %v", err)
+		t.Fatalf("Failed to create voting pool and series: %v", e)
 	}
 	pubKeys = vp.TstPubKeys[3:6]
 	e = vp.LoadAndReplaceSeries(ns, pool.Manager(), 1, poolID, 1, 2, pubKeys)
 	if e != nil  {
-		t.Fatalf("Failed to replace series: %v", err)
+		t.Fatalf("Failed to replace series: %v", e)
 	}
 }
 func TestLoadPoolAndEmpowerSeries(t *testing.T) {
@@ -108,7 +108,7 @@ func TestLoadPoolAndEmpowerSeries(t *testing.T) {
 	defer tearDown()
 	dbtx, e := db.BeginReadWriteTx()
 	if e != nil  {
-		t.F.Ln(e)
+		t.Fatal(e)
 	}
 	defer func() {
 		e := dbtx.Commit()
@@ -122,13 +122,13 @@ func TestLoadPoolAndEmpowerSeries(t *testing.T) {
 	pubKeys := vp.TstPubKeys[0:3]
 	e = vp.LoadAndCreateSeries(ns, pool.Manager(), 1, poolID, 1, 2, pubKeys)
 	if e != nil  {
-		t.Fatalf("Creating voting pool and Creating series failed: %v", err)
+		t.Fatalf("Creating voting pool and Creating series failed: %v", e)
 	}
 	vp.TstRunWithManagerUnlocked(t, pool.Manager(), addrmgrNs, func() {
 		e = vp.LoadAndEmpowerSeries(ns, pool.Manager(), poolID, 1, vp.TstPrivKeys[0])
 	})
 	if e != nil  {
-		t.Fatalf("Load voting pool and Empower series failed: %v", err)
+		t.Fatalf("Load voting pool and Empower series failed: %v", e)
 	}
 }
 
@@ -137,12 +137,12 @@ func TestLoadPoolAndEmpowerSeries(t *testing.T) {
 // 	defer tearDown()
 // 	dbtx, e := db.BeginReadWriteTx()
 // 	if e != nil  {
-// 		t.F.Ln(e)
+// 		t.Fatal(e)
 // 	}
 // 	defer func() {
 // e := dbtx.Commit()
 // if e != nil  {
-// 	t.Log( err)
+// 	t.Log( e)
 // }
 // }()
 // 	ns, _ := vp.TstRWNamespaces(dbtx)
@@ -175,7 +175,7 @@ func TestLoadPoolAndEmpowerSeries(t *testing.T) {
 // 		for branch, expectedAddress := range test.addresses {
 // 			addr, e := pool.DepositScriptAddress(test.series, vp.Branch(branch), vp.Index(0))
 // 			if e != nil  {
-// 				t.Fatalf("Failed to get DepositScriptAddress #%d: %v", i, err)
+// 				t.Fatalf("Failed to get DepositScriptAddress #%d: %v", i, e)
 // 			}
 // 			address := addr.EncodeAddress()
 // 			if expectedAddress != address {
@@ -196,12 +196,12 @@ func TestLoadPoolAndEmpowerSeries(t *testing.T) {
 // 	defer tearDown()
 // 	dbtx, e := db.BeginReadWriteTx()
 // 	if e != nil  {
-// 		t.F.Ln(e)
+// 		t.Fatal(e)
 // 	}
 // 	defer func() {
 // e := dbtx.Commit()
 // if e != nil  {
-// 	t.Log( err)
+// 	t.Log( e)
 // }
 // }()
 // 	ns, _ := vp.TstRWNamespaces(dbtx)
@@ -218,7 +218,7 @@ func TestLoadPool(t *testing.T) {
 	defer tearDown()
 	dbtx, e := db.BeginReadWriteTx()
 	if e != nil  {
-		t.F.Ln(e)
+		t.Fatal(e)
 	}
 	defer func() {
 		e := dbtx.Commit()
@@ -229,7 +229,7 @@ func TestLoadPool(t *testing.T) {
 	ns, _ := vp.TstRWNamespaces(dbtx)
 	pool2, e := vp.Load(ns, pool.Manager(), pool.ID)
 	if e != nil  {
-		t.Errorf("DBError loading Pool: %v", err)
+		t.Errorf("DBError loading Pool: %v", e)
 	}
 	if !bytes.Equal(pool2.ID, pool.ID) {
 		t.Errorf("Voting pool obtained from DB does not match the created one")
@@ -240,7 +240,7 @@ func TestCreatePool(t *testing.T) {
 	defer tearDown()
 	dbtx, e := db.BeginReadWriteTx()
 	if e != nil  {
-		t.F.Ln(e)
+		t.Fatal(e)
 	}
 	defer func() {
 		e := dbtx.Commit()
@@ -251,7 +251,7 @@ func TestCreatePool(t *testing.T) {
 	ns, _ := vp.TstRWNamespaces(dbtx)
 	pool2, e := vp.Create(ns, pool.Manager(), []byte{0x02})
 	if e != nil  {
-		t.Errorf("DBError creating Pool: %v", err)
+		t.Errorf("DBError creating Pool: %v", e)
 	}
 	if !bytes.Equal(pool2.ID, []byte{0x02}) {
 		t.Errorf("Pool ID mismatch: got %v, want %v", pool2.ID, []byte{0x02})
@@ -262,7 +262,7 @@ func TestCreatePoolWhenAlreadyExists(t *testing.T) {
 	defer tearDown()
 	dbtx, e := db.BeginReadWriteTx()
 	if e != nil  {
-		t.F.Ln(e)
+		t.Fatal(e)
 	}
 	defer func() {
 		e := dbtx.Commit()
@@ -279,7 +279,7 @@ func TestCreateSeries(t *testing.T) {
 	defer tearDown()
 	dbtx, e := db.BeginReadWriteTx()
 	if e != nil  {
-		t.F.Ln(e)
+		t.Fatal(e)
 	}
 	defer func() {
 		e := dbtx.Commit()
@@ -326,7 +326,7 @@ func TestCreateSeries(t *testing.T) {
 		}
 		exists, e := pool.TstExistsSeries(dbtx, test.series)
 		if e != nil  {
-			t.F.Ln(e)
+			t.Fatal(e)
 		}
 		if !exists {
 			t.Errorf("%d: Series %d not in database", testNum, test.series)
@@ -338,7 +338,7 @@ func TestPoolCreateSeriesInvalidID(t *testing.T) {
 	defer tearDown()
 	dbtx, e := db.BeginReadWriteTx()
 	if e != nil  {
-		t.F.Ln(e)
+		t.Fatal(e)
 	}
 	defer func() {
 		e := dbtx.Commit()
@@ -355,7 +355,7 @@ func TestPoolCreateSeriesWhenAlreadyExists(t *testing.T) {
 	defer tearDown()
 	dbtx, e := db.BeginReadWriteTx()
 	if e != nil  {
-		t.F.Ln(e)
+		t.Fatal(e)
 	}
 	defer func() {
 		e := dbtx.Commit()
@@ -366,7 +366,7 @@ func TestPoolCreateSeriesWhenAlreadyExists(t *testing.T) {
 	ns, _ := vp.TstRWNamespaces(dbtx)
 	pubKeys := vp.TstPubKeys[0:3]
 	if e := pool.CreateSeries(ns, 1, 1, 1, pubKeys); E.Chk(e) {
-		t.Fatalf("Cannot create series: %v", err)
+		t.Fatalf("Cannot create series: %v", e)
 	}
 	e = pool.CreateSeries(ns, 1, 1, 1, pubKeys)
 	vp.TstCheckError(t, "", e, vp.ErrSeriesAlreadyExists)
@@ -376,7 +376,7 @@ func TestPoolCreateSeriesIDNotSequential(t *testing.T) {
 	defer tearDown()
 	dbtx, e := db.BeginReadWriteTx()
 	if e != nil  {
-		t.F.Ln(e)
+		t.Fatal(e)
 	}
 	defer func() {
 		e := dbtx.Commit()
@@ -387,17 +387,17 @@ func TestPoolCreateSeriesIDNotSequential(t *testing.T) {
 	ns, _ := vp.TstRWNamespaces(dbtx)
 	pubKeys := vp.TstPubKeys[0:4]
 	if e := pool.CreateSeries(ns, 1, 1, 2, pubKeys); E.Chk(e) {
-		t.Fatalf("Cannot create series: %v", err)
+		t.Fatalf("Cannot create series: %v", e)
 	}
 	e = pool.CreateSeries(ns, 1, 3, 2, pubKeys)
-	vp.TstCheckError(t, "", err, vp.ErrSeriesIDNotSequential)
+	vp.TstCheckError(t, "", e, vp.ErrSeriesIDNotSequential)
 }
 func TestPutSeriesErrors(t *testing.T) {
 	tearDown, db, pool := vp.TstCreatePool(t)
 	defer tearDown()
 	dbtx, e := db.BeginReadWriteTx()
 	if e != nil  {
-		t.F.Ln(e)
+		t.Fatal(e)
 	}
 	defer func() {
 		e := dbtx.Commit()
@@ -410,39 +410,39 @@ func TestPutSeriesErrors(t *testing.T) {
 		version uint32
 		reqSigs uint32
 		pubKeys []string
-		err     vp.ErrorCode
+		e     vp.ErrorCode
 		msg     string
 	}{
 		{
 			pubKeys: vp.TstPubKeys[0:1],
-			err:     vp.ErrTooFewPublicKeys,
+			e:     vp.ErrTooFewPublicKeys,
 			msg:     "Should return error when passed too few pubkeys",
 		},
 		{
 			reqSigs: 5,
 			pubKeys: vp.TstPubKeys[0:3],
-			err:     vp.ErrTooManyReqSignatures,
+			e:     vp.ErrTooManyReqSignatures,
 			msg:     "Should return error when reqSigs > len(pubKeys)",
 		},
 		{
 			pubKeys: []string{vp.TstPubKeys[0], vp.TstPubKeys[1], vp.TstPubKeys[2], vp.TstPubKeys[0]},
-			err:     vp.ErrKeyDuplicate,
+			e:     vp.ErrKeyDuplicate,
 			msg:     "Should return error when passed duplicate pubkeys",
 		},
 		{
 			pubKeys: []string{"invalidxpub1", "invalidxpub2", "invalidxpub3"},
-			err:     vp.ErrKeyChain,
+			e:     vp.ErrKeyChain,
 			msg:     "Should return error when passed invalid pubkey",
 		},
 		{
 			pubKeys: vp.TstPrivKeys[0:3],
-			err:     vp.ErrKeyIsPrivate,
+			e:     vp.ErrKeyIsPrivate,
 			msg:     "Should return error when passed private keys",
 		},
 	}
 	for i, test := range tests {
 		e := pool.TstPutSeries(ns, test.version, uint32(i+1), test.reqSigs, test.pubKeys)
-		vp.TstCheckError(t, fmt.Sprintf("Create series #%d", i), err, test.err)
+		vp.TstCheckError(t, fmt.Sprintf("Create series #%d", i), e, test.e)
 	}
 }
 func TestCannotReplaceEmpoweredSeries(t *testing.T) {
@@ -450,7 +450,7 @@ func TestCannotReplaceEmpoweredSeries(t *testing.T) {
 	defer tearDown()
 	dbtx, e := db.BeginReadWriteTx()
 	if e != nil  {
-		t.F.Ln(e)
+		t.Fatal(e)
 	}
 	defer func() {
 		e := dbtx.Commit()
@@ -461,23 +461,23 @@ func TestCannotReplaceEmpoweredSeries(t *testing.T) {
 	ns, addrmgrNs := vp.TstRWNamespaces(dbtx)
 	seriesID := uint32(1)
 	if e := pool.CreateSeries(ns, 1, seriesID, 3, vp.TstPubKeys[0:4]); E.Chk(e) {
-		t.Fatalf("Failed to create series: %v", err)
+		t.Fatalf("Failed to create series: %v", e)
 	}
 	vp.TstRunWithManagerUnlocked(t, pool.Manager(), addrmgrNs, func() {
 		if e := pool.EmpowerSeries(ns, seriesID, vp.TstPrivKeys[1]); E.Chk(e) {
-			t.Fatalf("Failed to empower series: %v", err)
+			t.Fatalf("Failed to empower series: %v", e)
 		}
 	})
 	e = pool.ReplaceSeries(ns, 1, seriesID, 2, []string{vp.TstPubKeys[0], vp.TstPubKeys[2],
 		vp.TstPubKeys[3]})
-	vp.TstCheckError(t, "", err, vp.ErrSeriesAlreadyEmpowered)
+	vp.TstCheckError(t, "", e, vp.ErrSeriesAlreadyEmpowered)
 }
 func TestReplaceNonExistingSeries(t *testing.T) {
 	tearDown, db, pool := vp.TstCreatePool(t)
 	defer tearDown()
 	dbtx, e := db.BeginReadWriteTx()
 	if e != nil  {
-		t.F.Ln(e)
+		t.Fatal(e)
 	}
 	defer func() {
 		e := dbtx.Commit()
@@ -488,7 +488,7 @@ func TestReplaceNonExistingSeries(t *testing.T) {
 	ns, _ := vp.TstRWNamespaces(dbtx)
 	pubKeys := vp.TstPubKeys[0:3]
 	e = pool.ReplaceSeries(ns, 1, 1, 3, pubKeys)
-	vp.TstCheckError(t, "", err, vp.ErrSeriesNotExists)
+	vp.TstCheckError(t, "", e, vp.ErrSeriesNotExists)
 }
 
 type replaceSeriesTestEntry struct {
@@ -551,7 +551,7 @@ func TestReplaceExistingSeries(t *testing.T) {
 	defer tearDown()
 	dbtx, e := db.BeginReadWriteTx()
 	if e != nil  {
-		t.F.Ln(e)
+		t.Fatal(e)
 	}
 	defer func() {
 		e := dbtx.Commit()
@@ -565,11 +565,11 @@ func TestReplaceExistingSeries(t *testing.T) {
 		testID := data.testID
 		if e := pool.CreateSeries(ns, data.orig.version, seriesID, data.orig.reqSigs, data.orig.pubKeys); E.Chk(e) {
 			t.Fatalf("Test #%d: failed to create series in replace series setup: %v",
-				testID, err)
+				testID, e)
 		}
 		if e := pool.ReplaceSeries(ns, data.replaceWith.version, seriesID,
 			data.replaceWith.reqSigs, data.replaceWith.pubKeys); E.Chk(e) {
-			t.Errorf("Test #%d: replaceSeries failed: %v", testID, err)
+			t.Errorf("Test #%d: replaceSeries failed: %v", testID, e)
 		}
 		validateReplaceSeries(t, pool, testID, data.replaceWith)
 	}
@@ -605,7 +605,7 @@ func TestEmpowerSeries(t *testing.T) {
 	defer tearDown()
 	dbtx, e := db.BeginReadWriteTx()
 	if e != nil  {
-		t.ftl.Ln(e)
+		t.Fatal(e)
 	}
 	defer func() {
 		e := dbtx.Commit()
@@ -616,11 +616,11 @@ func TestEmpowerSeries(t *testing.T) {
 	ns, addrmgrNs := vp.TstRWNamespaces(dbtx)
 	seriesID := uint32(1)
 	if e := pool.CreateSeries(ns, 1, seriesID, 2, vp.TstPubKeys[0:3]); E.Chk(e) {
-		t.Fatalf("Failed to create series: %v", err)
+		t.Fatalf("Failed to create series: %v", e)
 	}
 	vp.TstRunWithManagerUnlocked(t, pool.Manager(), addrmgrNs, func() {
 		if e := pool.EmpowerSeries(ns, seriesID, vp.TstPrivKeys[0]); E.Chk(e) {
-			t.Errorf("Failed to empower series: %v", err)
+			t.Errorf("Failed to empower series: %v", e)
 		}
 	})
 }
@@ -629,7 +629,7 @@ func TestEmpowerSeriesErrors(t *testing.T) {
 	defer tearDown()
 	dbtx, e := db.BeginReadWriteTx()
 	if e != nil  {
-		t.ftl.Ln(e)
+		t.Fatal(e)
 	}
 	defer func() {
 		e := dbtx.Commit()
@@ -640,41 +640,41 @@ func TestEmpowerSeriesErrors(t *testing.T) {
 	ns, _ := vp.TstRWNamespaces(dbtx)
 	seriesID := uint32(1)
 	if e := pool.CreateSeries(ns, 1, seriesID, 2, vp.TstPubKeys[0:3]); E.Chk(e) {
-		t.Fatalf("Failed to create series: %v", err)
+		t.Fatalf("Failed to create series: %v", e)
 	}
 	tests := []struct {
 		seriesID uint32
 		key      string
-		err      vp.ErrorCode
+		e      vp.ErrorCode
 	}{
 		{
 			seriesID: 2,
 			key:      vp.TstPrivKeys[0],
 			// Invalid series.
-			err: vp.ErrSeriesNotExists,
+			e: vp.ErrSeriesNotExists,
 		},
 		{
 			seriesID: seriesID,
 			key:      "NONSENSE",
 			// Invalid private key.
-			err: vp.ErrKeyChain,
+			e: vp.ErrKeyChain,
 		},
 		{
 			seriesID: seriesID,
 			key:      vp.TstPubKeys[5],
 			// Wrong type of key.
-			err: vp.ErrKeyIsPublic,
+			e: vp.ErrKeyIsPublic,
 		},
 		{
 			seriesID: seriesID,
 			key:      vp.TstPrivKeys[5],
 			// Key not corresponding to public key.
-			err: vp.ErrKeysPrivatePublicMismatch,
+			e: vp.ErrKeysPrivatePublicMismatch,
 		},
 	}
 	for i, test := range tests {
 		e := pool.EmpowerSeries(ns, test.seriesID, test.key)
-		vp.TstCheckError(t, fmt.Sprintf("EmpowerSeries #%d", i), err, test.err)
+		vp.TstCheckError(t, fmt.Sprintf("EmpowerSeries #%d", i), e, test.e)
 	}
 }
 func TestPoolSeries(t *testing.T) {
@@ -682,7 +682,7 @@ func TestPoolSeries(t *testing.T) {
 	defer tearDown()
 	dbtx, e := db.BeginReadWriteTx()
 	if e != nil  {
-		t.ftl.Ln(e)
+		t.Fatal(e)
 	}
 	defer func() {
 		e := dbtx.Commit()
@@ -693,11 +693,11 @@ func TestPoolSeries(t *testing.T) {
 	ns, _ := vp.TstRWNamespaces(dbtx)
 	expectedPubKeys := vp.CanonicalKeyOrder(vp.TstPubKeys[0:3])
 	if e := pool.CreateSeries(ns, vp.CurrentVersion, 1, 2, expectedPubKeys); E.Chk(e) {
-		t.Fatalf("Failed to create series: %v", err)
+		t.Fatalf("Failed to create series: %v", e)
 	}
 	series := pool.Series(1)
 	if series == nil {
-		t.ftl.Ln("Series() returned nil")
+		t.Fatal("Series() returned nil")
 	}
 	pubKeys := series.TstGetRawPublicKeys()
 	if !reflect.DeepEqual(pubKeys, expectedPubKeys) {
@@ -761,20 +761,20 @@ func setUpLoadAllSeries(t *testing.T, dbtx walletdb.ReadWriteTx, mgr *waddrmgr.M
 	ns, addrmgrNs := vp.TstRWNamespaces(dbtx)
 	pool, e := vp.Create(ns, mgr, []byte{byte(test.id + 1)})
 	if e != nil  {
-		t.Fatalf("Voting Pool creation failed: %v", err)
+		t.Fatalf("Voting Pool creation failed: %v", e)
 	}
 	for _, series := range test.series {
 		e := pool.CreateSeries(ns, series.version, series.id,
 			series.reqSigs, series.pubKeys)
 		if e != nil  {
 			t.Fatalf("Test #%d Series #%d: failed to create series: %v",
-				test.id, series.id, err)
+				test.id, series.id, e)
 		}
 		for _, privKey := range series.privKeys {
 			vp.TstRunWithManagerUnlocked(t, mgr, addrmgrNs, func() {
 				if e := pool.EmpowerSeries(ns, series.id, privKey); E.Chk(e) {
 					t.Fatalf("Test #%d Series #%d: empower with privKey %v failed: %v",
-						test.id, series.id, privKey, err)
+						test.id, series.id, privKey, e)
 				}
 			})
 		}
@@ -786,7 +786,7 @@ func TestLoadAllSeries(t *testing.T) {
 	defer tearDown()
 	dbtx, e := db.BeginReadWriteTx()
 	if e != nil  {
-		t.ftl.Ln(e)
+		t.Fatal(e)
 	}
 	defer func() {
 		e := dbtx.Commit()
@@ -800,7 +800,7 @@ func TestLoadAllSeries(t *testing.T) {
 		pool.TstEmptySeriesLookup()
 		vp.TstRunWithManagerUnlocked(t, pool.Manager(), addrmgrNs, func() {
 			if e := pool.LoadAllSeries(ns); E.Chk(e) {
-				t.Fatalf("Test #%d: failed to load voting pool: %v", test.id, err)
+				t.Fatalf("Test #%d: failed to load voting pool: %v", test.id, e)
 			}
 		})
 		for _, seriesData := range test.series {
@@ -860,7 +860,7 @@ func TestBranchOrderZero(t *testing.T) {
 		wantKeys := reverse(inKeys)
 		resKeys, e := vp.TstBranchOrder(inKeys, 0)
 		if e != nil  {
-			t.Fatalf("DBError ordering keys: %v", err)
+			t.Fatalf("DBError ordering keys: %v", e)
 		}
 		if len(resKeys) != len(wantKeys) {
 			t.Errorf("BranchOrder: wrong no. of keys. Got: %d, want %d",
@@ -890,7 +890,7 @@ func TestBranchOrderNonZero(t *testing.T) {
 			wantKeys := append(append(pivot, first...), last...)
 			resKeys, e := vp.TstBranchOrder(inKeys, vp.Branch(branch))
 			if e != nil  {
-				t.Fatalf("DBError ordering keys: %v", err)
+				t.Fatalf("DBError ordering keys: %v", e)
 			}
 			if len(resKeys) != len(inKeys) {
 				t.Errorf("BranchOrder: wrong no. of keys. Got: %d, want %d",
@@ -907,11 +907,11 @@ func TestBranchOrderNonZero(t *testing.T) {
 }
 func TestBranchOrderNilKeys(t *testing.T) {
 	_, e := vp.TstBranchOrder(nil, 1)
-	vp.TstCheckError(t, "", err, vp.ErrInvalidValue)
+	vp.TstCheckError(t, "", e, vp.ErrInvalidValue)
 }
 func TestBranchOrderInvalidBranch(t *testing.T) {
 	_, e := vp.TstBranchOrder(createTestPubKeys(t, 3, 0), 4)
-	vp.TstCheckError(t, "", err, vp.ErrInvalidBranch)
+	vp.TstCheckError(t, "", e, vp.ErrInvalidBranch)
 }
 func branchErrorFormat(orig, want, got []*hdkeychain.ExtendedKey) (origOrder, wantOrder, gotOrder []int) {
 	origOrder = []int{}
@@ -934,13 +934,13 @@ func createTestPubKeys(t *testing.T, number, offset int) []*hdkeychain.ExtendedK
 	xpubRaw := "xpub661MyMwAqRbcFwdnYF5mvCBY54vaLdJf8c5ugJTp5p7PqF9J1USgBx12qYMnZ9yUiswV7smbQ1DSweMqu8wn7Jociz4PWkuJ6EPvoVEgMw7"
 	xpubKey, e := hdkeychain.NewKeyFromString(xpubRaw)
 	if e != nil  {
-		t.Fatalf("Failed to generate new key: %v", err)
+		t.Fatalf("Failed to generate new key: %v", e)
 	}
 	keys := make([]*hdkeychain.ExtendedKey, number)
 	for i := uint32(0); i < uint32(len(keys)); i++ {
 		chPubKey, e := xpubKey.Child(i + uint32(offset))
 		if e != nil  {
-			t.Fatalf("Failed to generate child key: %v", err)
+			t.Fatalf("Failed to generate child key: %v", e)
 		}
 		keys[i] = chPubKey
 	}
@@ -968,7 +968,7 @@ func TestEmpowerSeriesNeuterFailed(t *testing.T) {
 	defer tearDown()
 	dbtx, e := db.BeginReadWriteTx()
 	if e != nil  {
-		t.ftl.Ln(e)
+		t.Fatal(e)
 	}
 	defer func() {
 		e := dbtx.Commit()
@@ -980,13 +980,13 @@ func TestEmpowerSeriesNeuterFailed(t *testing.T) {
 	seriesID := uint32(1)
 	e = pool.CreateSeries(ns, 1, seriesID, 2, vp.TstPubKeys[0:3])
 	if e != nil  {
-		t.Fatalf("Failed to create series: %v", err)
+		t.Fatalf("Failed to create series: %v", e)
 	}
 	// A private key with bad version (0xffffffff) will trigger an error in (k *ExtendedKey).Neuter and the associated
 	// error path in EmpowerSeries.
 	badKey := "wM5uZBNTYmaYGiK8VaGi7zPGbZGLuQgDiR2Zk4nGfbRFLXwHGcMUdVdazRpNHFSR7X7WLmzzbAq8dA1ViN6eWKgKqPye1rJTDQTvBiXvZ7E3nmdx"
 	e = pool.EmpowerSeries(ns, seriesID, badKey)
-	vp.TstCheckError(t, "", err, vp.ErrKeyNeuter)
+	vp.TstCheckError(t, "", e, vp.ErrKeyNeuter)
 }
 func TestDecryptExtendedKeyCannotCreateResultKey(t *testing.T) {
 	tearDown, _, pool := vp.TstCreatePool(t)
@@ -994,23 +994,23 @@ func TestDecryptExtendedKeyCannotCreateResultKey(t *testing.T) {
 	// the plaintext not being base58 encoded triggers the error
 	cipherText, e := pool.Manager().Encrypt(waddrmgr.CKTPublic, []byte("not-base58-encoded"))
 	if e != nil  {
-		t.Fatalf("Failed to encrypt plaintext: %v", err)
+		t.Fatalf("Failed to encrypt plaintext: %v", e)
 	}
 	_, e = pool.TstDecryptExtendedKey(waddrmgr.CKTPublic, cipherText)
-	vp.TstCheckError(t, "", err, vp.ErrKeyChain)
+	vp.TstCheckError(t, "", e, vp.ErrKeyChain)
 }
 func TestDecryptExtendedKeyCannotDecrypt(t *testing.T) {
 	tearDown, _, pool := vp.TstCreatePool(t)
 	defer tearDown()
 	_, e := pool.TstDecryptExtendedKey(waddrmgr.CKTPublic, []byte{})
-	vp.TstCheckError(t, "", err, vp.ErrCrypto)
+	vp.TstCheckError(t, "", e, vp.ErrCrypto)
 }
 func TestPoolChangeAddress(t *testing.T) {
 	tearDown, db, pool := vp.TstCreatePool(t)
 	defer tearDown()
 	dbtx, e := db.BeginReadWriteTx()
 	if e != nil  {
-		t.ftl.Ln(e)
+		t.Fatal(e)
 	}
 	defer func() {
 		e := dbtx.Commit()
@@ -1027,14 +1027,14 @@ func TestPoolChangeAddress(t *testing.T) {
 	vp.TstCreateSeries(t, dbtx, pool,
 		[]vp.TstSeriesDef{{ReqSigs: 2, PubKeys: pubKeys, SeriesID: 2, Inactive: true}})
 	_, e = pool.ChangeAddress(2, 0)
-	vp.TstCheckError(t, "", err, vp.ErrSeriesNotActive)
+	vp.TstCheckError(t, "", e, vp.ErrSeriesNotActive)
 }
 func TestPoolWithdrawalAddress(t *testing.T) {
 	tearDown, db, pool := vp.TstCreatePool(t)
 	defer tearDown()
 	dbtx, e := db.BeginReadWriteTx()
 	if e != nil  {
-		t.ftl.Ln(e)
+		t.Fatal(e)
 	}
 	defer func() {
 		e := dbtx.Commit()
@@ -1049,7 +1049,7 @@ func TestPoolWithdrawalAddress(t *testing.T) {
 	checkPoolAddress(t, addr, 1, 0, 0)
 	// When the requested address is not present in the set of used addresses for that Pool, we should get an error.
 	_, e = pool.WithdrawalAddress(ns, addrmgrNs, 1, 2, 3)
-	vp.TstCheckError(t, "", err, vp.ErrWithdrawFromUnusedAddr)
+	vp.TstCheckError(t, "", e, vp.ErrWithdrawFromUnusedAddr)
 }
 func checkPoolAddress(t *testing.T, addr vp.PoolAddress, seriesID uint32, branch vp.Branch,
 	index vp.Index) {

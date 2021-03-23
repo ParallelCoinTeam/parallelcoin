@@ -3,15 +3,15 @@ package wallet
 
 import (
 	"fmt"
-	"github.com/p9c/pod/pkg/wallet/chain"
+	"github.com/p9c/pod/pkg/chainclient"
 	"sort"
 	
-	"github.com/p9c/pod/pkg/database/walletdb"
 	ec "github.com/p9c/pod/pkg/ecc"
 	"github.com/p9c/pod/pkg/txauthor"
 	"github.com/p9c/pod/pkg/txscript"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/wallet/waddrmgr"
+	"github.com/p9c/pod/pkg/walletdb"
 	"github.com/p9c/pod/pkg/wire"
 	"github.com/p9c/pod/pkg/wtxmgr"
 )
@@ -105,7 +105,7 @@ func (w *Wallet) txToOutputs(
 	outputs []*wire.TxOut, account uint32,
 	minconf int32, feeSatPerKb util.Amount,
 ) (tx *txauthor.AuthoredTx, e error) {
-	var chainClient chain.Interface
+	var chainClient chainclient.Interface
 	if chainClient, e = w.requireChainClient(); E.Chk(e) {
 		return nil, e
 	}

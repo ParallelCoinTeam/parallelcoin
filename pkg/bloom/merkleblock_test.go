@@ -22,19 +22,19 @@ func TestMerkleBlock3(t *testing.T) {
 		"672bb15ad5d4cac00000000"
 	blockBytes, e := hex.DecodeString(blockStr)
 	if e != nil  {
-		t.Errorf("TestMerkleBlock3 DecodeString failed: %v", err)
+		t.Errorf("TestMerkleBlock3 DecodeString failed: %v", e)
 		return
 	}
 	blk, e := util.NewBlockFromBytes(blockBytes)
 	if e != nil  {
-		t.Errorf("TestMerkleBlock3 NewBlockFromBytes failed: %v", err)
+		t.Errorf("TestMerkleBlock3 NewBlockFromBytes failed: %v", e)
 		return
 	}
 	f := bloom.NewFilter(10, 0, 0.000001, wire.BloomUpdateAll)
 	inputStr := "63194f18be0af63f2c6bc9dc0f777cbefed3d9415c4af83f3ee3a3d669c00cb5"
 	hash, e := chainhash.NewHashFromStr(inputStr)
 	if e != nil  {
-		t.Errorf("TestMerkleBlock3 NewHashFromStr failed: %v", err)
+		t.Errorf("TestMerkleBlock3 NewHashFromStr failed: %v", e)
 		return
 	}
 	f.AddHash(hash)
@@ -46,13 +46,13 @@ func TestMerkleBlock3(t *testing.T) {
 		"30101"
 	want, e := hex.DecodeString(wantStr)
 	if e != nil  {
-		t.Errorf("TestMerkleBlock3 DecodeString failed: %v", err)
+		t.Errorf("TestMerkleBlock3 DecodeString failed: %v", e)
 		return
 	}
 	got := bytes.NewBuffer(nil)
 	e = mBlock.BtcEncode(got, wire.ProtocolVersion, wire.LatestEncoding)
 	if e != nil  {
-		t.Errorf("TestMerkleBlock3 BtcEncode failed: %v", err)
+		t.Errorf("TestMerkleBlock3 BtcEncode failed: %v", e)
 		return
 	}
 	if !bytes.Equal(want, got.Bytes()) {

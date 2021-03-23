@@ -10,8 +10,8 @@ import (
 	
 	"github.com/p9c/pod/pkg/addrmgr"
 	"github.com/p9c/pod/pkg/chaincfg"
-	"github.com/p9c/pod/pkg/database/walletdb"
-	_ "github.com/p9c/pod/pkg/database/walletdb/bdb"
+	"github.com/p9c/pod/pkg/walletdb"
+	_ "github.com/p9c/pod/pkg/walletdb/bdb"
 	"github.com/p9c/pod/pkg/wallet/waddrmgr"
 )
 
@@ -227,12 +227,12 @@ func emptyDB(t *testing.T) (tearDownFunc func(), db walletdb.DB) {
 	var dirName string
 	var e error
 	if dirName, e = ioutil.TempDir("", "mgrtest"); addrmgr.E.Chk(e) {
-		t.Fatalf("Failed to create db temp dir: %v", err)
+		t.Fatalf("Failed to create db temp dir: %v", e)
 	}
 	dbPath := filepath.Join(dirName, "mgrtest.db")
 	if db, e = walletdb.Create("bdb", dbPath); addrmgr.E.Chk(e) {
 		_ = os.RemoveAll(dirName)
-		t.Fatalf("createDbNamespace: unexpected error: %v", err)
+		t.Fatalf("createDbNamespace: unexpected error: %v", e)
 	}
 	tearDownFunc = func() {
 		if e := db.Close(); addrmgr.E.Chk(e) {
@@ -249,13 +249,13 @@ func setupManager(t *testing.T) (tearDownFunc func(), db walletdb.DB, mgr *waddr
 	// Create a new manager in a temp directory.
 	dirName, e := ioutil.TempDir("", "mgrtest")
 	if e != nil  {
-		t.Fatalf("Failed to create db temp dir: %v", err)
+		t.Fatalf("Failed to create db temp dir: %v", e)
 	}
 	dbPath := filepath.Join(dirName, "mgrtest.db")
 	db, e = walletdb.Create("bdb", dbPath)
 	if e != nil  {
 		_ = os.RemoveAll(dirName)
-		t.Fatalf("createDbNamespace: unexpected error: %v", err)
+		t.Fatalf("createDbNamespace: unexpected error: %v", e)
 	}
 	e = walletdb.Update(db, func(tx walletdb.ReadWriteTx) (e error) {
 		ns, e := tx.CreateTopLevelBucket(waddrmgrNamespaceKey)
@@ -278,7 +278,7 @@ func setupManager(t *testing.T) (tearDownFunc func(), db walletdb.DB, mgr *waddr
 			}
 		}()
 		_ = os.RemoveAll(dirName)
-		t.Fatalf("Failed to create Manager: %v", err)
+		t.Fatalf("Failed to create Manager: %v", e)
 	}
 	tearDownFunc = func() {
 		mgr.Close()

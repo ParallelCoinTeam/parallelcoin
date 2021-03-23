@@ -18,16 +18,16 @@ func NewExplicitString(defaultValue string) *ExplicitString {
 }
 
 // ExplicitlySet returns whether the flag was explicitly set through the flags.Unmarshaler interface.
-func (e *ExplicitString) ExplicitlySet() bool { return e.explicitlySet }
+func (es *ExplicitString) ExplicitlySet() bool { return es.explicitlySet }
 
 // MarshalFlag implements the flags.Marshaler interface.
-func (e *ExplicitString) MarshalFlag() (string, error) {
-	return e.Value, nil
+func (es *ExplicitString) MarshalFlag() (string, error) {
+	return es.Value, nil
 }
 
 // UnmarshalFlag implements the flags.Unmarshaler interface.
-func (e *ExplicitString) UnmarshalFlag(value string) (e error) {
-	e.Value = value
-	e.explicitlySet = true
+func (es *ExplicitString) UnmarshalFlag(value string) (e error) {
+	es.Value = value
+	es.explicitlySet = true
 	return nil
 }

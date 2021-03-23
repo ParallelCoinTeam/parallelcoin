@@ -17,7 +17,7 @@ func NewClient(conn io.ReadWriteCloser) *Client {
 func (h *Client) Say(name string) (reply string) {
 	e := h.Call("Hello.Say", "worker", &reply)
 	if e != nil  {
-				return "error: " + err.Error()
+				return "error: " + e.Error()
 	}
 	return
 }
@@ -25,7 +25,7 @@ func (h *Client) Say(name string) (reply string) {
 func (h *Client) Bye() (reply string) {
 	e := h.Call("Hello.Bye", 1, &reply)
 	if e != nil  {
-				return "error: " + err.Error()
+				return "error: " + e.Error()
 	}
 	return
 }
