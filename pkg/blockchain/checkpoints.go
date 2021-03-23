@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 	
-	chaincfg "github.com/p9c/pod/pkg/blockchain/chaincfg"
+	chaincfg "github.com/p9c/pod/pkg/chaincfg"
 	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
 	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
 	"github.com/p9c/pod/pkg/util"

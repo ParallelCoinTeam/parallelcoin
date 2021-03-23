@@ -4,7 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/binary"
 	"fmt"
-	"github.com/p9c/pod/pkg/blockchain/chaincfg"
+	"github.com/p9c/pod/pkg/chaincfg"
 	"time"
 	
 	"github.com/p9c/pod/pkg/blockchain/chainhash"

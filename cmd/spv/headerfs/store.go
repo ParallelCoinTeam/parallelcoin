@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
-	"github.com/p9c/pod/pkg/blockchain/chaincfg"
+	"github.com/p9c/pod/pkg/chaincfg"
 	"os"
 	"path/filepath"
 	"sync"

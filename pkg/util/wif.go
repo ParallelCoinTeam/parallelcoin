@@ -3,7 +3,7 @@ package util
 import (
 	"bytes"
 	"errors"
-	"github.com/p9c/pod/pkg/blockchain/chaincfg"
+	"github.com/p9c/pod/pkg/chaincfg"
 	
 	"github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/coding/base58"

@@ -4,7 +4,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
-	"github.com/p9c/pod/pkg/blockchain/chaincfg"
+	"github.com/p9c/pod/pkg/chaincfg"
 	"math"
 	"math/big"
 	"time"

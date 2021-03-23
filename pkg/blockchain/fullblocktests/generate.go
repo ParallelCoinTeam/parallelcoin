@@ -14,7 +14,7 @@ import (
 	"time"
 	
 	blockchain "github.com/p9c/pod/pkg/blockchain"
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	"github.com/p9c/pod/pkg/chaincfg/netparams"
 	"github.com/p9c/pod/pkg/blockchain/fork"
 	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
 	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"

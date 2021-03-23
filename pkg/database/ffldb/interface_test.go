@@ -21,7 +21,7 @@ import (
 	"github.com/p9c/pod/pkg/database/walletdb/bdb"
 	qu "github.com/p9c/pod/pkg/util/qu"
 	
-	chaincfg "github.com/p9c/pod/pkg/blockchain/chaincfg"
+	chaincfg "github.com/p9c/pod/pkg/chaincfg"
 	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/blockchain/wire"
 	database "github.com/p9c/pod/pkg/database"

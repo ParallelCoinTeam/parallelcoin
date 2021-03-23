@@ -2,7 +2,7 @@ package walletmain
 
 import (
 	"bufio"
-	"github.com/p9c/pod/pkg/blockchain/chaincfg"
+	"github.com/p9c/pod/pkg/chaincfg"
 	"os"
 	"path/filepath"
 	"time"

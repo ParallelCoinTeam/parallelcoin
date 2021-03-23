@@ -3,7 +3,7 @@ package txauthor
 
 import (
 	"errors"
-	"github.com/p9c/pod/pkg/blockchain/chaincfg"
+	"github.com/p9c/pod/pkg/chaincfg"
 	
 	txsizes "github.com/p9c/pod/pkg/blockchain/tx/sizes"
 	"github.com/p9c/pod/pkg/blockchain/tx/txrules"

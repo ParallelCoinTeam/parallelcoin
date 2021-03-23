@@ -2,7 +2,7 @@ package wtxmgr
 
 import (
 	"bytes"
-	"github.com/p9c/pod/pkg/blockchain/chaincfg"
+	"github.com/p9c/pod/pkg/chaincfg"
 	"time"
 	
 	"github.com/p9c/pod/pkg/blockchain"

@@ -3,7 +3,7 @@ package txscript
 import (
 	"bytes"
 	"encoding/hex"
-	"github.com/p9c/pod/pkg/blockchain/chaincfg"
+	"github.com/p9c/pod/pkg/chaincfg"
 	"reflect"
 	"testing"
 	

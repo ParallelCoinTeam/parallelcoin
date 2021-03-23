@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 	
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	"github.com/p9c/pod/pkg/chaincfg/netparams"
 	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
 	wtxmgr "github.com/p9c/pod/pkg/blockchain/tx/wtxmgr"
 	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"

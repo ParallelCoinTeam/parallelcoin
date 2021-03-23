@@ -3,7 +3,7 @@ package hdkeychain_test
 import (
 	"fmt"
 	
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	"github.com/p9c/pod/pkg/chaincfg/netparams"
 	"github.com/p9c/pod/pkg/util/hdkeychain"
 )
 

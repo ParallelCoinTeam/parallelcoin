@@ -16,7 +16,7 @@ import (
 	"golang.org/x/crypto/ssh/terminal"
 	
 	"github.com/p9c/pod/app/appdata"
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	"github.com/p9c/pod/pkg/chaincfg/netparams"
 	"github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/blockchain/tx/txauthor"
 	"github.com/p9c/pod/pkg/blockchain/tx/txrules"

@@ -3,7 +3,7 @@ package conte
 import (
 	"fmt"
 	"github.com/p9c/pod/cmd/kopach/control"
-	"github.com/p9c/pod/pkg/blockchain/chaincfg"
+	"github.com/p9c/pod/pkg/chaincfg"
 	"math/rand"
 	"runtime"
 	"strings"

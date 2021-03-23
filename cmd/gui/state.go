@@ -3,7 +3,7 @@ package gui
 import (
 	"crypto/cipher"
 	"encoding/json"
-	"github.com/p9c/pod/pkg/blockchain/chaincfg"
+	"github.com/p9c/pod/pkg/chaincfg"
 	"io/ioutil"
 	"time"
 	

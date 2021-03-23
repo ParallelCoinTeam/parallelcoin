@@ -2,7 +2,7 @@ package rpcclient
 
 import (
 	js "encoding/json"
-	"github.com/p9c/pod/pkg/blockchain/chaincfg"
+	"github.com/p9c/pod/pkg/chaincfg"
 	"strconv"
 	
 	"github.com/p9c/pod/pkg/blockchain/chainhash"

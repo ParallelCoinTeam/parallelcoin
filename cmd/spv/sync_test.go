@@ -16,7 +16,7 @@ import (
 	
 	"github.com/p9c/pod/cmd/node/integration/rpctest"
 	"github.com/p9c/pod/cmd/spv"
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	"github.com/p9c/pod/pkg/chaincfg/netparams"
 	"github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/blockchain/tx/txauthor"
 	"github.com/p9c/pod/pkg/blockchain/tx/txscript"

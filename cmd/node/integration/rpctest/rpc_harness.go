@@ -2,7 +2,7 @@ package rpctest
 
 import (
 	"fmt"
-	"github.com/p9c/pod/pkg/blockchain/chaincfg"
+	"github.com/p9c/pod/pkg/chaincfg"
 	"io/ioutil"
 	"net"
 	"os"

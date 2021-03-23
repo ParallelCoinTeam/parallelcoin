@@ -2,7 +2,7 @@ package waddrmgr
 
 import (
 	"fmt"
-	"github.com/p9c/pod/pkg/blockchain/chaincfg"
+	"github.com/p9c/pod/pkg/chaincfg"
 	"sync"
 	
 	ec "github.com/p9c/pod/pkg/coding/ecc"

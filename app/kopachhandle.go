@@ -2,7 +2,7 @@ package app
 
 import (
 	"github.com/gookit/color"
-	"github.com/p9c/pod/pkg/blockchain/chaincfg"
+	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/logg"
 	"os"
 	

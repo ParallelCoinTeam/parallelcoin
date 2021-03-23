@@ -3,7 +3,7 @@ package indexers
 import (
 	"errors"
 	"fmt"
-	"github.com/p9c/pod/pkg/blockchain/chaincfg"
+	"github.com/p9c/pod/pkg/chaincfg"
 	"sync"
 	
 	"github.com/p9c/pod/pkg/util/qu"

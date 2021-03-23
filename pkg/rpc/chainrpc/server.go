@@ -31,7 +31,7 @@ import (
 	"github.com/p9c/pod/cmd/node/state"
 	"github.com/p9c/pod/cmd/node/version"
 	"github.com/p9c/pod/pkg/blockchain"
-	"github.com/p9c/pod/pkg/blockchain/chaincfg"
+	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/blockchain/fork"
 	"github.com/p9c/pod/pkg/blockchain/indexers"

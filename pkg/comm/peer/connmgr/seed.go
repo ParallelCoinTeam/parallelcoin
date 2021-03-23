@@ -2,7 +2,7 @@ package connmgr
 
 import (
 	"fmt"
-	"github.com/p9c/pod/pkg/blockchain/chaincfg"
+	"github.com/p9c/pod/pkg/chaincfg"
 	mrand "math/rand"
 	"net"
 	"strconv"

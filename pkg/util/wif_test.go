@@ -3,7 +3,7 @@ package util_test
 import (
 	"testing"
 	
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	"github.com/p9c/pod/pkg/chaincfg/netparams"
 	ec "github.com/p9c/pod/pkg/coding/ecc"
 	. "github.com/p9c/pod/pkg/util"
 )

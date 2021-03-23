@@ -3,7 +3,7 @@ package mining
 import (
 	"container/heap"
 	"fmt"
-	"github.com/p9c/pod/pkg/blockchain/chaincfg"
+	"github.com/p9c/pod/pkg/chaincfg"
 	"math/rand"
 	"time"
 	

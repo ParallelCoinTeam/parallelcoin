@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 	
-	chaincfg "github.com/p9c/pod/pkg/blockchain/chaincfg"
+	chaincfg "github.com/p9c/pod/pkg/chaincfg"
 	database "github.com/p9c/pod/pkg/database"
 	"github.com/p9c/pod/pkg/util"
 )

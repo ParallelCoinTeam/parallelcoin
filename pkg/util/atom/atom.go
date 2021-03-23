@@ -1,7 +1,7 @@
 package atom
 
 import (
-	"github.com/p9c/pod/pkg/blockchain/chaincfg"
+	"github.com/p9c/pod/pkg/chaincfg"
 	"time"
 	
 	"go.uber.org/atomic"

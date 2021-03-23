@@ -8,7 +8,7 @@ import (
 	"github.com/jessevdk/go-flags"
 	
 	"github.com/p9c/pod/app/appdata"
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	"github.com/p9c/pod/pkg/chaincfg/netparams"
 	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/database"
 	_ "github.com/p9c/pod/pkg/database/ffldb"

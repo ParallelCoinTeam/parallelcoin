@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"sort"
 	
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	"github.com/p9c/pod/pkg/chaincfg/netparams"
 	wtxmgr "github.com/p9c/pod/pkg/blockchain/tx/wtxmgr"
 	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
 	"github.com/p9c/pod/pkg/database/walletdb"

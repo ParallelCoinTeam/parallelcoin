@@ -2,7 +2,7 @@ package mining
 
 import (
 	"github.com/p9c/pod/pkg/blockchain"
-	"github.com/p9c/pod/pkg/blockchain/chaincfg"
+	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/blockchain/hardfork"
 	"github.com/p9c/pod/pkg/blockchain/tx/txscript"

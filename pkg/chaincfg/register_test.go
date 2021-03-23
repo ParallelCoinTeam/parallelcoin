@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"testing"
 	
-	. "github.com/p9c/pod/pkg/blockchain/chaincfg"
+	. "github.com/p9c/pod/pkg/chaincfg"
 )
 
 // Define some of the required parameters for a user-registered network. This is necessary to test the registration of

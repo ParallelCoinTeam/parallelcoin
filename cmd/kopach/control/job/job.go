@@ -3,7 +3,7 @@ package job
 //
 // import (
 // 	"errors"
-// 	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+// 	"github.com/p9c/pod/pkg/chaincfg/netparams"
 // 	"time"
 //
 // 	"github.com/niubaoshu/gotiny"

@@ -10,12 +10,12 @@ import (
 	"strings"
 	"time"
 	
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	"github.com/p9c/pod/pkg/chaincfg/netparams"
 	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
 	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
 	"github.com/p9c/pod/pkg/util"
 	
-	chaincfg "github.com/p9c/pod/pkg/blockchain/chaincfg"
+	chaincfg "github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/blockchain/wire"
 	database "github.com/p9c/pod/pkg/database"
 	_ "github.com/p9c/pod/pkg/database/ffldb"

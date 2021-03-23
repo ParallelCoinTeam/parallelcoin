@@ -5,8 +5,8 @@ import (
 	"math/big"
 	"time"
 	
-	chaincfg "github.com/p9c/pod/pkg/blockchain/chaincfg"
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	chaincfg "github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/chaincfg/netparams"
 	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/blockchain/wire"
 )

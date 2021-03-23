@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"testing"
 	
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	"github.com/p9c/pod/pkg/chaincfg/netparams"
 	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/blockchain/wire"
 	ec "github.com/p9c/pod/pkg/coding/ecc"
