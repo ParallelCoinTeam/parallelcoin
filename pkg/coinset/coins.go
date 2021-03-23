@@ -5,9 +5,9 @@ import (
 	"errors"
 	"sort"
 	
-	chainhash "github.com/p9c/pod/pkg/chainhash"
-	"github.com/p9c/pod/pkg/wire"
+	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 // Coin represents a spendable transaction outpoint
@@ -236,8 +236,8 @@ func (s MinPriorityCoinSelector) CoinSelect(targetValue util.Amount, coins []Coi
 			MaxInputs:       s.MaxInputs,
 			MinChangeAmount: s.MinChangeAmount,
 		}).CoinSelect(targetValue, possibleHighCoins)
-		if e != nil  {
-						// attempt to add available low priority to make a solution
+		if e != nil {
+			// attempt to add available low priority to make a solution
 			for numLow := 1; numLow <= cutoffIndex && numLow+(i-cutoffIndex) <= s.MaxInputs; numLow++ {
 				allHigh := NewCoinSet(possibleCoins[cutoffIndex : i+1])
 				newTargetValue := targetValue - allHigh.TotalValue()
@@ -252,8 +252,8 @@ func (s MinPriorityCoinSelector) CoinSelect(targetValue util.Amount, coins []Coi
 					MinChangeAmount:        s.MinChangeAmount,
 					MinAvgValueAgePerInput: newMinAvgValueAge,
 				}).CoinSelect(newTargetValue, possibleCoins[0:cutoffIndex])
-				if e != nil  {
-										continue
+				if e != nil {
+					continue
 				}
 				for _, coin := range lowSelect.Coins() {
 					allHigh.PushCoin(coin)

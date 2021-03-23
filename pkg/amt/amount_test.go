@@ -1,10 +1,9 @@
-package util_test
+package amt_test
 
 import (
+	amount2 "github.com/p9c/pod/pkg/amt"
 	"math"
 	"testing"
-
-	. "github.com/p9c/pod/pkg/util"
 )
 
 func TestAmountCreation(t *testing.T) {
@@ -12,7 +11,7 @@ func TestAmountCreation(t *testing.T) {
 		name     string
 		amount   float64
 		valid    bool
-		expected Amount
+		expected amount2.Amount
 	}{
 		// Positive tests.
 		{
@@ -25,31 +24,31 @@ func TestAmountCreation(t *testing.T) {
 			name:     "max producible",
 			amount:   21e6,
 			valid:    true,
-			expected: MaxSatoshi,
+			expected: amount2.MaxSatoshi,
 		},
 		{
 			name:     "min producible",
 			amount:   -21e6,
 			valid:    true,
-			expected: -MaxSatoshi,
+			expected: -amount2.MaxSatoshi,
 		},
 		{
 			name:     "exceeds max producible",
 			amount:   21e6 + 1e-8,
 			valid:    true,
-			expected: MaxSatoshi + 1,
+			expected: amount2.MaxSatoshi + 1,
 		},
 		{
 			name:     "exceeds min producible",
 			amount:   -21e6 - 1e-8,
 			valid:    true,
-			expected: -MaxSatoshi - 1,
+			expected: -amount2.MaxSatoshi - 1,
 		},
 		{
 			name:     "one hundred",
 			amount:   100,
 			valid:    true,
-			expected: 100 * SatoshiPerBitcoin,
+			expected: 100 * amount2.SatoshiPerBitcoin,
 		},
 		{
 			name:     "fraction",
@@ -61,13 +60,13 @@ func TestAmountCreation(t *testing.T) {
 			name:     "rounding up",
 			amount:   54.999999999999943157,
 			valid:    true,
-			expected: 55 * SatoshiPerBitcoin,
+			expected: 55 * amount2.SatoshiPerBitcoin,
 		},
 		{
 			name:     "rounding down",
 			amount:   55.000000000000056843,
 			valid:    true,
-			expected: 55 * SatoshiPerBitcoin,
+			expected: 55 * amount2.SatoshiPerBitcoin,
 		},
 		// Negative tests.
 		{
@@ -87,7 +86,7 @@ func TestAmountCreation(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
-		a, e := NewAmount(test.amount)
+		a, e := amount2.NewAmount(test.amount)
 		switch {
 		case test.valid && e != nil:
 			t.Errorf("%v: Positive test Amount creation failed with: %v", test.name, e)
@@ -105,57 +104,57 @@ func TestAmountCreation(t *testing.T) {
 func TestAmountUnitConversions(t *testing.T) {
 	tests := []struct {
 		name      string
-		amount    Amount
-		unit      AmountUnit
+		amount    amount2.Amount
+		unit      amount2.Unit
 		converted float64
 		s         string
 	}{
 		{
 			name:      "MDUO",
-			amount:    MaxSatoshi,
-			unit:      AmountMegaDUO,
+			amount:    amount2.MaxSatoshi,
+			unit:      amount2.MegaDUO,
 			converted: 21,
 			s:         "21 MDUO",
 		},
 		{
 			name:      "kDUO",
 			amount:    44433322211100,
-			unit:      AmountKiloDUO,
+			unit:      amount2.KiloDUO,
 			converted: 444.33322211100,
 			s:         "444.333222111 kDUO",
 		},
 		{
 			name:      "DUO",
 			amount:    44433322211100,
-			unit:      AmountDUO,
+			unit:      amount2.DUO,
 			converted: 444333.22211100,
 			s:         "444333.222111 DUO",
 		},
 		{
 			name:      "mDUO",
 			amount:    44433322211100,
-			unit:      AmountMilliDUO,
+			unit:      amount2.MilliDUO,
 			converted: 444333222.11100,
 			s:         "444333222.111 mDUO",
 		},
 		{
 			name:      "μDUO",
 			amount:    44433322211100,
-			unit:      AmountMicroDUO,
+			unit:      amount2.MicroDUO,
 			converted: 444333222111.00,
 			s:         "444333222111 μDUO",
 		},
 		{
 			name:      "satoshi",
 			amount:    44433322211100,
-			unit:      AmountSatoshi,
+			unit:      amount2.Satoshi,
 			converted: 44433322211100,
 			s:         "44433322211100 Satoshi",
 		},
 		{
 			name:      "non-standard unit",
 			amount:    44433322211100,
-			unit:      AmountUnit(-1),
+			unit:      amount2.Unit(-1),
 			converted: 4443332.2211100,
 			s:         "4443332.22111 1e-1 DUO",
 		},
@@ -172,13 +171,13 @@ func TestAmountUnitConversions(t *testing.T) {
 			continue
 		}
 		// Verify that Amount.ToDUO works as advertised.
-		f1 := test.amount.ToUnit(AmountDUO)
+		f1 := test.amount.ToUnit(amount2.DUO)
 		f2 := test.amount.ToDUO()
 		if f1 != f2 {
 			t.Errorf("%v: ToDUO does not match ToUnit(AmountDUO): %v != %v", test.name, f1, f2)
 		}
 		// Verify that Amount.String works as advertised.
-		s1 := test.amount.Format(AmountDUO)
+		s1 := test.amount.Format(amount2.DUO)
 		s2 := test.amount.String()
 		if s1 != s2 {
 			t.Errorf("%v: String does not match Format(AmountBitcoin): %v != %v", test.name, s1, s2)
@@ -188,9 +187,9 @@ func TestAmountUnitConversions(t *testing.T) {
 func TestAmountMulF64(t *testing.T) {
 	tests := []struct {
 		name string
-		amt  Amount
+		amt  amount2.Amount
 		mul  float64
-		res  Amount
+		res  amount2.Amount
 	}{
 		{
 			name: "Multiply 0.1 DUO by 2",

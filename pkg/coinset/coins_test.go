@@ -8,8 +8,8 @@ import (
 	"testing"
 	
 	"github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/coinset"
 	"github.com/p9c/pod/pkg/util"
-	"github.com/p9c/pod/pkg/wallet/coinset"
 	"github.com/p9c/pod/pkg/wire"
 )
 

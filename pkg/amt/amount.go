@@ -1,4 +1,4 @@
-package util
+package amt
 
 import (
 	"errors"
@@ -6,36 +6,36 @@ import (
 	"strconv"
 )
 
-// AmountUnit describes a method of converting an Amount to something other than the base unit of a bitcoin. The value
+// Unit describes a method of converting an Amount to something other than the base unit of a bitcoin. The value
 // of the AmountUnit is the exponent component of the decadic multiple to convert from an amount in bitcoin to an amount
 // counted in units.
-type AmountUnit int
+type Unit int
 
 // These constants define various units used when describing a bitcoin monetary amount.
 const (
-	AmountMegaDUO  AmountUnit = 6
-	AmountKiloDUO  AmountUnit = 3
-	AmountDUO      AmountUnit = 0
-	AmountMilliDUO AmountUnit = -3
-	AmountMicroDUO AmountUnit = -6
-	AmountSatoshi  AmountUnit = -8
+	MegaDUO  Unit = 6
+	KiloDUO  Unit = 3
+	DUO      Unit = 0
+	MilliDUO Unit = -3
+	MicroDUO Unit = -6
+	Satoshi  Unit = -8
 )
 
 // String returns the unit as a string. For recognized units, the SI prefix is used, or "Satoshi" for the base unit. For
 // all unrecognized units, "1eN DUO" is returned, where N is the AmountUnit.
-func (u AmountUnit) String() string {
+func (u Unit) String() string {
 	switch u {
-	case AmountMegaDUO:
+	case MegaDUO:
 		return "MDUO"
-	case AmountKiloDUO:
+	case KiloDUO:
 		return "kDUO"
-	case AmountDUO:
+	case DUO:
 		return "DUO"
-	case AmountMilliDUO:
+	case MilliDUO:
 		return "mDUO"
-	case AmountMicroDUO:
+	case MicroDUO:
 		return "μDUO"
-	case AmountSatoshi:
+	case Satoshi:
 		return "Satoshi"
 	default:
 		return "1e" + strconv.FormatInt(int64(u), 10) + " DUO"
@@ -81,26 +81,26 @@ func NewAmount(f float64) (Amount, error) {
 
 // ToUnit converts a monetary amount counted in bitcoin base units to a floating point value representing an amount of
 // bitcoin.
-func (a Amount) ToUnit(u AmountUnit) float64 {
+func (a Amount) ToUnit(u Unit) float64 {
 	return float64(a) / math.Pow10(int(u+8))
 }
 
 // ToDUO is the equivalent of calling ToUnit with AmountDUO.
 func (a Amount) ToDUO() float64 {
-	return a.ToUnit(AmountDUO)
+	return a.ToUnit(DUO)
 }
 
 // Format formats a monetary amount counted in bitcoin base units as a string for a given unit. The conversion will
 // succeed for any unit, however, known units will be formated with an appended label describing the units with SI
 // notation, or "Satoshi" for the base unit.
-func (a Amount) Format(u AmountUnit) string {
+func (a Amount) Format(u Unit) string {
 	units := " " + u.String()
 	return strconv.FormatFloat(a.ToUnit(u), 'f', -int(u+8), 64) + units
 }
 
 // String is the equivalent of calling Format with AmountDUO.
 func (a Amount) String() string {
-	return a.Format(AmountDUO)
+	return a.Format(DUO)
 }
 
 // MulF64 multiplies an Amount by a floating point value. While this is not an operation that must typically be done by

@@ -1,4 +1,4 @@
-package util
+package amt
 
 const (
 	// SatoshiPerBitcent is the number of satoshi in one bitcoin cent.

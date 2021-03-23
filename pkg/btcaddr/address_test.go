@@ -1,9 +1,10 @@
-package util_test
+package btcaddr_test
 
 import (
 	"bytes"
 	"encoding/hex"
 	"fmt"
+	"github.com/p9c/pod/pkg/btcaddr"
 	"reflect"
 	"strings"
 	"testing"
@@ -20,8 +21,8 @@ func TestAddresses(t *testing.T) {
 		addr    string
 		encoded string
 		valid   bool
-		result  util.Address
-		f       func() (util.Address, error)
+		result  btcaddr.Address
+		f       func() (btcaddr.Address, error)
 		net     *chaincfg.Params
 	}{
 		// Positive P2PKH tests.
@@ -37,12 +38,12 @@ func TestAddresses(t *testing.T) {
 				},
 				chaincfg.MainNetParams.PubKeyHashAddrID,
 			),
-			f: func() (util.Address, error) {
+			f: func() (btcaddr.Address, error) {
 				pkHash := []byte{
 					0xe3, 0x4c, 0xce, 0x70, 0xc8, 0x63, 0x73, 0x27, 0x3e, 0xfc,
 					0xc5, 0x4c, 0xe7, 0xd2, 0xa4, 0x91, 0xbb, 0x4a, 0x0e, 0x84,
 				}
-				return util.NewAddressPubKeyHash(pkHash, &chaincfg.MainNetParams)
+				return btcaddr.NewPubKeyHash(pkHash, &chaincfg.MainNetParams)
 			},
 			net: &chaincfg.MainNetParams,
 		},
@@ -58,12 +59,12 @@ func TestAddresses(t *testing.T) {
 				},
 				chaincfg.MainNetParams.PubKeyHashAddrID,
 			),
-			f: func() (util.Address, error) {
+			f: func() (btcaddr.Address, error) {
 				pkHash := []byte{
 					0x0e, 0xf0, 0x30, 0x10, 0x7f, 0xd2, 0x6e, 0x0b, 0x6b, 0xf4,
 					0x05, 0x12, 0xbc, 0xa2, 0xce, 0xb1, 0xdd, 0x80, 0xad, 0xaa,
 				}
-				return util.NewAddressPubKeyHash(pkHash, &chaincfg.MainNetParams)
+				return btcaddr.NewPubKeyHash(pkHash, &chaincfg.MainNetParams)
 			},
 			net: &chaincfg.MainNetParams,
 		},
@@ -79,12 +80,12 @@ func TestAddresses(t *testing.T) {
 				},
 				chaincfg.TestNet3Params.PubKeyHashAddrID,
 			),
-			f: func() (util.Address, error) {
+			f: func() (btcaddr.Address, error) {
 				pkHash := []byte{
 					0x78, 0xb3, 0x16, 0xa0, 0x86, 0x47, 0xd5, 0xb7, 0x72, 0x83,
 					0xe5, 0x12, 0xd3, 0x60, 0x3f, 0x1f, 0x1c, 0x8d, 0xe6, 0x8f,
 				}
-				return util.NewAddressPubKeyHash(pkHash, &chaincfg.TestNet3Params)
+				return btcaddr.NewPubKeyHash(pkHash, &chaincfg.TestNet3Params)
 			},
 			net: &chaincfg.TestNet3Params,
 		},
@@ -93,13 +94,13 @@ func TestAddresses(t *testing.T) {
 			name:  "p2pkh wrong hash length",
 			addr:  "",
 			valid: false,
-			f: func() (util.Address, error) {
+			f: func() (btcaddr.Address, error) {
 				pkHash := []byte{
 					0x00, 0x0e, 0xf0, 0x30, 0x10, 0x7f, 0xd2, 0x6e, 0x0b, 0x6b,
 					0xf4, 0x05, 0x12, 0xbc, 0xa2, 0xce, 0xb1, 0xdd, 0x80, 0xad,
 					0xaa,
 				}
-				return util.NewAddressPubKeyHash(pkHash, &chaincfg.MainNetParams)
+				return btcaddr.NewPubKeyHash(pkHash, &chaincfg.MainNetParams)
 			},
 			net: &chaincfg.MainNetParams,
 		},
@@ -125,7 +126,7 @@ func TestAddresses(t *testing.T) {
 				},
 				chaincfg.MainNetParams.ScriptHashAddrID,
 			),
-			f: func() (util.Address, error) {
+			f: func() (btcaddr.Address, error) {
 				script := []byte{
 					0x52, 0x41, 0x04, 0x91, 0xbb, 0xa2, 0x51, 0x09, 0x12, 0xa5,
 					0xbd, 0x37, 0xda, 0x1f, 0xb5, 0xb1, 0x67, 0x30, 0x10, 0xe4,
@@ -149,7 +150,7 @@ func TestAddresses(t *testing.T) {
 					0xc4, 0x1f, 0x32, 0x2a, 0x18, 0x63, 0xd4, 0x62, 0x13, 0x53,
 					0xae,
 				}
-				return util.NewAddressScriptHash(script, &chaincfg.MainNetParams)
+				return btcaddr.NewScriptHash(script, &chaincfg.MainNetParams)
 			},
 			net: &chaincfg.MainNetParams,
 		},
@@ -168,12 +169,12 @@ func TestAddresses(t *testing.T) {
 				},
 				chaincfg.MainNetParams.ScriptHashAddrID,
 			),
-			f: func() (util.Address, error) {
+			f: func() (btcaddr.Address, error) {
 				hash := []byte{
 					0xe8, 0xc3, 0x00, 0xc8, 0x79, 0x86, 0xef, 0xa8, 0x4c, 0x37,
 					0xc0, 0x51, 0x99, 0x29, 0x01, 0x9e, 0xf8, 0x6e, 0xb5, 0xb4,
 				}
-				return util.NewAddressScriptHashFromHash(hash, &chaincfg.MainNetParams)
+				return btcaddr.NewScriptHashFromHash(hash, &chaincfg.MainNetParams)
 			},
 			net: &chaincfg.MainNetParams,
 		},
@@ -190,12 +191,12 @@ func TestAddresses(t *testing.T) {
 				},
 				chaincfg.TestNet3Params.ScriptHashAddrID,
 			),
-			f: func() (util.Address, error) {
+			f: func() (btcaddr.Address, error) {
 				hash := []byte{
 					0xc5, 0x79, 0x34, 0x2c, 0x2c, 0x4c, 0x92, 0x20, 0x20, 0x5e,
 					0x2c, 0xdc, 0x28, 0x56, 0x17, 0x04, 0x0c, 0x92, 0x4a, 0x0a,
 				}
-				return util.NewAddressScriptHashFromHash(hash, &chaincfg.TestNet3Params)
+				return btcaddr.NewScriptHashFromHash(hash, &chaincfg.TestNet3Params)
 			},
 			net: &chaincfg.TestNet3Params,
 		},
@@ -204,13 +205,13 @@ func TestAddresses(t *testing.T) {
 			name:  "p2sh wrong hash length",
 			addr:  "",
 			valid: false,
-			f: func() (util.Address, error) {
+			f: func() (btcaddr.Address, error) {
 				hash := []byte{
 					0x00, 0xf8, 0x15, 0xb0, 0x36, 0xd9, 0xbb, 0xbc, 0xe5, 0xe9,
 					0xf2, 0xa0, 0x0a, 0xbd, 0x1b, 0xf3, 0xdc, 0x91, 0xe9, 0x55,
 					0x10,
 				}
-				return util.NewAddressScriptHashFromHash(hash, &chaincfg.MainNetParams)
+				return btcaddr.NewScriptHashFromHash(hash, &chaincfg.MainNetParams)
 			},
 			net: &chaincfg.MainNetParams,
 		},
@@ -227,16 +228,16 @@ func TestAddresses(t *testing.T) {
 					0xc3, 0xeb, 0xec, 0x3a, 0x95, 0x77, 0x24, 0x89, 0x5d, 0xca,
 					0x52, 0xc6, 0xb4,
 				},
-				util.PKFCompressed, chaincfg.MainNetParams.PubKeyHashAddrID,
+				btcaddr.PKFCompressed, chaincfg.MainNetParams.PubKeyHashAddrID,
 			),
-			f: func() (util.Address, error) {
+			f: func() (btcaddr.Address, error) {
 				serializedPubKey := []byte{
 					0x02, 0x19, 0x2d, 0x74, 0xd0, 0xcb, 0x94, 0x34, 0x4c, 0x95,
 					0x69, 0xc2, 0xe7, 0x79, 0x01, 0x57, 0x3d, 0x8d, 0x79, 0x03,
 					0xc3, 0xeb, 0xec, 0x3a, 0x95, 0x77, 0x24, 0x89, 0x5d, 0xca,
 					0x52, 0xc6, 0xb4,
 				}
-				return util.NewAddressPubKey(serializedPubKey, &chaincfg.MainNetParams)
+				return btcaddr.NewPubKey(serializedPubKey, &chaincfg.MainNetParams)
 			},
 			net: &chaincfg.MainNetParams,
 		},
@@ -252,16 +253,16 @@ func TestAddresses(t *testing.T) {
 					0x01, 0xf9, 0x13, 0x7f, 0x23, 0xc2, 0xc4, 0x09, 0x27, 0x3e,
 					0xb1, 0x6e, 0x65,
 				},
-				util.PKFCompressed, chaincfg.MainNetParams.PubKeyHashAddrID,
+				btcaddr.PKFCompressed, chaincfg.MainNetParams.PubKeyHashAddrID,
 			),
-			f: func() (util.Address, error) {
+			f: func() (btcaddr.Address, error) {
 				serializedPubKey := []byte{
 					0x03, 0xb0, 0xbd, 0x63, 0x42, 0x34, 0xab, 0xbb, 0x1b, 0xa1,
 					0xe9, 0x86, 0xe8, 0x84, 0x18, 0x5c, 0x61, 0xcf, 0x43, 0xe0,
 					0x01, 0xf9, 0x13, 0x7f, 0x23, 0xc2, 0xc4, 0x09, 0x27, 0x3e,
 					0xb1, 0x6e, 0x65,
 				}
-				return util.NewAddressPubKey(serializedPubKey, &chaincfg.MainNetParams)
+				return btcaddr.NewPubKey(serializedPubKey, &chaincfg.MainNetParams)
 			},
 			net: &chaincfg.MainNetParams,
 		},
@@ -281,9 +282,9 @@ func TestAddresses(t *testing.T) {
 					0x8b, 0x64, 0xf9, 0xd4, 0xc0, 0x3f, 0x99, 0x9b, 0x86, 0x43,
 					0xf6, 0x56, 0xb4, 0x12, 0xa3,
 				},
-				util.PKFUncompressed, chaincfg.MainNetParams.PubKeyHashAddrID,
+				btcaddr.PKFUncompressed, chaincfg.MainNetParams.PubKeyHashAddrID,
 			),
-			f: func() (util.Address, error) {
+			f: func() (btcaddr.Address, error) {
 				serializedPubKey := []byte{
 					0x04, 0x11, 0xdb, 0x93, 0xe1, 0xdc, 0xdb, 0x8a, 0x01, 0x6b,
 					0x49, 0x84, 0x0f, 0x8c, 0x53, 0xbc, 0x1e, 0xb6, 0x8a, 0x38,
@@ -293,7 +294,7 @@ func TestAddresses(t *testing.T) {
 					0x8b, 0x64, 0xf9, 0xd4, 0xc0, 0x3f, 0x99, 0x9b, 0x86, 0x43,
 					0xf6, 0x56, 0xb4, 0x12, 0xa3,
 				}
-				return util.NewAddressPubKey(serializedPubKey, &chaincfg.MainNetParams)
+				return btcaddr.NewPubKey(serializedPubKey, &chaincfg.MainNetParams)
 			},
 			net: &chaincfg.MainNetParams,
 		},
@@ -313,9 +314,9 @@ func TestAddresses(t *testing.T) {
 					0x76, 0x83, 0x01, 0x60, 0xc6, 0xd2, 0xeb, 0x5e, 0x6a, 0x4c,
 					0x44, 0xd3, 0x3f, 0x45, 0x3e,
 				},
-				util.PKFHybrid, chaincfg.MainNetParams.PubKeyHashAddrID,
+				btcaddr.PKFHybrid, chaincfg.MainNetParams.PubKeyHashAddrID,
 			),
-			f: func() (util.Address, error) {
+			f: func() (btcaddr.Address, error) {
 				serializedPubKey := []byte{
 					0x06, 0x19, 0x2d, 0x74, 0xd0, 0xcb, 0x94, 0x34, 0x4c, 0x95,
 					0x69, 0xc2, 0xe7, 0x79, 0x01, 0x57, 0x3d, 0x8d, 0x79, 0x03,
@@ -325,7 +326,7 @@ func TestAddresses(t *testing.T) {
 					0x76, 0x83, 0x01, 0x60, 0xc6, 0xd2, 0xeb, 0x5e, 0x6a, 0x4c,
 					0x44, 0xd3, 0x3f, 0x45, 0x3e,
 				}
-				return util.NewAddressPubKey(serializedPubKey, &chaincfg.MainNetParams)
+				return btcaddr.NewPubKey(serializedPubKey, &chaincfg.MainNetParams)
 			},
 			net: &chaincfg.MainNetParams,
 		},
@@ -345,9 +346,9 @@ func TestAddresses(t *testing.T) {
 					0x17, 0xab, 0x65, 0x12, 0x9b, 0x8a, 0x2e, 0x68, 0x1f, 0x3c,
 					0x1e, 0x09, 0x08, 0xef, 0x7b,
 				},
-				util.PKFHybrid, chaincfg.MainNetParams.PubKeyHashAddrID,
+				btcaddr.PKFHybrid, chaincfg.MainNetParams.PubKeyHashAddrID,
 			),
-			f: func() (util.Address, error) {
+			f: func() (btcaddr.Address, error) {
 				serializedPubKey := []byte{
 					0x07, 0xb0, 0xbd, 0x63, 0x42, 0x34, 0xab, 0xbb, 0x1b, 0xa1,
 					0xe9, 0x86, 0xe8, 0x84, 0x18, 0x5c, 0x61, 0xcf, 0x43, 0xe0,
@@ -357,7 +358,7 @@ func TestAddresses(t *testing.T) {
 					0x17, 0xab, 0x65, 0x12, 0x9b, 0x8a, 0x2e, 0x68, 0x1f, 0x3c,
 					0x1e, 0x09, 0x08, 0xef, 0x7b,
 				}
-				return util.NewAddressPubKey(serializedPubKey, &chaincfg.MainNetParams)
+				return btcaddr.NewPubKey(serializedPubKey, &chaincfg.MainNetParams)
 			},
 			net: &chaincfg.MainNetParams,
 		},
@@ -373,16 +374,16 @@ func TestAddresses(t *testing.T) {
 					0xc3, 0xeb, 0xec, 0x3a, 0x95, 0x77, 0x24, 0x89, 0x5d, 0xca,
 					0x52, 0xc6, 0xb4,
 				},
-				util.PKFCompressed, chaincfg.TestNet3Params.PubKeyHashAddrID,
+				btcaddr.PKFCompressed, chaincfg.TestNet3Params.PubKeyHashAddrID,
 			),
-			f: func() (util.Address, error) {
+			f: func() (btcaddr.Address, error) {
 				serializedPubKey := []byte{
 					0x02, 0x19, 0x2d, 0x74, 0xd0, 0xcb, 0x94, 0x34, 0x4c, 0x95,
 					0x69, 0xc2, 0xe7, 0x79, 0x01, 0x57, 0x3d, 0x8d, 0x79, 0x03,
 					0xc3, 0xeb, 0xec, 0x3a, 0x95, 0x77, 0x24, 0x89, 0x5d, 0xca,
 					0x52, 0xc6, 0xb4,
 				}
-				return util.NewAddressPubKey(serializedPubKey, &chaincfg.TestNet3Params)
+				return btcaddr.NewPubKey(serializedPubKey, &chaincfg.TestNet3Params)
 			},
 			net: &chaincfg.TestNet3Params,
 		},
@@ -398,16 +399,16 @@ func TestAddresses(t *testing.T) {
 					0x01, 0xf9, 0x13, 0x7f, 0x23, 0xc2, 0xc4, 0x09, 0x27, 0x3e,
 					0xb1, 0x6e, 0x65,
 				},
-				util.PKFCompressed, chaincfg.TestNet3Params.PubKeyHashAddrID,
+				btcaddr.PKFCompressed, chaincfg.TestNet3Params.PubKeyHashAddrID,
 			),
-			f: func() (util.Address, error) {
+			f: func() (btcaddr.Address, error) {
 				serializedPubKey := []byte{
 					0x03, 0xb0, 0xbd, 0x63, 0x42, 0x34, 0xab, 0xbb, 0x1b, 0xa1,
 					0xe9, 0x86, 0xe8, 0x84, 0x18, 0x5c, 0x61, 0xcf, 0x43, 0xe0,
 					0x01, 0xf9, 0x13, 0x7f, 0x23, 0xc2, 0xc4, 0x09, 0x27, 0x3e,
 					0xb1, 0x6e, 0x65,
 				}
-				return util.NewAddressPubKey(serializedPubKey, &chaincfg.TestNet3Params)
+				return btcaddr.NewPubKey(serializedPubKey, &chaincfg.TestNet3Params)
 			},
 			net: &chaincfg.TestNet3Params,
 		},
@@ -427,9 +428,9 @@ func TestAddresses(t *testing.T) {
 					0x8b, 0x64, 0xf9, 0xd4, 0xc0, 0x3f, 0x99, 0x9b, 0x86, 0x43,
 					0xf6, 0x56, 0xb4, 0x12, 0xa3,
 				},
-				util.PKFUncompressed, chaincfg.TestNet3Params.PubKeyHashAddrID,
+				btcaddr.PKFUncompressed, chaincfg.TestNet3Params.PubKeyHashAddrID,
 			),
-			f: func() (util.Address, error) {
+			f: func() (btcaddr.Address, error) {
 				serializedPubKey := []byte{
 					0x04, 0x11, 0xdb, 0x93, 0xe1, 0xdc, 0xdb, 0x8a, 0x01, 0x6b,
 					0x49, 0x84, 0x0f, 0x8c, 0x53, 0xbc, 0x1e, 0xb6, 0x8a, 0x38,
@@ -439,7 +440,7 @@ func TestAddresses(t *testing.T) {
 					0x8b, 0x64, 0xf9, 0xd4, 0xc0, 0x3f, 0x99, 0x9b, 0x86, 0x43,
 					0xf6, 0x56, 0xb4, 0x12, 0xa3,
 				}
-				return util.NewAddressPubKey(serializedPubKey, &chaincfg.TestNet3Params)
+				return btcaddr.NewPubKey(serializedPubKey, &chaincfg.TestNet3Params)
 			},
 			net: &chaincfg.TestNet3Params,
 		},
@@ -459,9 +460,9 @@ func TestAddresses(t *testing.T) {
 					0x76, 0x83, 0x01, 0x60, 0xc6, 0xd2, 0xeb, 0x5e, 0x6a, 0x4c,
 					0x44, 0xd3, 0x3f, 0x45, 0x3e,
 				},
-				util.PKFHybrid, chaincfg.TestNet3Params.PubKeyHashAddrID,
+				btcaddr.PKFHybrid, chaincfg.TestNet3Params.PubKeyHashAddrID,
 			),
-			f: func() (util.Address, error) {
+			f: func() (btcaddr.Address, error) {
 				serializedPubKey := []byte{
 					0x06, 0x19, 0x2d, 0x74, 0xd0, 0xcb, 0x94, 0x34, 0x4c, 0x95,
 					0x69, 0xc2, 0xe7, 0x79, 0x01, 0x57, 0x3d, 0x8d, 0x79, 0x03,
@@ -471,7 +472,7 @@ func TestAddresses(t *testing.T) {
 					0x76, 0x83, 0x01, 0x60, 0xc6, 0xd2, 0xeb, 0x5e, 0x6a, 0x4c,
 					0x44, 0xd3, 0x3f, 0x45, 0x3e,
 				}
-				return util.NewAddressPubKey(serializedPubKey, &chaincfg.TestNet3Params)
+				return btcaddr.NewPubKey(serializedPubKey, &chaincfg.TestNet3Params)
 			},
 			net: &chaincfg.TestNet3Params,
 		},
@@ -491,9 +492,9 @@ func TestAddresses(t *testing.T) {
 					0x17, 0xab, 0x65, 0x12, 0x9b, 0x8a, 0x2e, 0x68, 0x1f, 0x3c,
 					0x1e, 0x09, 0x08, 0xef, 0x7b,
 				},
-				util.PKFHybrid, chaincfg.TestNet3Params.PubKeyHashAddrID,
+				btcaddr.PKFHybrid, chaincfg.TestNet3Params.PubKeyHashAddrID,
 			),
-			f: func() (util.Address, error) {
+			f: func() (btcaddr.Address, error) {
 				serializedPubKey := []byte{
 					0x07, 0xb0, 0xbd, 0x63, 0x42, 0x34, 0xab, 0xbb, 0x1b, 0xa1,
 					0xe9, 0x86, 0xe8, 0x84, 0x18, 0x5c, 0x61, 0xcf, 0x43, 0xe0,
@@ -503,7 +504,7 @@ func TestAddresses(t *testing.T) {
 					0x17, 0xab, 0x65, 0x12, 0x9b, 0x8a, 0x2e, 0x68, 0x1f, 0x3c,
 					0x1e, 0x09, 0x08, 0xef, 0x7b,
 				}
-				return util.NewAddressPubKey(serializedPubKey, &chaincfg.TestNet3Params)
+				return btcaddr.NewPubKey(serializedPubKey, &chaincfg.TestNet3Params)
 			},
 			net: &chaincfg.TestNet3Params,
 		},
@@ -702,7 +703,7 @@ func TestAddresses(t *testing.T) {
 	}
 	for _, test := range tests {
 		// Decode addr and compare error against valid.
-		decoded, e := util.DecodeAddress(test.addr, test.net)
+		decoded, e := btcaddr.Decode(test.addr, test.net)
 		if (e == nil) != test.valid {
 			t.Errorf("%v: decoding test failed: %v", test.name, e)
 			return
@@ -738,11 +739,11 @@ func TestAddresses(t *testing.T) {
 			// Perform type-specific calculations.
 			var saddr []byte
 			switch d := decoded.(type) {
-			case *util.AddressPubKeyHash:
+			case *btcaddr.PubKeyHash:
 				saddr = util.TstAddressSAddr(encoded)
-			case *util.AddressScriptHash:
+			case *btcaddr.ScriptHash:
 				saddr = util.TstAddressSAddr(encoded)
-			case *util.AddressPubKey:
+			case *btcaddr.AddressPubKey:
 				// Ignore the error here since the script
 				// address is checked below.
 				saddr, _ = hex.DecodeString(d.String())
@@ -761,7 +762,7 @@ func TestAddresses(t *testing.T) {
 				return
 			}
 			switch a := decoded.(type) {
-			case *util.AddressPubKeyHash:
+			case *btcaddr.PubKeyHash:
 				if h := a.Hash160()[:]; !bytes.Equal(saddr, h) {
 					t.Errorf(
 						"%v: hashes do not match:\n%x != \n%x",
@@ -769,7 +770,7 @@ func TestAddresses(t *testing.T) {
 					)
 					return
 				}
-			case *util.AddressScriptHash:
+			case *btcaddr.ScriptHash:
 				if h := a.Hash160()[:]; !bytes.Equal(saddr, h) {
 					t.Errorf(
 						"%v: hashes do not match:\n%x != \n%x",

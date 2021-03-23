@@ -1,22 +1,22 @@
-package util_test
+package block_test
 
 import (
 	"bytes"
+	"github.com/p9c/pod/pkg/block"
 	"io"
 	"reflect"
 	"testing"
 	"time"
-
+	
 	"github.com/davecgh/go-spew/spew"
 	
-	chainhash "github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/wire"
-	"github.com/p9c/pod/pkg/util"
 )
 
 // TestBlock tests the API for Block.
 func TestBlock(t *testing.T) {
-	b := util.NewBlock(&Block100000)
+	b := block.NewBlock(&Block100000)
 	// Ensure we get the same data back out.
 	if msgBlock := b.MsgBlock(); !reflect.DeepEqual(msgBlock, &Block100000) {
 		t.Errorf("MsgBlock: mismatched MsgBlock - got %v, want %v",
@@ -51,7 +51,7 @@ func TestBlock(t *testing.T) {
 		"e9a66845e05d5abc0ad04ec80f774a7e585c6e8db975962d069a522137b80c1d",
 	}
 	// Create a new block to nuke all cached data.
-	b = util.NewBlock(&Block100000)
+	b = block.NewBlock(&Block100000)
 	// Request hash for all transactions one at a time via Tx.
 	for i, txHash := range wantTxHashes {
 		wantHash, e := chainhash.NewHashFromStr(txHash)
@@ -75,7 +75,7 @@ func TestBlock(t *testing.T) {
 		}
 	}
 	// Create a new block to nuke all cached data.
-	b = util.NewBlock(&Block100000)
+	b = block.NewBlock(&Block100000)
 	// Request slice of all transactions multiple times to test generation and caching.
 	for i := 0; i < 2; i++ {
 		transactions := b.Transactions()
@@ -151,7 +151,7 @@ func TestNewBlockFromBytes(t *testing.T) {
 	}
 	block100000Bytes := block100000Buf.Bytes()
 	// Create a new block from the serialized bytes.
-	b, e := util.NewBlockFromBytes(block100000Bytes)
+	b, e := block.NewBlockFromBytes(block100000Bytes)
 	if e != nil  {
 		t.Errorf("NewBlockFromBytes: %v", e)
 		return
@@ -184,7 +184,7 @@ func TestNewBlockFromBlockAndBytes(t *testing.T) {
 	}
 	block100000Bytes := block100000Buf.Bytes()
 	// Create a new block from the serialized bytes.
-	b := util.NewBlockFromBlockAndBytes(&Block100000, block100000Bytes)
+	b := block.NewBlockFromBlockAndBytes(&Block100000, block100000Bytes)
 	// Ensure we get the same data back out.
 	serializedBytes, e := b.Bytes()
 	if e != nil  {
@@ -206,7 +206,7 @@ func TestNewBlockFromBlockAndBytes(t *testing.T) {
 func TestBlockErrors(t *testing.T) {
 	// Ensure out of range errors are as expected.
 	wantErr := "transaction index -1 is out of range - max 3"
-	testErr := util.OutOfRangeError(wantErr)
+	testErr := block.OutOfRangeError(wantErr)
 	if testErr.Error() != wantErr {
 		t.Errorf("OutOfRangeError: wrong error - got %v, want %v",
 			testErr.Error(), wantErr)
@@ -219,39 +219,39 @@ func TestBlockErrors(t *testing.T) {
 	}
 	block100000Bytes := block100000Buf.Bytes()
 	// Create a new block from the serialized bytes.
-	b, e := util.NewBlockFromBytes(block100000Bytes)
+	b, e := block.NewBlockFromBytes(block100000Bytes)
 	if e != nil  {
 		t.Errorf("NewBlockFromBytes: %v", e)
 		return
 	}
 	// Truncate the block byte buffer to force errors.
 	shortBytes := block100000Bytes[:80]
-	_, e = util.NewBlockFromBytes(shortBytes)
+	_, e = block.NewBlockFromBytes(shortBytes)
 	if e != io.EOF {
 		t.Errorf("NewBlockFromBytes: did not get expected error - "+
 			"got %v, want %v", e, io.EOF)
 	}
 	// Ensure TxHash returns expected error on invalid indices.
 	_, e = b.TxHash(-1)
-	if _, ok := e.(util.OutOfRangeError); !ok {
+	if _, ok := e.(block.OutOfRangeError); !ok {
 		t.Errorf("TxHash: wrong error - got: %v <%T>, "+
-			"want: <%T>", e, e, util.OutOfRangeError(""))
+			"want: <%T>", e, e, block.OutOfRangeError(""))
 	}
 	_, e = b.TxHash(len(Block100000.Transactions) + 1)
-	if _, ok := e.(util.OutOfRangeError); !ok {
+	if _, ok := e.(block.OutOfRangeError); !ok {
 		t.Errorf("TxHash: wrong error - got: %v <%T>, "+
-			"want: <%T>", e, e, util.OutOfRangeError(""))
+			"want: <%T>", e, e, block.OutOfRangeError(""))
 	}
 	// Ensure Tx returns expected error on invalid indices.
 	_, e = b.Tx(-1)
-	if _, ok := e.(util.OutOfRangeError); !ok {
+	if _, ok := e.(block.OutOfRangeError); !ok {
 		t.Errorf("Tx: wrong error - got: %v <%T>, "+
-			"want: <%T>", e, e, util.OutOfRangeError(""))
+			"want: <%T>", e, e, block.OutOfRangeError(""))
 	}
 	_, e = b.Tx(len(Block100000.Transactions) + 1)
-	if _, ok := e.(util.OutOfRangeError); !ok {
+	if _, ok := e.(block.OutOfRangeError); !ok {
 		t.Errorf("Tx: wrong error - got: %v <%T>, "+
-			"want: <%T>", e, e, util.OutOfRangeError(""))
+			"want: <%T>", e, e, block.OutOfRangeError(""))
 	}
 	// Ensure TxLoc returns expected error with short byte buffer. This makes use of the test package only function,
 	// SetBlockBytes, to inject a short byte buffer.

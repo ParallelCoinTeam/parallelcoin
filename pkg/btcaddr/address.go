@@ -1,9 +1,11 @@
-package util
+package btcaddr
 
 import (
+	"crypto/sha256"
 	"encoding/hex"
 	"errors"
 	"golang.org/x/crypto/ripemd160"
+	"hash"
 	
 	"github.com/p9c/pod/pkg/base58"
 	"github.com/p9c/pod/pkg/chaincfg"
@@ -28,23 +30,23 @@ import (
 // }
 
 var (
-	// errChecksumMismatch describes an error where decoding failed due to a bad checksum.
-	errChecksumMismatch = errors.New("checksum mismatch")
-	// errUnknownAddressType describes an error where an address can not decoded as a specific address type due to the
+	// ErrChecksumMismatch describes an error where decoding failed due to a bad checksum.
+	ErrChecksumMismatch = errors.New("checksum mismatch")
+	// ErrUnknownAddressType describes an error where an address can not decoded as a specific address type due to the
 	// string encoding beginning with an identifier byte unknown to any standard or registered (via chaincfg.Register)
 	// network.
-	errUnknownAddressType = errors.New("unknown address type")
-	// errAddressCollision describes an error where an address can not be uniquely determined as either a
+	ErrUnknownAddressType = errors.New("unknown address type")
+	// ErrAddressCollision describes an error where an address can not be uniquely determined as either a
 	// pay-to-pubkey-hash or pay-to-script-hash address since the leading identifier is used for describing both address
 	// kinds, but for different networks. Rather than assuming or defaulting to one or the other, this error is returned
 	// and the caller must decide how to decode the address.
-	errAddressCollision = errors.New("address collision")
+	ErrAddressCollision = errors.New("address collision")
 )
 
-// encodeAddress returns a human-readable payment address given a ripemd160 hash and netID which encodes the bitcoin
+// encode returns a human-readable payment address given a ripemd160 hash and netID which encodes the bitcoin
 // network and address type. It is used in both pay-to-pubkey-hash (P2PKH) and pay-to-script-hash (P2SH) address
 // encoding.
-func encodeAddress(hash160 []byte, netID byte) string {
+func encode(hash160 []byte, netID byte) string {
 	// Format is 1 byte for a network and address class (i.e. P2PKH vs P2SH), 20 bytes for a RIPEMD160 hash, and 4 bytes of checksum.
 	return base58.CheckEncode(hash160[:ripemd160.Size], netID)
 }
@@ -104,12 +106,12 @@ type Address interface {
 	IsForNet(*chaincfg.Params) bool
 }
 
-// DecodeAddress decodes the string encoding of an address and returns the
+// Decode decodes the string encoding of an address and returns the
 // Address if addr is a valid encoding for a known address type. The bitcoin
 // network the address is associated with is extracted if possible. When the
 // address does not encode the network, such as in the case of a raw public key,
 // the address will be associated with the passed defaultNet.
-func DecodeAddress(addr string, defaultNet *chaincfg.Params) (Address, error) {
+func Decode(addr string, defaultNet *chaincfg.Params) (Address, error) {
 	// // Bech32 encoded segwit addresses start with a human-readable part (hrp) followed by '1'. For Bitcoin mainnet the
 	// // hrp is "bc", and for testnet it is "tb". If the address string has a prefix that matches one of the prefixes for
 	// // the known networks, we try to decode it as a segwit address.
@@ -145,13 +147,13 @@ func DecodeAddress(addr string, defaultNet *chaincfg.Params) (Address, error) {
 		if e != nil {
 			return nil, e
 		}
-		return NewAddressPubKey(serializedPubKey, defaultNet)
+		return NewPubKey(serializedPubKey, defaultNet)
 	}
 	// Switch on decoded length to determine the type.
 	decoded, netID, e := base58.CheckDecode(addr)
 	if e != nil {
 		if e == base58.ErrChecksum {
-			return nil, errChecksumMismatch
+			return nil, ErrChecksumMismatch
 		}
 		return nil, errors.New("decoded address is of unknown format")
 	}
@@ -161,13 +163,13 @@ func DecodeAddress(addr string, defaultNet *chaincfg.Params) (Address, error) {
 		isP2SH := chaincfg.IsScriptHashAddrID(netID)
 		switch hash160 := decoded; {
 		case isP2PKH && isP2SH:
-			return nil, errAddressCollision
+			return nil, ErrAddressCollision
 		case isP2PKH:
-			return newAddressPubKeyHash(hash160, netID)
+			return newPubKeyHash(hash160, netID)
 		case isP2SH:
-			return newAddressScriptHashFromHash(hash160, netID)
+			return newScriptHashFromHash(hash160, netID)
 		default:
-			return nil, errUnknownAddressType
+			return nil, ErrUnknownAddressType
 		}
 	default:
 		return nil, errors.New("decoded address is of unknown size")
@@ -210,116 +212,116 @@ func DecodeAddress(addr string, defaultNet *chaincfg.Params) (Address, error) {
 // 	return version, regrouped, nil
 // }
 
-// AddressPubKeyHash is an Address for a pay-to-pubkey-hash (P2PKH) transaction.
-type AddressPubKeyHash struct {
+// PubKeyHash is an Address for a pay-to-pubkey-hash (P2PKH) transaction.
+type PubKeyHash struct {
 	hash  [ripemd160.Size]byte
 	netID byte
 }
 
-// NewAddressPubKeyHash returns a new AddressPubKeyHash.  pkHash must be 20 bytes.
-func NewAddressPubKeyHash(pkHash []byte, net *chaincfg.Params) (*AddressPubKeyHash, error) {
-	return newAddressPubKeyHash(pkHash, net.PubKeyHashAddrID)
+// NewPubKeyHash returns a new PubKeyHash.  pkHash must be 20 bytes.
+func NewPubKeyHash(pkHash []byte, net *chaincfg.Params) (*PubKeyHash, error) {
+	return newPubKeyHash(pkHash, net.PubKeyHashAddrID)
 }
 
-// newAddressPubKeyHash is the internal API to create a pubkey hash address with
+// newPubKeyHash is the internal API to create a pubkey hash address with
 // a known leading identifier byte for a network, rather than looking it up
 // through its parameters. This is useful when creating a new address structure
 // from a string encoding where the identifier byte is already known.
-func newAddressPubKeyHash(pkHash []byte, netID byte) (*AddressPubKeyHash, error) {
+func newPubKeyHash(pkHash []byte, netID byte) (*PubKeyHash, error) {
 	// Chk for a valid pubkey hash length.
 	if len(pkHash) != ripemd160.Size {
 		return nil, errors.New("pkHash must be 20 bytes")
 	}
-	addr := &AddressPubKeyHash{netID: netID}
+	addr := &PubKeyHash{netID: netID}
 	copy(addr.hash[:], pkHash)
 	return addr, nil
 }
 
 // EncodeAddress returns the string encoding of a pay-to-pubkey-hash address.
 // Part of the Address interface.
-func (a *AddressPubKeyHash) EncodeAddress() string {
-	return encodeAddress(a.hash[:], a.netID)
+func (a *PubKeyHash) EncodeAddress() string {
+	return encode(a.hash[:], a.netID)
 }
 
 // ScriptAddress returns the bytes to be included in a txout script to pay to a
 // pubkey hash. Part of the Address interface.
-func (a *AddressPubKeyHash) ScriptAddress() []byte {
+func (a *PubKeyHash) ScriptAddress() []byte {
 	return a.hash[:]
 }
 
 // IsForNet returns whether or not the pay-to-pubkey-hash address is associated
 // with the passed bitcoin network.
-func (a *AddressPubKeyHash) IsForNet(net *chaincfg.Params) bool {
+func (a *PubKeyHash) IsForNet(net *chaincfg.Params) bool {
 	return a.netID == net.PubKeyHashAddrID
 }
 
 // String returns a human-readable string for the pay-to-pubkey-hash address. This is equivalent to calling
 // EncodeAddress, but is provided so the type can be used as a fmt.Stringer.
-func (a *AddressPubKeyHash) String() string {
+func (a *PubKeyHash) String() string {
 	return a.EncodeAddress()
 }
 
 // Hash160 returns the underlying array of the pubkey hash. This can be useful when an array is more appropriate than a
 // slice (for example, when used as map keys).
-func (a *AddressPubKeyHash) Hash160() *[ripemd160.Size]byte {
+func (a *PubKeyHash) Hash160() *[ripemd160.Size]byte {
 	return &a.hash
 }
 
-// AddressScriptHash is an Address for a pay-to-script-hash (P2SH) transaction.
-type AddressScriptHash struct {
+// ScriptHash is an Address for a pay-to-script-hash (P2SH) transaction.
+type ScriptHash struct {
 	hash  [ripemd160.Size]byte
 	netID byte
 }
 
-// NewAddressScriptHash returns a new AddressScriptHash.
-func NewAddressScriptHash(serializedScript []byte, net *chaincfg.Params) (*AddressScriptHash, error) {
+// NewScriptHash returns a new ScriptHash.
+func NewScriptHash(serializedScript []byte, net *chaincfg.Params) (*ScriptHash, error) {
 	scriptHash := Hash160(serializedScript)
-	return newAddressScriptHashFromHash(scriptHash, net.ScriptHashAddrID)
+	return newScriptHashFromHash(scriptHash, net.ScriptHashAddrID)
 }
 
-// NewAddressScriptHashFromHash returns a new AddressScriptHash.  scriptHash must be 20 bytes.
-func NewAddressScriptHashFromHash(scriptHash []byte, net *chaincfg.Params) (*AddressScriptHash, error) {
-	return newAddressScriptHashFromHash(scriptHash, net.ScriptHashAddrID)
+// NewScriptHashFromHash returns a new ScriptHash.  scriptHash must be 20 bytes.
+func NewScriptHashFromHash(scriptHash []byte, net *chaincfg.Params) (*ScriptHash, error) {
+	return newScriptHashFromHash(scriptHash, net.ScriptHashAddrID)
 }
 
-// newAddressScriptHashFromHash is the internal API to create a script hash address with a known leading identifier byte
+// newScriptHashFromHash is the internal API to create a script hash address with a known leading identifier byte
 // for a network, rather than looking it up through its parameters. This is useful when creating a new address structure
 // from a string encoding where the identifer byte is already known.
-func newAddressScriptHashFromHash(scriptHash []byte, netID byte) (*AddressScriptHash, error) {
+func newScriptHashFromHash(scriptHash []byte, netID byte) (*ScriptHash, error) {
 	// Chk for a valid script hash length.
 	if len(scriptHash) != ripemd160.Size {
 		return nil, errors.New("scriptHash must be 20 bytes")
 	}
-	addr := &AddressScriptHash{netID: netID}
+	addr := &ScriptHash{netID: netID}
 	copy(addr.hash[:], scriptHash)
 	return addr, nil
 }
 
 // EncodeAddress returns the string encoding of a pay-to-script-hash address.  Part of the Address interface.
-func (a *AddressScriptHash) EncodeAddress() string {
-	return encodeAddress(a.hash[:], a.netID)
+func (a *ScriptHash) EncodeAddress() string {
+	return encode(a.hash[:], a.netID)
 }
 
 // ScriptAddress returns the bytes to be included in a txout script to pay to a script hash. Part of the Address
 // interface.
-func (a *AddressScriptHash) ScriptAddress() []byte {
+func (a *ScriptHash) ScriptAddress() []byte {
 	return a.hash[:]
 }
 
 // IsForNet returns whether or not the pay-to-script-hash address is associated with the passed bitcoin network.
-func (a *AddressScriptHash) IsForNet(net *chaincfg.Params) bool {
+func (a *ScriptHash) IsForNet(net *chaincfg.Params) bool {
 	return a.netID == net.ScriptHashAddrID
 }
 
 // String returns a human-readable string for the pay-to-script-hash address. This is equivalent to calling
 // EncodeAddress, but is provided so the type can be used as a fmt.Stringer.
-func (a *AddressScriptHash) String() string {
+func (a *ScriptHash) String() string {
 	return a.EncodeAddress()
 }
 
 // Hash160 returns the underlying array of the script hash. This can be useful when an array is more appropriate than a
 // slice (for example, when used as map keys).
-func (a *AddressScriptHash) Hash160() *[ripemd160.Size]byte {
+func (a *ScriptHash) Hash160() *[ripemd160.Size]byte {
 	return &a.hash
 }
 
@@ -342,9 +344,9 @@ type AddressPubKey struct {
 	pubKeyHashID byte
 }
 
-// NewAddressPubKey returns a new AddressPubKey which represents a pay-to-pubkey address. The serializedPubKey parameter
+// NewPubKey returns a new AddressPubKey which represents a pay-to-pubkey address. The serializedPubKey parameter
 // must be a valid pubkey and can be uncompressed, compressed, or hybrid.
-func NewAddressPubKey(serializedPubKey []byte, net *chaincfg.Params) (*AddressPubKey, error) {
+func NewPubKey(serializedPubKey []byte, net *chaincfg.Params) (*AddressPubKey, error) {
 	pubKey, e := ec.ParsePubKey(serializedPubKey, ec.S256())
 	if e != nil {
 		return nil, e
@@ -383,7 +385,7 @@ func (a *AddressPubKey) serialize() []byte {
 
 // EncodeAddress returns the string encoding of the public key as a pay-to-pubkey-hash.  Note that the public key format (uncompressed, compressed, etc) will change the resulting address.  This is expected since pay-to-pubkey-hash is a hash of the serialized public key which obviously differs with the format.  At the time of this writing, most Bitcoin addresses are pay-to-pubkey-hash constructed from the uncompressed public key. Part of the Address interface.
 func (a *AddressPubKey) EncodeAddress() string {
-	return encodeAddress(Hash160(a.serialize()), a.pubKeyHashID)
+	return encode(Hash160(a.serialize()), a.pubKeyHashID)
 }
 
 // ScriptAddress returns the bytes to be included in a txout script to pay to a public key.  Setting the public key format will affect the output of this function accordingly.  Part of the Address interface.
@@ -411,9 +413,9 @@ func (a *AddressPubKey) SetFormat(pkFormat PubKeyFormat) {
 	a.pubKeyFormat = pkFormat
 }
 
-// AddressPubKeyHash returns the pay-to-pubkey address converted to a pay-to-pubkey-hash address.  Note that the public key format (uncompressed, compressed, etc) will change the resulting address.  This is expected since pay-to-pubkey-hash is a hash of the serialized public key which obviously differs with the format.  At the time of this writing, most Bitcoin addresses are pay-to-pubkey-hash constructed from the uncompressed public key.
-func (a *AddressPubKey) AddressPubKeyHash() *AddressPubKeyHash {
-	addr := &AddressPubKeyHash{netID: a.pubKeyHashID}
+// PubKeyHash returns the pay-to-pubkey address converted to a pay-to-pubkey-hash address.  Note that the public key format (uncompressed, compressed, etc) will change the resulting address.  This is expected since pay-to-pubkey-hash is a hash of the serialized public key which obviously differs with the format.  At the time of this writing, most Bitcoin addresses are pay-to-pubkey-hash constructed from the uncompressed public key.
+func (a *AddressPubKey) PubKeyHash() *PubKeyHash {
+	addr := &PubKeyHash{netID: a.pubKeyHashID}
 	copy(addr.hash[:], Hash160(a.serialize()))
 	return addr
 }
@@ -585,3 +587,16 @@ func (a *AddressPubKey) PubKey() *ec.PublicKey {
 // func (a *AddressWitnessScriptHash) WitnessProgram() []byte {
 // 	return a.witnessProgram[:]
 // }
+
+// Hash160 calculates the hash ripemd160(sha256(b)).
+func Hash160(buf []byte) []byte {
+	return calcHash(calcHash(buf, sha256.New()), ripemd160.New())
+}
+
+// Calculate the hash of hasher over buf.
+func calcHash(buf []byte, hasher hash.Hash) []byte {
+	_, e := hasher.Write(buf)
+	if e != nil {
+	}
+	return hasher.Sum(nil)
+}

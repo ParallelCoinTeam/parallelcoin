@@ -1,8 +1,9 @@
-package util
+package block
 
 import (
 	"bytes"
 	"fmt"
+	"github.com/p9c/pod/pkg/util"
 	"io"
 	
 	"github.com/p9c/pod/pkg/chainhash"
@@ -30,7 +31,7 @@ type Block struct {
 	serializedBlockNoWitness []byte          // Serialized bytes for block w/o witness data
 	blockHash                *chainhash.Hash // Cached block hash
 	blockHeight              int32           // Height in the main block chain
-	transactions             []*Tx           // Transactions
+	transactions             []*util.Tx      // Transactions
 	txnsGenerated            bool            // ALL wrapped transactions generated
 }
 
@@ -96,7 +97,7 @@ func (b *Block) Hash() *chainhash.Hash {
 // index is 0 based. That is to say, the first transaction in the block is txNum 0. This is nearly equivalent to
 // accessing the raw transaction (wire.MsgTx) from the underlying wire.MsgBlock, however the wrapped transaction has
 // some helpful properties such as caching the hash so subsequent calls are more efficient.
-func (b *Block) Tx(txNum int) (*Tx, error) {
+func (b *Block) Tx(txNum int) (*util.Tx, error) {
 	// Ensure the requested transaction is in range.
 	numTx := uint64(len(b.msgBlock.Transactions))
 	if txNum < 0 || uint64(txNum) > numTx {
@@ -108,14 +109,14 @@ func (b *Block) Tx(txNum int) (*Tx, error) {
 	}
 	// Generate slice to hold all of the wrapped transactions if needed.
 	if len(b.transactions) == 0 {
-		b.transactions = make([]*Tx, numTx)
+		b.transactions = make([]*util.Tx, numTx)
 	}
 	// Return the wrapped transaction if it has already been generated.
 	if b.transactions[txNum] != nil {
 		return b.transactions[txNum], nil
 	}
 	// Generate and cache the wrapped transaction and return it.
-	newTx := NewTx(b.msgBlock.Transactions[txNum])
+	newTx := util.NewTx(b.msgBlock.Transactions[txNum])
 	newTx.SetIndex(txNum)
 	b.transactions[txNum] = newTx
 	return newTx, nil
@@ -124,7 +125,7 @@ func (b *Block) Tx(txNum int) (*Tx, error) {
 // Transactions returns a slice of wrapped transactions (util.Tx) for all transactions in the Block. This is nearly
 // equivalent to accessing the raw transactions (wire.MsgTx) in the underlying wire.MsgBlock, however it instead
 // provides easy access to wrapped versions (util.Tx) of them.
-func (b *Block) Transactions() []*Tx {
+func (b *Block) Transactions() []*util.Tx {
 	// Return transactions if they have ALL already been generated. This flag is necessary because the wrapped
 	// transactions are lazily generated in a sparse fashion.
 	if b.txnsGenerated {
@@ -132,12 +133,12 @@ func (b *Block) Transactions() []*Tx {
 	}
 	// Generate slice to hold all of the wrapped transactions if needed.
 	if len(b.transactions) == 0 {
-		b.transactions = make([]*Tx, len(b.msgBlock.Transactions))
+		b.transactions = make([]*util.Tx, len(b.msgBlock.Transactions))
 	}
 	// Generate and cache the wrapped transactions for all that haven't already been done.
 	for i, tx := range b.transactions {
 		if tx == nil {
-			newTx := NewTx(b.msgBlock.Transactions[i])
+			newTx := util.NewTx(b.msgBlock.Transactions[i])
 			newTx.SetIndex(i)
 			b.transactions[i] = newTx
 		}
