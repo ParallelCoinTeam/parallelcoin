@@ -2,6 +2,7 @@ package rpctest
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg"
 	"io/ioutil"
 	"net"
 	"os"
@@ -13,7 +14,6 @@ import (
 	
 	"github.com/p9c/pod/pkg/util/qu"
 	
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
 	"github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/rpc/rpcclient"
@@ -242,7 +242,6 @@ func (h *Harness) TearDown() (e error) {
 // function returns with an error.
 func (h *Harness) connectRPCClient() (e error) {
 	var client *rpcclient.Client
-	var e error
 	rpcConf := h.node.config.rpcConnConfig()
 	for i := 0; i < h.maxConnRetries; i++ {
 		if client, e = rpcclient.New(&rpcConf, h.handlers, qu.T()); E.Chk(e) {
@@ -398,5 +397,5 @@ func generateListeningAddresses() (string, string) {
 func baseDir() (string, error) {
 	dirPath := filepath.Join(os.TempDir(), "pod", "rpctest")
 	e := os.MkdirAll(dirPath, 0755)
-	return dirPath, err
+	return dirPath, e
 }

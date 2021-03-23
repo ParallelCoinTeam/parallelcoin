@@ -2,6 +2,7 @@ package peer_test
 
 import (
 	"errors"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg"
 	"io"
 	"net"
 	"strconv"
@@ -12,7 +13,6 @@ import (
 	
 	"github.com/btcsuite/go-socks/socks"
 	
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
 	"github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/comm/peer"
@@ -689,15 +689,15 @@ func TestOutboundPeer(t *testing.T) {
 		na := wire.NetAddress{}
 		addrs = append(addrs, &na)
 	}
-	if _, e = p2.PushAddrMsg(addrs); e!=nil {
+	if _, e = p2.PushAddrMsg(addrs); e != nil {
 		t.Errorf("PushAddrMsg: unexpected err %v\n", e)
 		return
 	}
-	if e := p2.PushGetBlocksMsg(nil, &chainhash.Hash{}); e!=nil {
+	if e := p2.PushGetBlocksMsg(nil, &chainhash.Hash{}); e != nil {
 		t.Errorf("PushGetBlocksMsg: unexpected err %v\n", e)
 		return
 	}
-	if e := p2.PushGetHeadersMsg(nil, &chainhash.Hash{}); e!=nil {
+	if e := p2.PushGetHeadersMsg(nil, &chainhash.Hash{}); e != nil {
 		t.Errorf("PushGetHeadersMsg: unexpected err %v\n", e)
 		return
 	}
