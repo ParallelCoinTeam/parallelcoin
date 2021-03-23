@@ -2,13 +2,13 @@ package chainrpc
 
 import (
 	"sync/atomic"
-
+	
 	"github.com/p9c/pod/cmd/node/mempool"
-	blockchain "github.com/p9c/pod/pkg/blockchain"
-	chainhash "github.com/p9c/pod/pkg/chainhash"
-	netsync "github.com/p9c/pod/pkg/blockchain/netsync"
-	"github.com/p9c/pod/pkg/blockchain/wire"
+	"github.com/p9c/pod/pkg/blockchain"
+	"github.com/p9c/pod/pkg/wire"
+	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/comm/peer"
+	"github.com/p9c/pod/pkg/netsync"
 	"github.com/p9c/pod/pkg/util"
 )
 

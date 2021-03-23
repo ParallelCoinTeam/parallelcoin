@@ -18,15 +18,15 @@ import (
 	
 	"github.com/p9c/pod/cmd/node/mempool"
 	"github.com/p9c/pod/pkg/blockchain"
-	"github.com/p9c/pod/pkg/blockchain/tx/txscript"
-	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/chainhash"
-	ec "github.com/p9c/pod/pkg/coding/ecc"
 	"github.com/p9c/pod/pkg/database"
+	ec "github.com/p9c/pod/pkg/ecc"
 	"github.com/p9c/pod/pkg/fork"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
+	"github.com/p9c/pod/pkg/txscript"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/interrupt"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 // HandleAddNode handles addnode commands.
@@ -2297,7 +2297,7 @@ func HandleSearchRawTransactions(s *Server, cmd interface{}, closeChan qu.C) (in
 		reverse = *c.Reverse
 	}
 	// Add transactions from mempool first if client asked for reverse order. Otherwise, they will be added last (as
-	// needed depending on the requested counts). NOTE: This code doesn't sort by dependency. This might be something to
+	// needed depending on the requested counts). NOTE: This code doesn't txsort by dependency. This might be something to
 	// do in the future for the client's convenience, or leave it to the client.
 	numSkipped := uint32(0)
 	addressTxns := make([]RetrievedTx, 0, numRequested)

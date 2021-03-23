@@ -2,9 +2,9 @@ package gui
 
 import (
 	l "gioui.org/layout"
+	"github.com/p9c/pod/pkg/podcfg"
 	"golang.org/x/exp/shiny/materialdesign/icons"
 	
-	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/gui"
 	p9icons "github.com/p9c/pod/pkg/gui/ico/svg"
 )
@@ -21,7 +21,7 @@ func (wg *WalletGUI) getLoadingPage() (a *gui.App) {
 			if wgb, ok := wg.config.Bools["DarkTheme"]; ok {
 				wgb.Value(*wg.Dark)
 			}
-			save.Pod(wg.cx.Config)
+			podcfg.Save(wg.cx.Config)
 		},
 	)
 	a.Pages(

@@ -22,11 +22,11 @@ import (
 	"golang.org/x/crypto/ripemd160"
 	
 	"github.com/p9c/pod/pkg/chainhash"
-	"github.com/p9c/pod/pkg/blockchain/tx/txscript"
-	"github.com/p9c/pod/pkg/blockchain/wire"
-	ec "github.com/p9c/pod/pkg/coding/ecc"
+	ec "github.com/p9c/pod/pkg/ecc"
+	"github.com/p9c/pod/pkg/txscript"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/legacy/rename"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 // A bunch of constants
@@ -489,7 +489,7 @@ func New(
 	dir string, desc string, passphrase []byte, net *chaincfg.Params,
 	createdAt *BlockStamp,
 ) (s *Store, e error) {
-	// Chk sizes of inputs.
+	// Chk txsizes of inputs.
 	if len(desc) > 256 {
 		return nil, errors.New("desc exceeds 256 byte maximum size")
 	}

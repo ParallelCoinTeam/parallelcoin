@@ -3,7 +3,7 @@ package spv
 import (
 	"github.com/p9c/pod/cmd/spv/headerfs"
 	"github.com/p9c/pod/pkg/chainhash"
-	"github.com/p9c/pod/pkg/blockchain/wire"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 // headers wraps the different headers and filters used throughout the tests.

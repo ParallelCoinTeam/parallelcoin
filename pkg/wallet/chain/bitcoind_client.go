@@ -13,9 +13,9 @@ import (
 	"github.com/p9c/pod/pkg/util/qu"
 	
 	"github.com/p9c/pod/pkg/chainhash"
-	"github.com/p9c/pod/pkg/blockchain/tx/txscript"
-	tm "github.com/p9c/pod/pkg/blockchain/tx/wtxmgr"
-	"github.com/p9c/pod/pkg/blockchain/wire"
+	"github.com/p9c/pod/pkg/txscript"
+	tm "github.com/p9c/pod/pkg/wtxmgr"
+	"github.com/p9c/pod/pkg/wire"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/util"
 	am "github.com/p9c/pod/pkg/wallet/waddrmgr"

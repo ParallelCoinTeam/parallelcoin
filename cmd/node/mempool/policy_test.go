@@ -2,15 +2,15 @@ package mempool
 
 import (
 	"bytes"
+	"github.com/p9c/pod/pkg/chaincfg"
 	"testing"
 	"time"
 	
-	"github.com/p9c/pod/pkg/chaincfg/netparams"
 	"github.com/p9c/pod/pkg/chainhash"
-	"github.com/p9c/pod/pkg/blockchain/tx/txscript"
-	"github.com/p9c/pod/pkg/blockchain/wire"
-	ec "github.com/p9c/pod/pkg/coding/ecc"
+	ec "github.com/p9c/pod/pkg/ecc"
+	"github.com/p9c/pod/pkg/txscript"
 	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 // TestCalcMinRequiredTxRelayFee tests the calcMinRequiredTxRelayFee API.
@@ -188,7 +188,7 @@ func TestCheckPkScriptStandard(t *testing.T) {
 			
 			t.Fatalf(
 				"TestCheckPkScriptStandard test '%s' "+
-					"failed: %v", test.name, e,
+					"failed: %v", test.name, err,
 			)
 			// continue
 		}
@@ -293,7 +293,7 @@ func TestCheckTransactionStandard(t *testing.T) {
 	prevOutHash, err := chainhash.NewHashFromStr("01")
 	
 	if err != nil {
-		t.Fatalf("NewShaHashFromStr: unexpected error: %v", e)
+		t.Fatalf("NewShaHashFromStr: unexpected error: %v", err)
 	}
 	dummyPrevOut := wire.OutPoint{Hash: *prevOutHash, Index: 1}
 	dummySigScript := bytes.Repeat([]byte{0x00}, 65)
@@ -309,12 +309,12 @@ func TestCheckTransactionStandard(t *testing.T) {
 	)
 	
 	if err != nil {
-		t.Fatalf("NewAddressPubKeyHash: unexpected error: %v", e)
+		t.Fatalf("NewAddressPubKeyHash: unexpected error: %v", err)
 	}
 	dummyPkScript, err := txscript.PayToAddrScript(addr)
 	
 	if err != nil {
-		t.Fatalf("PayToAddrScript: unexpected error: %v", e)
+		t.Fatalf("PayToAddrScript: unexpected error: %v", err)
 	}
 	dummyTxOut := wire.TxOut{
 		Value:    100000000, // 1 DUO
@@ -523,7 +523,7 @@ func TestCheckTransactionStandard(t *testing.T) {
 		if err != nil && test.isStandard {
 			t.Errorf(
 				"checkTransactionStandard (%s): nonstandard "+
-					"when it should not be: %v", test.name, e,
+					"when it should not be: %v", test.name, err,
 			)
 			continue
 		}
@@ -532,7 +532,7 @@ func TestCheckTransactionStandard(t *testing.T) {
 		if !ok {
 			t.Errorf(
 				"checkTransactionStandard (%s): unexpected "+
-					"error type - got %T", test.name, e,
+					"error type - got %T", test.name, err,
 			)
 			continue
 		}

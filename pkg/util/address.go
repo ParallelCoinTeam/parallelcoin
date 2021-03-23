@@ -5,9 +5,9 @@ import (
 	"errors"
 	"golang.org/x/crypto/ripemd160"
 	
+	"github.com/p9c/pod/pkg/base58"
 	"github.com/p9c/pod/pkg/chaincfg"
-	"github.com/p9c/pod/pkg/coding/base58"
-	ec "github.com/p9c/pod/pkg/coding/ecc"
+	ec "github.com/p9c/pod/pkg/ecc"
 )
 
 // //

@@ -9,12 +9,11 @@ import (
 	"time"
 	
 	"github.com/p9c/pod/pkg/blockchain"
-	"github.com/p9c/pod/pkg/chaincfg/netparams"
 	"github.com/p9c/pod/pkg/chainhash"
-	"github.com/p9c/pod/pkg/blockchain/tx/txscript"
-	"github.com/p9c/pod/pkg/blockchain/wire"
-	ec "github.com/p9c/pod/pkg/coding/ecc"
+	ec "github.com/p9c/pod/pkg/ecc"
+	"github.com/p9c/pod/pkg/txscript"
 	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 // fakeChain is used by the pool harness to provide generated test utxos and a current faked chain height to the pool

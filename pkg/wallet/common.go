@@ -3,9 +3,9 @@ package wallet
 import (
 	"time"
 	
-	chainhash "github.com/p9c/pod/pkg/chainhash"
-	"github.com/p9c/pod/pkg/blockchain/wire"
+	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 // Note: The following common types should never reference the Wallet type. Long term goal is to move these to their own

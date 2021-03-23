@@ -5,11 +5,11 @@ import (
 	"bytes"
 	js "encoding/json"
 	"fmt"
+	"github.com/p9c/pod/pkg/pod"
 	"io"
 	"os"
 	"strings"
 	
-	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/rpc/ctl"
 )
@@ -20,7 +20,7 @@ var HelpPrint = func() {
 }
 
 // Main is the entry point for the pod.Ctl component
-func Main(args []string, cx *conte.Xt) {
+func Main(args []string, cx *pod.State) {
 	// Ensure the specified method identifies a valid registered command and is one of the usable types.
 	method := args[0]
 	var usageFlags btcjson.UsageFlag

@@ -8,8 +8,8 @@ import (
 	"sync"
 	"time"
 	
-	"github.com/p9c/pod/pkg/coding/snacl"
 	"github.com/p9c/pod/pkg/database/walletdb"
+	"github.com/p9c/pod/pkg/snacl"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/hdkeychain"
 	"github.com/p9c/pod/pkg/util/zero"
@@ -584,7 +584,7 @@ func (m *Manager) AddrAccount(
 	defer m.mtx.RUnlock()
 	var e error
 	for _, scopedMgr := range m.scopedManagers {
-		if _, e = scopedMgr.Address(ns, address); e!=nil/*T.Chk(e)*/ {
+		if _, e = scopedMgr.Address(ns, address); e != nil /*T.Chk(e)*/ {
 			// D.Ln(address)
 			continue
 		}

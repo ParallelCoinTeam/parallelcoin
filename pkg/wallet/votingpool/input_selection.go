@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"sort"
 	
-	"github.com/p9c/pod/pkg/chaincfg/netparams"
-	wtxmgr "github.com/p9c/pod/pkg/blockchain/tx/wtxmgr"
-	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
+	"github.com/p9c/pod/pkg/chaincfg"
+	wtxmgr "github.com/p9c/pod/pkg/wtxmgr"
+	txscript "github.com/p9c/pod/pkg/txscript"
 	"github.com/p9c/pod/pkg/database/walletdb"
 	"github.com/p9c/pod/pkg/util"
 )
@@ -30,7 +30,7 @@ func (c *Credit) String() string {
 	return fmt.Sprintf("credit of %v locked to %v", c.Amount, c.addr)
 }
 
-// byAddress defines the methods needed to satisfy sort.Interface to sort a slice of credits by their address.
+// byAddress defines the methods needed to satisfy sort.Interface to txsort a slice of credits by their address.
 type byAddress []Credit
 
 func (c byAddress) Len() int { return len(c) }

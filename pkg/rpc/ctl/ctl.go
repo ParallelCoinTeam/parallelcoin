@@ -3,13 +3,13 @@ package ctl
 import (
 	"errors"
 	"fmt"
-
-	"github.com/p9c/pod/app/conte"
+	"github.com/p9c/pod/pkg/pod"
+	
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
 // Call uses settings in the context to call the method with the given parameters and returns the raw json bytes
-func Call(cx *conte.Xt, wallet bool, method string, params ...interface{}) (result []byte, e error) {
+func Call(cx *pod.State, wallet bool, method string, params ...interface{}) (result []byte, e error) {
 	// Ensure the specified method identifies a valid registered command and is one of the usable types.
 	var usageFlags btcjson.UsageFlag
 	usageFlags, e = btcjson.MethodUsageFlags(method)

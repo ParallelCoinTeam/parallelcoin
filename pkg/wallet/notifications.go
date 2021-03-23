@@ -4,12 +4,12 @@ import (
 	"bytes"
 	"sync"
 	
-	chainhash "github.com/p9c/pod/pkg/chainhash"
-	wtxmgr "github.com/p9c/pod/pkg/blockchain/tx/wtxmgr"
-	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
+	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/database/walletdb"
+	"github.com/p9c/pod/pkg/txscript"
 	"github.com/p9c/pod/pkg/util"
-	waddrmgr "github.com/p9c/pod/pkg/wallet/waddrmgr"
+	"github.com/p9c/pod/pkg/wallet/waddrmgr"
+	"github.com/p9c/pod/pkg/wtxmgr"
 )
 
 // AccountBalance associates a total (zero confirmation) balance with an account. Balances for other minimum

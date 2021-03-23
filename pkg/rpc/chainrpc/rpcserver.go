@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/podcfg"
 	"io"
 	"io/ioutil"
 	"math/big"
@@ -31,17 +32,16 @@ import (
 	"github.com/p9c/pod/cmd/node/mempool"
 	"github.com/p9c/pod/cmd/node/state"
 	"github.com/p9c/pod/pkg/blockchain"
-	"github.com/p9c/pod/pkg/mining"
-	"github.com/p9c/pod/pkg/blockchain/tx/txscript"
-	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/chainhash"
 	p "github.com/p9c/pod/pkg/comm/peer"
 	"github.com/p9c/pod/pkg/database"
 	"github.com/p9c/pod/pkg/fork"
 	"github.com/p9c/pod/pkg/indexers"
-	"github.com/p9c/pod/pkg/pod"
+	"github.com/p9c/pod/pkg/mining"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
+	"github.com/p9c/pod/pkg/txscript"
 	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 const (
@@ -67,7 +67,7 @@ type GBTWorkState struct {
 	TimeSource    blockchain.MedianTimeSource
 	Algo          string
 	StateCfg      *state.Config
-	Config        *pod.Config
+	Config        *podcfg.Config
 }
 
 // ParsedRPCCmd represents a JSON-RPC request object that has been parsed into a known concrete command along with any
@@ -97,7 +97,7 @@ type RetrievedTx struct {
 type Server struct {
 	Cfg                             ServerConfig
 	StateCfg                        *state.Config
-	Config                          *pod.Config
+	Config                          *podcfg.Config
 	NtfnMgr                         *WSNtfnMgr
 	StatusLines                     map[int]string
 	StatusLock                      sync.RWMutex
@@ -117,7 +117,7 @@ type Server struct {
 // ServerConfig is a descriptor containing the RPC server configuration.
 type ServerConfig struct {
 	// Cx passes through the context variable for setting up a server
-	Cfg *pod.Config
+	Cfg *podcfg.Config
 	// Listeners defines a slice of listeners for which the RPC server will take ownership of and accept connections.
 	//
 	// Since the RPC server takes ownership of these listeners, they will be closed when the RPC server is stopped.
@@ -157,8 +157,8 @@ type ServerConfig struct {
 	// miners with one main node per algorithm. Currently 514 for Scrypt and anything else passes for SHA256d.
 	Algo string
 	// CPUMiner *exec.Cmd
-	Hashrate uberatomic.Uint64
-	Quit     qu.C
+	Hashrate                        uberatomic.Uint64
+	Quit                            qu.C
 	StartController, StopController qu.C
 }
 
@@ -1378,7 +1378,7 @@ func (s *Server) JSONRPCRead(w http.ResponseWriter, r *http.Request, isAdmin boo
 		// a valid request id, therefore such requests are not notifications.
 		//
 		// Bitcoin Core serves requests with "id":null or even an absent "id", and responds to such requests with
-		// "id":null in the response. Pod does not respond to any request without and "id" or "id":null, regardless the
+		// "id":null in the response. Save does not respond to any request without and "id" or "id":null, regardless the
 		// indicated JSON-RPC protocol version unless RPC quirks are enabled.
 		//
 		// With RPC quirks enabled, such requests will be responded to if the request does not indicate JSON-RPC
@@ -2052,7 +2052,7 @@ func NewGbtWorkState(
 // NewRPCServer returns a new instance of the RPCServer struct.
 func NewRPCServer(
 	config *ServerConfig, statecfg *state.Config,
-	podcfg *pod.Config,
+	podcfg *podcfg.Config,
 ) (*Server, error) {
 	rpc := Server{
 		Cfg:                    *config,

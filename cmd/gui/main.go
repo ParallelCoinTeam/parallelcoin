@@ -7,6 +7,8 @@ import (
 	"github.com/p9c/pod/cmd/kopach/control/p2padvt"
 	"github.com/p9c/pod/pkg/comm/transport"
 	"github.com/p9c/pod/pkg/logg"
+	"github.com/p9c/pod/pkg/pod"
+	"github.com/p9c/pod/pkg/podcfg"
 	"github.com/tyler-smith/go-bip39"
 	"net"
 	"os"
@@ -18,7 +20,6 @@ import (
 	"gioui.org/op/paint"
 	uberatomic "go.uber.org/atomic"
 	
-	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/gui"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/util/interrupt"
@@ -31,14 +32,13 @@ import (
 	"github.com/p9c/pod/pkg/pipe/consume"
 	"github.com/p9c/pod/pkg/util/rununit"
 	
-	"github.com/p9c/pod/app/apputil"
+	"github.com/p9c/pod/pkg/apputil"
 	
-	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/pkg/gui/cfg"
 	"github.com/p9c/pod/pkg/rpc/rpcclient"
 )
 
-func Main(cx *conte.Xt, c *cli.Context) (e error) {
+func Main(cx *pod.State, c *cli.Context) (e error) {
 	var size int
 	noWallet := true
 	wg := &WalletGUI{
@@ -63,7 +63,7 @@ type IncDecMap map[string]*gui.IncDec
 
 type WalletGUI struct {
 	wg                        sync.WaitGroup
-	cx                        *conte.Xt
+	cx                        *pod.State
 	c                         *cli.Context
 	quit                      qu.C
 	State                     *State
@@ -591,7 +591,7 @@ func (wg *WalletGUI) GetIncDecs() IncDecMap {
 							wg.miner.Stop()
 						}
 						*wg.cx.Config.GenThreads = n
-						save.Pod(wg.cx.Config)
+						podcfg.Save(wg.cx.Config)
 						// if wg.miner.Running() {
 						// 	D.Ln("restarting miner")
 						// 	wg.miner.Stop()

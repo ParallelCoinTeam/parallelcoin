@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"time"
 	
-	"github.com/p9c/pod/pkg/blockchain/wire"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 const (

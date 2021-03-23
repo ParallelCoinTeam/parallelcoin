@@ -2,6 +2,7 @@ package cfg
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/podcfg"
 	"sort"
 	"strconv"
 	"time"
@@ -12,7 +13,6 @@ import (
 	
 	l "gioui.org/layout"
 	
-	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/gui"
 	"github.com/p9c/pod/pkg/pod"
 )
@@ -108,7 +108,7 @@ func (c *Config) Config() GroupsMap {
 						D.Ln(sgf.Slug, "submitted", b)
 						bb := c.cx.ConfigMap[sgf.Slug].(*bool)
 						*bb = b
-						save.Pod(c.cx.Config)
+						podcfg.Save(c.cx.Config)
 						if sgf.Slug == "DarkTheme" {
 							c.Theme.Colors.SetTheme(b)
 						}
@@ -122,7 +122,7 @@ func (c *Config) Config() GroupsMap {
 						if n, e := strconv.Atoi(txt); !E.Chk(e) {
 							*i = n
 						}
-						save.Pod(c.cx.Config)
+						podcfg.Save(c.cx.Config)
 					}, nil,
 				)
 			case "time":
@@ -136,7 +136,7 @@ func (c *Config) Config() GroupsMap {
 						if d, e := time.ParseDuration(txt); !E.Chk(e) {
 							*tt = d
 						}
-						save.Pod(c.cx.Config)
+						podcfg.Save(c.cx.Config)
 					}, nil,
 				)
 			case "float":
@@ -150,7 +150,7 @@ func (c *Config) Config() GroupsMap {
 						if f, e := strconv.ParseFloat(txt, 64); !E.Chk(e) {
 							*ff = f
 						}
-						save.Pod(c.cx.Config)
+						podcfg.Save(c.cx.Config)
 					}, nil,
 				)
 			case "string":
@@ -159,7 +159,7 @@ func (c *Config) Config() GroupsMap {
 						D.Ln(sgf.Slug, "submitted", txt)
 						ss := c.cx.ConfigMap[sgf.Slug].(*string)
 						*ss = txt
-						save.Pod(c.cx.Config)
+						podcfg.Save(c.cx.Config)
 					}, nil,
 				)
 			case "password":
@@ -170,7 +170,7 @@ func (c *Config) Config() GroupsMap {
 						D.Ln(sgf.Slug, "submitted", txt)
 						pp := c.cx.ConfigMap[sgf.Slug].(*string)
 						*pp = txt
-						save.Pod(c.cx.Config)
+						podcfg.Save(c.cx.Config)
 					},
 				)
 			case "multi":
@@ -179,7 +179,7 @@ func (c *Config) Config() GroupsMap {
 						D.Ln(sgf.Slug, "submitted", txt)
 						sss := c.cx.ConfigMap[sgf.Slug].(*cli.StringSlice)
 						*sss = txt
-						save.Pod(c.cx.Config)
+						podcfg.Save(c.cx.Config)
 					},
 				)
 				// c.multis[sgf.Slug]
@@ -193,7 +193,7 @@ func (c *Config) Config() GroupsMap {
 					func(value string) {
 						rr := c.cx.ConfigMap[sgf.Slug].(*string)
 						*rr = value
-						save.Pod(c.cx.Config)
+						podcfg.Save(c.cx.Config)
 					},
 				)
 				c.lists[sgf.Slug] = c.List()

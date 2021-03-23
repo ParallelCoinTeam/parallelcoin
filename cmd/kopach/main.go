@@ -7,6 +7,8 @@ import (
 	"github.com/p9c/pod/cmd/kopach/control/sol"
 	"github.com/p9c/pod/cmd/kopach/control/templates"
 	"github.com/p9c/pod/pkg/logg"
+	"github.com/p9c/pod/pkg/pod"
+	"github.com/p9c/pod/pkg/podcfg"
 	"net"
 	"os"
 	"runtime"
@@ -16,7 +18,6 @@ import (
 	
 	"github.com/niubaoshu/gotiny"
 	
-	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/util/qu"
 	
 	"github.com/VividCortex/ewma"
@@ -25,7 +26,6 @@ import (
 	
 	"github.com/p9c/pod/pkg/data/ring"
 	
-	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/cmd/kopach/client"
 	"github.com/p9c/pod/cmd/kopach/control"
 	"github.com/p9c/pod/cmd/kopach/control/hashrate"
@@ -61,7 +61,7 @@ type SolutionData struct {
 
 type Worker struct {
 	id                  string
-	cx                  *conte.Xt
+	cx                  *pod.State
 	height              int32
 	active              atomic.Bool
 	conn                *transport.Channel
@@ -133,7 +133,7 @@ func (w *Worker) Stop() {
 	w.quit.Q()
 }
 
-func Handle(cx *conte.Xt) func(c *cli.Context) (e error) {
+func Handle(cx *pod.State) func(c *cli.Context) (e error) {
 	return func(c *cli.Context) (e error) {
 		D.Ln("miner controller starting")
 		randomBytes := make([]byte, 4)
@@ -209,23 +209,23 @@ func Handle(cx *conte.Xt) func(c *cli.Context) (e error) {
 				case <-w.StartChan.Wait():
 					D.Ln("received signal on StartChan")
 					*cx.Config.Generate = true
-					save.Pod(cx.Config)
+					podcfg.Save(cx.Config)
 					w.Start()
 				case <-w.StopChan.Wait():
 					D.Ln("received signal on StopChan")
 					*cx.Config.Generate = false
-					save.Pod(cx.Config)
+					podcfg.Save(cx.Config)
 					w.Stop()
 				case s := <-w.PassChan:
 					D.Ln("received signal on PassChan", s)
 					*cx.Config.MinerPass = s
-					save.Pod(cx.Config)
+					podcfg.Save(cx.Config)
 					w.Stop()
 					w.Start()
 				case n := <-w.SetThreads:
 					D.Ln("received signal on SetThreads", n)
 					*cx.Config.GenThreads = n
-					save.Pod(cx.Config)
+					podcfg.Save(cx.Config)
 					if *cx.Config.Generate {
 						// always sanitise
 						if n < 0 {

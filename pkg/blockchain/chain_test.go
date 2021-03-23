@@ -1,9 +1,9 @@
 package blockchain
 
 import (
-	"github.com/p9c/pod/pkg/chaincfg/netparams"
+	"github.com/p9c/pod/pkg/chaincfg"
 	chainhash "github.com/p9c/pod/pkg/chainhash"
-	"github.com/p9c/pod/pkg/blockchain/wire"
+	"github.com/p9c/pod/pkg/wire"
 	"reflect"
 	"testing"
 )

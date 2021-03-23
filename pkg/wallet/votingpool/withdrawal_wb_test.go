@@ -6,10 +6,10 @@ import (
 	"sort"
 	"testing"
 	
-	"github.com/p9c/pod/pkg/chaincfg/netparams"
-	wtxmgr "github.com/p9c/pod/pkg/blockchain/tx/wtxmgr"
-	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
-	"github.com/p9c/pod/pkg/blockchain/wire"
+	"github.com/p9c/pod/pkg/chaincfg"
+	wtxmgr "github.com/p9c/pod/pkg/wtxmgr"
+	txscript "github.com/p9c/pod/pkg/txscript"
+	"github.com/p9c/pod/pkg/wire"
 	"github.com/p9c/pod/pkg/database/walletdb"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/hdkeychain"
@@ -1116,7 +1116,7 @@ func TestGetRawSigsInvalidAddrBranch(t *testing.T) {
 	TstCheckError(t, "", err, ErrInvalidBranch)
 }
 
-// TestOutBailmentIDSort tests that we can correctly sort a slice of output requests by the hash of the outbailmentID.
+// TestOutBailmentIDSort tests that we can correctly txsort a slice of output requests by the hash of the outbailmentID.
 func TestOutBailmentIDSort(t *testing.T) {
 	or00 := OutputRequest{cachedHash: []byte{0, 0}}
 	or01 := OutputRequest{cachedHash: []byte{0, 1}}

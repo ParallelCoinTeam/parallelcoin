@@ -3,7 +3,7 @@ package addrmgr
 import (
 	"time"
 	
-	"github.com/p9c/pod/pkg/blockchain/wire"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 // KnownAddress tracks information about a known network address that is used to determine how viable an address is.

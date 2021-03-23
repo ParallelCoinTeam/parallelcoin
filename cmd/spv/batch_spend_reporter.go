@@ -2,7 +2,7 @@ package spv
 
 import (
 	"github.com/p9c/pod/pkg/chainhash"
-	"github.com/p9c/pod/pkg/blockchain/wire"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 // batchSpendReporter orchestrates the delivery of spend reports to GetUtxoRequests processed by the UtxoScanner. The

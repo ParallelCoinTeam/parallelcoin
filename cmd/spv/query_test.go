@@ -10,8 +10,8 @@ import (
 	"github.com/p9c/pod/cmd/spv/cache/lru"
 	"github.com/p9c/pod/cmd/spv/filterdb"
 	"github.com/p9c/pod/pkg/chainhash"
-	"github.com/p9c/pod/pkg/coding/gcs"
-	"github.com/p9c/pod/pkg/coding/gcs/builder"
+	"github.com/p9c/pod/pkg/gcs"
+	"github.com/p9c/pod/pkg/gcs/builder"
 )
 
 var (

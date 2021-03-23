@@ -72,7 +72,7 @@ package mining
 // 	// Get the current source transactions and create a priority queue to hold the
 // 	// transactions which are ready for inclusion into a block along with some
 // 	// priority related and fee metadata. Reserve the same number of items that are
-// 	// available for the priority queue. Also, choose the initial sort order for the
+// 	// available for the priority queue. Also, choose the initial txsort order for the
 // 	// priority queue based on whether or not there is an area allocated for
 // 	// high-priority transactions.
 // 	sourceTxns := g.TxSource.MiningDescs()
@@ -220,7 +220,7 @@ package mining
 // 	mbt.txs = make([]*util.Tx, 0, len(sourceTxns))
 // 	// Choose which transactions make it into the block.
 // 	for priorityQueues.Len() > 0 {
-// 		// Grab the highest priority (or highest fee per kilobyte depending on the sort
+// 		// Grab the highest priority (or highest fee per kilobyte depending on the txsort
 // 		// order) transaction.
 // 		prioItem := heap.Pop(priorityQueues).(*txPrioItem)
 // 		tx := prioItem.tx
@@ -282,7 +282,7 @@ package mining
 // 		if !sortedByFee && (blockPlusTxWeight >= g.Policy.BlockPrioritySize ||
 // 			prioItem.priority <= MinHighPriority.ToDUO()) {
 // 			Tracef(
-// 				"switching to sort by fees per kilobyte blockSize %d"+
+// 				"switching to txsort by fees per kilobyte blockSize %d"+
 // 					" >= BlockPrioritySize %d || priority %.2f <= minHighPriority %.2f",
 // 				blockPlusTxWeight,
 // 				g.Policy.BlockPrioritySize,

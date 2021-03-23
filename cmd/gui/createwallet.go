@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/gui"
+	"github.com/p9c/pod/pkg/podcfg"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/util/qu"
 	"golang.org/x/exp/shiny/materialdesign/icons"
@@ -13,7 +14,6 @@ import (
 	l "gioui.org/layout"
 	"github.com/urfave/cli"
 	
-	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/fork"
 	"github.com/p9c/pod/pkg/wallet"
 )
@@ -207,7 +207,7 @@ func (wg *WalletGUI) createWalletAction() {
 	pass := []byte(wg.passwords["passEditor"].GetPassword())
 	*wg.cx.Config.WalletPass = string(pass)
 	D.Ln("password", string(pass))
-	save.Pod(wg.cx.Config)
+	podcfg.Save(wg.cx.Config)
 	w, e := loader.CreateNewWallet(
 		pass,
 		pass,
@@ -229,7 +229,7 @@ func (wg *WalletGUI) createWalletAction() {
 	*wg.cx.Config.GenThreads = 1
 	*wg.cx.Config.NodeOff = false
 	*wg.cx.Config.WalletOff = false
-	save.Pod(wg.cx.Config)
+	podcfg.Save(wg.cx.Config)
 	// // we are going to assume the config is not manually misedited
 	// if apputil.FileExists(*wg.cx.Config.ConfigFile) {
 	// 	b, e := ioutil.ReadFile(*wg.cx.Config.ConfigFile)
@@ -295,5 +295,5 @@ func (wg *WalletGUI) createWalletTestnetToggle(b bool) {
 	*wg.cx.Config.WalletRPCListeners = cli.StringSlice{address}
 	*wg.cx.Config.WalletServer = address
 	*wg.cx.Config.NodeOff = false
-	save.Pod(wg.cx.Config)
+	podcfg.Save(wg.cx.Config)
 }

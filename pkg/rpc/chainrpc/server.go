@@ -8,8 +8,9 @@ import (
 	"errors"
 	"fmt"
 	"github.com/p9c/pod/cmd/kopach/control/peersummary"
-	"github.com/p9c/pod/pkg/mining"
 	"github.com/p9c/pod/pkg/logg"
+	"github.com/p9c/pod/pkg/mining"
+	"github.com/p9c/pod/pkg/podcfg"
 	"math"
 	"net"
 	"os"
@@ -31,12 +32,9 @@ import (
 	"github.com/p9c/pod/cmd/node/state"
 	"github.com/p9c/pod/cmd/node/version"
 	"github.com/p9c/pod/pkg/blockchain"
-	"github.com/p9c/pod/pkg/blockchain/netsync"
-	"github.com/p9c/pod/pkg/blockchain/tx/txscript"
-	"github.com/p9c/pod/pkg/blockchain/wire"
+	"github.com/p9c/pod/pkg/bloom"
 	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/chainhash"
-	"github.com/p9c/pod/pkg/coding/bloom"
 	"github.com/p9c/pod/pkg/comm/peer"
 	"github.com/p9c/pod/pkg/comm/peer/addrmgr"
 	"github.com/p9c/pod/pkg/comm/peer/connmgr"
@@ -44,8 +42,10 @@ import (
 	"github.com/p9c/pod/pkg/database"
 	"github.com/p9c/pod/pkg/fork"
 	"github.com/p9c/pod/pkg/indexers"
-	"github.com/p9c/pod/pkg/pod"
+	"github.com/p9c/pod/pkg/netsync"
+	"github.com/p9c/pod/pkg/txscript"
 	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 const DefaultMaxOrphanTxSize = 100000
@@ -160,7 +160,7 @@ type (
 		// CFCheckptCaches stores a cached slice of filter headers for cfcheckpt messages for each filter type.
 		CFCheckptCaches                 map[wire.FilterType][]CFHeaderKV
 		CFCheckptCachesMtx              sync.RWMutex
-		Config                          *pod.Config
+		Config                          *podcfg.Config
 		ActiveNet                       *chaincfg.Params
 		StateCfg                        *state.Config
 		GenThreads                      uint32
@@ -2360,7 +2360,7 @@ func (np *NodePeer) SetDisableRelayTx(disable bool) {
 // Len returns the number of checkpoints in the slice. It is part of the sort.Interface implementation.
 func (s CheckpointSorter) Len() int { return len(s) }
 
-//	Less returns whether the checkpoint with index i should sort before the
+//	Less returns whether the checkpoint with index i should txsort before the
 // checkpoint with index j. It is part of the sort.Interface implementation.
 func (s CheckpointSorter) Less(i, j int) bool {
 	return s[i].Height < s[j].
@@ -2438,7 +2438,7 @@ func AddLocalAddress(addrMgr *addrmgr.AddrManager, addr string, services wire.Se
 // AddrStringToNetAddr takes an address in the form of 'host:port' and returns a net.Addr which maps to the original
 // address with any host names resolved to IP addresses. It also handles tor addresses properly by returning a net.Addr
 // that encapsulates the address.
-func AddrStringToNetAddr(config *pod.Config, stateCfg *state.Config, addr string) (net.Addr, error) {
+func AddrStringToNetAddr(config *podcfg.Config, stateCfg *state.Config, addr string) (net.Addr, error) {
 	host, strPort, e := net.SplitHostPort(addr)
 	if e != nil {
 		return nil, e
@@ -2531,7 +2531,7 @@ func GetHasServices(advertised, desired wire.ServiceFlag) bool {
 // InitListeners initializes the configured net listeners and adds any bound addresses to the address manager. Returns
 // the listeners and a upnp.NAT interface, which is non-nil if UPnP is in use.
 func InitListeners(
-	config *pod.Config, activeNet *chaincfg.Params,
+	config *podcfg.Config, activeNet *chaincfg.Params,
 	aMgr *addrmgr.AddrManager, listenAddrs []string, services wire.ServiceFlag,
 ) ([]net.Listener, upnp.NAT, error) {
 	// Listen for TCP connections at the configured addresses
@@ -2711,7 +2711,7 @@ func NewPeerConfig(sp *NodePeer) *peer.Config {
 
 type Context struct {
 	// Config is the pod all-in-one server config
-	Config *pod.Config
+	Config *podcfg.Config
 	// StateCfg is a reference to the main node state configuration struct
 	StateCfg *state.Config
 	// ActiveNet is the active net parameters
@@ -3203,7 +3203,7 @@ func RandomUint16Number(max uint16) uint16 {
 
 // SetupRPCListeners returns a slice of listeners that are configured for use with the RPC server depending on the
 // configuration settings for listen addresses and TLS.
-func SetupRPCListeners(config *pod.Config, urls []string) ([]net.Listener, error) {
+func SetupRPCListeners(config *podcfg.Config, urls []string) ([]net.Listener, error) {
 	// Setup TLS if not disabled.
 	listenFunc := net.Listen
 	if *config.TLS {
@@ -3254,7 +3254,7 @@ func FileExists(name string) bool {
 	return true
 }
 
-func GetBlkTemplateGenerator(node *Node, cfg *pod.Config, stateCfg *state.Config) *mining.BlkTmplGenerator {
+func GetBlkTemplateGenerator(node *Node, cfg *podcfg.Config, stateCfg *state.Config) *mining.BlkTmplGenerator {
 	D.Ln("getting a block template generator")
 	return mining.NewBlkTmplGenerator(
 		&mining.Policy{

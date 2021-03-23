@@ -8,8 +8,8 @@ import (
 	"time"
 	
 	"github.com/p9c/pod/pkg/blockchain"
-	"github.com/p9c/pod/pkg/blockchain/tx/txscript"
-	"github.com/p9c/pod/pkg/blockchain/wire"
+	"github.com/p9c/pod/pkg/txscript"
+	"github.com/p9c/pod/pkg/wire"
 	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/fork"
 	"github.com/p9c/pod/pkg/util"
@@ -128,7 +128,7 @@ func (pq *txPriorityQueue) Len() int {
 	return len(pq.items)
 }
 
-// Less returns whether the item in the priority queue with index i should sort
+// Less returns whether the item in the priority queue with index i should txsort
 // before the item with index j by deferring to the assigned less function.
 //
 // It is part of the heap.Interface implementation.
@@ -381,7 +381,7 @@ func NewBlkTmplGenerator(
 // factors. First, each transaction has a priority calculated based on its
 // value, age of inputs, and size.
 //
-// Transactions which consist of larger amounts, older inputs, and small sizes
+// Transactions which consist of larger amounts, older inputs, and small txsizes
 // have the highest priority. Second, a fee per kilobyte is calculated for each
 // transaction. Transactions with a higher fee per kilobyte are preferred.
 // Finally, the block generation related policy settings are all taken into
@@ -467,7 +467,7 @@ func (g *BlkTmplGenerator) NewBlockTemplate(payToAddress util.Address, algo stri
 	// Get the current source transactions and create a priority queue to hold the
 	// transactions which are ready for inclusion into a block along with some
 	// priority related and fee metadata. Reserve the same number of items that are
-	// available for the priority queue. Also, choose the initial sort order for the
+	// available for the priority queue. Also, choose the initial txsort order for the
 	// priority queue based on whether or not there is an area allocated for
 	// high-priority transactions.
 	sourceTxns := g.TxSource.MiningDescs()
@@ -607,7 +607,7 @@ mempoolLoop:
 	// witnessIncluded := false
 	// Choose which transactions make it into the block.
 	for priorityQueue.Len() > 0 {
-		// Grab the highest priority (or highest fee per kilobyte depending on the sort
+		// Grab the highest priority (or highest fee per kilobyte depending on the txsort
 		// order) transaction.
 		prioItem := heap.Pop(priorityQueue).(*txPrioItem)
 		tx := prioItem.tx
@@ -704,7 +704,7 @@ mempoolLoop:
 		if !sortedByFee && (blockPlusTxWeight >= g.Policy.BlockPrioritySize ||
 			prioItem.priority <= MinHighPriority.ToDUO()) {
 			T.F(
-				"switching to sort by fees per kilobyte blockSize %d"+
+				"switching to txsort by fees per kilobyte blockSize %d"+
 					" >= BlockPrioritySize %d || priority %.2f <= minHighPriority %.2f",
 				blockPlusTxWeight,
 				g.Policy.BlockPrioritySize,

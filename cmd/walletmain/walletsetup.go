@@ -3,18 +3,18 @@ package walletmain
 import (
 	"bufio"
 	"github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/podcfg"
 	"os"
 	"path/filepath"
 	"time"
 	
-	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/database/walletdb"
-	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/legacy/keystore"
 	"github.com/p9c/pod/pkg/util/prompt"
 	"github.com/p9c/pod/pkg/wallet"
 	"github.com/p9c/pod/pkg/wallet/waddrmgr"
+	"github.com/p9c/pod/pkg/wire"
 	
 	// This initializes the bdb driver
 	_ "github.com/p9c/pod/pkg/database/walletdb/bdb"
@@ -53,7 +53,7 @@ func CreateSimulationWallet(activenet *chaincfg.Params, cfg *Config) (e error) {
 
 // CreateWallet prompts the user for information needed to generate a new wallet and generates the wallet accordingly.
 // The new wallet will reside at the provided path.
-func CreateWallet(activenet *chaincfg.Params, config *pod.Config) (e error) {
+func CreateWallet(activenet *chaincfg.Params, config *podcfg.Config) (e error) {
 	dbDir := *config.WalletFile
 	loader := wallet.NewLoader(activenet, dbDir, 250)
 	D.Ln("WalletPage", loader.ChainParams.Name)

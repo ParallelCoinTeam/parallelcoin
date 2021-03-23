@@ -7,12 +7,12 @@ import (
 	"path/filepath"
 	"time"
 	
-	qu "github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/pod/pkg/util/qu"
 	
-	"github.com/p9c/pod/app/appdata"
-	"github.com/p9c/pod/pkg/blockchain/wire"
-	rpcclient "github.com/p9c/pod/pkg/rpc/rpcclient"
+	"github.com/p9c/pod/pkg/appdata"
+	"github.com/p9c/pod/pkg/rpc/rpcclient"
 	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 func main() {

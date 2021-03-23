@@ -11,8 +11,8 @@ import (
 	uberatomic "go.uber.org/atomic"
 	
 	"github.com/p9c/pod/pkg/chainhash"
-	"github.com/p9c/pod/pkg/coding/gcm"
 	"github.com/p9c/pod/pkg/comm/transport"
+	"github.com/p9c/pod/pkg/gcm"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/atom"

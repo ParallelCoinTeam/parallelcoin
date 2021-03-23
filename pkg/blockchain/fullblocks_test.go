@@ -3,7 +3,7 @@ package blockchain_test
 import (
 	"os"
 	
-	"github.com/p9c/pod/pkg/blockchain/wire"
+	"github.com/p9c/pod/pkg/wire"
 	database "github.com/p9c/pod/pkg/database"
 	_ "github.com/p9c/pod/pkg/database/ffldb"
 )

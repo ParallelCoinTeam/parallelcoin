@@ -8,8 +8,8 @@ import (
 	
 	"github.com/p9c/pod/pkg/util/qu"
 	
-	"github.com/p9c/pod/pkg/chaincfg/netparams"
-	"github.com/p9c/pod/pkg/blockchain/wire"
+	"github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/wire"
 	"github.com/p9c/pod/pkg/comm/peer"
 )
 

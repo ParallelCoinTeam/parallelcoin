@@ -1,13 +1,13 @@
 package wallet
 
 import (
-	txs "github.com/p9c/pod/pkg/blockchain/tx/txscript"
-	tm "github.com/p9c/pod/pkg/blockchain/tx/wtxmgr"
-	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/logg"
+	txs "github.com/p9c/pod/pkg/txscript"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/wallet/chain"
 	wm "github.com/p9c/pod/pkg/wallet/waddrmgr"
+	"github.com/p9c/pod/pkg/wire"
+	tm "github.com/p9c/pod/pkg/wtxmgr"
 )
 
 // RescanProgressMsg reports the current progress made by a rescan for a set of

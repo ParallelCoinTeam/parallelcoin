@@ -1,9 +1,9 @@
 package addresses
 
 import (
+	"github.com/p9c/pod/pkg/podcfg"
 	"github.com/urfave/cli"
 	
-	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/cmd/node/state"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/wallet"
@@ -60,7 +60,7 @@ func RefillMiningAddresses(w *wallet.Wallet, cfg *pod.Config, stateCfg *state.Co
 			Error("error adding new address ", e)
 		}
 	}
-	if save.Pod(cfg) {
+	if podcfg.Save(cfg) {
 		D.Ln("saved config with new addresses")
 	} else {
 		Error("error adding new addresses", e)

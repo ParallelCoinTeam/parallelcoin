@@ -1,7 +1,7 @@
 package cache
 
 import (
-	"github.com/p9c/pod/pkg/coding/gcs"
+	"github.com/p9c/pod/pkg/gcs"
 )
 
 // CacheableFilter is a wrapper around Filter type which provides a Size method used by the cache to target certain

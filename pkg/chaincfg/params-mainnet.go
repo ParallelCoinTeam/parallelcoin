@@ -1,7 +1,7 @@
 package chaincfg
 
 import (
-	"github.com/p9c/pod/pkg/blockchain/wire"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 // MainNetParams defines the network parameters for the main Bitcoin network.

@@ -10,9 +10,9 @@ import (
 	"strconv"
 	"time"
 	
-	wtxmgr "github.com/p9c/pod/pkg/blockchain/tx/wtxmgr"
-	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
-	"github.com/p9c/pod/pkg/blockchain/wire"
+	wtxmgr "github.com/p9c/pod/pkg/wtxmgr"
+	txscript "github.com/p9c/pod/pkg/txscript"
+	"github.com/p9c/pod/pkg/wire"
 	"github.com/p9c/pod/pkg/database/walletdb"
 	"github.com/p9c/pod/pkg/util"
 	waddrmgr "github.com/p9c/pod/pkg/wallet/waddrmgr"
@@ -98,7 +98,7 @@ type (
 	TxSigs [][]RawSig
 	// RawSig represents one of the signatures included in the unlocking script of inputs spending from P2SH UTXOs.
 	RawSig []byte
-	// byAmount defines the methods needed to satisify sort.Interface to sort a slice of OutputRequests by their amount.
+	// byAmount defines the methods needed to satisify sort.Interface to txsort a slice of OutputRequests by their amount.
 	byAmount []OutputRequest
 )
 
@@ -106,7 +106,7 @@ func (u byAmount) Len() int           { return len(u) }
 func (u byAmount) Less(i, j int) bool { return u[i].Amount < u[j].Amount }
 func (u byAmount) Swap(i, j int)      { u[i], u[j] = u[j], u[i] }
 
-// byOutBailmentID defines the methods needed to satisify sort.Interface to sort a slice of OutputRequests by their
+// byOutBailmentID defines the methods needed to satisify sort.Interface to txsort a slice of OutputRequests by their
 // outBailmentIDHash.
 type byOutBailmentID []OutputRequest
 
@@ -765,7 +765,7 @@ func getRawSigs(transactions []*withdrawalTx) (map[Ntxid]TxSigs, error) {
 			redeemScript := creditAddr.redeemScript()
 			series := creditAddr.series()
 			// The order of the raw signatures in the signature script must match the order of the public keys in the
-			// redeem script, so we sort the public keys here using the same API used to sort them in the redeem script
+			// redeem script, so we txsort the public keys here using the same API used to txsort them in the redeem script
 			// and use series.getPrivKeyFor() to lookup the corresponding private keys.
 			pubKeys, e := branchOrder(series.publicKeys, creditAddr.Branch())
 			if e != nil  {

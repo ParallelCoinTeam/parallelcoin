@@ -4,25 +4,25 @@ import (
 	"fmt"
 	"github.com/gookit/color"
 	"github.com/p9c/pod/pkg/logg"
+	"github.com/p9c/pod/pkg/pod"
 	"io/ioutil"
 	"os"
 	
 	"github.com/urfave/cli"
 	
-	"github.com/p9c/pod/app/config"
+	"github.com/p9c/pod/pkg/podconfig"
 	
-	"github.com/p9c/pod/app/apputil"
-	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/cmd/node"
 	"github.com/p9c/pod/cmd/walletmain"
+	"github.com/p9c/pod/pkg/apputil"
 	"github.com/p9c/pod/pkg/wallet"
 )
 
-func ShellHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
+func ShellHandle(cx *pod.State) func(c *cli.Context) (e error) {
 	return func(c *cli.Context) (e error) {
 		logg.AppColorizer = color.Bit24(255, 128, 128, false).Sprint
 		logg.App = " shell"
-		config.Configure(cx, c.Command.Name, true)
+		podconfig.Configure(cx, c.Command.Name, true)
 		D.Ln("starting shell")
 		if *cx.Config.TLS || *cx.Config.ServerTLS {
 			// generate the tls certificate if configured

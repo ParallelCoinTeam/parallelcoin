@@ -11,8 +11,8 @@ import (
 	
 	"github.com/p9c/pod/pkg/blockchain"
 	"github.com/p9c/pod/pkg/chainhash"
-	"github.com/p9c/pod/pkg/blockchain/wire"
-	"github.com/p9c/pod/pkg/coding/gcs/builder"
+	"github.com/p9c/pod/pkg/wire"
+	"github.com/p9c/pod/pkg/gcs/builder"
 	"github.com/p9c/pod/pkg/database/walletdb"
 	"github.com/p9c/pod/pkg/wallet/waddrmgr"
 )

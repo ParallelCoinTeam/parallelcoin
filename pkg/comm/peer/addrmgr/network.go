@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net"
 	
-	"github.com/p9c/pod/pkg/blockchain/wire"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 var (

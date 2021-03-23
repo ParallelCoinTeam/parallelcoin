@@ -8,7 +8,7 @@ import (
 	
 	chaincfg "github.com/p9c/pod/pkg/chaincfg"
 	chainhash "github.com/p9c/pod/pkg/chainhash"
-	"github.com/p9c/pod/pkg/blockchain/wire"
+	"github.com/p9c/pod/pkg/wire"
 	"github.com/p9c/pod/pkg/util"
 )
 

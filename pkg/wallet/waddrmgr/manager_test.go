@@ -13,9 +13,9 @@ import (
 	"github.com/davecgh/go-spew/spew"
 	
 	chaincfg "github.com/p9c/pod/pkg/chaincfg"
-	"github.com/p9c/pod/pkg/chaincfg/netparams"
+	"github.com/p9c/pod/pkg/chaincfg"
 	chainhash "github.com/p9c/pod/pkg/chainhash"
-	"github.com/p9c/pod/pkg/coding/snacl"
+	"github.com/p9c/pod/pkg/snacl"
 	"github.com/p9c/pod/pkg/database/walletdb"
 	"github.com/p9c/pod/pkg/util"
 	waddrmgr "github.com/p9c/pod/pkg/wallet/waddrmgr"

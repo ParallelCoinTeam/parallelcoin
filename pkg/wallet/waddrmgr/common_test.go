@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 	
-	"github.com/p9c/pod/pkg/chaincfg/netparams"
+	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/comm/peer/addrmgr"
 	"github.com/p9c/pod/pkg/database/walletdb"
 	_ "github.com/p9c/pod/pkg/database/walletdb/bdb"

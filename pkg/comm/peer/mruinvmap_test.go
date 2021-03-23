@@ -6,7 +6,7 @@ import (
 	"testing"
 	
 	chainhash "github.com/p9c/pod/pkg/chainhash"
-	"github.com/p9c/pod/pkg/blockchain/wire"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 // TestMruInventoryMap ensures the MruInventoryMap behaves as expected including limiting, eviction of least-recently

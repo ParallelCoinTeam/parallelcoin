@@ -5,19 +5,19 @@ package app
 import (
 	"github.com/gookit/color"
 	"github.com/p9c/pod/pkg/logg"
+	"github.com/p9c/pod/pkg/pod"
 	"github.com/urfave/cli"
 	
-	"github.com/p9c/pod/app/config"
-	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/cmd/gui"
+	"github.com/p9c/pod/pkg/podconfig"
 )
 
-func walletGUIHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
+func walletGUIHandle(cx *pod.State) func(c *cli.Context) (e error) {
 	return func(c *cli.Context) (e error) {
 		logg.AppColorizer = color.Bit24(128, 255, 255, false).Sprint
 		logg.App = "   gui"
 		D.Ln("starting up parallelcoin pod gui...")
-		config.Configure(cx, "gui", true)
+		podconfig.Configure(cx, "gui", true)
 		// D.Ln(os.Args)
 		// interrupt.AddHandler(func() {
 		// 	D.Ln("wallet gui is shut down")

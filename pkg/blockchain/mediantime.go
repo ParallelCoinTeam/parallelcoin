@@ -50,7 +50,7 @@ func (s int64Sorter) Swap(i, j int) {
 	s[i], s[j] = s[j], s[i]
 }
 
-// Less returns whether the 64-bit integer with index i should sort before the 64-bit integer with index j. It is part
+// Less returns whether the 64-bit integer with index i should txsort before the 64-bit integer with index j. It is part
 // of the sort.Interface implementation.
 func (s int64Sorter) Less(i, j int) bool {
 	return s[i] < s[j]

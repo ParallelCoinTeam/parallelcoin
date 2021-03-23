@@ -9,7 +9,7 @@ import (
 	"gioui.org/op/paint"
 	"github.com/atotto/clipboard"
 	
-	"github.com/p9c/pod/pkg/coding/qrcode"
+	"github.com/p9c/pod/pkg/qrcode"
 	"github.com/p9c/pod/pkg/util"
 )
 

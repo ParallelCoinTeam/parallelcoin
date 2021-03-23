@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/p9c/pod/pkg/logg"
+	"github.com/p9c/pod/pkg/podcfg"
 	"io/ioutil"
 	prand "math/rand"
 	"os"
@@ -15,14 +16,13 @@ import (
 	
 	"github.com/urfave/cli"
 	
-	"github.com/p9c/pod/app/apputil"
-	"github.com/p9c/pod/app/conte"
+	"github.com/p9c/pod/pkg/apputil"
 	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/fork"
 	"github.com/p9c/pod/pkg/pod"
 )
 
-func beforeFunc(cx *conte.Xt) func(c *cli.Context) (e error) {
+func beforeFunc(cx *pod.State) func(c *cli.Context) (e error) {
 	return func(c *cli.Context) (e error) {
 		D.Ln("running beforeFunc")
 		cx.AppContext = c
@@ -52,7 +52,7 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) (e error) {
 		if apputil.FileExists(*cx.Config.ConfigFile) {
 			b, e := ioutil.ReadFile(*cx.Config.ConfigFile)
 			if e == nil {
-				cx.Config, cx.ConfigMap = pod.EmptyConfig()
+				cx.Config, cx.ConfigMap = podcfg.EmptyConfig()
 				e = json.Unmarshal(b, cx.Config)
 				if e != nil {
 					E.Ln("error unmarshalling config", e)

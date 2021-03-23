@@ -3,28 +3,28 @@ package app
 import (
 	"github.com/gookit/color"
 	"github.com/p9c/pod/pkg/logg"
+	"github.com/p9c/pod/pkg/pod"
 	"github.com/urfave/cli"
 	
-	"github.com/p9c/pod/app/apputil"
-	"github.com/p9c/pod/app/config"
 	"github.com/p9c/pod/cmd/walletmain"
+	"github.com/p9c/pod/pkg/apputil"
+	"github.com/p9c/pod/pkg/podconfig"
 	"github.com/p9c/pod/pkg/util/qu"
 	
-	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/cmd/node"
 )
 
-func rpcNodeHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
+func rpcNodeHandle(cx *pod.State) func(c *cli.Context) (e error) {
 	// *cx.Config.DisableController = true
 	return nodeHandle(cx)
 }
 
-func nodeHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
+func nodeHandle(cx *pod.State) func(c *cli.Context) (e error) {
 	return func(c *cli.Context) (e error) {
 		logg.AppColorizer = color.Bit24(128, 128, 255, false).Sprint
 		logg.App = "  node"
 		F.Ln("running node handler")
-		config.Configure(cx, "node", true)
+		podconfig.Configure(cx, "node", true)
 		cx.NodeReady = qu.T()
 		cx.Node.Store(false)
 		// serviceOptions defines the configuration options for the daemon as a service on Windows.

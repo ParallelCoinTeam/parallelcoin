@@ -4,8 +4,8 @@ import (
 	"time"
 	
 	chainhash "github.com/p9c/pod/pkg/chainhash"
-	wtxmgr "github.com/p9c/pod/pkg/blockchain/tx/wtxmgr"
-	"github.com/p9c/pod/pkg/blockchain/wire"
+	wtxmgr "github.com/p9c/pod/pkg/wtxmgr"
+	"github.com/p9c/pod/pkg/wire"
 	"github.com/p9c/pod/pkg/util"
 	waddrmgr "github.com/p9c/pod/pkg/wallet/waddrmgr"
 )

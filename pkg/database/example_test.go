@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	
-	"github.com/p9c/pod/pkg/blockchain/wire"
+	"github.com/p9c/pod/pkg/wire"
 	"github.com/p9c/pod/pkg/database"
 	_ "github.com/p9c/pod/pkg/database/ffldb"
 )

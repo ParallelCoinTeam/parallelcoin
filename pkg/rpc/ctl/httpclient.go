@@ -7,21 +7,21 @@ import (
 	"crypto/x509"
 	js "encoding/json"
 	"fmt"
+	"github.com/p9c/pod/pkg/podcfg"
 	"io/ioutil"
 	"net"
 	"net/http"
 	"os"
-
+	
 	"github.com/btcsuite/go-socks/socks"
-
-	"github.com/p9c/pod/app/conte"
+	
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
 // newHTTPClient returns a new HTTP client that is configured according to the proxy and TLS settings in the associated
 // connection configuration.
-func newHTTPClient(cfg *pod.Config) (*http.Client, func(), error) {
+func newHTTPClient(cfg *podcfg.Config) (*http.Client, func(), error) {
 	var dial func(ctx context.Context, network string, addr string) (net.Conn, error)
 	ctx, cancel := context.WithCancel(context.Background())
 	// Configure proxy if needed.
@@ -94,7 +94,7 @@ func newHTTPClient(cfg *pod.Config) (*http.Client, func(), error) {
 // sendPostRequest sends the marshalled JSON-RPC command using HTTP-POST mode to the server described in the passed
 // config struct. It also attempts to unmarshal the response as a JSON-RPC response and returns either the result field
 // or the error field depending on whether or not there is an error.
-func sendPostRequest(marshalledJSON []byte, cx *conte.Xt, wallet bool) ([]byte, error) {
+func sendPostRequest(marshalledJSON []byte, cx *pod.State, wallet bool) ([]byte, error) {
 	// Generate a request to the configured RPC server.
 	protocol := "http"
 	if *cx.Config.TLS {

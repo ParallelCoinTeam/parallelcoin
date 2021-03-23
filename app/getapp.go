@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/version"
 	"os"
 	"path/filepath"
@@ -9,22 +10,21 @@ import (
 	
 	"github.com/urfave/cli"
 	
-	au "github.com/p9c/pod/app/apputil"
-	"github.com/p9c/pod/app/config"
-	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/cmd/kopach/kopach_worker"
 	"github.com/p9c/pod/cmd/node"
 	"github.com/p9c/pod/cmd/node/mempool"
 	"github.com/p9c/pod/cmd/walletmain"
-	"github.com/p9c/pod/pkg/coding/base58"
+	au "github.com/p9c/pod/pkg/apputil"
+	"github.com/p9c/pod/pkg/base58"
 	"github.com/p9c/pod/pkg/database/blockdb"
+	"github.com/p9c/pod/pkg/podconfig"
 	"github.com/p9c/pod/pkg/rpc/legacy"
 	"github.com/p9c/pod/pkg/util/hdkeychain"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
 // getApp defines the pod app
-func getApp(cx *conte.Xt) (a *cli.App) {
+func getApp(cx *pod.State) (a *cli.App) {
 	return &cli.App{
 		Name:        "pod",
 		Version:     version.Get(),
@@ -115,7 +115,7 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 						"resetchain",
 						"reset the chain",
 						func(c *cli.Context) (e error) {
-							config.Configure(cx, "resetchain", true)
+							podconfig.Configure(cx, "resetchain", true)
 							dbName := blockdb.NamePrefix + "_" + *cx.Config.DbType
 							if *cx.Config.DbType == "sqlite" {
 								dbName += ".db"
@@ -188,7 +188,7 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 						"resetchain",
 						"reset the chain",
 						func(c *cli.Context) (e error) {
-							config.Configure(cx, "resetchain", true)
+							podconfig.Configure(cx, "resetchain", true)
 							dbName := blockdb.NamePrefix + "_" + *cx.Config.DbType
 							if *cx.Config.DbType == "sqlite" {
 								dbName += ".db"
@@ -216,7 +216,7 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 						"drophistory", "drop the transaction history in the wallet (for "+
 							"development and testing as well as clearing up transaction mess)",
 						func(c *cli.Context) (e error) {
-							config.Configure(cx, "wallet", true)
+							podconfig.Configure(cx, "wallet", true)
 							I.Ln("dropping wallet history")
 							go func() {
 								D.Ln("starting wallet")

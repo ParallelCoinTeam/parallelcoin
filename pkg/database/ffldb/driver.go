@@ -3,7 +3,7 @@ package ffldb
 import (
 	"fmt"
 	
-	"github.com/p9c/pod/pkg/blockchain/wire"
+	"github.com/p9c/pod/pkg/wire"
 	database "github.com/p9c/pod/pkg/database"
 )
 

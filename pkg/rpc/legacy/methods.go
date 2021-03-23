@@ -12,18 +12,18 @@ import (
 	"time"
 	
 	"github.com/p9c/pod/pkg/chainhash"
-	"github.com/p9c/pod/pkg/blockchain/tx/txrules"
-	"github.com/p9c/pod/pkg/blockchain/tx/txscript"
-	"github.com/p9c/pod/pkg/blockchain/tx/wtxmgr"
-	"github.com/p9c/pod/pkg/blockchain/wire"
-	ec "github.com/p9c/pod/pkg/coding/ecc"
+	ec "github.com/p9c/pod/pkg/ecc"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/rpc/rpcclient"
+	"github.com/p9c/pod/pkg/txrules"
+	"github.com/p9c/pod/pkg/txscript"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/wallet"
 	"github.com/p9c/pod/pkg/wallet/chain"
 	"github.com/p9c/pod/pkg/wallet/waddrmgr"
+	"github.com/p9c/pod/pkg/wire"
+	"github.com/p9c/pod/pkg/wtxmgr"
 )
 
 // // confirmed checks whether a transaction at height txHeight has met minconf

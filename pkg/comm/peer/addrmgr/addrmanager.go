@@ -21,7 +21,7 @@ import (
 	qu "github.com/p9c/pod/pkg/util/qu"
 	
 	chainhash "github.com/p9c/pod/pkg/chainhash"
-	"github.com/p9c/pod/pkg/blockchain/wire"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 // AddrManager provides a concurrency safe address manager for caching potential peers on the bitcoin network.

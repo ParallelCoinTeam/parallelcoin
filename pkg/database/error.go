@@ -48,7 +48,7 @@ const (
 	ErrKeyRequired
 	// ErrKeyTooLarge indicates an attmempt to insert a key that is larger than
 	// the max allowed key size. The max key size depends on the specific backend
-	// driver being used. As a general rule, key sizes should be relatively, so
+	// driver being used. As a general rule, key txsizes should be relatively, so
 	// this should rarely be an issue.
 	ErrKeyTooLarge
 	// ErrValueTooLarge indicates an attmpt to insert a value that is larger than

@@ -2,7 +2,6 @@ package p2padvt
 
 import (
 	"github.com/niubaoshu/gotiny"
-	"github.com/p9c/pod/pkg/pod"
 	
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/routeable"
@@ -24,12 +23,12 @@ type Advertisment struct {
 }
 
 // Get returns an advertisment message
-func Get(uuid uint64, cfg *pod.Config) []byte {
+func Get(uuid uint64, listeners string) []byte {
 	_, ips := routeable.GetAddressesAndInterfaces()
 	adv := &Advertisment{
-		IPs:      ips,
-		P2P:      util.GetActualPort((*cfg.P2PListeners)[0]),
-		UUID:     uuid,
+		IPs:  ips,
+		P2P:  util.GetActualPort(listeners),
+		UUID: uuid,
 		// Services: node.Services,
 	}
 	ad := gotiny.Marshal(&adv)

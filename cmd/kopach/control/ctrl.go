@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/VividCortex/ewma"
 	"github.com/niubaoshu/gotiny"
-	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/cmd/kopach/control/hashrate"
 	"github.com/p9c/pod/cmd/kopach/control/job"
 	"github.com/p9c/pod/cmd/kopach/control/p2padvt"
@@ -15,17 +14,17 @@ import (
 	"github.com/p9c/pod/cmd/kopach/control/templates"
 	"github.com/p9c/pod/cmd/node/state"
 	"github.com/p9c/pod/pkg/blockchain"
-	"github.com/p9c/pod/pkg/mining"
-	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/comm/transport"
 	rav "github.com/p9c/pod/pkg/data/ring"
 	"github.com/p9c/pod/pkg/fork"
-	"github.com/p9c/pod/pkg/pod"
+	"github.com/p9c/pod/pkg/mining"
+	"github.com/p9c/pod/pkg/podcfg"
 	"github.com/p9c/pod/pkg/rpc/chainrpc"
 	"github.com/p9c/pod/pkg/rpc/rpcclient"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/qu"
 	"github.com/p9c/pod/pkg/util/routeable"
+	"github.com/p9c/pod/pkg/wire"
 	"github.com/urfave/cli"
 	"go.uber.org/atomic"
 	"math/rand"
@@ -43,7 +42,7 @@ const (
 // State stores the state of the controller
 type State struct {
 	sync.Mutex
-	cfg               *pod.Config
+	cfg               *podcfg.Config
 	node              *chainrpc.Node
 	connMgr           chainrpc.ServerConnManager
 	stateCfg          *state.Config
@@ -72,7 +71,7 @@ type nodeSpec struct {
 // New creates a new controller
 func New(
 	syncing *atomic.Bool,
-	cfg *pod.Config,
+	cfg *podcfg.Config,
 	stateCfg *state.Config,
 	node *chainrpc.Node,
 	connMgr chainrpc.ServerConnManager,
@@ -162,7 +161,7 @@ func (s *State) Shutdown() {
 
 func (s *State) startWallet() (e error) {
 	I.Ln("getting configured TLS certificates")
-	certs := pod.ReadCAFile(s.cfg)
+	certs := podcfg.ReadCAFile(s.cfg)
 	I.Ln("establishing wallet connection")
 	if s.walletClient, e = rpcclient.New(
 		&rpcclient.ConnConfig{
@@ -487,7 +486,7 @@ func (s *State) GetNewAddressFromMiningAddrs() (addr util.Address, e error) {
 		ma = append(ma, s.stateCfg.ActiveMiningAddrs[i].String())
 	}
 	*s.cfg.MiningAddrs = ma
-	save.Pod(s.cfg)
+	podcfg.Save(s.cfg)
 	return
 }
 
@@ -582,7 +581,7 @@ func processSolMsg(ctx interface{}, src net.Addr, dst string, b []byte,) (e erro
 	}
 	
 	I.Ln("sending pause to workers")
-	if e = s.multiConn.SendMany(pause.Magic, transport.GetShards(p2padvt.Get(s.uuid, s.cfg))); E.Chk(e) {
+	if e = s.multiConn.SendMany(pause.Magic, transport.GetShards(p2padvt.Get(s.uuid, (*s.cfg.P2PListeners)[0]))); E.Chk(e) {
 		return
 	}
 	I.Ln("signalling controller to enter pause mode")

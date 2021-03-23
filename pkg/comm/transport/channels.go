@@ -11,11 +11,11 @@ import (
 	"strings"
 	"time"
 	
-	qu "github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/pod/pkg/util/qu"
 	
-	"github.com/p9c/pod/pkg/coding/fec"
-	"github.com/p9c/pod/pkg/coding/gcm"
 	"github.com/p9c/pod/pkg/comm/multicast"
+	"github.com/p9c/pod/pkg/fec"
+	"github.com/p9c/pod/pkg/gcm"
 )
 
 const (

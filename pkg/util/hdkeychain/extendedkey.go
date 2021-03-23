@@ -12,10 +12,10 @@ import (
 	"fmt"
 	"math/big"
 	
+	"github.com/p9c/pod/pkg/base58"
 	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/chainhash"
-	"github.com/p9c/pod/pkg/coding/base58"
-	ec "github.com/p9c/pod/pkg/coding/ecc"
+	ec "github.com/p9c/pod/pkg/ecc"
 	"github.com/p9c/pod/pkg/util"
 )
 

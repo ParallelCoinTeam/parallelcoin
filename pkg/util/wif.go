@@ -5,9 +5,9 @@ import (
 	"errors"
 	"github.com/p9c/pod/pkg/chaincfg"
 	
+	"github.com/p9c/pod/pkg/base58"
 	"github.com/p9c/pod/pkg/chainhash"
-	"github.com/p9c/pod/pkg/coding/base58"
-	ec "github.com/p9c/pod/pkg/coding/ecc"
+	ec "github.com/p9c/pod/pkg/ecc"
 )
 
 // ErrMalformedPrivateKey describes an error where a WIF-encoded private key cannot be decoded due to being improperly

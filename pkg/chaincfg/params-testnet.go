@@ -1,7 +1,7 @@
 package chaincfg
 
 import (
-	"github.com/p9c/pod/pkg/blockchain/wire"
+	"github.com/p9c/pod/pkg/wire"
 	"github.com/p9c/pod/pkg/fork"
 )
 

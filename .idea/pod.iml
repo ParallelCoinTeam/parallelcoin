@@ -5,7 +5,6 @@
       <excludeFolder url="file://$MODULE_DIR$/legacy/src/openssl-OpenSSL_1_0_1u" />
       <excludeFolder url="file://$MODULE_DIR$/test0" />
       <excludeFolder url="file://$MODULE_DIR$/legacy" />
-      <excludeFolder url="file://$MODULE_DIR$/version" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

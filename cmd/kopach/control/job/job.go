@@ -3,7 +3,7 @@ package job
 //
 // import (
 // 	"errors"
-// 	"github.com/p9c/pod/pkg/chaincfg/netparams"
+// 	"github.com/p9c/pod/pkg/chaincfg"
 // 	"time"
 //
 // 	"github.com/niubaoshu/gotiny"
@@ -11,7 +11,7 @@ package job
 // 	"github.com/p9c/pod/pkg/blockchain"
 // 	"github.com/p9c/pod/pkg/chainhash"
 // 	"github.com/p9c/pod/pkg/blockchain/fork"
-// 	"github.com/p9c/pod/pkg/blockchain/wire"
+// 	"github.com/p9c/pod/pkg/wire"
 // 	"github.com/p9c/pod/pkg/util"
 // )
 //
@@ -205,7 +205,7 @@ var Magic = []byte{'j', 'o', 'b', 1}
 // // 	for i := range bitses {
 // // 		sortedBitses = append(sortedBitses, int(i))
 // // 	}
-// // 	sort.Ints(sortedBitses)
+// // 	txsort.Ints(sortedBitses)
 // // 	for i := range sortedBitses {
 // // 		s += fmt.Sprintf(
 // // 			"  %2d %-10v %d %064x",

@@ -1,13 +1,12 @@
 package path
 
 import (
+	"github.com/p9c/pod/pkg/pod"
 	"path/filepath"
-	
-	"github.com/p9c/pod/app/conte"
 )
 
 // BlockDb returns the path to the block database given a database type.
-func BlockDb(cx *conte.Xt, dbType string, namePrefix string) string {
+func BlockDb(cx *pod.State, dbType string, namePrefix string) string {
 	// The database name is based on the database type.
 	dbName := namePrefix + "_" + dbType
 	if dbType == "sqlite" {

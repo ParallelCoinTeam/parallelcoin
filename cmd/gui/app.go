@@ -2,6 +2,7 @@ package gui
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/podcfg"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -12,7 +13,6 @@ import (
 	l "gioui.org/layout"
 	"gioui.org/text"
 	
-	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/gui"
 	"github.com/p9c/pod/pkg/gui/cfg"
 	p9icons "github.com/p9c/pod/pkg/gui/ico/svg"
@@ -33,7 +33,7 @@ func (wg *WalletGUI) GetAppWidget() (a *gui.App) {
 			// 	wgb.Value(*wg.Dark)
 			// }
 			// wg.Colors.Unlock()
-			save.Pod(wg.cx.Config)
+			podcfg.Save(wg.cx.Config)
 			wg.RecentTransactions(10, "recent")
 			wg.RecentTransactions(-1, "history")
 		},
@@ -556,7 +556,7 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 						func() {
 							go func() {
 								*wg.cx.Config.Discovery = !*wg.cx.Config.Discovery
-								save.Pod(wg.cx.Config)
+								podcfg.Save(wg.cx.Config)
 								I.Ln("discover enabled:", *wg.cx.Config.Discovery)
 							}()
 						},
@@ -611,7 +611,7 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 							// 		wg.miner.Start()
 							// 		*wg.cx.Config.Generate = true
 							// 	}
-							// 	save.Pod(wg.cx.Config)
+							// 	save.Save(wg.cx.Config)
 							// }()
 						},
 					).
@@ -649,7 +649,7 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 										wg.miner.Start()
 										*wg.cx.Config.Generate = true
 									}
-									save.Pod(wg.cx.Config)
+									podcfg.Save(wg.cx.Config)
 								}
 							}()
 						},
@@ -744,7 +744,7 @@ func (wg *WalletGUI) writeWalletCookie() (e error) {
 // 		wg.node.Start()
 // 		*wg.cx.Config.NodeOff = false
 // 	}
-// 	save.Pod(wg.cx.Config)
+// 	save.Save(wg.cx.Config)
 // }
 //
 // func (wg *WalletGUI) startNode() {
@@ -775,7 +775,7 @@ func (wg *WalletGUI) writeWalletCookie() (e error) {
 // 		wg.miner.Start()
 // 		*wg.cx.Config.Generate = true
 // 	}
-// 	save.Pod(wg.cx.Config)
+// 	save.Save(wg.cx.Config)
 // }
 //
 // func (wg *WalletGUI) startMiner() {
@@ -803,7 +803,7 @@ func (wg *WalletGUI) writeWalletCookie() (e error) {
 // 		wg.startWallet()
 // 		*wg.cx.Config.WalletOff = false
 // 	}
-// 	save.Pod(wg.cx.Config)
+// 	save.Save(wg.cx.Config)
 // }
 //
 // func (wg *WalletGUI) startWallet() {

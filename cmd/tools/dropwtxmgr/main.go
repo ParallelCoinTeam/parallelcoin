@@ -10,10 +10,10 @@ import (
 	
 	"github.com/jessevdk/go-flags"
 	
-	"github.com/p9c/pod/app/appdata"
-	"github.com/p9c/pod/pkg/blockchain/tx/wtxmgr"
+	"github.com/p9c/pod/pkg/appdata"
 	"github.com/p9c/pod/pkg/database/walletdb"
 	_ "github.com/p9c/pod/pkg/database/walletdb/bdb"
+	"github.com/p9c/pod/pkg/wtxmgr"
 )
 
 const defaultNet = "mainnet"

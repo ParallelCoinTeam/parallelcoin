@@ -618,7 +618,7 @@ func deserializeAccountRow(accountID []byte, serializedAccount []byte) (*dbAccou
 	// 1 byte acctType + 4 bytes raw data length + raw data
 	//
 	// Given the above, the length of the entry must be at a minimum the constant
-	// value sizes.
+	// value txsizes.
 	if len(serializedAccount) < 5 {
 		str := fmt.Sprintf(
 			"malformed serialized account for key %x",
@@ -664,7 +664,7 @@ func deserializeDefaultAccountRow(accountID []byte, row *dbAccountRow) (*dbDefau
 	// 4 bytes next internal index + 4 bytes name len + name
 	//
 	// Given the above, the length of the entry must be at a minimum the constant
-	// value sizes.
+	// value txsizes.
 	if len(row.rawData) < 20 {
 		str := fmt.Sprintf("malformed serialized bip0044 account for key %x", accountID)
 		return nil, managerError(ErrDatabase, str, nil)
@@ -1037,7 +1037,7 @@ func deserializeAddressRow(serializedAddress []byte) (*dbAddressRow, error) {
 	// syncStatus + 4 bytes raw data length + raw data
 	//
 	// Given the above, the length of the entry must be at a minimum the constant
-	// value sizes.
+	// value txsizes.
 	if len(serializedAddress) < 18 {
 		str := "malformed serialized address"
 		return nil, managerError(ErrDatabase, str, nil)
@@ -1119,7 +1119,7 @@ func deserializeImportedAddress(row *dbAddressRow) (*dbImportedAddressRow, error
 	// privkey len + encrypted privkey
 	//
 	// Given the above, the length of the entry must be at a minimum the constant
-	// value sizes.
+	// value txsizes.
 	if len(row.rawData) < 8 {
 		str := "malformed serialized imported address"
 		return nil, managerError(ErrDatabase, str, nil)
@@ -1172,7 +1172,7 @@ func deserializeScriptAddress(row *dbAddressRow) (*dbScriptAddressRow, error) {
 	// encrypted script len + encrypted script
 	//
 	// Given the above, the length of the entry must be at a minimum the constant
-	// value sizes.
+	// value txsizes.
 	if len(row.rawData) < 8 {
 		str := "malformed serialized script address"
 		return nil, managerError(ErrDatabase, str, nil)

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sort"
 	
-	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
+	txscript "github.com/p9c/pod/pkg/txscript"
 	"github.com/p9c/pod/pkg/database/walletdb"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/hdkeychain"

@@ -17,7 +17,7 @@ import (
 	"github.com/p9c/pod/pkg/blockchain"
 	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/chainhash"
-	"github.com/p9c/pod/pkg/blockchain/wire"
+	"github.com/p9c/pod/pkg/wire"
 	"github.com/p9c/pod/pkg/comm/peer"
 	"github.com/p9c/pod/pkg/comm/peer/addrmgr"
 	"github.com/p9c/pod/pkg/comm/peer/connmgr"
@@ -956,7 +956,7 @@ func (ps *peerState) forAllPeers(closure func(sp *ServerPeer)) {
 // NewChainService returns a new chain service configured to connect to the bitcoin network type specified by
 // chainParams. Use start to begin syncing with peers.
 func NewChainService(cfg Config) (*ChainService, error) {
-	// First, we'll sort out the methods that we'll use to established outbound TCP connections, as well as perform any
+	// First, we'll txsort out the methods that we'll use to established outbound TCP connections, as well as perform any
 	// DNS queries.
 	//
 	// If the dialler was specified, then we'll use that in place of the default net.Dial function.

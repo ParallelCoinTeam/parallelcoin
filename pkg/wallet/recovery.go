@@ -5,13 +5,13 @@ import (
 	"time"
 	
 	"github.com/p9c/pod/pkg/chainhash"
-	"github.com/p9c/pod/pkg/blockchain/tx/txscript"
-	"github.com/p9c/pod/pkg/blockchain/tx/wtxmgr"
-	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/database/walletdb"
+	"github.com/p9c/pod/pkg/txscript"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/hdkeychain"
 	"github.com/p9c/pod/pkg/wallet/waddrmgr"
+	"github.com/p9c/pod/pkg/wire"
+	"github.com/p9c/pod/pkg/wtxmgr"
 )
 
 // RecoveryManager maintains the state required to recover previously used addresses, and coordinates batched processing

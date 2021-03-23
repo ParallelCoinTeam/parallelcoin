@@ -5,11 +5,11 @@ import (
 	"github.com/p9c/pod/pkg/util"
 	"strings"
 	
-	tm "github.com/p9c/pod/pkg/blockchain/tx/wtxmgr"
-	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
 	"github.com/p9c/pod/pkg/database/walletdb"
-	wm "github.com/p9c/pod/pkg/wallet/waddrmgr"
+	"github.com/p9c/pod/pkg/txscript"
 	"github.com/p9c/pod/pkg/wallet/chain"
+	wm "github.com/p9c/pod/pkg/wallet/waddrmgr"
+	tm "github.com/p9c/pod/pkg/wtxmgr"
 )
 
 func (w *Wallet) handleChainNotifications() {

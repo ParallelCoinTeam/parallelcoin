@@ -2,17 +2,17 @@ package legacy
 
 import (
 	"encoding/binary"
-	"github.com/p9c/pod/pkg/pod"
+	"github.com/p9c/pod/pkg/podcfg"
 	"github.com/p9c/pod/pkg/wallet"
 	"path/filepath"
 	
 	"github.com/urfave/cli"
 	
-	wtxmgr "github.com/p9c/pod/pkg/blockchain/tx/wtxmgr"
 	"github.com/p9c/pod/pkg/database/walletdb"
+	"github.com/p9c/pod/pkg/wtxmgr"
 )
 
-func DropWalletHistory(w *wallet.Wallet, cfg *pod.Config) func(c *cli.Context) (e error) {
+func DropWalletHistory(w *wallet.Wallet, cfg *podcfg.Config) func(c *cli.Context) (e error) {
 	return func(c *cli.Context) (e error) {
 		var (
 			// Namespace keys.

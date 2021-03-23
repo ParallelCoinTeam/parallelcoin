@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 	
-	"github.com/p9c/pod/app/appdata"
+	"github.com/p9c/pod/pkg/appdata"
 	"github.com/p9c/pod/pkg/blockchain"
 	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/chainhash"
@@ -624,7 +624,7 @@ func loadConfig() (
 		fmt.Fprintln(os.Stderr, usageMessage)
 		return nil, nil, e
 	}
-	// Limit the block priority and minimum block sizes to max block size.
+	// Limit the block priority and minimum block txsizes to max block size.
 	cfg.BlockPrioritySize = minUint32(cfg.BlockPrioritySize, cfg.BlockMaxSize)
 	cfg.BlockMinSize = minUint32(cfg.BlockMinSize, cfg.BlockMaxSize)
 	cfg.BlockMinWeight = minUint32(cfg.BlockMinWeight, cfg.BlockMaxWeight)

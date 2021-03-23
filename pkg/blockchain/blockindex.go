@@ -8,7 +8,7 @@ import (
 	"sync/atomic"
 	"time"
 	
-	"github.com/p9c/pod/pkg/blockchain/wire"
+	"github.com/p9c/pod/pkg/wire"
 	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/database"
 	"github.com/p9c/pod/pkg/fork"
@@ -160,7 +160,7 @@ func (node *BlockNode) CalcPastMedianTime() time.Time {
 		iterNode = iterNode.parent
 	}
 	// Prune the slice to the actual number of available timestamps which will be fewer than desired near the beginning
-	// of the block chain and sort them.
+	// of the block chain and txsort them.
 	timestamps = timestamps[:numNodes]
 	sort.Sort(timeSorter(timestamps))
 	// NOTE: The consensus rules incorrectly calculate the median for even numbers of blocks. A true median averages the

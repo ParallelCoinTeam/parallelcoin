@@ -8,9 +8,9 @@ import (
 	"path/filepath"
 	"time"
 	
-	"github.com/p9c/pod/pkg/chaincfg/netparams"
-	wtxmgr "github.com/p9c/pod/pkg/blockchain/tx/wtxmgr"
-	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
+	"github.com/p9c/pod/pkg/chaincfg"
+	wtxmgr "github.com/p9c/pod/pkg/wtxmgr"
+	txscript "github.com/p9c/pod/pkg/txscript"
 	"github.com/p9c/pod/pkg/database/walletdb"
 	_ "github.com/p9c/pod/pkg/database/walletdb/bdb"
 	"github.com/p9c/pod/pkg/util"

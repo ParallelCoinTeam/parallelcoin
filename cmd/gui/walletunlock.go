@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"github.com/p9c/pod/pkg/podcfg"
 	"io/ioutil"
 	"path/filepath"
 	"time"
@@ -14,10 +15,8 @@ import (
 	l "gioui.org/layout"
 	"gioui.org/text"
 	
-	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/gui"
 	p9icons "github.com/p9c/pod/pkg/gui/ico/svg"
-	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
@@ -29,7 +28,7 @@ func (wg *WalletGUI) unlockWallet(pass string) {
 	*wg.cx.Config.WalletOff = false
 	wg.cx.Config.Unlock()
 	// load config into a fresh variable
-	cfg, _ := pod.EmptyConfig()
+	cfg, _ := podcfg.EmptyConfig()
 	var cfgFile []byte
 	var e error
 	if cfgFile, e = ioutil.ReadFile(*wg.cx.Config.ConfigFile); E.Chk(e) {
@@ -56,7 +55,7 @@ func (wg *WalletGUI) unlockWallet(pass string) {
 			// the entered password matches the stored hash
 			*wg.cx.Config.NodeOff = false
 			*wg.cx.Config.WalletOff = false
-			save.Pod(wg.cx.Config)
+			podcfg.Save(wg.cx.Config)
 			wg.WalletWatcher = wg.Watcher()
 			// }
 			//
@@ -112,7 +111,7 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
 			if wgb, ok := wg.config.Bools["DarkTheme"]; ok {
 				wgb.Value(*wg.Dark)
 			}
-			save.Pod(wg.cx.Config)
+			podcfg.Save(wg.cx.Config)
 		},
 	)
 	a.Pages(

@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/podcfg"
 	"sort"
 	"strings"
 	"sync"
@@ -17,20 +18,19 @@ import (
 	
 	"github.com/p9c/pod/pkg/blockchain"
 	"github.com/p9c/pod/pkg/chainhash"
-	"github.com/p9c/pod/pkg/blockchain/tx/txauthor"
-	"github.com/p9c/pod/pkg/blockchain/tx/txrules"
-	"github.com/p9c/pod/pkg/blockchain/tx/txscript"
-	"github.com/p9c/pod/pkg/blockchain/tx/wtxmgr"
-	"github.com/p9c/pod/pkg/blockchain/wire"
-	ec "github.com/p9c/pod/pkg/coding/ecc"
 	"github.com/p9c/pod/pkg/database/walletdb"
-	"github.com/p9c/pod/pkg/pod"
+	ec "github.com/p9c/pod/pkg/ecc"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/rpc/rpcclient"
+	"github.com/p9c/pod/pkg/txauthor"
+	"github.com/p9c/pod/pkg/txrules"
+	"github.com/p9c/pod/pkg/txscript"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/hdkeychain"
 	"github.com/p9c/pod/pkg/wallet/chain"
 	"github.com/p9c/pod/pkg/wallet/waddrmgr"
+	"github.com/p9c/pod/pkg/wire"
+	"github.com/p9c/pod/pkg/wtxmgr"
 )
 
 const (
@@ -91,7 +91,7 @@ type Wallet struct {
 	// reorganizeToHash chainhash.Hash
 	// reorganizing     bool
 	NtfnServer  *NotificationServer
-	PodConfig   *pod.Config
+	PodConfig   *podcfg.Config
 	chainParams *chaincfg.Params
 	wg          sync.WaitGroup
 	started     bool
@@ -2224,10 +2224,10 @@ func (s creditSlice) Len() int {
 }
 func (s creditSlice) Less(i, j int) bool {
 	switch {
-	// If both credits are from the same tx, sort by output index.
+	// If both credits are from the same tx, txsort by output index.
 	case s[i].OutPoint.Hash == s[j].OutPoint.Hash:
 		return s[i].OutPoint.Index < s[j].OutPoint.Index
-	// If both transactions are unmined, sort by their received date.
+	// If both transactions are unmined, txsort by their received date.
 	case s[i].Height == -1 && s[j].Height == -1:
 		return s[i].Received.Before(s[j].Received)
 	// Unmined (newer) txs always come last.
@@ -2235,7 +2235,7 @@ func (s creditSlice) Less(i, j int) bool {
 		return false
 	case s[j].Height == -1:
 		return true
-	// If both txs are mined in different blocks, sort by block height.
+	// If both txs are mined in different blocks, txsort by block height.
 	default:
 		return s[i].Height < s[j].Height
 	}
@@ -3190,7 +3190,7 @@ func Open(
 	cbs *waddrmgr.OpenCallbacks,
 	params *chaincfg.Params,
 	recoveryWindow uint32,
-	podConfig *pod.Config,
+	podConfig *podcfg.Config,
 	quit qu.C,
 ) (*Wallet, error) {
 	// debug.PrintStack()

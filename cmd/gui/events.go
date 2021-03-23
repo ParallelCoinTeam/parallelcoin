@@ -3,9 +3,9 @@ package gui
 import (
 	"encoding/json"
 	"github.com/p9c/pod/cmd/kopach/control/p2padvt"
-	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/comm/transport"
-	"github.com/p9c/pod/pkg/pod"
+	"github.com/p9c/pod/pkg/podcfg"
+	"github.com/p9c/pod/pkg/wire"
 	"io/ioutil"
 	"path/filepath"
 	"time"
@@ -27,7 +27,7 @@ func (wg *WalletGUI) Advertise() (e error) {
 		I.Ln("sending out advertisment")
 		if e = wg.multiConn.SendMany(
 			p2padvt.Magic,
-			transport.GetShards(p2padvt.Get(uint64(*wg.cx.Config.UUID), wg.cx.Config)),
+			transport.GetShards(p2padvt.Get(uint64(*wg.cx.Config.UUID), (*wg.cx.Config.P2PListeners)[0])),
 		); E.Chk(e) {
 		}
 	}
@@ -656,7 +656,7 @@ func (wg *WalletGUI) chainClient() (e error) {
 		return nil
 	}
 	if wg.ChainClient == nil { // || wg.ChainClient.Disconnected() {
-		certs := pod.ReadCAFile(wg.cx.Config)
+		certs := podcfg.ReadCAFile(wg.cx.Config)
 		D.Ln(*wg.cx.Config.RPCConnect)
 		// wg.ChainMutex.Lock()
 		// defer wg.ChainMutex.Unlock()
@@ -696,7 +696,7 @@ func (wg *WalletGUI) walletClient() (e error) {
 		return nil
 	}
 	// walletRPC := (*wg.cx.Config.WalletRPCListeners)[0]
-	certs := pod.ReadCAFile(wg.cx.Config)
+	certs := podcfg.ReadCAFile(wg.cx.Config)
 	I.Ln("config.tls", *wg.cx.Config.TLS)
 	wg.WalletMutex.Lock()
 	if wg.WalletClient, e = rpcclient.New(

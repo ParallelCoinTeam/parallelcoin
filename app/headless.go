@@ -3,14 +3,13 @@
 package app
 
 import (
+	"github.com/p9c/pod/pkg/pod"
 	"os"
 	
 	"github.com/urfave/cli"
-	
-	"github.com/p9c/pod/app/conte"
 )
 
-var walletGUIHandle = func(cx *conte.Xt) func(c *cli.Context) (e error) {
+var walletGUIHandle = func(cx *pod.State) func(c *cli.Context) (e error) {
 	return func(c *cli.Context) (e error) {
 		logg.App = c.Command.Name
 		W.Ln("GUI was disabled for this build (server only version)")

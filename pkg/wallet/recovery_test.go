@@ -3,7 +3,7 @@ package wallet_test
 import (
 	"runtime"
 	"testing"
-
+	
 	"github.com/p9c/pod/pkg/wallet"
 )
 
@@ -177,7 +177,9 @@ func assertNumInvalid(t *testing.T, i int, have, want uint32) {
 func assertHaveWant(t *testing.T, i int, msg string, have, want uint32) {
 	_, _, line, _ := runtime.Caller(2)
 	if want != have {
-		t.Fatalf("[line: %d, step: %d] %s: got %d, want %d",
-			line, i, msg, have, want)
+		t.Fatalf(
+			"[line: %d, step: %d] %s: got %d, want %d",
+			line, i, msg, have, want,
+		)
 	}
 }

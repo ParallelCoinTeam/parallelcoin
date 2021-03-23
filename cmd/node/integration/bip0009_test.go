@@ -9,7 +9,7 @@ import (
 	"github.com/p9c/pod/cmd/node/integration/rpctest"
 	"github.com/p9c/pod/pkg/blockchain"
 	"github.com/p9c/pod/pkg/chaincfg"
-	"github.com/p9c/pod/pkg/chaincfg/netparams"
+	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/chainhash"
 )
 

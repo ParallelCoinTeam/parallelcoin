@@ -3,8 +3,8 @@ package wallet
 import (
 	"errors"
 	
-	"github.com/p9c/pod/pkg/blockchain/tx/txscript"
 	"github.com/p9c/pod/pkg/database/walletdb"
+	"github.com/p9c/pod/pkg/txscript"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/wallet/waddrmgr"
 )

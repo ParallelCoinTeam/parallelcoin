@@ -155,7 +155,7 @@ func populateVersionFlags() bool {
 	}
 	// fmt.Println(maxVersion, maxString)
 	Tag = maxString
-	// sort.Ints(versionsI)
+	// txsort.Ints(versionsI)
 	// if runtime.GOOS == "windows" {
 	_, file, _, _ := runtime.Caller(0)
 	fmt.Fprintln(os.Stderr, "file", file)

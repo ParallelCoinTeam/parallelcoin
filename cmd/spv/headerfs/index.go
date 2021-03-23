@@ -91,7 +91,7 @@ func (h headerBatch) Len() int {
 	return len(h)
 }
 
-// Less reports where the entry with index i should sort before the entry with index j. As we want to ensure the items
+// Less reports where the entry with index i should txsort before the entry with index j. As we want to ensure the items
 // are written in sequential order, items with the "first" hash.
 //
 // NOTE: This is part of the sort.Interface implementation.

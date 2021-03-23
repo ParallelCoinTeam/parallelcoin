@@ -19,7 +19,7 @@ import (
 	"github.com/btcsuite/goleveldb/leveldb/util"
 	
 	chainhash "github.com/p9c/pod/pkg/chainhash"
-	"github.com/p9c/pod/pkg/blockchain/wire"
+	"github.com/p9c/pod/pkg/wire"
 	database "github.com/p9c/pod/pkg/database"
 	u "github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/treap"
@@ -71,14 +71,14 @@ const (
 
 // bulkFetchData is allows a block location to be specified along with the index it was requested from.
 //
-// This in turn allows the bulk data loading functions to sort the data accesses based on the location to improve
+// This in turn allows the bulk data loading functions to txsort the data accesses based on the location to improve
 // performance while keeping track of which result the data is for.
 type bulkFetchData struct {
 	*blockLocation
 	replyIndex int
 }
 
-// bulkFetchDataSorter implements sort.
+// bulkFetchDataSorter implements txsort.
 //
 // Interface to allow a slice of bulkFetchData to be sorted. In particular it sorts by file and then offset so that
 // reads from files are grouped and linear.
@@ -98,7 +98,7 @@ func (s bulkFetchDataSorter) Swap(i, j int) {
 	s[i], s[j] = s[j], s[i]
 }
 
-// Less returns whether the item with index i should sort before the item with index j.
+// Less returns whether the item with index i should txsort before the item with index j.
 //
 // It is part of the sort.Interface implementation.
 func (s bulkFetchDataSorter) Less(i, j int) bool {
@@ -1420,7 +1420,7 @@ func (tx *transaction) FetchBlockRegions(regions []database.BlockRegion) ([][]by
 	// NOTE: A potential optimization here would be to combine adjacent regions to reduce the number of reads.
 	//
 	// In order to improve efficiency of loading the bulk data, first grab the block location for all of the requested
-	// block hashes and sort the reads by filenum:offset so that all reads are grouped by file and linear within each
+	// block hashes and txsort the reads by filenum:offset so that all reads are grouped by file and linear within each
 	// file.
 	//
 	// This can result in quite a significant performance increase depending on how spread out the requested hashes are

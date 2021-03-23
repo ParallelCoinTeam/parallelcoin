@@ -16,18 +16,17 @@ import (
 	
 	"github.com/p9c/pod/cmd/node/integration/rpctest"
 	"github.com/p9c/pod/cmd/spv"
-	"github.com/p9c/pod/pkg/chaincfg/netparams"
 	"github.com/p9c/pod/pkg/chainhash"
-	"github.com/p9c/pod/pkg/blockchain/tx/txauthor"
-	"github.com/p9c/pod/pkg/blockchain/tx/txscript"
-	"github.com/p9c/pod/pkg/blockchain/wire"
-	ec "github.com/p9c/pod/pkg/coding/ecc"
-	"github.com/p9c/pod/pkg/coding/gcs/builder"
+	"github.com/p9c/pod/pkg/gcs/builder"
 	_ "github.com/p9c/pod/pkg/database/walletdb/bdb"
+	ec "github.com/p9c/pod/pkg/ecc"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/rpc/rpcclient"
+	"github.com/p9c/pod/pkg/txauthor"
+	"github.com/p9c/pod/pkg/txscript"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/wallet/waddrmgr"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 var (

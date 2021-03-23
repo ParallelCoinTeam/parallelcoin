@@ -6,17 +6,17 @@ import (
 	"github.com/p9c/pod/pkg/wallet/chain"
 	"sort"
 	
-	"github.com/p9c/pod/pkg/blockchain/tx/txauthor"
-	"github.com/p9c/pod/pkg/blockchain/tx/txscript"
-	"github.com/p9c/pod/pkg/blockchain/tx/wtxmgr"
-	"github.com/p9c/pod/pkg/blockchain/wire"
-	ec "github.com/p9c/pod/pkg/coding/ecc"
 	"github.com/p9c/pod/pkg/database/walletdb"
+	ec "github.com/p9c/pod/pkg/ecc"
+	"github.com/p9c/pod/pkg/txauthor"
+	"github.com/p9c/pod/pkg/txscript"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/wallet/waddrmgr"
+	"github.com/p9c/pod/pkg/wire"
+	"github.com/p9c/pod/pkg/wtxmgr"
 )
 
-// byAmount defines the methods needed to satisify sort.Interface to sort credits by their output amount.
+// byAmount defines the methods needed to satisify sort.Interface to txsort credits by their output amount.
 type byAmount []wtxmgr.Credit
 
 func (s byAmount) Len() int           { return len(s) }

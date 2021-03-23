@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"io"
 	
-	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 // OutOfRangeError describes an error due to accessing an element that is out of range.

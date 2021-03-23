@@ -4,8 +4,8 @@ import (
 	"fmt"
 	
 	chainhash "github.com/p9c/pod/pkg/chainhash"
-	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
-	"github.com/p9c/pod/pkg/blockchain/wire"
+	txscript "github.com/p9c/pod/pkg/txscript"
+	"github.com/p9c/pod/pkg/wire"
 	database "github.com/p9c/pod/pkg/database"
 	"github.com/p9c/pod/pkg/util"
 )

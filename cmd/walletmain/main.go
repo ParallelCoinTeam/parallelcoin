@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/logg"
+	"github.com/p9c/pod/pkg/podcfg"
 	
 	// This enables pprof
 	// _ "net/http/pprof"
@@ -11,7 +12,6 @@ import (
 	
 	"github.com/p9c/pod/pkg/util/qu"
 	
-	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/rpc/legacy"
 	"github.com/p9c/pod/pkg/util/interrupt"
@@ -24,7 +24,7 @@ import (
 // runs this function and checks for a non-nil error, at point any defers have
 // already run, and if the error is non-nil, the program can be exited with an
 // error exit status.
-func Main(cx *conte.Xt) (e error) {
+func Main(cx *pod.State) (e error) {
 	// cx.WaitGroup.Add(1)
 	cx.WaitAdd()
 	// if *config.Profile != "" {
@@ -90,7 +90,7 @@ func Main(cx *conte.Xt) (e error) {
 }
 
 // LoadWallet ...
-func LoadWallet(loader *wallet.Loader, cx *conte.Xt, legacyServer *legacy.Server) (e error) {
+func LoadWallet(loader *wallet.Loader, cx *pod.State, legacyServer *legacy.Server) (e error) {
 	D.Ln("starting rpc client connection handler", *cx.Config.WalletPass)
 	// Create and start chain RPC client so it's ready to connect to the wallet when
 	// loaded later. Load the wallet database. It must have been created already or
@@ -107,7 +107,7 @@ func LoadWallet(loader *wallet.Loader, cx *conte.Xt, legacyServer *legacy.Server
 	// addresses.RefillMiningAddresses(w, cx.Config, cx.StateCfg)
 	// W.Ln("done refilling mining addresses")
 	// D.S(*cx.Config.MiningAddrs)
-	// save.Pod(cx.Config)
+	// save.Save(cx.Config)
 	// }()
 	loader.Wallet = w
 	// D.Ln("^^^^^^^^^^^ sending back wallet")
@@ -154,13 +154,13 @@ func LoadWallet(loader *wallet.Loader, cx *conte.Xt, legacyServer *legacy.Server
 // associated with the server for RPC pass-through and to enable additional
 // methods.
 func rpcClientConnectLoop(
-	cx *conte.Xt, legacyServer *legacy.Server,
+	cx *pod.State, legacyServer *legacy.Server,
 	loader *wallet.Loader,
 ) {
 	D.Ln("^^^^^^^^^^^^^^^ rpcClientConnectLoop", logg.Caller("which was started at:", 2))
 	// var certs []byte
 	// if !cx.PodConfig.UseSPV {
-	certs := pod.ReadCAFile(cx.Config)
+	certs := podcfg.ReadCAFile(cx.Config)
 	// }
 	for {
 		var (
@@ -265,7 +265,7 @@ func rpcClientConnectLoop(
 // services. This function uses the RPC options from the global config and there
 // is no recovery in case the server is not available or if there is an
 // authentication error. Instead, all requests to the client will simply error.
-func StartChainRPC(config *pod.Config, activeNet *chaincfg.Params, certs []byte, quit qu.C) (*chain.RPCClient, error) {
+func StartChainRPC(config *podcfg.Config, activeNet *chaincfg.Params, certs []byte, quit qu.C) (*chain.RPCClient, error) {
 	D.Ln(
 		">>>>>>>>>>>>>>> attempting RPC client connection to %v, TLS: %s", *config.RPCConnect, fmt.Sprint(*config.TLS),
 	)

@@ -9,7 +9,7 @@ import (
 	
 	blockchain "github.com/p9c/pod/pkg/blockchain"
 	chaincfg "github.com/p9c/pod/pkg/chaincfg"
-	"github.com/p9c/pod/pkg/chaincfg/netparams"
+	"github.com/p9c/pod/pkg/chaincfg"
 	database "github.com/p9c/pod/pkg/database"
 	_ "github.com/p9c/pod/pkg/database/ffldb"
 	"github.com/p9c/pod/pkg/util"

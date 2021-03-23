@@ -15,7 +15,7 @@ import (
 	ldberrors "github.com/btcsuite/goleveldb/leveldb/errors"
 	
 	chaincfg "github.com/p9c/pod/pkg/chaincfg"
-	"github.com/p9c/pod/pkg/blockchain/wire"
+	"github.com/p9c/pod/pkg/wire"
 	database "github.com/p9c/pod/pkg/database"
 	"github.com/p9c/pod/pkg/util"
 )

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 	
-	"github.com/p9c/pod/app/appdata"
+	"github.com/p9c/pod/pkg/appdata"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 

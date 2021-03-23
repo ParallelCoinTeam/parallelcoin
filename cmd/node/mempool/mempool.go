@@ -13,8 +13,8 @@ import (
 	
 	"github.com/p9c/pod/pkg/blockchain"
 	"github.com/p9c/pod/pkg/mining"
-	"github.com/p9c/pod/pkg/blockchain/tx/txscript"
-	"github.com/p9c/pod/pkg/blockchain/wire"
+	"github.com/p9c/pod/pkg/txscript"
+	"github.com/p9c/pod/pkg/wire"
 	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/hardfork"
 	"github.com/p9c/pod/pkg/indexers"
