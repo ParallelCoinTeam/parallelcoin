@@ -13,7 +13,7 @@ import (
 	
 	"github.com/btcsuite/go-socks/socks"
 	
-	"github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/comm/peer"
 )

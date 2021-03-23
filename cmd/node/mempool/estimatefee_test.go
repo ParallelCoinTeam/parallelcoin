@@ -5,8 +5,8 @@ import (
 	"math/rand"
 	"testing"
 	
-	"github.com/p9c/pod/pkg/blockchain/chainhash"
-	"github.com/p9c/pod/pkg/blockchain/mining"
+	"github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/mining"
 	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/util"
 )

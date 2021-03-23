@@ -5,7 +5,7 @@ import (
 
 	"github.com/p9c/pod/cmd/node/mempool"
 	blockchain "github.com/p9c/pod/pkg/blockchain"
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	chainhash "github.com/p9c/pod/pkg/chainhash"
 	netsync "github.com/p9c/pod/pkg/blockchain/netsync"
 	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/comm/peer"

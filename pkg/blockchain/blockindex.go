@@ -8,10 +8,10 @@ import (
 	"sync/atomic"
 	"time"
 	
-	"github.com/p9c/pod/pkg/blockchain/chainhash"
-	"github.com/p9c/pod/pkg/blockchain/fork"
 	"github.com/p9c/pod/pkg/blockchain/wire"
+	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/database"
+	"github.com/p9c/pod/pkg/fork"
 )
 
 // blockStatus is a bit field representing the validation state of the block.

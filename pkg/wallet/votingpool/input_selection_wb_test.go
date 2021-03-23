@@ -6,7 +6,7 @@ import (
 	"sort"
 	"testing"
 	
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	chainhash "github.com/p9c/pod/pkg/chainhash"
 	wtxmgr "github.com/p9c/pod/pkg/blockchain/tx/wtxmgr"
 	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/database/walletdb"

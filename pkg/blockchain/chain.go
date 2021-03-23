@@ -8,12 +8,12 @@ import (
 	
 	"go.uber.org/atomic"
 	
-	"github.com/p9c/pod/pkg/chaincfg"
-	"github.com/p9c/pod/pkg/blockchain/chainhash"
-	"github.com/p9c/pod/pkg/blockchain/fork"
 	"github.com/p9c/pod/pkg/blockchain/tx/txscript"
 	"github.com/p9c/pod/pkg/blockchain/wire"
+	"github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/database"
+	"github.com/p9c/pod/pkg/fork"
 	"github.com/p9c/pod/pkg/util"
 )
 

@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/p9c/pod/pkg/logg"
 	
-	"github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/chainhash"
 	ec "github.com/p9c/pod/pkg/coding/ecc"
 )
 

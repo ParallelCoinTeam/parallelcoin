@@ -10,7 +10,7 @@ import (
 	"sync"
 	
 	"github.com/p9c/pod/pkg/blockchain"
-	"github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/coding/gcs/builder"
 	"github.com/p9c/pod/pkg/database/walletdb"

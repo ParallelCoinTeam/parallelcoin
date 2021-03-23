@@ -13,7 +13,7 @@ import (
 	"github.com/p9c/pod/cmd/spv/cache"
 	"github.com/p9c/pod/cmd/spv/filterdb"
 	"github.com/p9c/pod/pkg/blockchain"
-	"github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/coding/gcs"
 	"github.com/p9c/pod/pkg/coding/gcs/builder"

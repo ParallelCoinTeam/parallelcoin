@@ -2,9 +2,9 @@ package forkhash
 
 import (
 	"math/big"
-
+	
 	"github.com/bitbandi/go-x11"
-
+	
 	skein "github.com/enceve/crypto/skein/skein256"
 	gost "github.com/programmer10110/gostreebog"
 	"golang.org/x/crypto/argon2"
@@ -13,9 +13,9 @@ import (
 	"golang.org/x/crypto/sha3"
 	"lukechampine.com/blake3"
 	
-	"github.com/p9c/pod/pkg/blockchain/fork"
+	"github.com/p9c/pod/pkg/fork"
 	
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/chainhash"
 )
 
 // HashReps allows the number of multiplication/division cycles to be repeated before the final hash, on release for

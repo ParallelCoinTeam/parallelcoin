@@ -9,7 +9,7 @@ import (
 	"os"
 	"testing"
 	
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	chainhash "github.com/p9c/pod/pkg/chainhash"
 )
 
 // genesisCoinbaseTx is the coinbase transaction for the genesis blocks for the main network, regression test network,

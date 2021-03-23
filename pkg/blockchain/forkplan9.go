@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"math/big"
 	"strings"
-
+	
 	"github.com/VividCortex/ewma"
 	
-	"github.com/p9c/pod/pkg/blockchain/fork"
 	"github.com/p9c/pod/pkg/blockchain/wire"
+	"github.com/p9c/pod/pkg/fork"
 )
 
 // GetAlgStamps ...

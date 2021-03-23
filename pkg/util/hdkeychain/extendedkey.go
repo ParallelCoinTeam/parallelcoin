@@ -13,7 +13,7 @@ import (
 	"math/big"
 	
 	"github.com/p9c/pod/pkg/chaincfg"
-	"github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/coding/base58"
 	ec "github.com/p9c/pod/pkg/coding/ecc"
 	"github.com/p9c/pod/pkg/util"

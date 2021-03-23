@@ -3,7 +3,7 @@ package templates
 import (
 	"errors"
 	"github.com/niubaoshu/gotiny"
-	"github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/blockchain/wire"
 	"time"
 )

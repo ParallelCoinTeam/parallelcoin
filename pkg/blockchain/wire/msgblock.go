@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io"
 	
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	chainhash "github.com/p9c/pod/pkg/chainhash"
 )
 
 // defaultTransactionAlloc is the default size used for the backing array for transactions. The transaction array will

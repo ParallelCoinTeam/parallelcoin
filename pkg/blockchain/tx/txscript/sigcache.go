@@ -3,7 +3,7 @@ package txscript
 import (
 	"sync"
 	
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	chainhash "github.com/p9c/pod/pkg/chainhash"
 	ec "github.com/p9c/pod/pkg/coding/ecc"
 )
 

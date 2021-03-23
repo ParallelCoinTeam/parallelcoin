@@ -130,9 +130,9 @@ func LoadWallet(loader *wallet.Loader, cx *conte.Xt, legacyServer *legacy.Server
 	if legacyServer != nil {
 		interrupt.AddHandler(
 			func() {
-				F.Ln("stopping wallet RPC server")
+				D.Ln("stopping wallet RPC server")
 				legacyServer.Stop()
-				F.Ln("wallet RPC server shutdown")
+				D.Ln("wallet RPC server shutdown")
 			},
 		)
 	}

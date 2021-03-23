@@ -1,12 +1,12 @@
 // Package indexers implements optional block chain indexes.
-package indexers
+package index
 
 import (
 	"encoding/binary"
 	"errors"
 	
-	blockchain "github.com/p9c/pod/pkg/blockchain"
-	database "github.com/p9c/pod/pkg/database"
+	"github.com/p9c/pod/pkg/blockchain"
+	"github.com/p9c/pod/pkg/database"
 	"github.com/p9c/pod/pkg/util"
 )
 

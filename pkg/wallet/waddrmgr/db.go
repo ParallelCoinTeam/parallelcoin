@@ -7,7 +7,7 @@ import (
 	"github.com/p9c/pod/pkg/chaincfg"
 	"time"
 	
-	"github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/database/walletdb"
 )
 

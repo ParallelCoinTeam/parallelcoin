@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"math"
 	"runtime"
-
+	
 	"github.com/p9c/pod/pkg/util/qu"
-
-	"github.com/p9c/pod/pkg/blockchain/hardfork"
+	
 	"github.com/p9c/pod/pkg/blockchain/tx/txscript"
 	"github.com/p9c/pod/pkg/blockchain/wire"
+	"github.com/p9c/pod/pkg/hardfork"
 	"github.com/p9c/pod/pkg/util"
 )
 

@@ -16,7 +16,7 @@ import (
 	"github.com/davecgh/go-spew/spew"
 	
 	"github.com/p9c/pod/pkg/blockchain"
-	"github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/blockchain/tx/txauthor"
 	"github.com/p9c/pod/pkg/blockchain/tx/txrules"
 	"github.com/p9c/pod/pkg/blockchain/tx/txscript"

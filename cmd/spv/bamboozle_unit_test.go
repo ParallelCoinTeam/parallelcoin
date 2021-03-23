@@ -8,7 +8,7 @@ import (
 	
 	"github.com/p9c/pod/cmd/spv/headerfs"
 	"github.com/p9c/pod/pkg/chaincfg/netparams"
-	"github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/coding/gcs"
 	"github.com/p9c/pod/pkg/coding/gcs/builder"

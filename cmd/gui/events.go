@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 	"time"
 	
-	"github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/rpc/rpcclient"
 	"github.com/p9c/pod/pkg/util"

@@ -9,14 +9,14 @@ import (
 	"math/rand"
 	"time"
 	
-	qu "github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/pod/pkg/util/qu"
 	
 	"github.com/conformal/fastsha256"
 	
-	blockchain "github.com/p9c/pod/pkg/blockchain"
-	"github.com/p9c/pod/pkg/blockchain/fork"
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/blockchain"
 	"github.com/p9c/pod/pkg/blockchain/wire"
+	"github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/fork"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/util"
 )

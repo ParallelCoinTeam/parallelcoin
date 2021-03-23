@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"math/big"
 	
-	"github.com/p9c/pod/pkg/blockchain/fork"
+	"github.com/p9c/pod/pkg/fork"
 )
 
 // CalcNextRequiredDifficultyHalcyon calculates the required difficulty for the block after the passed previous block

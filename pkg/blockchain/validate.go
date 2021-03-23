@@ -9,11 +9,11 @@ import (
 	"math/big"
 	"time"
 	
-	"github.com/p9c/pod/pkg/blockchain/chainhash"
-	"github.com/p9c/pod/pkg/blockchain/fork"
-	"github.com/p9c/pod/pkg/blockchain/hardfork"
 	"github.com/p9c/pod/pkg/blockchain/tx/txscript"
 	"github.com/p9c/pod/pkg/blockchain/wire"
+	"github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/fork"
+	"github.com/p9c/pod/pkg/hardfork"
 	"github.com/p9c/pod/pkg/util"
 )
 

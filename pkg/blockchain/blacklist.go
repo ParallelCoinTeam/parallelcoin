@@ -1,8 +1,8 @@
 package blockchain
 
 import (
-	"github.com/p9c/pod/pkg/blockchain/fork"
-	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
+	"github.com/p9c/pod/pkg/blockchain/tx/txscript"
+	"github.com/p9c/pod/pkg/fork"
 	"github.com/p9c/pod/pkg/util"
 )
 

@@ -9,7 +9,7 @@ package job
 // 	"github.com/niubaoshu/gotiny"
 //
 // 	"github.com/p9c/pod/pkg/blockchain"
-// 	"github.com/p9c/pod/pkg/blockchain/chainhash"
+// 	"github.com/p9c/pod/pkg/chainhash"
 // 	"github.com/p9c/pod/pkg/blockchain/fork"
 // 	"github.com/p9c/pod/pkg/blockchain/wire"
 // 	"github.com/p9c/pod/pkg/util"

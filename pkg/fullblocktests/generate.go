@@ -13,13 +13,12 @@ import (
 	"runtime"
 	"time"
 	
-	blockchain "github.com/p9c/pod/pkg/blockchain"
-	"github.com/p9c/pod/pkg/chaincfg/netparams"
-	"github.com/p9c/pod/pkg/blockchain/fork"
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
-	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
+	"github.com/p9c/pod/pkg/blockchain"
+	"github.com/p9c/pod/pkg/blockchain/tx/txscript"
 	"github.com/p9c/pod/pkg/blockchain/wire"
+	"github.com/p9c/pod/pkg/chainhash"
 	ec "github.com/p9c/pod/pkg/coding/ecc"
+	"github.com/p9c/pod/pkg/fork"
 	"github.com/p9c/pod/pkg/util"
 )
 
@@ -401,7 +400,8 @@ func createSpendTx(spend *spendableOut, fee util.Amount) *wire.MsgTx {
 		SignatureScript:  nil,
 	})
 	spendTx.AddTxOut(wire.NewTxOut(int64(spend.amount-fee),
-		opTrueScript))
+		opTrueScript
+	))
 	spendTx.AddTxOut(wire.NewTxOut(0, uniqueOpReturnScript()))
 	return spendTx
 }

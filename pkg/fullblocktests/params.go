@@ -5,10 +5,9 @@ import (
 	"math/big"
 	"time"
 	
-	chaincfg "github.com/p9c/pod/pkg/chaincfg"
-	"github.com/p9c/pod/pkg/chaincfg/netparams"
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/blockchain/wire"
+	"github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/chainhash"
 )
 
 // newHashFromStr converts the passed big-endian hex string into a wire.Hash. It only differs from the one available in

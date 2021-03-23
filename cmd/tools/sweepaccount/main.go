@@ -17,7 +17,7 @@ import (
 	
 	"github.com/p9c/pod/app/appdata"
 	"github.com/p9c/pod/pkg/chaincfg/netparams"
-	"github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/blockchain/tx/txauthor"
 	"github.com/p9c/pod/pkg/blockchain/tx/txrules"
 	"github.com/p9c/pod/pkg/blockchain/tx/txscript"

@@ -10,7 +10,7 @@ import (
 	"gioui.org/text"
 	"github.com/atotto/clipboard"
 	
-	"github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/gui"
 	"github.com/p9c/pod/pkg/util"
 )

@@ -10,7 +10,7 @@ import (
 	
 	"golang.org/x/crypto/ripemd160"
 	
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	chainhash "github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/blockchain/wire"
 	ec "github.com/p9c/pod/pkg/coding/ecc"
 )

@@ -3,8 +3,8 @@ package blockchain
 import (
 	"fmt"
 	
-	"github.com/p9c/pod/pkg/blockchain/hardfork"
-	database "github.com/p9c/pod/pkg/database"
+	"github.com/p9c/pod/pkg/database"
+	"github.com/p9c/pod/pkg/hardfork"
 	"github.com/p9c/pod/pkg/util"
 )
 

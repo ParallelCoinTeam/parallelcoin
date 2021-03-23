@@ -21,7 +21,7 @@ import (
 	
 	"golang.org/x/crypto/ripemd160"
 	
-	"github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/blockchain/tx/txscript"
 	"github.com/p9c/pod/pkg/blockchain/wire"
 	ec "github.com/p9c/pod/pkg/coding/ecc"

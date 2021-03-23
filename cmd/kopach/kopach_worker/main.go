@@ -11,7 +11,7 @@ import (
 	
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/cmd/kopach/worker"
-	"github.com/p9c/pod/pkg/blockchain/fork"
+	"github.com/p9c/pod/pkg/fork"
 )
 
 func KopachWorkerHandle(cx *conte.Xt) func(c *cli.Context) (e error) {

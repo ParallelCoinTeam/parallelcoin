@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"time"
 	
-	"github.com/p9c/pod/pkg/blockchain/chainhash"
-	"github.com/p9c/pod/pkg/blockchain/fork"
+	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/database"
+	"github.com/p9c/pod/pkg/fork"
 	"github.com/p9c/pod/pkg/util"
 )
 

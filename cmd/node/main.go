@@ -14,9 +14,9 @@ import (
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/cmd/node/path"
-	"github.com/p9c/pod/pkg/blockchain/indexers"
 	"github.com/p9c/pod/pkg/database"
 	"github.com/p9c/pod/pkg/database/blockdb"
+	"github.com/p9c/pod/pkg/indexers"
 	"github.com/p9c/pod/pkg/rpc/chainrpc"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )

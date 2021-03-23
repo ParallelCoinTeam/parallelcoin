@@ -31,14 +31,14 @@ import (
 	"github.com/p9c/pod/cmd/node/mempool"
 	"github.com/p9c/pod/cmd/node/state"
 	"github.com/p9c/pod/pkg/blockchain"
-	"github.com/p9c/pod/pkg/blockchain/chainhash"
-	"github.com/p9c/pod/pkg/blockchain/fork"
-	"github.com/p9c/pod/pkg/blockchain/indexers"
-	"github.com/p9c/pod/pkg/blockchain/mining"
+	"github.com/p9c/pod/pkg/mining"
 	"github.com/p9c/pod/pkg/blockchain/tx/txscript"
 	"github.com/p9c/pod/pkg/blockchain/wire"
+	"github.com/p9c/pod/pkg/chainhash"
 	p "github.com/p9c/pod/pkg/comm/peer"
 	"github.com/p9c/pod/pkg/database"
+	"github.com/p9c/pod/pkg/fork"
+	"github.com/p9c/pod/pkg/indexers"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/util"
@@ -1165,7 +1165,7 @@ func (s *Server) Stop() (e error) {
 		W.Ln("RPC server is already in the process of shutting down")
 		return nil
 	}
-	F.Ln("RPC server shutting down")
+	I.Ln("RPC server shutting down")
 	s.Quit.Q()
 	for _, listener := range s.Cfg.Listeners {
 		e := listener.Close()

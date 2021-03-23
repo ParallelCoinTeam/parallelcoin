@@ -183,7 +183,7 @@ func (s *Server) Serve(lis net.Listener) {
 		var e error
 		if e = s.HTTPServer.Serve(lis); E.Chk(e) {
 		}
-		F.Ln("finished serving wallet RPC:", e)
+		D.Ln("finished serving wallet RPC:", e)
 		s.WG.Done()
 	}()
 }

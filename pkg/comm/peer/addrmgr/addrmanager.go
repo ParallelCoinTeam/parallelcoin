@@ -20,7 +20,7 @@ import (
 	
 	qu "github.com/p9c/pod/pkg/util/qu"
 	
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	chainhash "github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/blockchain/wire"
 )
 

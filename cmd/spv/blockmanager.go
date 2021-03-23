@@ -15,13 +15,13 @@ import (
 	"github.com/p9c/pod/cmd/spv/headerfs"
 	"github.com/p9c/pod/cmd/spv/headerlist"
 	"github.com/p9c/pod/pkg/blockchain"
-	"github.com/p9c/pod/pkg/chaincfg"
-	"github.com/p9c/pod/pkg/blockchain/chainhash"
-	"github.com/p9c/pod/pkg/blockchain/fork"
 	"github.com/p9c/pod/pkg/blockchain/tx/txscript"
 	"github.com/p9c/pod/pkg/blockchain/wire"
+	"github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/coding/gcs"
 	"github.com/p9c/pod/pkg/coding/gcs/builder"
+	"github.com/p9c/pod/pkg/fork"
 	"github.com/p9c/pod/pkg/util"
 )
 

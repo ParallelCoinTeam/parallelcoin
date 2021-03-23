@@ -1,10 +1,10 @@
-package indexers
+package index
 
 import (
 	"fmt"
 	
 	"github.com/p9c/pod/pkg/blockchain"
-	"github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/database"
 	"github.com/p9c/pod/pkg/util"
 )
@@ -224,7 +224,7 @@ func (m *Manager) Init(chain *blockchain.BlockChain, interrupt <-chan struct{}) 
 		func(dbTx database.Tx) (e error) {
 			// Create the bucket for the current tips as needed.
 			meta := dbTx.Metadata()
-			if _, e = meta.CreateBucketIfNotExists(indexTipsBucketName);E.Chk(e){
+			if _, e = meta.CreateBucketIfNotExists(indexTipsBucketName); E.Chk(e) {
 				return e
 			}
 			return m.maybeCreateIndexes(dbTx)
@@ -360,7 +360,6 @@ func (m *Manager) Init(chain *blockchain.BlockChain, interrupt <-chan struct{}) 
 	// Create a progress logger for the indexing process below.
 	progressLogger := newBlockProgressLogger(
 		"Indexed",
-		// log.L,
 	)
 	// At this point, one or more indexes are behind the current best chain tip and need to be caught up, so log the
 	// details and loop through each block that needs to be indexed.

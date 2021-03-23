@@ -3,9 +3,9 @@ package chaincfg
 import (
 	"time"
 	
-	"github.com/p9c/pod/pkg/blockchain/chainhash"
-	"github.com/p9c/pod/pkg/blockchain/fork"
 	"github.com/p9c/pod/pkg/blockchain/wire"
+	"github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/fork"
 )
 
 // genesisCoinbaseTx is the coinbase transaction for the genesis blocks for the main network, regression test network,

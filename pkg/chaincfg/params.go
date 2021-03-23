@@ -3,7 +3,7 @@ package chaincfg
 import (
 	"strings"
 	
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	chainhash "github.com/p9c/pod/pkg/chainhash"
 )
 
 // String returns the hostname of the DNS seed in human-readable form.

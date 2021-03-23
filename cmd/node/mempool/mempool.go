@@ -12,12 +12,12 @@ import (
 	"time"
 	
 	"github.com/p9c/pod/pkg/blockchain"
-	"github.com/p9c/pod/pkg/blockchain/chainhash"
-	"github.com/p9c/pod/pkg/blockchain/hardfork"
-	"github.com/p9c/pod/pkg/blockchain/indexers"
-	"github.com/p9c/pod/pkg/blockchain/mining"
+	"github.com/p9c/pod/pkg/mining"
 	"github.com/p9c/pod/pkg/blockchain/tx/txscript"
 	"github.com/p9c/pod/pkg/blockchain/wire"
+	"github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/hardfork"
+	"github.com/p9c/pod/pkg/indexers"
 	
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/util"

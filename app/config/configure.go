@@ -6,7 +6,7 @@ import (
 	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/cmd/spv"
 	"github.com/p9c/pod/pkg/chaincfg"
-	"github.com/p9c/pod/pkg/blockchain/fork"
+	"github.com/p9c/pod/pkg/fork"
 )
 
 // Configure loads and sanitises the configuration from urfave/cli

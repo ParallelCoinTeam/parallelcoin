@@ -22,7 +22,7 @@ import (
 	qu "github.com/p9c/pod/pkg/util/qu"
 	
 	chaincfg "github.com/p9c/pod/pkg/chaincfg"
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	chainhash "github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/blockchain/wire"
 	database "github.com/p9c/pod/pkg/database"
 	"github.com/p9c/pod/pkg/util"

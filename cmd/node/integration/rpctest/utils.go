@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"time"
 	
-	"github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/rpc/rpcclient"
 )
 

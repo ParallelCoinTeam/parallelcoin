@@ -5,9 +5,9 @@ import (
 	"io"
 	"time"
 	
-	"github.com/p9c/pod/pkg/blockchain/fork"
-	"github.com/p9c/pod/pkg/blockchain/forkhash"
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/fork"
+	"github.com/p9c/pod/pkg/forkhash"
 )
 
 // MaxBlockHeaderPayload is the maximum number of bytes a block header can be. Version 4 bytes + Timestamp 4 bytes +

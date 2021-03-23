@@ -10,7 +10,7 @@ import (
 	"github.com/p9c/pod/pkg/util/qu"
 	
 	sac "github.com/p9c/pod/cmd/spv"
-	"github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/blockchain/tx/txscript"
 	"github.com/p9c/pod/pkg/blockchain/tx/wtxmgr"
 	"github.com/p9c/pod/pkg/blockchain/wire"

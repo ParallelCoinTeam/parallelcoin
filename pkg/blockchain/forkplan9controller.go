@@ -1,10 +1,10 @@
 package blockchain
 
 import (
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/chainhash"
 	"sort"
 	
-	"github.com/p9c/pod/pkg/blockchain/fork"
+	"github.com/p9c/pod/pkg/fork"
 )
 
 type Algo struct {

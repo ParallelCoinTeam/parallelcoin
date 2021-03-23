@@ -1,8 +1,8 @@
 package chaincfg
 
 import (
-	"github.com/p9c/pod/pkg/blockchain/fork"
 	"github.com/p9c/pod/pkg/blockchain/wire"
+	"github.com/p9c/pod/pkg/fork"
 )
 
 // TestNet3Params defines the network parameters for the test Bitcoin network (version 3). Not to be confused with the
@@ -15,10 +15,10 @@ var TestNet3Params = Params{
 		// {"seed3.parallelcoin.io", true},
 	},
 	// Chain parameters
-	GenesisBlock:             &testNet3GenesisBlock,
-	GenesisHash:              &testNet3GenesisHash,
-	PowLimit:                 &fork.SecondPowLimit,    // fork&testNet3PowLimit,
-	PowLimitBits:             fork.SecondPowLimitBits, // testnetBits,
+	GenesisBlock: &testNet3GenesisBlock,
+	GenesisHash:  &testNet3GenesisHash,
+	PowLimit:     &fork.SecondPowLimit,    // fork&testNet3PowLimit,
+	PowLimitBits: fork.SecondPowLimitBits, // testnetBits,
 	// BIP0034Height:            math.MaxInt32,                       // 0000000023b3a96d3484e5abb3755c413e7d41500f8e2a5c3f0dd01299cd8ef8
 	// BIP0065Height:            math.MaxInt32,                       // 00000000007f6655f22f98e72ed80d8b06dc761d5da09df0fa1dc4be4f861eb6
 	// BIP0066Height:            math.MaxInt32,                       // 000000002104c8c45e99a8853285a3b592602a3ccde2b832481da85e9e4ba182

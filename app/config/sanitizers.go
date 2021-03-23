@@ -15,7 +15,7 @@ import (
 	"strings"
 	"time"
 	
-	"github.com/p9c/pod/pkg/blockchain/forkhash"
+	"github.com/p9c/pod/pkg/forkhash"
 	"github.com/p9c/pod/pkg/util/routeable"
 	
 	"github.com/p9c/pod/app/apputil"
@@ -33,7 +33,7 @@ import (
 	"github.com/p9c/pod/app/appdata"
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/cmd/node/state"
-	"github.com/p9c/pod/pkg/blockchain/fork"
+	"github.com/p9c/pod/pkg/fork"
 	"github.com/p9c/pod/pkg/pod"
 )
 

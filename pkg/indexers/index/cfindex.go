@@ -1,14 +1,13 @@
-package indexers
+package index
 
 import (
 	"errors"
-	"github.com/p9c/pod/pkg/chaincfg"
 	
 	"github.com/p9c/pod/pkg/util/qu"
 	
 	"github.com/p9c/pod/pkg/blockchain"
-	"github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/blockchain/wire"
+	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/coding/gcs"
 	"github.com/p9c/pod/pkg/coding/gcs/builder"
 	"github.com/p9c/pod/pkg/database"

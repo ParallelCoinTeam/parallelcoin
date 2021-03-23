@@ -10,7 +10,7 @@ import (
 	l "gioui.org/layout"
 	uberatomic "go.uber.org/atomic"
 	
-	"github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/coding/gcm"
 	"github.com/p9c/pod/pkg/comm/transport"
 	"github.com/p9c/pod/pkg/rpc/btcjson"

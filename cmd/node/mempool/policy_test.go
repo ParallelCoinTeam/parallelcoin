@@ -6,7 +6,7 @@ import (
 	"time"
 	
 	"github.com/p9c/pod/pkg/chaincfg/netparams"
-	"github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/blockchain/tx/txscript"
 	"github.com/p9c/pod/pkg/blockchain/wire"
 	ec "github.com/p9c/pod/pkg/coding/ecc"

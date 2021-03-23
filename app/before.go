@@ -18,7 +18,7 @@ import (
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/pkg/chaincfg"
-	"github.com/p9c/pod/pkg/blockchain/fork"
+	"github.com/p9c/pod/pkg/fork"
 	"github.com/p9c/pod/pkg/pod"
 )
 

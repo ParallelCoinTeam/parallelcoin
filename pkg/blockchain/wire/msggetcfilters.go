@@ -3,7 +3,7 @@ package wire
 import (
 	"io"
 	
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	chainhash "github.com/p9c/pod/pkg/chainhash"
 )
 
 // MaxGetCFiltersReqRange the maximum number of filters that may be requested in a getcfheaders message.
