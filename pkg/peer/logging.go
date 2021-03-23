@@ -5,8 +5,8 @@ import (
 	"strings"
 	"time"
 	
-	chainhash "github.com/p9c/pod/pkg/chainhash"
-	txscript "github.com/p9c/pod/pkg/txscript"
+	"github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/txscript"
 	"github.com/p9c/pod/pkg/wire"
 )
 

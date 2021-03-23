@@ -8,7 +8,7 @@ import (
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/util/qu"
 	
-	"github.com/p9c/pod/pkg/comm/pipe"
+	"github.com/p9c/pod/pkg/pipe"
 )
 
 // Log starts up a handler to listen to logs from the child process worker

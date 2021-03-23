@@ -7,9 +7,9 @@ import (
 	"runtime"
 	"syscall"
 	
-	qu "github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/pod/pkg/util/qu"
 	
-	"github.com/p9c/pod/pkg/comm/stdconn"
+	"github.com/p9c/pod/pkg/stdconn"
 )
 
 type Worker struct {

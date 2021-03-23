@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/p9c/pod/pkg/comm/stdconn/example/hello/hello"
-	"github.com/p9c/pod/pkg/comm/stdconn/worker"
 	"github.com/p9c/pod/pkg/logg"
-	qu "github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/pod/pkg/stdconn/example/hello/hello"
+	"github.com/p9c/pod/pkg/stdconn/worker"
+	"github.com/p9c/pod/pkg/util/qu"
 )
 
 func main() {

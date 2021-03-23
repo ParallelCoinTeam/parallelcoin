@@ -1,22 +1,22 @@
-package mining
+package fork
 
 import (
 	"github.com/p9c/pod/pkg/blockchain"
-	"github.com/p9c/pod/pkg/txscript"
-	"github.com/p9c/pod/pkg/wire"
 	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/hardfork"
+	"github.com/p9c/pod/pkg/txscript"
 	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/wire"
 )
 
-// createHardForkSubsidyTx creates the transaction that must be on the hard fork activation block in place of a standard
+// CreateHardForkSubsidyTx creates the transaction that must be on the hard fork activation block in place of a standard
 // coinbase transaction.
 //
 // The main difference is the value set on this coinbase and that it pays out to multiple addresses, several being to
 // the developers and to a 3 of 4 multisig to the development team for marketing and ongoing development costs multisig
 // tx: NUM_SIGS PUBKEY PUBKEY PUBKEY... NUM_PUBKEYS OP_CHECKMULTISIG
-func createHardForkSubsidyTx(
+func CreateHardForkSubsidyTx(
 	params *chaincfg.Params,
 	coinbaseScript []byte,
 	nextBlockHeight int32,

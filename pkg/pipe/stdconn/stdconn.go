@@ -7,7 +7,7 @@ import (
 	"runtime"
 	"time"
 	
-	qu "github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/pod/pkg/util/qu"
 )
 
 type StdConn struct {

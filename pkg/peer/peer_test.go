@@ -14,8 +14,8 @@ import (
 	"github.com/btcsuite/go-socks/socks"
 	
 	"github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/peer"
 	"github.com/p9c/pod/pkg/wire"
-	"github.com/p9c/pod/pkg/comm/peer"
 )
 
 // conn mocks a network connection by implementing the net.Conn interface. It is used to test peer connection without

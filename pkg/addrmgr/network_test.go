@@ -4,8 +4,8 @@ import (
 	"net"
 	"testing"
 	
+	"github.com/p9c/pod/pkg/addrmgr"
 	"github.com/p9c/pod/pkg/wire"
-	"github.com/p9c/pod/pkg/comm/peer/addrmgr"
 )
 
 // TestIPTypes ensures the various functions which determine the type of an IP address based on RFCs work as intended.
