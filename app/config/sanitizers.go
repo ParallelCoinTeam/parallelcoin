@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg"
 	"github.com/p9c/pod/pkg/logg"
 	"io/ioutil"
 	"net"
@@ -32,7 +33,6 @@ import (
 	"github.com/p9c/pod/app/appdata"
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/cmd/node/state"
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
 	"github.com/p9c/pod/pkg/blockchain/fork"
 	"github.com/p9c/pod/pkg/pod"
 )
@@ -98,20 +98,20 @@ func initParams(cx *conte.Xt) {
 	switch network {
 	case "testnet", "testnet3", "t":
 		T.Ln("on testnet")
-		cx.ActiveNet = &netparams.TestNet3Params
+		cx.ActiveNet = &chaincfg.TestNet3Params
 		fork.IsTestnet = true
 	case "regtestnet", "regressiontest", "r":
 		T.Ln("on regression testnet")
-		cx.ActiveNet = &netparams.RegressionTestParams
+		cx.ActiveNet = &chaincfg.RegressionTestParams
 	case "simnet", "s":
 		T.Ln("on simnet")
-		cx.ActiveNet = &netparams.SimNetParams
+		cx.ActiveNet = &chaincfg.SimNetParams
 	default:
 		if network != "mainnet" && network != "m" {
 			D.Ln("using mainnet for node")
 		}
 		T.Ln("on mainnet")
-		cx.ActiveNet = &netparams.MainNetParams
+		cx.ActiveNet = &chaincfg.MainNetParams
 	}
 }
 
@@ -461,7 +461,7 @@ func validatePeerLists(cfg *pod.Config) {
 		// os.Exit(1)
 	}
 }
-func configListener(cfg *pod.Config, params *netparams.Params) {
+func configListener(cfg *pod.Config, params *chaincfg.Params) {
 	// --proxy or --connect without --listen disables listening.
 	T.Ln("checking proxy/connect for disabling listening")
 	if (*cfg.Proxy != "" ||
@@ -497,7 +497,7 @@ func validateUsers(cfg *pod.Config) {
 	}
 }
 
-func configRPC(cfg *pod.Config, params *netparams.Params) {
+func configRPC(cfg *pod.Config, params *chaincfg.Params) {
 	// The RPC server is disabled if no username or password is provided.
 	T.Ln("checking rpc server has a login enabled")
 	if (*cfg.Username == "" || *cfg.Password == "") &&
@@ -658,7 +658,7 @@ func validateOnions(cfg *pod.Config) {
 
 func validateMiningStuff(
 	cfg *pod.Config, state *state.Config,
-	params *netparams.Params,
+	params *chaincfg.Params,
 ) {
 	if state == nil {
 		panic("state is nil")

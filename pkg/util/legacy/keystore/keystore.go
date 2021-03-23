@@ -10,6 +10,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg"
 	"io"
 	"io/ioutil"
 	"math/big"
@@ -20,9 +21,8 @@ import (
 	
 	"golang.org/x/crypto/ripemd160"
 	
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
-	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
+	"github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/blockchain/tx/txscript"
 	"github.com/p9c/pod/pkg/blockchain/wire"
 	ec "github.com/p9c/pod/pkg/coding/ecc"
 	"github.com/p9c/pod/pkg/util"
@@ -411,7 +411,7 @@ func (v *varEntries) ReadFrom(r io.Reader) (n int64, e error) {
 // the fact.
 //
 // This is admittedly a hack, but with a bip32 keystore on the horizon I'm not too motivated to clean this up.
-type netParams netparams.Params
+type netParams chaincfg.Params
 
 func (net *netParams) ReadFrom(r io.Reader) (int64, error) {
 	var buf [4]byte
@@ -424,11 +424,11 @@ func (net *netParams) ReadFrom(r io.Reader) (int64, error) {
 	}
 	switch wire.BitcoinNet(binary.LittleEndian.Uint32(uint32Bytes)) {
 	case wire.MainNet:
-		*net = netParams(netparams.MainNetParams)
+		*net = netParams(chaincfg.MainNetParams)
 	case wire.TestNet3:
-		*net = netParams(netparams.TestNet3Params)
+		*net = netParams(chaincfg.TestNet3Params)
 	case wire.SimNet:
-		*net = netParams(netparams.SimNetParams)
+		*net = netParams(chaincfg.SimNetParams)
 	default:
 		return n64, errors.New("unknown network")
 	}
@@ -486,7 +486,7 @@ type Store struct {
 // New creates and initializes a new Store. name's and desc's byte length must not exceed 32 and 256 bytes,
 // respectively. All address private keys are encrypted with passphrase. The key store is returned locked.
 func New(
-	dir string, desc string, passphrase []byte, net *netparams.Params,
+	dir string, desc string, passphrase []byte, net *chaincfg.Params,
 	createdAt *BlockStamp,
 ) (s *Store, e error) {
 	// Chk sizes of inputs.
@@ -1110,13 +1110,13 @@ func (s *Store) Address(a util.Address) (WalletAddress, error) {
 }
 
 // Net returns the bitcoin network parameters for this key store.
-func (s *Store) Net() *netparams.Params {
+func (s *Store) Net() *chaincfg.Params {
 	s.mtx.RLock()
 	defer s.mtx.RUnlock()
 	return s.netParams()
 }
-func (s *Store) netParams() *netparams.Params {
-	return (*netparams.Params)(s.net)
+func (s *Store) netParams() *chaincfg.Params {
+	return (*chaincfg.Params)(s.net)
 }
 
 // SetSyncStatus sets the sync status for a single key store address. This may error if the address is not found in the
@@ -2700,7 +2700,7 @@ type kdfParameters struct {
 
 // computeKdfParameters returns best guess parameters to the memory-hard key derivation function to make the computation
 // last targetSec seconds, while using no more than maxMem bytes of memory.
-func computeKdfParameters(targetSec float64, maxMem uint64) (params *kdfParameters,e error) {
+func computeKdfParameters(targetSec float64, maxMem uint64) (params *kdfParameters, e error) {
 	params = &kdfParameters{}
 	if _, e = rand.Read(params.salt[:]); E.Chk(e) {
 		return nil, e
@@ -2753,7 +2753,7 @@ func (params *kdfParameters) WriteTo(w io.Writer) (n int64, e error) {
 }
 func (params *kdfParameters) ReadFrom(r io.Reader) (n int64, e error) {
 	var read int64
-	// These must be read in but are not saved directly to netparams.
+	// These must be read in but are not saved directly to chaincfg.
 	chkedBytes := make([]byte, 44)
 	var chk uint32
 	padding := make([]byte, 256-(binary.Size(params)+4))

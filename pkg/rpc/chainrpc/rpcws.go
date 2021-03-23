@@ -10,22 +10,22 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg"
 	"io"
 	"math"
 	"sync"
 	"time"
 	
-	qu "github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/pod/pkg/util/qu"
 	
 	"github.com/btcsuite/websocket"
 	"golang.org/x/crypto/ripemd160"
 	
-	blockchain "github.com/p9c/pod/pkg/blockchain"
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
-	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
+	"github.com/p9c/pod/pkg/blockchain"
+	"github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/blockchain/tx/txscript"
 	"github.com/p9c/pod/pkg/blockchain/wire"
-	database "github.com/p9c/pod/pkg/database"
+	"github.com/p9c/pod/pkg/database"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/util"
 )
@@ -652,7 +652,7 @@ func (f *WSClientFilter) AddAddress(a util.Address) {
 // AddAddressStr parses an address from a string and then adds it to the wsClientFilter using addAddress.
 //
 // NOTE: This extension was ported from github.com/decred/dcrd
-func (f *WSClientFilter) AddAddressStr(s string, params *netparams.Params) {
+func (f *WSClientFilter) AddAddressStr(s string, params *chaincfg.Params) {
 	// If address can't be decoded, no point in saving it since it should also impossible to create the address from an
 	// inspected transaction output script.
 	a, e := util.DecodeAddress(s, params)
@@ -742,7 +742,7 @@ func (f *WSClientFilter) ExistsUnspentOutPoint(op *wire.OutPoint) bool {
 // // removeAddressStr parses an address from a string and then removes it from
 // // the wsClientFilter using removeAddress. NOTE: This extension was ported
 // // from github.com/decred/dcrd
-// func (f *wsClientFilter) removeAddressStr(s string, netparams *netparams.Params) {
+// func (f *wsClientFilter) removeAddressStr(s string, netparams *chaincfg.Params) {
 // 	a, e := util.DecodeAddress(s, netparams)
 // 	if e ==  nil {
 // 		f.removeAddress(a)
@@ -1512,7 +1512,7 @@ func BlockDetails(block *util.Block, txIndex int) *btcjson.BlockDetails {
 // decode each address using the current active network parameters.
 //
 // If any single address fails to decode properly, the function returns an error. Otherwise, nil is returned.
-func CheckAddressValidity(addrs []string, params *netparams.Params) (e error) {
+func CheckAddressValidity(addrs []string, params *chaincfg.Params) (e error) {
 	for _, addr := range addrs {
 		_, e := util.DecodeAddress(addr, params)
 		if e != nil {
@@ -2100,7 +2100,7 @@ func HandleWebsocketHelp(wsc *WSClient, icmd interface{}) (interface{}, error) {
 }
 
 func init() {
-
+	
 	WSHandlers = WSHandlersBeforeInit
 }
 func MakeSemaphore(n int) Semaphore {
@@ -2122,7 +2122,7 @@ func NewRedeemingTxNotification(
 // NOTE: This extension was ported from github.com/decred/ dcrd
 func NewWSClientFilter(
 	addresses []string, unspentOutPoints []wire.OutPoint,
-	params *netparams.Params,
+	params *chaincfg.Params,
 ) *WSClientFilter {
 	filter := &WSClientFilter{
 		PubKeyHashes:        map[[ripemd160.Size]byte]struct{}{},
@@ -2391,7 +2391,7 @@ func RescanBlock(wsc *WSClient, lookups *RescanKeys, blk *util.Block) {
 // NOTE: This extension is ported from github.com/decred/dcrd
 func RescanBlockFilter(
 	filter *WSClientFilter, block *util.Block,
-	params *netparams.Params,
+	params *chaincfg.Params,
 ) []string {
 	var transactions []string
 	filter.mu.Lock()

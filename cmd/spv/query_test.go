@@ -89,7 +89,7 @@ func TestBigFilterEvictsEverything(t *testing.T) {
 // 	cs := &ChainService{
 // 		BlockCache:   lru.NewCache(size),
 // 		BlockHeaders: headers,
-// 		chainParams: netparams.Params{
+// 		chainParams: chaincfg.Params{
 // 			PowLimit: maxPowLimit,
 // 		},
 // 		timeSource: blockchain.NewMedianTime(),

@@ -35,7 +35,7 @@ func ShellHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
 		}
 		dbFilename :=
 			*cx.Config.DataDir + slash +
-				cx.ActiveNet.Params.Name + slash +
+				cx.ActiveNet.Name + slash +
 				wallet.DbName
 		if !apputil.FileExists(dbFilename) && !cx.IsGUI {
 			// log.SetLevel("off", false)
@@ -46,7 +46,7 @@ func ShellHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
 			os.Exit(1)
 		}
 		// for security with apps launching the wallet, the public password can be set with a file that is deleted after
-		walletPassPath := *cx.Config.DataDir + slash + cx.ActiveNet.Params.Name + slash + "wp.txt"
+		walletPassPath := *cx.Config.DataDir + slash + cx.ActiveNet.Name + slash + "wp.txt"
 		D.Ln("reading password from", walletPassPath)
 		if apputil.FileExists(walletPassPath) {
 			var b []byte

@@ -211,7 +211,7 @@ func TestPeerConnection(t *testing.T) {
 		UserAgentName:     "peer",
 		UserAgentVersion:  "1.0",
 		UserAgentComments: []string{"comment"},
-		ChainParams:       &netparams.MainNetParams,
+		ChainParams:       &chaincfg.MainNetParams,
 		ProtocolVersion:   wire.RejectVersion, // Configure with older version
 		Services:          0,
 		TrickleInterval:   time.Second * 10,
@@ -221,7 +221,7 @@ func TestPeerConnection(t *testing.T) {
 		UserAgentName:     "peer",
 		UserAgentVersion:  "1.0",
 		UserAgentComments: []string{"comment"},
-		ChainParams:       &netparams.MainNetParams,
+		ChainParams:       &chaincfg.MainNetParams,
 		Services:          wire.SFNodeNetwork, // | wire.SFNodeWitness,
 		TrickleInterval:   time.Second * 10,
 	}
@@ -419,7 +419,7 @@ func TestPeerListeners(t *testing.T) {
 		UserAgentName:     "peer",
 		UserAgentVersion:  "1.0",
 		UserAgentComments: []string{"comment"},
-		ChainParams:       &netparams.MainNetParams,
+		ChainParams:       &chaincfg.MainNetParams,
 		Services:          wire.SFNodeBloom,
 		TrickleInterval:   time.Second * 10,
 	}
@@ -595,7 +595,7 @@ func TestOutboundPeer(t *testing.T) {
 		UserAgentName:     "peer",
 		UserAgentVersion:  "1.0",
 		UserAgentComments: []string{"comment"},
-		ChainParams:       &netparams.MainNetParams,
+		ChainParams:       &chaincfg.MainNetParams,
 		Services:          0,
 		TrickleInterval:   time.Second * 10,
 	}
@@ -673,7 +673,7 @@ func TestOutboundPeer(t *testing.T) {
 	p1.QueueInventory(fakeInv)
 	p1.Disconnect()
 	// Test regression
-	peerCfg.ChainParams = &netparams.RegressionTestParams
+	peerCfg.ChainParams = &chaincfg.RegressionTestParams
 	peerCfg.Services = wire.SFNodeBloom
 	r2, w2 := io.Pipe()
 	c2 := &conn{raddr: "10.0.0.1:11047", Writer: w2, Reader: r2}
@@ -719,7 +719,7 @@ func TestOutboundPeer(t *testing.T) {
 // 		UserAgentName:     "peer",
 // 		UserAgentVersion:  "1.0",
 // 		UserAgentComments: []string{"comment"},
-// 		ChainParams:       &netparams.MainNetParams,
+// 		ChainParams:       &chaincfg.MainNetParams,
 // 		Services:          0,
 // 		TrickleInterval:   time.Second * 10,
 // 	}
@@ -819,7 +819,7 @@ func TestDuplicateVersionMsg(t *testing.T) {
 		},
 		UserAgentName:    "peer",
 		UserAgentVersion: "1.0",
-		ChainParams:      &netparams.MainNetParams,
+		ChainParams:      &chaincfg.MainNetParams,
 		Services:         0,
 	}
 	inConn, outConn := pipe(

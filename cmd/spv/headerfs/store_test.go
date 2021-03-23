@@ -33,7 +33,7 @@ func createTestBlockHeaderStore() (
 	if e != nil {
 		return nil, nil, "", nil, e
 	}
-	hStore, e := NewBlockHeaderStore(tempDir, db, &netparams.SimNetParams)
+	hStore, e := NewBlockHeaderStore(tempDir, db, &chaincfg.SimNetParams)
 	if e != nil {
 		return nil, nil, "", nil, e
 	}
@@ -47,7 +47,7 @@ func createTestBlockHeaderStore() (
 }
 func createTestBlockHeaderChain(numHeaders uint32) []BlockHeader {
 	blockHeaders := make([]BlockHeader, numHeaders)
-	prevHeader := &netparams.SimNetParams.GenesisBlock.Header
+	prevHeader := &chaincfg.SimNetParams.GenesisBlock.Header
 	for i := uint32(1); i <= numHeaders; i++ {
 		bitcoinHeader := &wire.BlockHeader{
 			Bits:      uint32(rand.Int31()),
@@ -190,7 +190,7 @@ func TestBlockHeaderStoreRecovery(t *testing.T) {
 		}
 	}
 	// Next, we'll re-create the block header store in order to trigger the recovery logic.
-	hs, e := NewBlockHeaderStore(tempDir, db, &netparams.SimNetParams)
+	hs, e := NewBlockHeaderStore(tempDir, db, &chaincfg.SimNetParams)
 	if e != nil {
 		t.Fatalf("unable to re-create bhs: %v", err)
 	}
@@ -227,7 +227,7 @@ func createTestFilterHeaderStore() (
 	}
 	hStore, e := NewFilterHeaderStore(
 		tempDir, db, RegularFilter,
-		&netparams.SimNetParams,
+		&chaincfg.SimNetParams,
 	)
 	if e != nil {
 		return nil, nil, "", nil, e
@@ -408,7 +408,7 @@ func TestFilterHeaderStoreRecovery(t *testing.T) {
 	// Next, we'll re-create the block header store in order to trigger the recovery logic.
 	fhs, e = NewFilterHeaderStore(
 		tempDir, db, RegularFilter,
-		&netparams.SimNetParams,
+		&chaincfg.SimNetParams,
 	)
 	if e != nil {
 		t.Fatalf("unable to re-create bhs: %v", err)

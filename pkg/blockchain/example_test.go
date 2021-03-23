@@ -43,7 +43,7 @@ func ExampleBlockChain_ProcessBlock() {
 	// obtained from other peers on the network so the local time is adjusted to be in agreement with other peers.
 	chain, e := blockchain.New(&blockchain.Config{
 		DB:          db,
-		ChainParams: &netparams.MainNetParams,
+		ChainParams: &chaincfg.MainNetParams,
 		TimeSource:  blockchain.NewMedianTime(),
 	})
 	if e != nil  {

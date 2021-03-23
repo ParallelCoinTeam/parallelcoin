@@ -3,6 +3,7 @@ package conte
 import (
 	"fmt"
 	"github.com/p9c/pod/cmd/kopach/control"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg"
 	"math/rand"
 	"runtime"
 	"strings"
@@ -16,7 +17,6 @@ import (
 	"github.com/urfave/cli"
 	
 	"github.com/p9c/pod/cmd/node/state"
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/rpc/chainrpc"
 	"github.com/p9c/pod/pkg/util/lang"
@@ -44,7 +44,7 @@ type Xt struct {
 	// StateCfg is a reference to the main node state configuration struct
 	StateCfg *state.Config
 	// ActiveNet is the active net parameters
-	ActiveNet *netparams.Params
+	ActiveNet *chaincfg.Params
 	// Language libraries
 	Language *lang.Lexicon
 	// // DataDir is the default data dir

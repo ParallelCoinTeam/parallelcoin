@@ -3,13 +3,13 @@ package gui
 import (
 	"crypto/cipher"
 	"encoding/json"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg"
 	"io/ioutil"
 	"time"
 	
 	l "gioui.org/layout"
 	uberatomic "go.uber.org/atomic"
 	
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
 	"github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/coding/gcm"
 	"github.com/p9c/pod/pkg/comm/transport"
@@ -78,7 +78,7 @@ type State struct {
 	receiveAddresses        []AddressEntry
 }
 
-func GetNewState(params *netparams.Params, activePage *uberatomic.String) *State {
+func GetNewState(params *chaincfg.Params, activePage *uberatomic.String) *State {
 	fc := &atom.Bool{
 		Bool: uberatomic.NewBool(false),
 	}

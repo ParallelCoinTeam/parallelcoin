@@ -112,7 +112,7 @@ type poolHarness struct {
 	signKey     *ec.PrivateKey
 	payAddr     util.Address
 	payScript   []byte
-	chainParams *netparams.Params
+	chainParams *chaincfg.Params
 	chain       *fakeChain
 	txPool      *TxPool
 }
@@ -250,7 +250,7 @@ func (p *poolHarness) CreateTxChain(firstOutput spendableOutput, numTxns uint32)
 // newPoolHarness returns a new instance of a pool harness initialized with a fake chain and a TxPool bound to it that
 // is configured with a policy suitable for testing. Also the fake chain is populated with the returned spendable
 // outputs so the caller can easily create new valid transactions which build off of it.
-func newPoolHarness(chainParams *netparams.Params) (*poolHarness, []spendableOutput, error) {
+func newPoolHarness(chainParams *chaincfg.Params) (*poolHarness, []spendableOutput, error) {
 	// Use a hard coded key pair for deterministic results.
 	keyBytes, e := hex.DecodeString(
 		"700868df1838811ffbdf918fb482c1f7e" +
@@ -363,7 +363,7 @@ func testPoolMembership(tc *testContext, tx *util.Tx, inOrphanPool, inTxPool boo
 // pool.
 func TestSimpleOrphanChain(t *testing.T) {
 	t.Parallel()
-	harness, spendableOuts, e := newPoolHarness(&netparams.MainNetParams)
+	harness, spendableOuts, e := newPoolHarness(&chaincfg.MainNetParams)
 	if e != nil {
 		t.Fatalf("unable to create test pool: %v", e)
 	}
@@ -428,7 +428,7 @@ func TestSimpleOrphanChain(t *testing.T) {
 // ProcessTransaction.
 func TestOrphanReject(t *testing.T) {
 	t.Parallel()
-	harness, outputs, e := newPoolHarness(&netparams.MainNetParams)
+	harness, outputs, e := newPoolHarness(&chaincfg.MainNetParams)
 	if e != nil {
 		t.Fatalf("unable to create test pool: %v", e)
 	}
@@ -487,7 +487,7 @@ func TestOrphanReject(t *testing.T) {
 // TestOrphanEviction ensures that exceeding the maximum number of orphans evicts entries to make room for the new ones.
 func TestOrphanEviction(t *testing.T) {
 	t.Parallel()
-	harness, outputs, e := newPoolHarness(&netparams.MainNetParams)
+	harness, outputs, e := newPoolHarness(&chaincfg.MainNetParams)
 	if e != nil {
 		t.Fatalf("unable to create test pool: %v", e)
 	}
@@ -547,7 +547,7 @@ func TestOrphanEviction(t *testing.T) {
 func TestBasicOrphanRemoval(t *testing.T) {
 	t.Parallel()
 	const maxOrphans = 4
-	harness, spendableOuts, e := newPoolHarness(&netparams.MainNetParams)
+	harness, spendableOuts, e := newPoolHarness(&chaincfg.MainNetParams)
 	if e != nil {
 		t.Fatalf("unable to create test pool: %v", e)
 	}
@@ -618,7 +618,7 @@ func TestBasicOrphanRemoval(t *testing.T) {
 func TestOrphanChainRemoval(t *testing.T) {
 	t.Parallel()
 	const maxOrphans = 10
-	harness, spendableOuts, e := newPoolHarness(&netparams.MainNetParams)
+	harness, spendableOuts, e := newPoolHarness(&chaincfg.MainNetParams)
 	if e != nil {
 		t.Fatalf("unable to create test pool: %v", err)
 	}
@@ -676,7 +676,7 @@ func TestOrphanChainRemoval(t *testing.T) {
 func TestMultiInputOrphanDoubleSpend(t *testing.T) {
 	t.Parallel()
 	const maxOrphans = 4
-	harness, outputs, e := newPoolHarness(&netparams.MainNetParams)
+	harness, outputs, e := newPoolHarness(&chaincfg.MainNetParams)
 	if e != nil {
 		t.Fatalf("unable to create test pool: %v", err)
 	}
@@ -767,7 +767,7 @@ func TestMultiInputOrphanDoubleSpend(t *testing.T) {
 // TestCheckSpend tests that CheckSpend returns the expected spends found in the mempool.
 func TestCheckSpend(t *testing.T) {
 	t.Parallel()
-	harness, outputs, e := newPoolHarness(&netparams.MainNetParams)
+	harness, outputs, e := newPoolHarness(&chaincfg.MainNetParams)
 	if e != nil {
 		t.Fatalf("unable to create test pool: %v", err)
 	}

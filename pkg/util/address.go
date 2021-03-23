@@ -5,8 +5,7 @@ import (
 	"errors"
 	"golang.org/x/crypto/ripemd160"
 	
-	chaincfg "github.com/p9c/pod/pkg/blockchain/chaincfg"
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg"
 	"github.com/p9c/pod/pkg/coding/base58"
 	ec "github.com/p9c/pod/pkg/coding/ecc"
 )
@@ -102,7 +101,7 @@ type Address interface {
 	ScriptAddress() []byte
 	// IsForNet returns whether or not the address is associated with the
 	// passed bitcoin network.
-	IsForNet(*netparams.Params) bool
+	IsForNet(*chaincfg.Params) bool
 }
 
 // DecodeAddress decodes the string encoding of an address and returns the
@@ -110,7 +109,7 @@ type Address interface {
 // network the address is associated with is extracted if possible. When the
 // address does not encode the network, such as in the case of a raw public key,
 // the address will be associated with the passed defaultNet.
-func DecodeAddress(addr string, defaultNet *netparams.Params) (Address, error) {
+func DecodeAddress(addr string, defaultNet *chaincfg.Params) (Address, error) {
 	// // Bech32 encoded segwit addresses start with a human-readable part (hrp) followed by '1'. For Bitcoin mainnet the
 	// // hrp is "bc", and for testnet it is "tb". If the address string has a prefix that matches one of the prefixes for
 	// // the known networks, we try to decode it as a segwit address.
@@ -218,7 +217,7 @@ type AddressPubKeyHash struct {
 }
 
 // NewAddressPubKeyHash returns a new AddressPubKeyHash.  pkHash must be 20 bytes.
-func NewAddressPubKeyHash(pkHash []byte, net *netparams.Params) (*AddressPubKeyHash, error) {
+func NewAddressPubKeyHash(pkHash []byte, net *chaincfg.Params) (*AddressPubKeyHash, error) {
 	return newAddressPubKeyHash(pkHash, net.PubKeyHashAddrID)
 }
 
@@ -250,7 +249,7 @@ func (a *AddressPubKeyHash) ScriptAddress() []byte {
 
 // IsForNet returns whether or not the pay-to-pubkey-hash address is associated
 // with the passed bitcoin network.
-func (a *AddressPubKeyHash) IsForNet(net *netparams.Params) bool {
+func (a *AddressPubKeyHash) IsForNet(net *chaincfg.Params) bool {
 	return a.netID == net.PubKeyHashAddrID
 }
 
@@ -273,13 +272,13 @@ type AddressScriptHash struct {
 }
 
 // NewAddressScriptHash returns a new AddressScriptHash.
-func NewAddressScriptHash(serializedScript []byte, net *netparams.Params) (*AddressScriptHash, error) {
+func NewAddressScriptHash(serializedScript []byte, net *chaincfg.Params) (*AddressScriptHash, error) {
 	scriptHash := Hash160(serializedScript)
 	return newAddressScriptHashFromHash(scriptHash, net.ScriptHashAddrID)
 }
 
 // NewAddressScriptHashFromHash returns a new AddressScriptHash.  scriptHash must be 20 bytes.
-func NewAddressScriptHashFromHash(scriptHash []byte, net *netparams.Params) (*AddressScriptHash, error) {
+func NewAddressScriptHashFromHash(scriptHash []byte, net *chaincfg.Params) (*AddressScriptHash, error) {
 	return newAddressScriptHashFromHash(scriptHash, net.ScriptHashAddrID)
 }
 
@@ -308,7 +307,7 @@ func (a *AddressScriptHash) ScriptAddress() []byte {
 }
 
 // IsForNet returns whether or not the pay-to-script-hash address is associated with the passed bitcoin network.
-func (a *AddressScriptHash) IsForNet(net *netparams.Params) bool {
+func (a *AddressScriptHash) IsForNet(net *chaincfg.Params) bool {
 	return a.netID == net.ScriptHashAddrID
 }
 
@@ -345,7 +344,7 @@ type AddressPubKey struct {
 
 // NewAddressPubKey returns a new AddressPubKey which represents a pay-to-pubkey address. The serializedPubKey parameter
 // must be a valid pubkey and can be uncompressed, compressed, or hybrid.
-func NewAddressPubKey(serializedPubKey []byte, net *netparams.Params) (*AddressPubKey, error) {
+func NewAddressPubKey(serializedPubKey []byte, net *chaincfg.Params) (*AddressPubKey, error) {
 	pubKey, e := ec.ParsePubKey(serializedPubKey, ec.S256())
 	if e != nil {
 		return nil, e
@@ -393,7 +392,7 @@ func (a *AddressPubKey) ScriptAddress() []byte {
 }
 
 // IsForNet returns whether or not the pay-to-pubkey address is associated with the passed bitcoin network.
-func (a *AddressPubKey) IsForNet(net *netparams.Params) bool {
+func (a *AddressPubKey) IsForNet(net *chaincfg.Params) bool {
 	return a.pubKeyHashID == net.PubKeyHashAddrID
 }
 
@@ -436,7 +435,7 @@ func (a *AddressPubKey) PubKey() *ec.PublicKey {
 // }
 
 // // NewAddressWitnessPubKeyHash returns a new AddressWitnessPubKeyHash.
-// func NewAddressWitnessPubKeyHash(witnessProg []byte, net *netparams.Params) (*AddressWitnessPubKeyHash, error) {
+// func NewAddressWitnessPubKeyHash(witnessProg []byte, net *chaincfg.Params) (*AddressWitnessPubKeyHash, error) {
 // 	return newAddressWitnessPubKeyHash(net.Bech32HRPSegwit, witnessProg)
 // }
 
@@ -476,7 +475,7 @@ func (a *AddressPubKey) PubKey() *ec.PublicKey {
 //
 // // IsForNet returns whether or not the AddressWitnessPubKeyHash is associated
 // // with the passed bitcoin network. Part of the Address interface.
-// func (a *AddressWitnessPubKeyHash) IsForNet(net *netparams.Params) bool {
+// func (a *AddressWitnessPubKeyHash) IsForNet(net *chaincfg.Params) bool {
 // 	return a.hrp == net.Bech32HRPSegwit
 // }
 //
@@ -520,7 +519,7 @@ func (a *AddressPubKey) PubKey() *ec.PublicKey {
 // }
 //
 // // NewAddressWitnessScriptHash returns a new AddressWitnessPubKeyHash.
-// func NewAddressWitnessScriptHash(witnessProg []byte, net *netparams.Params) (*AddressWitnessScriptHash, error) {
+// func NewAddressWitnessScriptHash(witnessProg []byte, net *chaincfg.Params) (*AddressWitnessScriptHash, error) {
 // 	return newAddressWitnessScriptHash(net.Bech32HRPSegwit, witnessProg)
 // }
 //
@@ -560,7 +559,7 @@ func (a *AddressPubKey) PubKey() *ec.PublicKey {
 //
 // // IsForNet returns whether or not the AddressWitnessScriptHash is associated
 // // with the passed bitcoin network. Part of the Address interface.
-// func (a *AddressWitnessScriptHash) IsForNet(net *netparams.Params) bool {
+// func (a *AddressWitnessScriptHash) IsForNet(net *chaincfg.Params) bool {
 // 	return a.hrp == net.Bech32HRPSegwit
 // }
 //

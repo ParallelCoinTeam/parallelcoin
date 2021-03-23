@@ -7,23 +7,23 @@ import (
 	js "encoding/json"
 	"errors"
 	"fmt"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg"
 	"sync"
 	"time"
 	
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
-	wtxmgr "github.com/p9c/pod/pkg/blockchain/tx/wtxmgr"
-	txrules "github.com/p9c/pod/pkg/blockchain/tx/txrules"
-	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
+	"github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/blockchain/tx/txrules"
+	"github.com/p9c/pod/pkg/blockchain/tx/txscript"
+	"github.com/p9c/pod/pkg/blockchain/tx/wtxmgr"
 	"github.com/p9c/pod/pkg/blockchain/wire"
 	ec "github.com/p9c/pod/pkg/coding/ecc"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
-	rpcclient "github.com/p9c/pod/pkg/rpc/rpcclient"
+	"github.com/p9c/pod/pkg/rpc/rpcclient"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/wallet"
-	waddrmgr "github.com/p9c/pod/pkg/wallet/waddrmgr"
 	"github.com/p9c/pod/pkg/wallet/chain"
+	"github.com/p9c/pod/pkg/wallet/waddrmgr"
 )
 
 // // confirmed checks whether a transaction at height txHeight has met minconf
@@ -713,7 +713,7 @@ func GetInfo(icmd interface{}, w *wallet.Wallet, chainClient ...*chain.RPCClient
 	return info, nil
 }
 
-func DecodeAddress(s string, params *netparams.Params) (util.Address, error) {
+func DecodeAddress(s string, params *chaincfg.Params) (util.Address, error) {
 	addr, e := util.DecodeAddress(s, params)
 	if e != nil {
 		msg := fmt.Sprintf("Invalid address %q: decode failed with %#q", s, e)
@@ -981,7 +981,10 @@ func GetRawChangeAddress(icmd interface{}, w *wallet.Wallet, chainClient ...*cha
 
 // GetReceivedByAccount handles a getreceivedbyaccount request by returning the
 // total amount received by addresses of an account.
-func GetReceivedByAccount(icmd interface{}, w *wallet.Wallet, chainClient ...*chain.RPCClient) (ii interface{},e error) {
+func GetReceivedByAccount(icmd interface{}, w *wallet.Wallet, chainClient ...*chain.RPCClient) (
+	ii interface{},
+	e error,
+) {
 	cmd, ok := icmd.(*btcjson.GetReceivedByAccountCmd)
 	if !ok {
 		return nil, &btcjson.RPCError{
@@ -1710,7 +1713,7 @@ func LockUnspent(
 // MakeOutputs creates a slice of transaction outputs from a pair of address strings to amounts. This is used to create
 // the outputs to include in newly created transactions from a JSON object describing the output destinations and
 // amounts.
-func MakeOutputs(pairs map[string]util.Amount, chainParams *netparams.Params) ([]*wire.TxOut, error) {
+func MakeOutputs(pairs map[string]util.Amount, chainParams *chaincfg.Params) ([]*wire.TxOut, error) {
 	outputs := make([]*wire.TxOut, 0, len(pairs))
 	for addrStr, amt := range pairs {
 		addr, e := util.DecodeAddress(addrStr, chainParams)

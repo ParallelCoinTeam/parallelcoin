@@ -289,7 +289,7 @@ var Block100000 = wire.MsgBlock{
 // 	req := &chain.FilterBlocksRequest{
 // 		WatchedOutPoints: watchedOutPoints,
 // 	}
-// 	blockFilterer := chain.NewBlockFilterer(&netparams.SimNetParams, req)
+// 	blockFilterer := chain.NewBlockFilterer(&chaincfg.SimNetParams, req)
 // 	// Filter block 100000, which should find matches for the watched outpoints.
 // 	match := blockFilterer.FilterBlock(&Block100000)
 // 	if !match {

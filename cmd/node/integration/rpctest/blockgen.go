@@ -89,7 +89,7 @@ func createCoinbaseTx(
 	nextBlockHeight int32,
 	addr util.Address,
 	mineTo []wire.TxOut,
-	net *netparams.Params,
+	net *chaincfg.Params,
 	version int32,
 ) (*util.Tx, error) {
 	// Create the script to pay to the provided payment address.
@@ -131,7 +131,7 @@ func createCoinbaseTx(
 func CreateBlock(
 	prevBlock *util.Block, inclusionTxs []*util.Tx,
 	blockVersion int32, blockTime time.Time, miningAddr util.Address,
-	mineTo []wire.TxOut, net *netparams.Params,
+	mineTo []wire.TxOut, net *chaincfg.Params,
 ) (*util.Block, error) {
 	var (
 		prevHash      *chainhash.Hash

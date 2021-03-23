@@ -424,13 +424,13 @@ func runCheckCFCheckptSanityTestCase(t *testing.T, testCase *cfCheckptTestCase) 
 		}
 	}()
 	hdrStore, e := headerfs.NewBlockHeaderStore(
-		tempDir, db, &netparams.SimNetParams,
+		tempDir, db, &chaincfg.SimNetParams,
 	)
 	if e != nil {
 		t.Fatalf("DBError creating block header store: %s", err)
 	}
 	cfStore, e := headerfs.NewFilterHeaderStore(
-		tempDir, db, headerfs.RegularFilter, &netparams.SimNetParams,
+		tempDir, db, headerfs.RegularFilter, &chaincfg.SimNetParams,
 	)
 	if e != nil {
 		t.Fatalf("DBError creating filter header store: %s", err)

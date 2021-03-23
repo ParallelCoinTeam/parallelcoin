@@ -2,11 +2,11 @@ package wtxmgr
 
 import (
 	"bytes"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg"
 	"time"
 	
-	blockchain "github.com/p9c/pod/pkg/blockchain"
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/blockchain"
+	"github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/database/walletdb"
 	"github.com/p9c/pod/pkg/util"
@@ -77,7 +77,7 @@ type (
 	}
 	// Store implements a transaction store for storing and managing wallet transactions.
 	Store struct {
-		chainParams *netparams.Params
+		chainParams *chaincfg.Params
 		// Event callbacks. These execute in the same goroutine as the wtxmgr caller.
 		NotifyUnspent func(hash *chainhash.Hash, index uint32)
 	}
@@ -125,7 +125,7 @@ func DoUpgrades(db walletdb.DB, namespaceKey []byte) (e error) {
 
 // Open opens the wallet transaction store from a walletdb namespace.
 // If the store does not exist, ErrNoExist is returned.
-func Open(ns walletdb.ReadBucket, chainParams *netparams.Params) (*Store, error) {
+func Open(ns walletdb.ReadBucket, chainParams *chaincfg.Params) (*Store, error) {
 	// Open the store.
 	e := openStore(ns)
 	if e != nil {

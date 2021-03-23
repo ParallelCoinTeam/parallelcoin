@@ -3,11 +3,11 @@ package txauthor
 
 import (
 	"errors"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg"
 	
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
-	txrules "github.com/p9c/pod/pkg/blockchain/tx/txrules"
-	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
 	txsizes "github.com/p9c/pod/pkg/blockchain/tx/sizes"
+	"github.com/p9c/pod/pkg/blockchain/tx/txrules"
+	"github.com/p9c/pod/pkg/blockchain/tx/txscript"
 	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/util"
 	h "github.com/p9c/pod/pkg/util/helpers"
@@ -54,7 +54,7 @@ type (
 	SecretsSource interface {
 		txscript.KeyDB
 		txscript.ScriptDB
-		ChainParams() *netparams.Params
+		ChainParams() *chaincfg.Params
 	}
 )
 
@@ -96,7 +96,7 @@ func NewUnsignedTransaction(
 		}
 		// We count the types of inputs, which we'll use to estimate the vsize of the transaction.
 		var nested, p2wpkh, p2pkh int
-		for _, /*pkScript*/_ = range scripts {
+		for _, /*pkScript*/ _ = range scripts {
 			switch {
 			// // If this is a p2sh output, we assume this is a nested P2WKH.
 			// case txscript.IsPayToScriptHash(pkScript):
@@ -229,7 +229,7 @@ func AddAllInputScripts(
 // // will fail since the new sighash digest algorithm defined in BIP0143 includes
 // // the input value in the sighash.
 // func spendWitnessKeyHash(txIn *wire.TxIn, pkScript []byte,
-// 	inputValue int64, chainParams *netparams.Params, secrets SecretsSource,
+// 	inputValue int64, chainParams *chaincfg.Params, secrets SecretsSource,
 // 	tx *wire.MsgTx, hashCache *txscript.TxSigHashes, idx int) (e error) {
 // 	// First obtain the key pair associated with this p2wkh address.
 // 	_, addrs, _, e = txscript.ExtractPkScriptAddrs(pkScript,
@@ -277,7 +277,7 @@ func AddAllInputScripts(
 // // previous pkScript, or else verification will fail since the new sighash
 // // digest algorithm defined in BIP0143 includes the input value in the sighash.
 // func spendNestedWitnessPubKeyHash(txIn *wire.TxIn, pkScript []byte,
-// 	inputValue int64, chainParams *netparams.Params, secrets SecretsSource,
+// 	inputValue int64, chainParams *chaincfg.Params, secrets SecretsSource,
 // 	tx *wire.MsgTx, hashCache *txscript.TxSigHashes, idx int) (e error) {
 // 	// First we need to obtain the key pair related to this p2sh output.
 // 	_, addrs, _, e = txscript.ExtractPkScriptAddrs(pkScript,

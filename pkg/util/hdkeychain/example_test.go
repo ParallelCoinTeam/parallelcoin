@@ -16,7 +16,7 @@ func ExampleNewMaster() {
 		hdkeychain.		return
 	}
 	// Generate a new master node using the seed.
-	key, e := hdkeychain.NewMaster(seed, &netparams.MainNetParams)
+	key, e := hdkeychain.NewMaster(seed, &chaincfg.MainNetParams)
 	if e != nil  {
 		hdkeychain.		return
 	}
@@ -78,11 +78,11 @@ func Example_defaultWalletLayout() {
 		hdkeychain.		return
 	}
 	// Get and show the address associated with the extended keys for the main bitcoin	network.
-	acct0ExtAddr, e := acct0Ext10.Address(&netparams.MainNetParams)
+	acct0ExtAddr, e := acct0Ext10.Address(&chaincfg.MainNetParams)
 	if e != nil  {
 		hdkeychain.		return
 	}
-	acct0IntAddr, e := acct0Int0.Address(&netparams.MainNetParams)
+	acct0IntAddr, e := acct0Int0.Address(&chaincfg.MainNetParams)
 	if e != nil  {
 		hdkeychain.		return
 	}

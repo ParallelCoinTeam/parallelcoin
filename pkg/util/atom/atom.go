@@ -1,12 +1,12 @@
 package atom
 
 import (
+	"github.com/p9c/pod/pkg/blockchain/chaincfg"
 	"time"
 	
 	"go.uber.org/atomic"
 	
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/util"
 )
@@ -113,11 +113,11 @@ func (at *Hash) Swap(n chainhash.Hash) chainhash.Hash {
 // Address is an atomic wrapper around util.Address
 type Address struct {
 	*atomic.String
-	ForNet *netparams.Params
+	ForNet *chaincfg.Params
 }
 
 // NewAddress creates a Hash.
-func NewAddress(tt util.Address, forNet *netparams.Params) *Address {
+func NewAddress(tt util.Address, forNet *chaincfg.Params) *Address {
 	t := atomic.NewString(tt.EncodeAddress())
 	return &Address{String: t, ForNet: forNet}
 }
@@ -125,7 +125,7 @@ func NewAddress(tt util.Address, forNet *netparams.Params) *Address {
 // Load atomically loads the wrapped value.
 func (at *Address) Load() util.Address {
 	addr, e := util.DecodeAddress(at.String.Load(), at.ForNet)
-	if e != nil  {
+	if e != nil {
 		return nil
 	}
 	return addr
@@ -180,7 +180,8 @@ func (at *ListTransactionsResult) Store(ltr []btcjson.ListTransactionsResult) {
 
 // Swap atomically swaps the wrapped chainhash.ListTransactionsResult and
 // returns the old value.
-func (at *ListTransactionsResult) Swap(n []btcjson.ListTransactionsResult,
+func (at *ListTransactionsResult) Swap(
+	n []btcjson.ListTransactionsResult,
 ) []btcjson.ListTransactionsResult {
 	o := at.v.Load().([]btcjson.ListTransactionsResult)
 	at.v.Store(n)

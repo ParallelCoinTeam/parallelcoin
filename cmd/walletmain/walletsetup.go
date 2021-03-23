@@ -2,11 +2,11 @@ package walletmain
 
 import (
 	"bufio"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg"
 	"os"
 	"path/filepath"
 	"time"
 	
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
 	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/database/walletdb"
 	"github.com/p9c/pod/pkg/pod"
@@ -24,7 +24,7 @@ const slash = string(os.PathSeparator)
 
 // CreateSimulationWallet is intended to be called from the rpcclient and used
 // to create a wallet for actors involved in simulations.
-func CreateSimulationWallet(activenet *netparams.Params, cfg *Config) (e error) {
+func CreateSimulationWallet(activenet *chaincfg.Params, cfg *Config) (e error) {
 	// Simulation wallet password is 'password'.
 	privPass := []byte("password")
 	// Public passphrase is the default.
@@ -53,7 +53,7 @@ func CreateSimulationWallet(activenet *netparams.Params, cfg *Config) (e error) 
 
 // CreateWallet prompts the user for information needed to generate a new wallet and generates the wallet accordingly.
 // The new wallet will reside at the provided path.
-func CreateWallet(activenet *netparams.Params, config *pod.Config) (e error) {
+func CreateWallet(activenet *chaincfg.Params, config *pod.Config) (e error) {
 	dbDir := *config.WalletFile
 	loader := wallet.NewLoader(activenet, dbDir, 250)
 	D.Ln("WalletPage", loader.ChainParams.Name)
@@ -160,7 +160,7 @@ func CreateWallet(activenet *netparams.Params, config *pod.Config) (e error) {
 }
 
 // NetworkDir returns the directory name of a network directory to hold wallet files.
-func NetworkDir(dataDir string, chainParams *netparams.Params) string {
+func NetworkDir(dataDir string, chainParams *chaincfg.Params) string {
 	netname := chainParams.Name
 	// For now, we must always name the testnet data directory as "testnet" and not "testnet3" or any other version, as
 	// the chaincfg testnet3 paramaters will likely be switched to being named "testnet3" in the future. This is done to

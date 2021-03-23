@@ -91,11 +91,11 @@ func init() {
 	if opts.TestNet3 && opts.SimNet {
 		fatalf("Multiple bitcoin networks may not be used simultaneously")
 	}
-	var activeNet = &netparams.MainNetParams
+	var activeNet = &chaincfg.MainNetParams
 	if opts.TestNet3 {
-		activeNet = &netparams.TestNet3Params
+		activeNet = &chaincfg.TestNet3Params
 	} else if opts.SimNet {
-		activeNet = &netparams.SimNetParams
+		activeNet = &chaincfg.SimNetParams
 	}
 	if opts.RPCConnect == "" {
 		fatalf("RPC hostname[:port] is required")

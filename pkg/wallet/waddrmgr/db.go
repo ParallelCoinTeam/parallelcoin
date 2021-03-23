@@ -4,9 +4,9 @@ import (
 	"crypto/sha256"
 	"encoding/binary"
 	"fmt"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg"
 	"time"
 	
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
 	"github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/database/walletdb"
 )
@@ -1941,7 +1941,7 @@ func createManagerNS(
 // versions as neeeded.
 func upgradeManager(
 	db walletdb.DB, namespaceKey []byte, pubPassPhrase []byte,
-	chainParams *netparams.Params, cbs *OpenCallbacks,
+	chainParams *chaincfg.Params, cbs *OpenCallbacks,
 ) (e error) {
 	var version uint32
 	if e = walletdb.View(

@@ -65,7 +65,7 @@ func dbDeleteFilterIdxEntry(dbTx database.Tx, key []byte, h *chainhash.Hash) (e 
 // CFIndex implements a committed filter (cf) by hash index.
 type CFIndex struct {
 	db          database.DB
-	chainParams *netparams.Params
+	chainParams *chaincfg.Params
 }
 
 // Ensure the CfIndex type implements the Indexer interface.
@@ -322,7 +322,7 @@ func (idx *CFIndex) FilterHashesByBlockHashes(
 // blockchain to their respective committed filters. It implements the Indexer interface which plugs into the
 // IndexManager that in turn is used by the blockchain package. This allows the index to be seamlessly maintained along
 // with the chain.
-func NewCfIndex(db database.DB, chainParams *netparams.Params) *CFIndex {
+func NewCfIndex(db database.DB, chainParams *chaincfg.Params) *CFIndex {
 	return &CFIndex{db: db, chainParams: chainParams}
 }
 

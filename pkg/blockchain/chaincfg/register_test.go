@@ -462,7 +462,7 @@ func TestRegister(t *testing.T) {
 	for _, test := range tests {
 		for _, regTest := range test.register {
 			e := Register(regTest.params)
-			if err != regTest.err {
+			if e != regTest.err {
 				t.Errorf("%s:%s: Registered network with unexpected error: got %v expected %v",
 					test.name, regTest.name, e, regTest.err)
 			}
@@ -490,12 +490,12 @@ func TestRegister(t *testing.T) {
 		}
 		for i, magTest := range test.hdMagics {
 			pubKey, e := HDPrivateKeyToPublicKeyID(magTest.priv[:])
-			if !reflect.DeepEqual(err, magTest.err) {
+			if !reflect.DeepEqual(e, magTest.err) {
 				t.Errorf("%s: HD magic %d mismatched error: got %v expected %v ",
 					test.name, i, e, magTest.err)
 				continue
 			}
-			if magTest.e ==  nil && !bytes.Equal(pubKey, magTest.want[:]) {
+			if magTest.err ==  nil && !bytes.Equal(pubKey, magTest.want[:]) {
 				t.Errorf("%s: HD magic %d private and public mismatch: got %v expected %v ",
 					test.name, i, pubKey, magTest.want[:])
 			}

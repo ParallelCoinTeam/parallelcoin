@@ -13,7 +13,6 @@ import (
 	"github.com/p9c/pod/cmd/node/mempool"
 	"github.com/p9c/pod/pkg/blockchain"
 	"github.com/p9c/pod/pkg/blockchain/chaincfg"
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
 	"github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/blockchain/wire"
 	peerpkg "github.com/p9c/pod/pkg/comm/peer"
@@ -33,7 +32,7 @@ type (
 		shutdown       int32
 		chain          *blockchain.BlockChain
 		txMemPool      *mempool.TxPool
-		chainParams    *netparams.Params
+		chainParams    *chaincfg.Params
 		progressLogger *blockProgressLogger
 		msgChan        chan interface{}
 		wg             sync.WaitGroup
@@ -481,7 +480,7 @@ func (sm *SyncManager) handleBlockMsg(workerNumber uint32, bmsg *blockMsg) {
 		// block insertion fails. Don't disconnect the peer or ignore the block when
 		// we're in regression test mode in this case so the chain code is actually fed
 		// the duplicate blocks.
-		if sm.chainParams != &netparams.RegressionTestParams {
+		if sm.chainParams != &chaincfg.RegressionTestParams {
 			W.C(
 				func() string {
 					return fmt.Sprintf(
@@ -1229,7 +1228,7 @@ func (sm *SyncManager) isSyncCandidate(peer *peerpkg.Peer) bool {
 	// Typically a peer is not a candidate for sync if it's not a full node, however
 	// regression test is special in that the regression tool is not a full node and
 	// still needs to be considered a sync candidate.
-	if sm.chainParams == &netparams.RegressionTestParams {
+	if sm.chainParams == &chaincfg.RegressionTestParams {
 		// The peer is not a candidate if it's not coming from localhost or the hostname
 		// can't be determined for some reason.
 		var host string
@@ -1363,7 +1362,7 @@ func (sm *SyncManager) startSync() {
 		// in regression test mode.
 		if sm.nextCheckpoint != nil &&
 			best.Height < sm.nextCheckpoint.Height &&
-			sm.chainParams != &netparams.RegressionTestParams {
+			sm.chainParams != &chaincfg.RegressionTestParams {
 			e := bestPeer.PushGetHeadersMsg(locator, sm.nextCheckpoint.Hash)
 			if e != nil {
 			}

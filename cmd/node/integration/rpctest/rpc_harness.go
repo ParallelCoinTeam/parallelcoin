@@ -57,7 +57,7 @@ type HarnessTestCase func(r *Harness, t *testing.T)
 // includes an in-memory wallet to streamline various classes of tests.
 type Harness struct {
 	// ActiveNet is the parameters of the blockchain the Harness belongs to.
-	ActiveNet      *netparams.Params
+	ActiveNet      *chaincfg.Params
 	Node           *rpcclient.Client
 	node           *node
 	handlers       *rpcclient.NotificationHandlers
@@ -72,12 +72,12 @@ type Harness struct {
 // configuration may be passed. In the case that a nil config is passed, a default configuration will be used. NOTE:
 // This function is safe for concurrent access.
 func New(
-	activeNet *netparams.Params, handlers *rpcclient.NotificationHandlers,
+	activeNet *chaincfg.Params, handlers *rpcclient.NotificationHandlers,
 	extraArgs []string,
 ) (*Harness, error) {
 	harnessStateMtx.Lock()
 	defer harnessStateMtx.Unlock()
-	// Add a flag for the appropriate network type based on the provided chain netparams.
+	// Add a flag for the appropriate network type based on the provided chain chaincfg.
 	switch activeNet.Net {
 	case wire.MainNet:
 		// No extra flags since mainnet is the default

@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg"
 	"sort"
 	"strings"
 	"sync"
@@ -15,10 +16,9 @@ import (
 	"github.com/davecgh/go-spew/spew"
 	
 	"github.com/p9c/pod/pkg/blockchain"
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
 	"github.com/p9c/pod/pkg/blockchain/chainhash"
-	txrules "github.com/p9c/pod/pkg/blockchain/tx/txrules"
 	"github.com/p9c/pod/pkg/blockchain/tx/txauthor"
+	"github.com/p9c/pod/pkg/blockchain/tx/txrules"
 	"github.com/p9c/pod/pkg/blockchain/tx/txscript"
 	"github.com/p9c/pod/pkg/blockchain/tx/wtxmgr"
 	"github.com/p9c/pod/pkg/blockchain/wire"
@@ -92,7 +92,7 @@ type Wallet struct {
 	// reorganizing     bool
 	NtfnServer  *NotificationServer
 	PodConfig   *pod.Config
-	chainParams *netparams.Params
+	chainParams *chaincfg.Params
 	wg          sync.WaitGroup
 	started     bool
 	quit        qu.C
@@ -1623,7 +1623,7 @@ func (c CreditCategory) String() string {
 // is used to distinguish immature from mature coinbase outputs.
 //
 // TODO: This is intended for use by the RPC server and should be moved out of this package at a later time.
-func RecvCategory(details *wtxmgr.TxDetails, syncHeight int32, net *netparams.Params) CreditCategory {
+func RecvCategory(details *wtxmgr.TxDetails, syncHeight int32, net *chaincfg.Params) CreditCategory {
 	if blockchain.IsCoinBaseTx(&details.MsgTx) {
 		if confirmed(
 			int32(net.CoinbaseMaturity), details.Block.Height,
@@ -1641,7 +1641,7 @@ func RecvCategory(details *wtxmgr.TxDetails, syncHeight int32, net *netparams.Pa
 // TODO: This should be moved to the legacyrpc package.
 func listTransactions(
 	tx walletdb.ReadTx, details *wtxmgr.TxDetails, addrMgr *waddrmgr.Manager,
-	syncHeight int32, net *netparams.Params,
+	syncHeight int32, net *chaincfg.Params,
 ) []btcjson.ListTransactionsResult {
 	addrmgrNs := tx.ReadBucket(waddrmgrNamespaceKey)
 	var (
@@ -3130,7 +3130,7 @@ func (w *Wallet) publishTransaction(tx *wire.MsgTx) (*chainhash.Hash, error) {
 }
 
 // ChainParams returns the network parameters for the blockchain the wallet belongs to.
-func (w *Wallet) ChainParams() *netparams.Params {
+func (w *Wallet) ChainParams() *chaincfg.Params {
 	return w.chainParams
 }
 
@@ -3143,7 +3143,7 @@ func (w *Wallet) Database() walletdb.DB {
 // Create creates an new wallet, writing it to an empty database. If the passed seed is non-nil, it is used. Otherwise,
 // a secure random seed of the recommended length is generated.
 func Create(
-	db walletdb.DB, pubPass, privPass, seed []byte, params *netparams.Params,
+	db walletdb.DB, pubPass, privPass, seed []byte, params *chaincfg.Params,
 	birthday time.Time,
 ) (e error) {
 	// If a seed was provided, ensure that it is of valid length. Otherwise, we generate a random seed for the wallet
@@ -3188,7 +3188,7 @@ func Open(
 	db walletdb.DB,
 	pubPass []byte,
 	cbs *waddrmgr.OpenCallbacks,
-	params *netparams.Params,
+	params *chaincfg.Params,
 	recoveryWindow uint32,
 	podConfig *pod.Config,
 	quit qu.C,

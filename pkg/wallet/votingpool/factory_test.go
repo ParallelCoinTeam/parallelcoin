@@ -155,7 +155,7 @@ func TstCreateSeries(t *testing.T, dbtx walletdb.ReadWriteTx, pool *Pool, defini
 	}
 }
 func TstCreateMasterKey(t *testing.T, seed []byte) *hdkeychain.ExtendedKey {
-	key, e := hdkeychain.NewMaster(seed, &netparams.MainNetParams)
+	key, e := hdkeychain.NewMaster(seed, &chaincfg.MainNetParams)
 	if e != nil  {
 		t.ftl.Ln(e)
 	}
@@ -312,11 +312,11 @@ func TstCreatePool(t *testing.T) (tearDownFunc func(), db walletdb.DB, pool *Poo
 		}
 		fastScrypt := &waddrmgr.ScryptOptions{N: 16, R: 8, P: 1}
 		e = waddrmgr.Create(addrmgrNs, seed, pubPassphrase, privPassphrase,
-			&netparams.MainNetParams, fastScrypt, time.Now())
+			&chaincfg.MainNetParams, fastScrypt, time.Now())
 		if e != nil  {
 			return e
 		}
-		addrMgr, e = waddrmgr.Open(addrmgrNs, pubPassphrase, &netparams.MainNetParams)
+		addrMgr, e = waddrmgr.Open(addrmgrNs, pubPassphrase, &chaincfg.MainNetParams)
 		if e != nil  {
 			return e
 		}
@@ -346,7 +346,7 @@ func TstCreateTxStore(t *testing.T, db walletdb.DB) *wtxmgr.Store {
 		if e != nil  {
 			return e
 		}
-		store, e = wtxmgr.Open(txmgrNs, &netparams.MainNetParams)
+		store, e = wtxmgr.Open(txmgrNs, &chaincfg.MainNetParams)
 		return e
 	})
 	if e != nil  {
@@ -355,7 +355,7 @@ func TstCreateTxStore(t *testing.T, db walletdb.DB) *wtxmgr.Store {
 	return store
 }
 func TstNewOutputRequest(t *testing.T, transaction uint32, address string, amount util.Amount,
-	net *netparams.Params) OutputRequest {
+	net *chaincfg.Params) OutputRequest {
 	addr, e := util.DecodeAddress(address, net)
 	if e != nil  {
 		t.Fatalf("Unable to decode address %s", address)

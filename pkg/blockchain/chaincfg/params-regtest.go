@@ -77,4 +77,6 @@ var RegressionTestParams = Params{
 	MaxActualTimespan:       AveragingTargetTimespan * (Interval + MaxAdjustDown) / Interval,
 	ScryptPowLimit:          &scryptPowLimit,
 	ScryptPowLimitBits:      ScryptPowLimitBits,
+	RPCClientPort:       "31048",
+	WalletRPCServerPort: "31046",
 }

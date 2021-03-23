@@ -2,8 +2,8 @@ package hardfork
 
 import (
 	"encoding/hex"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg"
 	
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
 	"github.com/p9c/pod/pkg/util"
 )
 
@@ -15,8 +15,8 @@ type Payee struct {
 
 var (
 	// The following prepares hard fork disbursement payout transactions
-	tn = &netparams.TestNet3Params
-	mn = &netparams.MainNetParams
+	tn = &chaincfg.TestNet3Params
+	mn = &chaincfg.MainNetParams
 	// Payees are the list of payments to be made on the hard fork activation on mainnet
 	Payees = []Payee{
 		{Addr("ag7s5bmcA8XoP1CcS1QPjiD4C5hhMWATik", mn), Amt(4400)},
@@ -74,7 +74,7 @@ func Amt(f float64) (amt util.Amount) {
 	return
 }
 
-func Addr(addr string, defaultNet *netparams.Params) (out util.Address) {
+func Addr(addr string, defaultNet *chaincfg.Params) (out util.Address) {
 	out, e := util.DecodeAddress(addr, defaultNet)
 	if e != nil {
 		panic(e)

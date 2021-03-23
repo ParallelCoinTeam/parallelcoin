@@ -489,7 +489,7 @@ type AddrIndex struct {
 	// The following fields are set when the instance is created and can't be changed afterwards, so there is no need to
 	// protect them with a separate mutex.
 	db          database.DB
-	chainParams *netparams.Params
+	chainParams *chaincfg.Params
 	// The following fields are used to quickly link transactions and addresses that have not been included into a block
 	// yet when an address index is being maintained. The are protected by the unconfirmedLock field. The txnsByAddr
 	// field is used to keep an index of all transactions which either create an output to a given address or spend from
@@ -789,7 +789,7 @@ func (idx *AddrIndex) UnconfirmedTxnsForAddress(addr util.Address) []*util.Tx {
 // to the respective transactions that involve them. It implements the Indexer interface which plugs into the
 // IndexManager that in turn is used by the blockchain package. This allows the index to be seamlessly maintained along
 // with the chain.
-func NewAddrIndex(db database.DB, chainParams *netparams.Params) *AddrIndex {
+func NewAddrIndex(db database.DB, chainParams *chaincfg.Params) *AddrIndex {
 	return &AddrIndex{
 		db:          db,
 		chainParams: chainParams,

@@ -2,10 +2,10 @@ package rpcclient
 
 import (
 	js "encoding/json"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg"
 	"strconv"
 	
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/util"
@@ -726,7 +726,7 @@ func (r FutureAddMultisigAddressResult) Receive() (util.Address, error) {
 	if e != nil {
 		return nil, e
 	}
-	return util.DecodeAddress(addr, &netparams.MainNetParams)
+	return util.DecodeAddress(addr, &chaincfg.MainNetParams)
 }
 
 // AddMultisigAddressAsync returns an instance of a type that can be used to get the result of the RPC at some future
@@ -834,7 +834,7 @@ func (r FutureGetNewAddressResult) Receive() (util.Address, error) {
 	if e != nil {
 		return nil, e
 	}
-	return util.DecodeAddress(addr, &netparams.MainNetParams)
+	return util.DecodeAddress(addr, &chaincfg.MainNetParams)
 }
 
 // GetNewAddressAsync returns an instance of a type that can be used to get the result of the RPC at some future time by
@@ -871,7 +871,7 @@ func (r FutureGetRawChangeAddressResult) Receive() (util.Address, error) {
 	if e != nil {
 		return nil, e
 	}
-	return util.DecodeAddress(addr, &netparams.MainNetParams)
+	return util.DecodeAddress(addr, &chaincfg.MainNetParams)
 }
 
 // GetRawChangeAddressAsync returns an instance of a type that can be used to get the result of the RPC at some future
@@ -906,7 +906,7 @@ func (r FutureAddWitnessAddressResult) Receive() (util.Address, error) {
 	if e != nil {
 		return nil, e
 	}
-	return util.DecodeAddress(addr, &netparams.MainNetParams)
+	return util.DecodeAddress(addr, &chaincfg.MainNetParams)
 }
 
 // AddWitnessAddressAsync returns an instance of a type that can be used to get
@@ -942,7 +942,7 @@ func (r FutureGetAccountAddressResult) Receive() (util.Address, error) {
 	if e != nil {
 		return nil, e
 	}
-	return util.DecodeAddress(addr, &netparams.MainNetParams)
+	return util.DecodeAddress(addr, &chaincfg.MainNetParams)
 }
 
 // GetAccountAddressAsync returns an instance of a type that can be used to get the result of the RPC at some future
@@ -1040,7 +1040,7 @@ func (r FutureGetAddressesByAccountResult) Receive() ([]util.Address, error) {
 	for _, addrStr := range addrStrings {
 		addr, e := util.DecodeAddress(
 			addrStr,
-			&netparams.MainNetParams,
+			&chaincfg.MainNetParams,
 		)
 		if e != nil {
 			return nil, e

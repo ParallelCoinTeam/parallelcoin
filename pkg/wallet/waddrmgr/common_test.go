@@ -264,12 +264,12 @@ func setupManager(t *testing.T) (tearDownFunc func(), db walletdb.DB, mgr *waddr
 		}
 		e = waddrmgr.Create(
 			ns, seed, pubPassphrase, privPassphrase,
-			&netparams.MainNetParams, fastScrypt, time.Time{},
+			&chaincfg.MainNetParams, fastScrypt, time.Time{},
 		)
 		if e != nil  {
 			return e
 		}
-		mgr, e = waddrmgr.Open(ns, pubPassphrase, &netparams.MainNetParams)
+		mgr, e = waddrmgr.Open(ns, pubPassphrase, &chaincfg.MainNetParams)
 		return e
 	})
 	if e != nil  {

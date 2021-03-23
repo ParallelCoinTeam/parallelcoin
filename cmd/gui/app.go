@@ -725,7 +725,7 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 
 func (wg *WalletGUI) writeWalletCookie() (e error) {
 	// for security with apps launching the wallet, the public password can be set with a file that is deleted after
-	walletPassPath := *wg.cx.Config.DataDir + slash + wg.cx.ActiveNet.Params.Name + slash + "wp.txt"
+	walletPassPath := *wg.cx.Config.DataDir + slash + wg.cx.ActiveNet.Name + slash + "wp.txt"
 	D.Ln("runner", walletPassPath)
 	wp := *wg.cx.Config.WalletPass
 	b := []byte(wp)

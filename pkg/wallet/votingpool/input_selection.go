@@ -184,7 +184,7 @@ func (p *Pool) highestUsedSeriesIndex(ns walletdb.ReadBucket, seriesID uint32) (
 
 // groupCreditsByAddr converts a slice of credits to a map from the string representation of an encoded address to the
 // unspent outputs associated with that address.
-func groupCreditsByAddr(credits []wtxmgr.Credit, chainParams *netparams.Params) (
+func groupCreditsByAddr(credits []wtxmgr.Credit, chainParams *chaincfg.Params) (
 	map[string][]wtxmgr.Credit, error) {
 	addrMap := make(map[string][]wtxmgr.Credit)
 	for _, c := range credits {

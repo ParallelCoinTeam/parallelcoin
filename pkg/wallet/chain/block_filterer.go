@@ -1,8 +1,8 @@
 package chain
 
 import (
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
-	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg"
+	"github.com/p9c/pod/pkg/blockchain/tx/txscript"
 	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/util"
 	am "github.com/p9c/pod/pkg/wallet/waddrmgr"
@@ -24,7 +24,7 @@ import (
 // branch (Internal or External).
 type BlockFilterer struct {
 	// Params specifies the chain netparams of the current network.
-	Params *netparams.Params
+	Params *chaincfg.Params
 	// ExReverseFilter holds a reverse index mapping an external address to the scoped index from which it was derived.
 	ExReverseFilter map[string]am.ScopedIndex
 	// InReverseFilter holds a reverse index mapping an internal address to the scoped index from which it was derived.
@@ -47,7 +47,7 @@ type BlockFilterer struct {
 // searching for, and is used to scan successive blocks for addresses of interest. A particular block filter can be
 // reused until the first call from `FilterBlock` returns true.
 func NewBlockFilterer(
-	params *netparams.Params,
+	params *chaincfg.Params,
 	req *FilterBlocksRequest,
 ) *BlockFilterer {
 	// Construct a reverse index by address string for the requested external addresses.

@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/davecgh/go-spew/spew"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg"
 	"github.com/p9c/pod/pkg/logg"
 	"io"
 	"math/rand"
@@ -20,7 +21,6 @@ import (
 	"github.com/btcsuite/go-socks/socks"
 	
 	"github.com/p9c/pod/pkg/blockchain"
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
 	"github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/blockchain/wire"
 )
@@ -181,7 +181,7 @@ type Config struct {
 	UserAgentComments []string
 	// ChainParams identifies which chain parameters the peer is associated with. It is highly recommended to specify
 	// this field, however it can be omitted in which case the test network will be used.
-	ChainParams *netparams.Params
+	ChainParams *chaincfg.Params
 	// Services specifies which services to advertise as supported by the local peer. This field can be omitted in which
 	// case it will be 0 and therefore advertise no supported services.
 	Services wire.ServiceFlag
@@ -1963,7 +1963,7 @@ func newPeerBase(origCfg *Config, inbound bool) *Peer {
 	}
 	// Set the chain parameters to testnet if the caller did not specify any.
 	if cfg.ChainParams == nil {
-		cfg.ChainParams = &netparams.TestNet3Params
+		cfg.ChainParams = &chaincfg.TestNet3Params
 	}
 	// Set the trickle interval if a non-positive value is specified.
 	if cfg.TrickleInterval <= 0 {

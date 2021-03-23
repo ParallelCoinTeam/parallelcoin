@@ -3,9 +3,9 @@ package util
 import (
 	"bytes"
 	"errors"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg"
 	
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/coding/base58"
 	ec "github.com/p9c/pod/pkg/coding/ecc"
 )
@@ -35,7 +35,7 @@ type WIF struct {
 // NewWIF creates a new WIF structure to export an address and its private key as a string encoded in the Wallet Import
 // Format. The compress argument specifies whether the address intended to be imported or exported was created by
 // serializing the public key compressed rather than uncompressed.
-func NewWIF(privKey *ec.PrivateKey, net *netparams.Params, compress bool) (*WIF, error) {
+func NewWIF(privKey *ec.PrivateKey, net *chaincfg.Params, compress bool) (*WIF, error) {
 	if net == nil {
 		return nil, errors.New("no network")
 	}
@@ -43,7 +43,7 @@ func NewWIF(privKey *ec.PrivateKey, net *netparams.Params, compress bool) (*WIF,
 }
 
 // IsForNet returns whether or not the decoded WIF structure is associated with the passed bitcoin network.
-func (w *WIF) IsForNet(net *netparams.Params) bool {
+func (w *WIF) IsForNet(net *chaincfg.Params) bool {
 	return w.netID == net.PrivateKeyID
 }
 

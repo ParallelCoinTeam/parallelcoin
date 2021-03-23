@@ -102,4 +102,7 @@ var MainNetParams = Params{
 	MaxActualTimespan:  3300,
 	ScryptPowLimit:     &scryptPowLimit,
 	ScryptPowLimitBits: ScryptPowLimitBits,
+		RPCClientPort:       "11048",
+	WalletRPCServerPort: "11046",
+
 }

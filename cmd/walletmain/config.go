@@ -432,11 +432,11 @@ return nil, nil, e
 								// Multiple networks can't be selected simultaneously.
 								numNets := 0
 								if cfg.TestNet3 {
-activeNet = &netparams.TestNet3Params
+activeNet = &chaincfg.TestNet3Params
 										numNets++
 									}
 									if cfg.SimNet {
-activeNet = &netparams.SimNetParams
+activeNet = &chaincfg.SimNetParams
 			numNets++
 		}
 		if numNets > 1 {

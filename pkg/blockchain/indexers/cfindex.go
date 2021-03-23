@@ -2,16 +2,16 @@ package indexers
 
 import (
 	"errors"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg"
 	
-	qu "github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/pod/pkg/util/qu"
 	
-	blockchain "github.com/p9c/pod/pkg/blockchain"
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/blockchain"
+	"github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/coding/gcs"
 	"github.com/p9c/pod/pkg/coding/gcs/builder"
-	database "github.com/p9c/pod/pkg/database"
+	"github.com/p9c/pod/pkg/database"
 	"github.com/p9c/pod/pkg/util"
 )
 
@@ -65,7 +65,7 @@ func dbDeleteFilterIdxEntry(dbTx database.Tx, key []byte, h *chainhash.Hash) (e 
 // CFIndex implements a committed filter (cf) by hash index.
 type CFIndex struct {
 	db          database.DB
-	chainParams *netparams.Params
+	chainParams *chaincfg.Params
 }
 
 // Ensure the CfIndex type implements the Indexer interface.
@@ -227,7 +227,7 @@ func (idx *CFIndex) DisconnectBlock(
 func (idx *CFIndex) entryByBlockHash(
 	filterTypeKeys [][]byte,
 	filterType wire.FilterType, h *chainhash.Hash,
-) (entry []byte,e error) {
+) (entry []byte, e error) {
 	if uint8(filterType) > maxFilterType {
 		return nil, errors.New("unsupported filter type")
 	}
@@ -246,7 +246,7 @@ func (idx *CFIndex) entryByBlockHash(
 func (idx *CFIndex) entriesByBlockHashes(
 	filterTypeKeys [][]byte,
 	filterType wire.FilterType, blockHashes []*chainhash.Hash,
-) (entries [][]byte,e error) {
+) (entries [][]byte, e error) {
 	if uint8(filterType) > maxFilterType {
 		return nil, errors.New("unsupported filter type")
 	}
@@ -322,7 +322,7 @@ func (idx *CFIndex) FilterHashesByBlockHashes(
 // blockchain to their respective committed filters. It implements the Indexer interface which plugs into the
 // IndexManager that in turn is used by the blockchain package. This allows the index to be seamlessly maintained along
 // with the chain.
-func NewCfIndex(db database.DB, chainParams *netparams.Params) *CFIndex {
+func NewCfIndex(db database.DB, chainParams *chaincfg.Params) *CFIndex {
 	return &CFIndex{db: db, chainParams: chainParams}
 }
 

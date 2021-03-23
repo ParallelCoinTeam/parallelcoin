@@ -4,6 +4,7 @@ import (
 	"container/list"
 	"errors"
 	"fmt"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg"
 	"github.com/p9c/pod/pkg/logg"
 	"math"
 	"sync"
@@ -11,7 +12,6 @@ import (
 	"time"
 	
 	"github.com/p9c/pod/pkg/blockchain"
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
 	"github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/blockchain/hardfork"
 	"github.com/p9c/pod/pkg/blockchain/indexers"
@@ -28,7 +28,7 @@ type Config struct {
 	// Policy defines the various mempool configuration options related to policy.
 	Policy Policy
 	// ChainParams identifies which chain parameters the txpool is associated with.
-	ChainParams *netparams.Params
+	ChainParams *chaincfg.Params
 	// FetchUtxoView defines the function to use to fetch unspent transaction output information.
 	FetchUtxoView func(*util.Tx) (*blockchain.UtxoViewpoint, error)
 	// BestHeight defines the function to use to access the block height of the current best chain.

@@ -2,12 +2,12 @@ package chain
 
 import (
 	"errors"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg"
 	"sync"
 	"time"
 	
 	"github.com/p9c/pod/pkg/util/qu"
 	
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
 	"github.com/p9c/pod/pkg/blockchain/chainhash"
 	tm "github.com/p9c/pod/pkg/blockchain/tx/wtxmgr"
 	"github.com/p9c/pod/pkg/blockchain/wire"
@@ -24,7 +24,7 @@ import (
 type RPCClient struct {
 	*rpcclient.Client
 	connConfig          *rpcclient.ConnConfig // Work around unexported field
-	chainParams         *netparams.Params
+	chainParams         *chaincfg.Params
 	reconnectAttempts   int
 	enqueueNotification chan interface{}
 	dequeueNotification chan interface{}
@@ -40,7 +40,7 @@ type RPCClient struct {
 // be done using the Start method. If the remote server does not operate on the same bitcoin network as described by the
 // passed chain parameters, the connection will be disconnected.
 func NewRPCClient(
-	chainParams *netparams.Params,
+	chainParams *chaincfg.Params,
 	connect, user, pass string,
 	certs []byte,
 	tls bool,

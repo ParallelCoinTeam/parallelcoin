@@ -103,7 +103,7 @@ func loadBlocks(filename string) (blocks []*util.Block, e error) {
 
 // chainSetup is used to create a new db and chain instance with the genesis block already inserted. In addition to the
 // new chain instance, it returns a teardown function the caller should invoke when done testing to clean up.
-func chainSetup(dbName string, netparams *netparams.Params) (*BlockChain, func(), error) {
+func chainSetup(dbName string, netparams *chaincfg.Params) (*BlockChain, func(), error) {
 	if !isSupportedDbType(testDbType) {
 		return nil, nil, fmt.Errorf("unsupported db type %v", testDbType)
 	}
@@ -312,7 +312,7 @@ func (b *BlockChain) TstSetCoinbaseMaturity(maturity uint16) {
 // newFakeChain returns a chain that is usable for syntetic tests. It is important to note that this chain has no
 // database associated with it, so it is not usable with all functions and the tests must take care when making use of
 // it.
-func newFakeChain(params *netparams.Params) *BlockChain {
+func newFakeChain(params *chaincfg.Params) *BlockChain {
 	// Create a genesis block node and block index index populated with it for use when creating the fake chain below.
 	node := NewBlockNode(&params.GenesisBlock.Header, nil)
 	index := newBlockIndex(nil, params)

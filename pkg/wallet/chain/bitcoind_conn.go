@@ -8,15 +8,14 @@ import (
 	"sync/atomic"
 	"time"
 	
-	qu "github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/pod/pkg/util/qu"
 	
 	"github.com/tstranex/gozmq"
 	
-	chaincfg "github.com/p9c/pod/pkg/blockchain/chaincfg"
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg"
+	"github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/blockchain/wire"
-	rpcclient "github.com/p9c/pod/pkg/rpc/rpcclient"
+	"github.com/p9c/pod/pkg/rpc/rpcclient"
 )
 
 // BitcoindConn represents a persistent client connection to a bitcoind node that listens for events read from a ZMQ
@@ -28,7 +27,7 @@ type BitcoindConn struct {
 	// current bitcoind connection.
 	rescanClientCounter uint64
 	// chainParams identifies the current network the bitcoind node is running on.
-	chainParams *netparams.Params
+	chainParams *chaincfg.Params
 	// client is the RPC client to the bitcoind node.
 	client *rpcclient.Client
 	// zmqBlockHost is the host listening for ZMQ connections that will be responsible for delivering raw transaction
@@ -50,7 +49,7 @@ type BitcoindConn struct {
 // established immediately, but must be done using the Start method. If the remote node does not operate on the same
 // bitcoin network as described by the passed chain parameters, the connection will be disconnected.
 func NewBitcoindConn(
-	chainParams *netparams.Params,
+	chainParams *chaincfg.Params,
 	host, user, pass, zmqBlockHost, zmqTxHost string,
 	zmqPollInterval time.Duration,
 ) (*BitcoindConn, error) {
@@ -297,8 +296,8 @@ func (c *BitcoindConn) getCurrentNet() (wire.BitcoinNet, error) {
 	switch *hash {
 	case *chaincfg.TestNet3Params.GenesisHash:
 		return chaincfg.TestNet3Params.Net, nil
-	case *netparams.RegressionTestParams.GenesisHash:
-		return netparams.RegressionTestParams.Net, nil
+	case *chaincfg.RegressionTestParams.GenesisHash:
+		return chaincfg.RegressionTestParams.Net, nil
 	case *chaincfg.MainNetParams.GenesisHash:
 		return chaincfg.MainNetParams.Net, nil
 	default:

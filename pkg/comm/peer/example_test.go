@@ -23,7 +23,7 @@ func mockRemotePeer() (e error) {
 	peerCfg := &peer.Config{
 		UserAgentName:    "peer",  // User agent name to advertise.
 		UserAgentVersion: "1.0.0", // User agent version to advertise.
-		ChainParams:      &netparams.SimNetParams,
+		ChainParams:      &chaincfg.SimNetParams,
 		TrickleInterval:  time.Second * 10,
 	}
 	// Accept connections on the simnet port.
@@ -58,7 +58,7 @@ func Example_newOutboundPeer() {
 	peerCfg := &peer.Config{
 		UserAgentName:    "peer",  // User agent name to advertise.
 		UserAgentVersion: "1.0.0", // User agent version to advertise.
-		ChainParams:      &netparams.SimNetParams,
+		ChainParams:      &chaincfg.SimNetParams,
 		Services:         0,
 		TrickleInterval:  time.Second * 10,
 		Listeners: peer.MessageListeners{

@@ -31,7 +31,7 @@ func createTestDatabase() (func(), FilterDatabase, error) {
 		if e := db.Close(); E.Chk(e) {
 		}
 	}
-	filterDB, e := New(db, netparams.SimNetParams)
+	filterDB, e := New(db, chaincfg.SimNetParams)
 	if e != nil {
 		return nil, nil, e
 	}

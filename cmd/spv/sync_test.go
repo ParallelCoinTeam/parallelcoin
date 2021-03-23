@@ -162,7 +162,7 @@ var (
 type secSource struct {
 	keys    map[string]*ec.PrivateKey
 	scripts map[string]*[]byte
-	params  *netparams.Params
+	params  *chaincfg.Params
 }
 
 func (s *secSource) add(privKey *ec.PrivateKey) (util.Address, error) {
@@ -212,11 +212,11 @@ func (s *secSource) GetScript(addr util.Address) ([]byte, error) {
 }
 
 // ChainParams is required by the SecretsSource interface
-func (s *secSource) ChainParams() *netparams.Params {
+func (s *secSource) ChainParams() *chaincfg.Params {
 	return s.params
 }
 
-func newSecSource(params *netparams.Params) *secSource {
+func newSecSource(params *chaincfg.Params) *secSource {
 	return &secSource{
 		keys:    make(map[string]*ec.PrivateKey),
 		scripts: make(map[string]*[]byte),
@@ -1019,7 +1019,7 @@ func testRandomBlocks(harness *neutrinoHarness, t *testing.T) {
 // 	// rpcclient.UseLogger(rpcLogger)
 // 	// Create a btcd SimNet node and generate 800 blocks
 // 	h1, e := rpctest.New(
-// 		&netparams.SimNetParams, nil, []string{"--txindex"},
+// 		&chaincfg.SimNetParams, nil, []string{"--txindex"},
 // 	)
 // 	if e != nil  {
 // 		t.Fatalf("Couldn't create harness: %s", err)
@@ -1035,7 +1035,7 @@ func testRandomBlocks(harness *neutrinoHarness, t *testing.T) {
 // 	}
 // 	// Create a second btcd SimNet node
 // 	h2, e := rpctest.New(
-// 		&netparams.SimNetParams, nil, []string{"--txindex"},
+// 		&chaincfg.SimNetParams, nil, []string{"--txindex"},
 // 	)
 // 	if e != nil  {
 // 		t.Fatalf("Couldn't create harness: %s", err)
@@ -1047,7 +1047,7 @@ func testRandomBlocks(harness *neutrinoHarness, t *testing.T) {
 // 	}
 // 	// Create a third btcd SimNet node and generate 1200 blocks
 // 	h3, e := rpctest.New(
-// 		&netparams.SimNetParams, nil, []string{"--txindex"},
+// 		&chaincfg.SimNetParams, nil, []string{"--txindex"},
 // 	)
 // 	if e != nil  {
 // 		t.Fatalf("Couldn't create harness: %s", err)
@@ -1143,7 +1143,7 @@ func testRandomBlocks(harness *neutrinoHarness, t *testing.T) {
 // reorg testing. It brings up and tears down a temporary node, otherwise the
 // nodes try to reconnect to each other which results in unintended reorgs.
 func csd(harnesses []*rpctest.Harness) (e error) {
-	hTemp, e := rpctest.New(&netparams.SimNetParams, nil, nil)
+	hTemp, e := rpctest.New(&chaincfg.SimNetParams, nil, nil)
 	if e != nil {
 		return e
 	}

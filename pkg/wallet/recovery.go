@@ -1,17 +1,17 @@
 package wallet
 
 import (
+	"github.com/p9c/pod/pkg/blockchain/chaincfg"
 	"time"
 	
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
-	wtxmgr "github.com/p9c/pod/pkg/blockchain/tx/wtxmgr"
-	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
+	"github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/blockchain/tx/txscript"
+	"github.com/p9c/pod/pkg/blockchain/tx/wtxmgr"
 	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/database/walletdb"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/hdkeychain"
-	waddrmgr "github.com/p9c/pod/pkg/wallet/waddrmgr"
+	"github.com/p9c/pod/pkg/wallet/waddrmgr"
 )
 
 // RecoveryManager maintains the state required to recover previously used addresses, and coordinates batched processing
@@ -26,14 +26,14 @@ type RecoveryManager struct {
 	// state encapsulates and allocates the necessary recovery state for all key scopes and subsidiary derivation paths.
 	state *RecoveryState
 	// chainParams are the parameters that describe the chain we're trying to recover funds on.
-	chainParams *netparams.Params
+	chainParams *chaincfg.Params
 }
 
 // NewRecoveryManager initializes a new RecoveryManager with a derivation look-ahead of `recoveryWindow` child indexes,
 // and pre-allocates a backing array for `batchSize` blocks to scan at once.
 func NewRecoveryManager(
 	recoveryWindow, batchSize uint32,
-	chainParams *netparams.Params,
+	chainParams *chaincfg.Params,
 ) *RecoveryManager {
 	return &RecoveryManager{
 		recoveryWindow: recoveryWindow,

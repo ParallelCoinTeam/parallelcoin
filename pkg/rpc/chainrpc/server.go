@@ -32,7 +32,6 @@ import (
 	"github.com/p9c/pod/cmd/node/version"
 	"github.com/p9c/pod/pkg/blockchain"
 	"github.com/p9c/pod/pkg/blockchain/chaincfg"
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
 	"github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/blockchain/fork"
 	"github.com/p9c/pod/pkg/blockchain/indexers"
@@ -123,7 +122,7 @@ type (
 		BytesReceived        uint64 // Total bytes received from all peers since start.
 		BytesSent            uint64 // Total bytes sent by all peers since start.
 		StartupTime          int64
-		ChainParams          *netparams.Params
+		ChainParams          *chaincfg.Params
 		AddrManager          *addrmgr.AddrManager
 		ConnManager          *connmgr.ConnManager
 		SigCache             *txscript.SigCache
@@ -162,7 +161,7 @@ type (
 		CFCheckptCaches                 map[wire.FilterType][]CFHeaderKV
 		CFCheckptCachesMtx              sync.RWMutex
 		Config                          *pod.Config
-		ActiveNet                       *netparams.Params
+		ActiveNet                       *chaincfg.Params
 		StateCfg                        *state.Config
 		GenThreads                      uint32
 		Started                         int32
@@ -2532,7 +2531,7 @@ func GetHasServices(advertised, desired wire.ServiceFlag) bool {
 // InitListeners initializes the configured net listeners and adds any bound addresses to the address manager. Returns
 // the listeners and a upnp.NAT interface, which is non-nil if UPnP is in use.
 func InitListeners(
-	config *pod.Config, activeNet *netparams.Params,
+	config *pod.Config, activeNet *chaincfg.Params,
 	aMgr *addrmgr.AddrManager, listenAddrs []string, services wire.ServiceFlag,
 ) ([]net.Listener, upnp.NAT, error) {
 	// Listen for TCP connections at the configured addresses
@@ -2716,7 +2715,7 @@ type Context struct {
 	// StateCfg is a reference to the main node state configuration struct
 	StateCfg *state.Config
 	// ActiveNet is the active net parameters
-	ActiveNet *netparams.Params
+	ActiveNet *chaincfg.Params
 	// Hashrate is the hash counter
 	Hashrate uberatomic.Uint64
 }

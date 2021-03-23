@@ -3,11 +3,11 @@ package mining
 import (
 	"container/heap"
 	"fmt"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg"
 	"math/rand"
 	"time"
 	
 	"github.com/p9c/pod/pkg/blockchain"
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
 	"github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/blockchain/fork"
 	"github.com/p9c/pod/pkg/blockchain/tx/txscript"
@@ -112,7 +112,7 @@ type (
 	// built on top of the current best chain and adhere to the consensus rules.
 	BlkTmplGenerator struct {
 		Policy      *Policy
-		ChainParams *netparams.Params
+		ChainParams *chaincfg.Params
 		TxSource    TxSource
 		Chain       *blockchain.BlockChain
 		TimeSource  blockchain.MedianTimeSource
@@ -241,7 +241,7 @@ func standardCoinbaseScript(nextBlockHeight int32, extraNonce uint64) ([]byte, e
 // comment for NewBlockTemplate for more information about why the nil address
 // handling is useful.
 func createCoinbaseTx(
-	params *netparams.Params, coinbaseScript []byte, nextBlockHeight int32,
+	params *chaincfg.Params, coinbaseScript []byte, nextBlockHeight int32,
 	addr util.Address, version int32,
 ) (*util.Tx, error) {
 	// if this is the hard fork activation height coming up, we create the special
@@ -351,7 +351,7 @@ func medianAdjustedTime(chainState *blockchain.BestState, timeSource blockchain.
 // additional state-related fields are required in order to ensure the templates
 // are built on top of the current best chain and adhere to the consensus rules.
 func NewBlkTmplGenerator(
-	policy *Policy, params *netparams.Params,
+	policy *Policy, params *chaincfg.Params,
 	txSource TxSource, chain *blockchain.BlockChain,
 	timeSource blockchain.MedianTimeSource,
 	sigCache *txscript.SigCache,
@@ -437,7 +437,7 @@ func (g *BlkTmplGenerator) NewBlockTemplate(payToAddress util.Address, algo stri
 	}
 	// Extend the most recently known best block.
 	best := g.Chain.BestSnapshot()
-	nextBlockHeight := best.Height+1
+	nextBlockHeight := best.Height + 1
 	// sanitise the version number
 	vers := fork.GetAlgoVer(algo, nextBlockHeight)
 	algo = fork.GetAlgoName(vers, nextBlockHeight)

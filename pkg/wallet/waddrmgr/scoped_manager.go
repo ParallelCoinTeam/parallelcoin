@@ -2,9 +2,9 @@ package waddrmgr
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg"
 	"sync"
 	
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
 	ec "github.com/p9c/pod/pkg/coding/ecc"
 	"github.com/p9c/pod/pkg/database/walletdb"
 	"github.com/p9c/pod/pkg/util"
@@ -955,7 +955,7 @@ func (s *ScopedKeyManager) NextExternalAddresses(
 func (s *ScopedKeyManager) NextInternalAddresses(
 	ns walletdb.ReadWriteBucket,
 	account uint32, numAddresses uint32,
-) (ma []ManagedAddress,e error) {
+) (ma []ManagedAddress, e error) {
 	// Enforce maximum account number.
 	if account > MaxAccountNum {
 		if e = managerError(ErrAccountNumTooHigh, errAcctTooHigh, nil); E.Chk(e) {
@@ -1488,7 +1488,7 @@ func (s *ScopedKeyManager) MarkUsed(
 }
 
 // ChainParams returns the chain parameters for this address manager.
-func (s *ScopedKeyManager) ChainParams() *netparams.Params {
+func (s *ScopedKeyManager) ChainParams() *chaincfg.Params {
 	// NOTE: No need for mutex here since the net field does not change after the
 	// manager instance is created.
 	return s.rootManager.chainParams

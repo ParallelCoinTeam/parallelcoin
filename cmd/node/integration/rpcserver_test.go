@@ -99,7 +99,7 @@ func TestMain(m *testing.M) {
 	// In order to properly test scenarios on as if we were on mainnet, ensure that non-standard transactions aren't
 	// accepted into the mempool or relayed.
 	podCfg := []string{"--rejectnonstd"}
-	primaryHarness, e = rpctest.New(&netparams.SimNetParams, nil, podCfg)
+	primaryHarness, e = rpctest.New(&chaincfg.SimNetParams, nil, podCfg)
 	if e != nil {
 		fmt.Println("unable to create primary harness: ", err)
 		os.Exit(1)

@@ -89,7 +89,7 @@ testLoop:
 			key := serializeUint32(uint32(i))
 			testTreap.Put(key, key)
 		}
-		// Create new iterator limited by the test netparams.
+		// Create new iterator limited by the test chaincfg.
 		iter := testTreap.Iterator(test.startKey, test.limitKey)
 		// Ensure the first item is accurate.
 		hasFirst := iter.First()
@@ -442,7 +442,7 @@ testLoop:
 			key := serializeUint32(uint32(i))
 			testTreap = testTreap.Put(key, key)
 		}
-		// Create new iterator limited by the test netparams.
+		// Create new iterator limited by the test chaincfg.
 		iter := testTreap.Iterator(test.startKey, test.limitKey)
 		// Ensure the first item is accurate.
 		hasFirst := iter.First()

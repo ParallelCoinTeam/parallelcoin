@@ -1536,7 +1536,7 @@ func testWatchingOnly(tc *testContext) bool {
 	e = walletdb.View(db, func(tx walletdb.ReadTx) (e error) {
 		ns := tx.ReadBucket(waddrmgrNamespaceKey)
 		var e error
-		mgr, e = waddrmgr.Open(ns, pubPassphrase, &netparams.MainNetParams)
+		mgr, e = waddrmgr.Open(ns, pubPassphrase, &chaincfg.MainNetParams)
 		return e
 	})
 	if e != nil  {
@@ -1573,7 +1573,7 @@ func testWatchingOnly(tc *testContext) bool {
 	e = walletdb.View(db, func(tx walletdb.ReadTx) (e error) {
 		ns := tx.ReadBucket(waddrmgrNamespaceKey)
 		var e error
-		mgr, e = waddrmgr.Open(ns, pubPassphrase, &netparams.MainNetParams)
+		mgr, e = waddrmgr.Open(ns, pubPassphrase, &chaincfg.MainNetParams)
 		return e
 	})
 	if e != nil  {
@@ -1660,7 +1660,7 @@ func testSync(tc *testContext) bool {
 // 	// returned.
 // 	e := walletdb.View(db, func(tx walletdb.ReadTx) (e error) {
 // 		ns := tx.ReadBucket(waddrmgrNamespaceKey)
-// 		_, e := waddrmgr.Open(ns, pubPassphrase, &netparams.MainNetParams)
+// 		_, e := waddrmgr.Open(ns, pubPassphrase, &chaincfg.MainNetParams)
 // 		return e
 // 	})
 // 	if !checkManagerError(t, "Open non-existent", err, waddrmgr.ErrNoExist) {
@@ -1675,12 +1675,12 @@ func testSync(tc *testContext) bool {
 // 		}
 // 		e = waddrmgr.Create(
 // 			ns, seed, pubPassphrase, privPassphrase,
-// 			&netparams.MainNetParams, fastScrypt, time.Time{},
+// 			&chaincfg.MainNetParams, fastScrypt, time.Time{},
 // 		)
 // 		if e != nil  {
 // 			return e
 // 		}
-// 		mgr, e = waddrmgr.Open(ns, pubPassphrase, &netparams.MainNetParams)
+// 		mgr, e = waddrmgr.Open(ns, pubPassphrase, &chaincfg.MainNetParams)
 // 		return e
 // 	})
 // 	if e != nil  {
@@ -1694,7 +1694,7 @@ func testSync(tc *testContext) bool {
 // 	e = walletdb.Update(db, func(tx walletdb.ReadWriteTx) (e error) {
 // 		ns := tx.ReadWriteBucket(waddrmgrNamespaceKey)
 // 		return waddrmgr.Create(ns, seed, pubPassphrase, privPassphrase,
-// 			&netparams.MainNetParams, fastScrypt, time.Time{})
+// 			&chaincfg.MainNetParams, fastScrypt, time.Time{})
 // 	})
 // 	if !checkManagerError(t, "Create existing", err, waddrmgr.ErrAlreadyExists) {
 // 		mgr.Close()
@@ -1721,7 +1721,7 @@ func testSync(tc *testContext) bool {
 // 	*waddrmgr.TstLatestMgrVersion++
 // 	e = walletdb.View(db, func(tx walletdb.ReadTx) (e error) {
 // 		ns := tx.ReadBucket(waddrmgrNamespaceKey)
-// 		_, e := waddrmgr.Open(ns, pubPassphrase, &netparams.MainNetParams)
+// 		_, e := waddrmgr.Open(ns, pubPassphrase, &chaincfg.MainNetParams)
 // 		return e
 // 	})
 // 	if !checkManagerError(t, "Upgrade needed", err, waddrmgr.ErrUpgrade) {
@@ -1733,7 +1733,7 @@ func testSync(tc *testContext) bool {
 // 	e = walletdb.View(db, func(tx walletdb.ReadTx) (e error) {
 // 		ns := tx.ReadBucket(waddrmgrNamespaceKey)
 // 		var e error
-// 		mgr, e = waddrmgr.Open(ns, pubPassphrase, &netparams.MainNetParams)
+// 		mgr, e = waddrmgr.Open(ns, pubPassphrase, &chaincfg.MainNetParams)
 // 		return e
 // 	})
 // 	if e != nil  {
@@ -1867,13 +1867,13 @@ func TestScopedKeyManagerManagement(t *testing.T) {
 		}
 		e = waddrmgr.Create(
 			ns, seed, pubPassphrase, privPassphrase,
-			&netparams.MainNetParams, fastScrypt, time.Time{},
+			&chaincfg.MainNetParams, fastScrypt, time.Time{},
 		)
 		if e != nil  {
 			return e
 		}
 		mgr, e = waddrmgr.Open(
-			ns, pubPassphrase, &netparams.MainNetParams,
+			ns, pubPassphrase, &chaincfg.MainNetParams,
 		)
 		if e != nil  {
 			return e
@@ -2005,7 +2005,7 @@ func TestScopedKeyManagerManagement(t *testing.T) {
 	e = walletdb.View(db, func(tx walletdb.ReadTx) (e error) {
 		ns := tx.ReadBucket(waddrmgrNamespaceKey)
 		var e error
-		mgr, e = waddrmgr.Open(ns, pubPassphrase, &netparams.MainNetParams)
+		mgr, e = waddrmgr.Open(ns, pubPassphrase, &chaincfg.MainNetParams)
 		if e != nil  {
 			return e
 		}
@@ -2083,13 +2083,13 @@ func TestRootHDKeyNeutering(t *testing.T) {
 		}
 		e = waddrmgr.Create(
 			ns, seed, pubPassphrase, privPassphrase,
-			&netparams.MainNetParams, fastScrypt, time.Time{},
+			&chaincfg.MainNetParams, fastScrypt, time.Time{},
 		)
 		if e != nil  {
 			return e
 		}
 		mgr, e = waddrmgr.Open(
-			ns, pubPassphrase, &netparams.MainNetParams,
+			ns, pubPassphrase, &chaincfg.MainNetParams,
 		)
 		if e != nil  {
 			return e
@@ -2165,13 +2165,13 @@ func TestNewRawAccount(t *testing.T) {
 		}
 		e = waddrmgr.Create(
 			ns, seed, pubPassphrase, privPassphrase,
-			&netparams.MainNetParams, fastScrypt, time.Time{},
+			&chaincfg.MainNetParams, fastScrypt, time.Time{},
 		)
 		if e != nil  {
 			return e
 		}
 		mgr, e = waddrmgr.Open(
-			ns, pubPassphrase, &netparams.MainNetParams,
+			ns, pubPassphrase, &chaincfg.MainNetParams,
 		)
 		if e != nil  {
 			return e

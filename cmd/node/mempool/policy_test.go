@@ -305,7 +305,7 @@ func TestCheckTransactionStandard(t *testing.T) {
 	addrHash := [20]byte{0x01}
 	addr, err := util.NewAddressPubKeyHash(
 		addrHash[:],
-		&netparams.TestNet3Params,
+		&chaincfg.TestNet3Params,
 	)
 	
 	if err != nil {

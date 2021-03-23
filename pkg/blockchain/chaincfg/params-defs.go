@@ -6,7 +6,7 @@ import (
 	"math/big"
 	"time"
 	
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/blockchain/wire"
 )
 
@@ -197,9 +197,9 @@ type Params struct {
 	// // Human-readable part for Bech32 encoded segwit addresses, as defined in BIP 173.
 	// Bech32HRPSegwit string
 	// Address encoding magics
-	PubKeyHashAddrID        byte // First byte of a P2PKH address
-	ScriptHashAddrID        byte // First byte of a P2SH address
-	PrivateKeyID            byte // First byte of a WIF private key
+	PubKeyHashAddrID byte // First byte of a P2PKH address
+	ScriptHashAddrID byte // First byte of a P2SH address
+	PrivateKeyID     byte // First byte of a WIF private key
 	// WitnessPubKeyHashAddrID byte // First byte of a P2WPKH address
 	// WitnessScriptHashAddrID byte // First byte of a P2WSH address
 	// BIP32 hierarchical deterministic extended key magics
@@ -217,6 +217,8 @@ type Params struct {
 	MinActualTimespan       int64
 	MaxActualTimespan       int64
 	// PowLimit defines the highest allowed proof of work value for a scrypt block as a uint256.
-	ScryptPowLimit     *big.Int
-	ScryptPowLimitBits uint32
+	ScryptPowLimit      *big.Int
+	ScryptPowLimitBits  uint32
+	RPCClientPort       string
+	WalletRPCServerPort string
 }

@@ -84,4 +84,6 @@ var SimNetParams = Params{
 	MaxActualTimespan:       10 * 300 * (100 + 10) / 100,
 	ScryptPowLimit:          &scryptPowLimit,
 	ScryptPowLimitBits:      ScryptPowLimitBits,
+	RPCClientPort:       "41048",
+	WalletRPCServerPort: "41046",
 }

@@ -4,11 +4,11 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg"
 	"math"
 	"math/big"
 	"time"
 	
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
 	"github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/blockchain/fork"
 	"github.com/p9c/pod/pkg/blockchain/hardfork"
@@ -646,9 +646,9 @@ func (b *BlockChain) checkBlockHeaderContext(
 	// BIP0034, BIP0065, and BIP0066.
 	//
 	// netparams := b.netparams
-	// if header.Version < 2 && blockHeight >= netparams.BIP0034Height ||
-	// 	header.Version < 3 && blockHeight >= netparams.BIP0066Height ||
-	// 	header.Version < 4 && blockHeight >= netparams.BIP0065Height {
+	// if header.Version < 2 && blockHeight >= chaincfg.BIP0034Height ||
+	// 	header.Version < 3 && blockHeight >= chaincfg.BIP0066Height ||
+	// 	header.Version < 4 && blockHeight >= chaincfg.BIP0065Height {
 	// 	str := "new blocks with version %d are no longer valid"
 	// 	str = fmt.Sprintf(str, header.Version)
 	// 	return ruleError(ErrBlockVersionTooOld, str)
@@ -668,7 +668,7 @@ func (b *BlockChain) checkBlockHeaderContext(
 // At the target block generation rate for the main network, this is approximately every 4 years.
 //
 // After the Plan 9 Hardfork the block value is adjusted every block according to the time it is to repeat
-func CalcBlockSubsidy(height int32, chainParams *netparams.Params, version int32) (r int64) {
+func CalcBlockSubsidy(height int32, chainParams *chaincfg.Params, version int32) (r int64) {
 	if chainParams.SubsidyReductionInterval == 0 {
 		return int64(baseSubsidy)
 	}
@@ -737,7 +737,7 @@ func CheckProofOfWork(block *util.Block, powLimit *big.Int, height int32) (e err
 //
 // NOTE: The transaction MUST have already been sanity checked with the CheckTransactionSanity function prior to calling
 // this function.
-func CheckTransactionInputs(tx *util.Tx, txHeight int32, utxoView *UtxoViewpoint, chainParams *netparams.Params) (
+func CheckTransactionInputs(tx *util.Tx, txHeight int32, utxoView *UtxoViewpoint, chainParams *chaincfg.Params) (
 	int64,
 	error,
 ) {

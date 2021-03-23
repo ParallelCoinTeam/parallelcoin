@@ -19,11 +19,11 @@ func TestEncodeDecodeWIF(t *testing.T) {
 		0xeb, 0x3f, 0xe6, 0xe9, 0xef, 0x2a, 0x25, 0x81,
 		0x4e, 0x39, 0x6f, 0xb5, 0xdc, 0x29, 0x5f, 0xe9,
 		0x94, 0xb9, 0x67, 0x89, 0xb2, 0x1a, 0x03, 0x98})
-	wif1, e := NewWIF(priv1, &netparams.MainNetParams, false)
+	wif1, e := NewWIF(priv1, &chaincfg.MainNetParams, false)
 	if e != nil  {
 		t.F.Ln(e)
 	}
-	wif2, e := NewWIF(priv2, &netparams.TestNet3Params, true)
+	wif2, e := NewWIF(priv2, &chaincfg.TestNet3Params, true)
 	if e != nil  {
 		t.F.Ln(e)
 	}

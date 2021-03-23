@@ -5,16 +5,16 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg"
 	"sync"
 	"sync/atomic"
 	"time"
 	
-	qu "github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/pod/pkg/util/qu"
 	
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/blockchain/tx/txscript"
 	tm "github.com/p9c/pod/pkg/blockchain/tx/wtxmgr"
-	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
 	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/util"
@@ -35,7 +35,7 @@ type BitcoindClient struct {
 	// birthday is the earliest time for which we should begin scanning the chain.
 	birthday time.Time
 	// chainParams are the parameters of the current chain this client is active under.
-	chainParams *netparams.Params
+	chainParams *chaincfg.Params
 	// id is the unique ID of this client assigned by the backing bitcoind connection.
 	id uint64
 	// chainConn is the backing client to our rescan client that contains the RPC and ZMQ connections to a bitcoind
@@ -191,7 +191,8 @@ func (c *BitcoindClient) NotifyReceived(addrs []util.Address) (e error) {
 
 // NotifySpent allows the chain backend to notify the caller whenever a transaction spends any of the given outpoints.
 func (c *BitcoindClient) NotifySpent(outPoints []*wire.OutPoint) (e error) {
-	if e = c.NotifyBlocks();E.Chk(e){}
+	if e = c.NotifyBlocks(); E.Chk(e) {
+	}
 	select {
 	case c.rescanUpdate <- outPoints:
 	case <-c.quit.Wait():
@@ -203,7 +204,8 @@ func (c *BitcoindClient) NotifySpent(outPoints []*wire.OutPoint) (e error) {
 // NotifyTx allows the chain backend to notify the caller whenever any of the given transactions confirm within the
 // chain.
 func (c *BitcoindClient) NotifyTx(txids []chainhash.Hash) (e error) {
-	if e = c.NotifyBlocks();E.Chk(e){}
+	if e = c.NotifyBlocks(); E.Chk(e) {
+	}
 	select {
 	case c.rescanUpdate <- txids:
 	case <-c.quit.Wait():

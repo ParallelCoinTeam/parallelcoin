@@ -43,7 +43,7 @@ var Magic = []byte{'j', 'o', 'b', 1}
 // // transactions are stored separately and will be reassembled at the end
 // func Get(
 // 	node *blockchain.BlockChain,
-// 	activeNet *netparams.Params,
+// 	activeNet *chaincfg.Params,
 // 	uuid uint64,
 // 	mB *util.Block,
 // ) (cbs *map[int32]*util.Tx, out []byte, txr []*util.Tx,) {

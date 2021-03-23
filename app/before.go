@@ -18,7 +18,6 @@ import (
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/pkg/blockchain/chaincfg"
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
 	"github.com/p9c/pod/pkg/blockchain/fork"
 	"github.com/p9c/pod/pkg/pod"
 )
@@ -71,7 +70,7 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) (e error) {
 			cx.StateCfg.Save = true
 		}
 		if c.IsSet("loglevel") {
-			F.Ln("set loglevel", c.String("loglevel"))
+			T.Ln("set loglevel", c.String("loglevel"))
 			*cx.Config.LogLevel = c.String("loglevel")
 		}
 		logg.SetLogLevel(*cx.Config.LogLevel)
@@ -84,21 +83,21 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) (e error) {
 			*cx.Config.Network = c.String("network")
 			switch *cx.Config.Network {
 			case "testnet", "testnet3", "t":
-				cx.ActiveNet = &netparams.TestNet3Params
+				cx.ActiveNet = &chaincfg.TestNet3Params
 				fork.IsTestnet = true
 				// fork.HashReps = 3
 			case "regtestnet", "regressiontest", "r":
 				fork.IsTestnet = true
-				cx.ActiveNet = &netparams.RegressionTestParams
+				cx.ActiveNet = &chaincfg.RegressionTestParams
 			case "simnet", "s":
 				fork.IsTestnet = true
-				cx.ActiveNet = &netparams.SimNetParams
+				cx.ActiveNet = &chaincfg.SimNetParams
 			default:
 				if *cx.Config.Network != "mainnet" &&
 					*cx.Config.Network != "m" {
 					D.Ln("using mainnet for node")
 				}
-				cx.ActiveNet = &netparams.MainNetParams
+				cx.ActiveNet = &chaincfg.MainNetParams
 			}
 		}
 		if c.IsSet("username") {
@@ -265,7 +264,7 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) (e error) {
 			// if LAN is turned on we need to remove the seeds from netparams not on mainnet
 			// mainnet is never in lan mode
 			// if LAN is turned on it means by default we are on testnet
-			cx.ActiveNet = &netparams.TestNet3Params
+			cx.ActiveNet = &chaincfg.TestNet3Params
 			if cx.ActiveNet.Name != "mainnet" {
 				D.Ln("set lan", c.Bool("lan"))
 				*cx.Config.LAN = c.Bool("lan")

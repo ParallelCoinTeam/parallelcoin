@@ -60,7 +60,7 @@ import (
 // func TestCheckConnectBlockTemplate(// 	t *testing.T) {
 // 	// Create a new database and chain instance to run tests against.
 // 	chain, teardownFunc, e := chainSetup("checkconnectblocktemplate",
-// 		&netparams.MainNetParams)
+// 		&chaincfg.MainNetParams)
 // 	if e != nil  {
 // 		t.Errorf("Failed to setup chain instance: %v", e)
 // 		return

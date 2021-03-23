@@ -3,8 +3,8 @@ package txscript
 import (
 	"errors"
 	"fmt"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg"
 	
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
 	"github.com/p9c/pod/pkg/blockchain/wire"
 	ec "github.com/p9c/pod/pkg/coding/ecc"
 	"github.com/p9c/pod/pkg/util"
@@ -148,7 +148,7 @@ func signMultiSig(
 }
 
 func sign(
-	chainParams *netparams.Params, tx *wire.MsgTx, idx int,
+	chainParams *chaincfg.Params, tx *wire.MsgTx, idx int,
 	subScript []byte, hashType SigHashType, kdb KeyDB, sdb ScriptDB,
 ) (
 	[]byte,
@@ -218,7 +218,7 @@ func sign(
 // is the best effort merging of the two scripts. Calling this function with addresses, class and nrequired that do not
 // match pkScript is an error and results in undefined behaviour.
 func mergeScripts(
-	chainParams *netparams.Params, tx *wire.MsgTx, idx int, pkScript []byte, class ScriptClass,
+	chainParams *chaincfg.Params, tx *wire.MsgTx, idx int, pkScript []byte, class ScriptClass,
 	addresses []util.Address, nRequired int, sigScript, prevScript []byte,
 ) []byte {
 	// TODO: the scripthash and multisig paths here are overly inefficient in that they will recompute already known data.
@@ -397,7 +397,7 @@ func (sc ScriptClosure) GetScript(address util.Address) ([]byte, error) {
 // then the results in previousScript will be merged in a type-dependent manner with the newly generated signature
 // script.
 func SignTxOutput(
-	chainParams *netparams.Params, tx *wire.MsgTx, idx int, pkScript []byte, hashType SigHashType,
+	chainParams *chaincfg.Params, tx *wire.MsgTx, idx int, pkScript []byte, hashType SigHashType,
 	kdb KeyDB, sdb ScriptDB, previousScript []byte,
 ) ([]byte, error) {
 	sigScript, class, addresses, nrequired, e :=

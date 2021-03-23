@@ -16,7 +16,6 @@ import (
 	"github.com/p9c/pod/cmd/spv/headerfs"
 	"github.com/p9c/pod/pkg/blockchain"
 	"github.com/p9c/pod/pkg/blockchain/chaincfg"
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
 	"github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/comm/peer"
@@ -55,7 +54,7 @@ type (
 			wire.Message,
 		) bool, qu.C, ...QueryOption,
 		)
-		chainParams       netparams.Params
+		chainParams       chaincfg.Params
 		addrManager       *addrmgr.AddrManager
 		connManager       *connmgr.ConnManager
 		blockManager      *blockManager
@@ -91,7 +90,7 @@ type (
 		// Database is an *open* database instance that we'll use to storm indexes of teh chain.
 		Database walletdb.DB
 		// ChainParams is the chain that we're running on.
-		ChainParams netparams.Params
+		ChainParams chaincfg.Params
 		// ConnectPeers is a slice of hosts that should be connected to on startup, and be established as persistent
 		// peers.
 		//
@@ -240,8 +239,8 @@ func (s *ChainService) BestBlock() (*waddrmgr.BlockStamp, error) {
 		nil
 }
 
-// ChainParams returns a copy of the ChainService's netparams.Params.
-func (s *ChainService) ChainParams() netparams.Params {
+// ChainParams returns a copy of the ChainService's chaincfg.Params.
+func (s *ChainService) ChainParams() chaincfg.Params {
 	return s.chainParams
 }
 

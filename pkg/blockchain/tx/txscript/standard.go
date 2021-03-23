@@ -2,8 +2,8 @@ package txscript
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg"
 	
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
 	"github.com/p9c/pod/pkg/util"
 )
 
@@ -472,7 +472,7 @@ func PushedData(script []byte) ([][]byte, error) {
 // signatures associated with the passed PkScript. Note that it only works for
 // 'standard' transaction script types. Any data such as public keys which are
 // invalid are omitted from the results.
-func ExtractPkScriptAddrs(pkScript []byte, chainParams *netparams.Params) (ScriptClass, []util.Address, int, error) {
+func ExtractPkScriptAddrs(pkScript []byte, chainParams *chaincfg.Params) (ScriptClass, []util.Address, int, error) {
 	var addrs []util.Address
 	var requiredSigs int
 	// No valid addresses or required signatures if the script doesn't parse.

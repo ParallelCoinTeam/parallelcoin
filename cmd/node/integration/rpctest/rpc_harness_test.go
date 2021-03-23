@@ -90,7 +90,7 @@ func assertConnectedTo(t *testing.T, nodeA *Harness, nodeB *Harness) {
 
 func testConnectNode(r *Harness, t *testing.T) {
 	// Create a fresh test harness.
-	harness, e := New(&netparams.SimNetParams, nil, nil)
+	harness, e := New(&chaincfg.SimNetParams, nil, nil)
 	if e != nil {
 		t.F.Ln(e)
 	}
@@ -130,7 +130,7 @@ func testTearDownAll(t *testing.T) {
 func testActiveHarnesses(r *Harness, t *testing.T) {
 	numInitialHarnesses := len(ActiveHarnesses())
 	// Create a single test harness.
-	harness1, e := New(&netparams.SimNetParams, nil, nil)
+	harness1, e := New(&chaincfg.SimNetParams, nil, nil)
 	if e != nil {
 		t.F.Ln(e)
 	}
@@ -158,7 +158,7 @@ func testJoinMempools(r *Harness, t *testing.T) {
 	}
 	// Create a local test harness with only the genesis block. The nodes will be synced below so the same transaction
 	// can be sent to both nodes without it being an orphan.
-	harness, e := New(&netparams.SimNetParams, nil, nil)
+	harness, e := New(&chaincfg.SimNetParams, nil, nil)
 	if e != nil {
 		t.F.Ln(e)
 	}
@@ -243,7 +243,7 @@ func testJoinMempools(r *Harness, t *testing.T) {
 }
 func testJoinBlocks(r *Harness, t *testing.T) {
 	// Create a second harness with only the genesis block so it is behind the main harness.
-	harness, e := New(&netparams.SimNetParams, nil, nil)
+	harness, e := New(&chaincfg.SimNetParams, nil, nil)
 	if e != nil {
 		t.F.Ln(e)
 	}
@@ -430,7 +430,7 @@ func testGenerateAndSubmitBlockWithCustomCoinbaseOutputs(
 }
 func testMemWalletReorg(r *Harness, t *testing.T) {
 	// Create a fresh harness, we'll be using the main harness to force a re-org on this local harness.
-	harness, e := New(&netparams.SimNetParams, nil, nil)
+	harness, e := New(&chaincfg.SimNetParams, nil, nil)
 	if e != nil {
 		t.F.Ln(e)
 	}
@@ -527,7 +527,7 @@ const (
 
 func TestMain(m *testing.M) {
 	var e error
-	mainHarness, e = New(&netparams.SimNetParams, nil, nil)
+	mainHarness, e = New(&chaincfg.SimNetParams, nil, nil)
 	if e != nil {
 		fmt.Println("unable to create main harness: ", err)
 		os.Exit(1)

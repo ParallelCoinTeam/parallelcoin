@@ -83,4 +83,6 @@ var TestNet3Params = Params{
 	MaxActualTimespan:       TestnetAveragingTargetTimespan * (TestnetInterval + TestnetMaxAdjustDown) / TestnetInterval,
 	ScryptPowLimit:          &scryptPowLimit,
 	ScryptPowLimitBits:      ScryptPowLimitBits,
+	RPCClientPort:       "21048",
+	WalletRPCServerPort: "21046",
 }

@@ -5,7 +5,7 @@ import (
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/cmd/spv"
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg"
 	"github.com/p9c/pod/pkg/blockchain/fork"
 )
 
@@ -51,7 +51,7 @@ func Configure(cx *conte.Xt, commandName string, initial bool) {
 		D.Ln("saving configuration")
 		save.Pod(cx.Config)
 	}
-	if cx.ActiveNet.Name == netparams.TestNet3Params.Name {
+	if cx.ActiveNet.Name == chaincfg.TestNet3Params.Name {
 		fork.IsTestnet = true
 	}
 }

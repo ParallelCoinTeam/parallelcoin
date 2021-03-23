@@ -2,6 +2,7 @@ package gui
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg"
 	"github.com/p9c/pod/pkg/gui"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/util/qu"
@@ -13,7 +14,6 @@ import (
 	"github.com/urfave/cli"
 	
 	"github.com/p9c/pod/app/save"
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
 	"github.com/p9c/pod/pkg/blockchain/fork"
 	"github.com/p9c/pod/pkg/wallet"
 )
@@ -271,10 +271,10 @@ func (wg *WalletGUI) createWalletTestnetToggle(b bool) {
 		D.Ln("wallet pass", *wg.cx.Config.WalletPass)
 	}
 	if b {
-		wg.cx.ActiveNet = &netparams.TestNet3Params
+		wg.cx.ActiveNet = &chaincfg.TestNet3Params
 		fork.IsTestnet = true
 	} else {
-		wg.cx.ActiveNet = &netparams.MainNetParams
+		wg.cx.ActiveNet = &chaincfg.MainNetParams
 		fork.IsTestnet = false
 	}
 	I.Ln("activenet:", wg.cx.ActiveNet.Name)

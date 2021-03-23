@@ -4,10 +4,10 @@ import (
 	"crypto/rand"
 	"crypto/sha512"
 	"fmt"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg"
 	"sync"
 	"time"
 	
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
 	"github.com/p9c/pod/pkg/coding/snacl"
 	"github.com/p9c/pod/pkg/database/walletdb"
 	"github.com/p9c/pod/pkg/util"
@@ -258,7 +258,7 @@ type Manager struct {
 	internalAddrSchemas map[AddressType][]KeyScope
 	syncState           syncState
 	birthday            time.Time
-	chainParams         *netparams.Params
+	chainParams         *chaincfg.Params
 	// masterKeyPub is the secret key used to secure the cryptoKeyPub key and
 	// masterKeyPriv is the secret key used to secure the cryptoKeyPriv key. This
 	// approach is used because it makes changing the passwords much simpler as it
@@ -651,7 +651,7 @@ func (m *Manager) ForEachAccountAddress(
 }
 
 // ChainParams returns the chain parameters for this address manager.
-func (m *Manager) ChainParams() *netparams.Params {
+func (m *Manager) ChainParams() *chaincfg.Params {
 	// NOTE: No need for mutex here since the net field does not change after the
 	// manager instance is created.
 	return m.chainParams
@@ -1098,7 +1098,7 @@ func (m *Manager) Decrypt(keyType CryptoKeyType, in []byte) ([]byte, error) {
 
 // newManager returns a new locked address manager with the given parameters.
 func newManager(
-	chainParams *netparams.Params, masterKeyPub *snacl.SecretKey,
+	chainParams *chaincfg.Params, masterKeyPub *snacl.SecretKey,
 	masterKeyPriv *snacl.SecretKey, cryptoKeyPub EncryptorDecryptor,
 	cryptoKeyPrivEncrypted, cryptoKeyScriptEncrypted []byte, syncInfo *syncState,
 	birthday time.Time, privPassphraseSalt [saltSize]byte,
@@ -1220,7 +1220,7 @@ func checkBranchKeys(acctKey *hdkeychain.ExtendedKey) (e error) {
 // public keys.
 func loadManager(
 	ns walletdb.ReadBucket, pubPassphrase []byte,
-	chainParams *netparams.Params,
+	chainParams *chaincfg.Params,
 ) (*Manager, error) {
 	D.Ln("loading address manager")
 	// Verify the version is neither too old or too new.
@@ -1368,7 +1368,7 @@ func loadManager(
 // passed manager does not exist in the specified namespace.
 func Open(
 	ns walletdb.ReadBucket, pubPassphrase []byte,
-	chainParams *netparams.Params,
+	chainParams *chaincfg.Params,
 ) (*Manager, error) {
 	D.Ln("opening address manager")
 	// Return an error if the manager has NOT already been created in the
@@ -1385,7 +1385,7 @@ func Open(
 // in the wallet database, namespaced by the top level bucket key namespaceKey.
 func DoUpgrades(
 	db walletdb.DB, namespaceKey []byte, pubPassphrase []byte,
-	chainParams *netparams.Params, cbs *OpenCallbacks,
+	chainParams *chaincfg.Params, cbs *OpenCallbacks,
 ) (e error) {
 	return upgradeManager(db, namespaceKey, pubPassphrase, chainParams, cbs)
 }
@@ -1503,7 +1503,7 @@ func createManagerKeyScope(
 // address manager already exists in the specified namespace.
 func Create(
 	ns walletdb.ReadWriteBucket, seed, pubPassphrase, privPassphrase []byte,
-	chainParams *netparams.Params, config *ScryptOptions,
+	chainParams *chaincfg.Params, config *ScryptOptions,
 	birthday time.Time,
 ) (e error) {
 	// Return an error if the manager has already been created in the given database

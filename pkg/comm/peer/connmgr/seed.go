@@ -2,12 +2,12 @@ package connmgr
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg"
 	mrand "math/rand"
 	"net"
 	"strconv"
 	"time"
 	
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
 	"github.com/p9c/pod/pkg/blockchain/wire"
 )
 
@@ -24,8 +24,10 @@ type OnSeed func(addrs []*wire.NetAddress)
 type LookupFunc func(string) ([]net.IP, error)
 
 // SeedFromDNS uses DNS seeding to populate the address manager with peers.
-func SeedFromDNS(chainParams *netparams.Params, reqServices wire.ServiceFlag,
-	lookupFn LookupFunc, seedFn OnSeed) {
+func SeedFromDNS(
+	chainParams *chaincfg.Params, reqServices wire.ServiceFlag,
+	lookupFn LookupFunc, seedFn OnSeed,
+) {
 	for _, dnsseed := range chainParams.DNSSeeds {
 		var host string
 		if !dnsseed.HasFiltering || reqServices == wire.SFNodeNetwork {
@@ -36,7 +38,7 @@ func SeedFromDNS(chainParams *netparams.Params, reqServices wire.ServiceFlag,
 		go func(host string) {
 			randSource := mrand.New(mrand.NewSource(time.Now().UnixNano()))
 			seedpeers, e := lookupFn(host)
-			if e != nil  {
+			if e != nil {
 				E.F("DNS routeable failed on seed %s: %v", host, e)
 				return
 			}
@@ -52,9 +54,14 @@ func SeedFromDNS(chainParams *netparams.Params, reqServices wire.ServiceFlag,
 				addresses[i] = wire.NewNetAddressTimestamp(
 					// bitcoind seeds with addresses from a time randomly
 					// selected between 3 and 7 days ago.
-					time.Now().Add(-1*time.Second*time.Duration(secondsIn3Days+
-						randSource.Int31n(secondsIn4Days))),
-					0, peer, uint16(intPort))
+					time.Now().Add(
+						-1*time.Second*time.Duration(
+							secondsIn3Days+
+								randSource.Int31n(secondsIn4Days),
+						),
+					),
+					0, peer, uint16(intPort),
+				)
 			}
 			seedFn(addresses)
 		}(host)

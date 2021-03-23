@@ -160,7 +160,7 @@ func makeSpendableOut(block *wire.MsgBlock, txIndex, txOutIndex uint32) spendabl
 // testGenerator houses state used to easy the process of generating test blocks that build from one another along with
 // housing other useful things such as available spendable outputs used throughout the tests.
 type testGenerator struct {
-	params       *netparams.Params
+	params       *chaincfg.Params
 	tip          *wire.MsgBlock
 	tipName      string
 	tipHeight    int32
@@ -175,7 +175,7 @@ type testGenerator struct {
 }
 
 // makeTestGenerator returns a test generator instance initialized with the genesis block as the tip.
-func makeTestGenerator(params *netparams.Params) (testGenerator, error) {
+func makeTestGenerator(params *chaincfg.Params) (testGenerator, error) {
 	privKey, _ := ec.PrivKeyFromBytes(ec.S256(), []byte{0x01})
 	genesis := params.GenesisBlock
 	genesisHash := genesis.BlockHash()

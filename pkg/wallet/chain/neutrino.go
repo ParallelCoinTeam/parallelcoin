@@ -3,13 +3,13 @@ package chain
 import (
 	"errors"
 	"fmt"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg"
 	"sync"
 	"time"
 	
 	"github.com/p9c/pod/pkg/util/qu"
 	
 	sac "github.com/p9c/pod/cmd/spv"
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
 	"github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/blockchain/tx/txscript"
 	"github.com/p9c/pod/pkg/blockchain/tx/wtxmgr"
@@ -24,7 +24,7 @@ import (
 // NeutrinoClient is an implementation of the btcwallet chain.Interface interface.
 type NeutrinoClient struct {
 	CS          *sac.ChainService
-	chainParams *netparams.Params
+	chainParams *chaincfg.Params
 	// We currently support one rescan/notification goroutine per client
 	rescan              *sac.Rescan
 	enqueueNotification chan interface{}
@@ -45,7 +45,7 @@ type NeutrinoClient struct {
 
 // NewNeutrinoClient creates a new NeutrinoClient struct with a backing ChainService.
 func NewNeutrinoClient(
-	chainParams *netparams.Params,
+	chainParams *chaincfg.Params,
 	chainService *sac.ChainService,
 ) *NeutrinoClient {
 	return &NeutrinoClient{

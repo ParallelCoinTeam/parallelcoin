@@ -1,17 +1,17 @@
 package blockchain
 
 import (
+	"github.com/p9c/pod/pkg/blockchain/chaincfg"
 	"math/big"
 	"sort"
 	"sync"
 	"sync/atomic"
 	"time"
 	
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	"github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/blockchain/fork"
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/blockchain/wire"
-	database "github.com/p9c/pod/pkg/database"
+	"github.com/p9c/pod/pkg/database"
 )
 
 // blockStatus is a bit field representing the validation state of the block.
@@ -182,7 +182,7 @@ type blockIndex struct {
 	// The following fields are set when the instance is created and can't be changed afterwards, so there is no need to
 	// protect them with a separate mutex.
 	db          database.DB
-	chainParams *netparams.Params
+	chainParams *chaincfg.Params
 	sync.RWMutex
 	index map[chainhash.Hash]*BlockNode
 	dirty map[*BlockNode]struct{}
@@ -190,7 +190,7 @@ type blockIndex struct {
 
 // newBlockIndex returns a new empty instance of a block index. The index will be dynamically populated as block nodes
 // are loaded from the database and manually added.
-func newBlockIndex(db database.DB, chainParams *netparams.Params) *blockIndex {
+func newBlockIndex(db database.DB, chainParams *chaincfg.Params) *blockIndex {
 	return &blockIndex{
 		db:          db,
 		chainParams: chainParams,

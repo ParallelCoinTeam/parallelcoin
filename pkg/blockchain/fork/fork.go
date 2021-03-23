@@ -36,7 +36,7 @@ type HardForks struct {
 }
 
 func init() {
-	F.Ln("running fork data init")
+	T.Ln("running fork data init")
 	for i := range P9AlgosNumeric {
 		List[1].AlgoVers[i] = fmt.Sprintf("Div%d", P9AlgosNumeric[i].VersionInterval)
 	}

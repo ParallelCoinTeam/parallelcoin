@@ -2,9 +2,9 @@ package netsync
 
 import (
 	"github.com/p9c/pod/cmd/node/mempool"
-	blockchain "github.com/p9c/pod/pkg/blockchain"
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/blockchain"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg"
+	"github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/blockchain/wire"
 	"github.com/p9c/pod/pkg/comm/peer"
 	"github.com/p9c/pod/pkg/util"
@@ -24,7 +24,7 @@ type Config struct {
 	PeerNotifier       PeerNotifier
 	Chain              *blockchain.BlockChain
 	TxMemPool          *mempool.TxPool
-	ChainParams        *netparams.Params
+	ChainParams        *chaincfg.Params
 	DisableCheckpoints bool
 	MaxPeers           int
 	FeeEstimator       *mempool.FeeEstimator

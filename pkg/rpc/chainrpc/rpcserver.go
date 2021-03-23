@@ -9,6 +9,7 @@ import (
 	js "encoding/json"
 	"errors"
 	"fmt"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg"
 	"io"
 	"io/ioutil"
 	"math/big"
@@ -30,7 +31,6 @@ import (
 	"github.com/p9c/pod/cmd/node/mempool"
 	"github.com/p9c/pod/cmd/node/state"
 	"github.com/p9c/pod/pkg/blockchain"
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
 	"github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/blockchain/fork"
 	"github.com/p9c/pod/pkg/blockchain/indexers"
@@ -134,7 +134,7 @@ type ServerConfig struct {
 	// These fields allow the RPC server to interface with the local block chain data and state.
 	TimeSource  blockchain.MedianTimeSource
 	Chain       *blockchain.BlockChain
-	ChainParams *netparams.Params
+	ChainParams *chaincfg.Params
 	DB          database.DB
 	// TxMemPool defines the transaction memory pool to interact with.
 	TxMemPool *mempool.TxPool
@@ -1631,7 +1631,7 @@ func CreateMarshalledReply(id, result interface{}, replyErr error) ([]byte, erro
 
 // CreateTxRawResult converts the passed transaction and associated parameters to a raw transaction JSON object.
 func CreateTxRawResult(
-	chainParams *netparams.Params, mtx *wire.MsgTx,
+	chainParams *chaincfg.Params, mtx *wire.MsgTx,
 	txHash string, blkHeader *wire.BlockHeader, blkHash string, blkHeight int32,
 	chainHeight int32,
 ) (*btcjson.TxRawResult, error) {
@@ -1694,7 +1694,7 @@ func CreateVinList(mtx *wire.MsgTx) []btcjson.Vin {
 // passed transaction.
 func CreateVinListPrevOut(
 	s *Server, mtx *wire.MsgTx,
-	chainParams *netparams.Params, vinExtra bool,
+	chainParams *chaincfg.Params, vinExtra bool,
 	filterAddrMap map[string]struct{},
 ) ([]btcjson.VinPrevOut, error) {
 	// Coinbase transactions only have a single txin by definition.
@@ -1792,7 +1792,7 @@ func CreateVinListPrevOut(
 
 // CreateVoutList returns a slice of JSON objects for the outputs of the passed transaction.
 func CreateVoutList(
-	mtx *wire.MsgTx, chainParams *netparams.Params,
+	mtx *wire.MsgTx, chainParams *chaincfg.Params,
 	filterAddrMap map[string]struct{},
 ) []btcjson.Vout {
 	voutList := make([]btcjson.Vout, 0, len(mtx.TxOut))
@@ -1964,7 +1964,7 @@ func GenCertPair(certFile, keyFile string) (e error) {
 // GetDifficultyRatio returns the proof-of-work difficulty as a multiple of the
 // minimum difficulty using the passed bits field from the header of a block.
 func GetDifficultyRatio(
-	bits uint32, params *netparams.Params,
+	bits uint32, params *chaincfg.Params,
 	algo int32,
 ) float64 {
 	// The minimum difficulty is the max possible proof-of-work limit bits converted

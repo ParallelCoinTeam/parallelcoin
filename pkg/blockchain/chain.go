@@ -8,13 +8,12 @@ import (
 	
 	"go.uber.org/atomic"
 	
-	chaincfg "github.com/p9c/pod/pkg/blockchain/chaincfg"
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg"
+	"github.com/p9c/pod/pkg/blockchain/chainhash"
 	"github.com/p9c/pod/pkg/blockchain/fork"
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
-	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
+	"github.com/p9c/pod/pkg/blockchain/tx/txscript"
 	"github.com/p9c/pod/pkg/blockchain/wire"
-	database "github.com/p9c/pod/pkg/database"
+	"github.com/p9c/pod/pkg/database"
 	"github.com/p9c/pod/pkg/util"
 )
 
@@ -87,7 +86,7 @@ type BlockChain struct {
 	checkpoints         []chaincfg.Checkpoint
 	checkpointsByHeight map[int32]*chaincfg.Checkpoint
 	db                  database.DB
-	params              *netparams.Params
+	params              *chaincfg.Params
 	timeSource          MedianTimeSource
 	sigCache            *txscript.SigCache
 	indexManager        IndexManager
@@ -1464,7 +1463,7 @@ type Config struct {
 	// desire the behavior.
 	Interrupt <-chan struct{}
 	// ChainParams identifies which chain parameters the chain is associated with. This field is required.
-	ChainParams *netparams.Params
+	ChainParams *chaincfg.Params
 	// Checkpoints hold caller-defined checkpoints that should be added to the default checkpoints in ChainParams.
 	// Checkpoints must be sorted by height. This field can be nil if the caller does not wish to specify any
 	// checkpoints.

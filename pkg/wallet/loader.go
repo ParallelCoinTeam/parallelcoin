@@ -2,6 +2,7 @@ package wallet
 
 import (
 	"errors"
+	"github.com/p9c/pod/pkg/blockchain/chaincfg"
 	"os"
 	"path/filepath"
 	"sync"
@@ -9,7 +10,6 @@ import (
 	
 	"github.com/p9c/pod/pkg/util/qu"
 	
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
 	"github.com/p9c/pod/pkg/database/walletdb"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/util/prompt"
@@ -23,7 +23,7 @@ import (
 // Loader is safe for concurrent access.
 type Loader struct {
 	Callbacks      []func(*Wallet)
-	ChainParams    *netparams.Params
+	ChainParams    *chaincfg.Params
 	DDDirPath      string
 	RecoveryWindow uint32
 	Wallet         *Wallet
@@ -243,7 +243,7 @@ func (ld *Loader) onLoaded(db walletdb.DB) {
 
 // NewLoader constructs a Loader with an optional recovery window. If the recovery window is non-zero, the wallet will
 // attempt to recovery addresses starting from the last SyncedTo height.
-func NewLoader(chainParams *netparams.Params, dbDirPath string, recoveryWindow uint32) *Loader {
+func NewLoader(chainParams *chaincfg.Params, dbDirPath string, recoveryWindow uint32) *Loader {
 	l := &Loader{
 		ChainParams:    chainParams,
 		DDDirPath:      dbDirPath,
