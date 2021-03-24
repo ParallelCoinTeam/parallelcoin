@@ -228,11 +228,13 @@ func processAdvtMsg(ctx interface{}, src net.Addr, dst string, b []byte) (e erro
 	// If we lose connection for more than 9 seconds we delete and if the node
 	// reappears it can be reconnected
 	for i := range wg.otherNodes {
-		if time.Now().Sub(wg.otherNodes[i].Time) > time.Second*6 {
+		D.Ln(i, wg.otherNodes[i])
+		tn := time.Now()
+		if tn.Sub(wg.otherNodes[i].Time) > time.Second*6 {
 			// also remove from connection manager
 			if e = wg.ChainClient.AddNode(wg.otherNodes[i].addr, "remove"); E.Chk(e) {
 			}
-			D.Ln("deleting", wg.otherNodes[i])
+			D.Ln("deleting", tn, wg.otherNodes[i], i)
 			delete(wg.otherNodes, i)
 		}
 	}

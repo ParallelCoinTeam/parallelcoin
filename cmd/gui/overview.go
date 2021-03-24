@@ -18,10 +18,10 @@ func (wg *WalletGUI) balanceCard() func(gtx l.Context) l.Dimensions {
 	
 	// gtx.Constraints.Min.X = int(wg.TextSize.V * sp.inputWidth)
 	return func(gtx l.Context) l.Dimensions {
-		// gtx.Constraints.Min.X =
-		// 	int(wg.TextSize.V * 26)
+		gtx.Constraints.Min.X =
+			int(wg.TextSize.V * 16)
 		gtx.Constraints.Max.X =
-			int(wg.TextSize.V * 23)
+			int(wg.TextSize.V * 16)
 		return wg.VFlex().
 			AlignStart().
 			Rigid(
@@ -329,7 +329,7 @@ func (wg *WalletGUI) recentTxCardSummary(txs *btcjson.ListTransactionsResult) l.
 			// 	0.25,
 			wg.Flex().AlignStart().SpaceBetween().
 				Rigid(
-					wg.H6(fmt.Sprintf("%.f DUO", txs.Amount)).Alignment(text.Start).Color("PanelText").Fn,
+					wg.H6(fmt.Sprintf("%-.8f DUO", txs.Amount)).Alignment(text.Start).Color("PanelText").Fn,
 				).
 				Flexed(
 					1,

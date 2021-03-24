@@ -24,7 +24,7 @@ type SendPage struct {
 func (wg *WalletGUI) GetSendPage() (sp *SendPage) {
 	sp = &SendPage{
 		wg:         wg,
-		inputWidth: 24,
+		inputWidth: 17,
 		break1:     48,
 	}
 	wg.inputs["sendAddress"].SetPasteFunc = sp.pasteFunction
@@ -51,7 +51,7 @@ func (sp *SendPage) Fn(gtx l.Context) l.Dimensions {
 func (sp *SendPage) SmallList(gtx l.Context) l.Dimensions {
 	wg := sp.wg
 	smallWidgets := []l.Widget{
-		wg.balanceCard(),
+		wg.Flex().Rigid(wg.balanceCard()).Fn,
 		sp.InputMessage(),
 		sp.AddressInput(),
 		sp.AmountInput(),
@@ -77,11 +77,10 @@ func (sp *SendPage) SmallList(gtx l.Context) l.Dimensions {
 	}
 	smallWidgets = append(smallWidgets, sp.GetAddressbookHistoryCards("DocBg")...)
 	le := func(gtx l.Context, index int) l.Dimensions {
-		return	smallWidgets[index](gtx)
-		// wg.Inset(
-		// 	0.25,
-		// ,
-		// ).Fn(gtx)
+		return wg.Inset(
+			0.25,
+			smallWidgets[index],
+		).Fn(gtx)
 	}
 	return wg.lists["send"].
 		Vertical().
@@ -147,7 +146,8 @@ func (sp *SendPage) MediumList(gtx l.Context) l.Dimensions {
 			},
 		).
 		// Rigid(wg.Inset(0.25, gui.EmptySpace(0, 0)).Fn).
-		Flexed(1,
+		Flexed(
+			1,
 			wg.VFlex().AlignStart().
 				Rigid(
 					sp.AddressbookHeader(),
