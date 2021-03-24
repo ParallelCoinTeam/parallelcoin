@@ -163,7 +163,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNodeP *BlockNode, algoN
 		newTargetBits = bits2.BigToCompact(newTarget)
 		// Tracef("newTarget %064x %08x", newTarget, newTargetBits)
 	}
-	if l {
+	// if l {
 		// if lastNode.version == algoVer {
 		I.Ln(func() string {
 			an := fork.List[1].AlgoVers[algoVer]
@@ -197,7 +197,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNodeP *BlockNode, algoN
 			)
 		}())
 		// }
-	}
+	// }
 	return
 }
 
