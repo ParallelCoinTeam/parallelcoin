@@ -10,8 +10,8 @@ import (
 	
 	l "gioui.org/layout"
 	
-	"github.com/p9c/pod/pkg/gui"
 	"github.com/p9c/pod/pkg/btcjson"
+	"github.com/p9c/pod/pkg/gui"
 )
 
 func (wg *WalletGUI) balanceCard() func(gtx l.Context) l.Dimensions {
@@ -303,16 +303,15 @@ func (wg *WalletGUI) recentTxCardStub(txs *btcjson.ListTransactionsResult) l.Wid
 }
 
 func (wg *WalletGUI) recentTxCardSummary(txs *btcjson.ListTransactionsResult) l.Widget {
-	return wg.VFlex().
+	return wg.VFlex().AlignStart().SpaceBetween().
 		Rigid(
 			wg.Inset(
 				0.25,
-				wg.Flex().
+				wg.Flex().AlignStart().SpaceBetween().
 					Rigid(
-						wg.Body1(fmt.Sprintf("%-6.8f DUO", txs.Amount)).Color("PanelText").Fn,
+						wg.H6(fmt.Sprintf("%.f DUO", txs.Amount)).Alignment(text.Start).Color("PanelText").Fn,
 					).
-					Flexed(
-						1,
+					Flexed(1,
 						wg.Inset(
 							0.25,
 							wg.Caption(txs.Address).
@@ -328,74 +327,75 @@ func (wg *WalletGUI) recentTxCardSummary(txs *btcjson.ListTransactionsResult) l.
 		Rigid(
 			wg.Inset(
 				0.25,
-				wg.Flex().Flexed(
-					1,
-					wg.Flex().
-						Rigid(
-							wg.Flex().
-								Rigid(
-									wg.Icon().Color("PanelText").Scale(1).Src(&icons2.DeviceWidgets).Fn,
-								).
-								// Rigid(
-								// 	wg.Caption(fmt.Sprint(*txs.BlockIndex)).Fn,
-								// 	// wg.buttonIconText(txs.clickBlock,
-								// 	// 	fmt.Sprint(*txs.BlockIndex),
-								// 	// 	&icons2.DeviceWidgets,
-								// 	// 	wg.blockPage(*txs.BlockIndex)),
-								// ).
-								Rigid(
-									wg.Caption(fmt.Sprintf("%d ", txs.BlockIndex)).Fn,
-								).
-								Fn,
-						).
-						Rigid(
-							wg.Flex().
-								Rigid(
-									wg.Icon().Color("PanelText").Scale(1).Src(&icons2.ActionCheckCircle).Fn,
-								).
-								Rigid(
-									wg.Caption(fmt.Sprintf("%d ", txs.Confirmations)).Fn,
-								).
-								Fn,
-						).
-						Rigid(
-							wg.Flex().
-								Rigid(
-									func(gtx l.Context) l.Dimensions {
-										switch txs.Category {
-										case "generate":
-											return wg.Icon().Color("PanelText").Scale(1).Src(&icons2.ActionStars).Fn(gtx)
-										case "immature":
-											return wg.Icon().Color("PanelText").Scale(1).Src(&icons2.ImageTimeLapse).Fn(gtx)
-										case "receive":
-											return wg.Icon().Color("PanelText").Scale(1).Src(&icons2.ActionPlayForWork).Fn(gtx)
-										case "unknown":
-											return wg.Icon().Color("PanelText").Scale(1).Src(&icons2.AVNewReleases).Fn(gtx)
-										}
-										return l.Dimensions{}
-									},
-								).
-								Rigid(
-									wg.Caption(txs.Category+" ").Fn,
-								).
-								Fn,
-						).
-						Rigid(
-							wg.Flex().
-								Rigid(
-									wg.Icon().Color("PanelText").Scale(1).Src(&icons2.DeviceAccessTime).Fn,
-								).
-								Rigid(
-									wg.Caption(
-										time.Unix(
-											txs.Time,
-											0,
-										).Format("02 Jan 06 15:04:05 MST"),
-									).Color("PanelText").Fn,
-								).
-								Fn,
-						).Fn,
-				).Fn,
+				wg.Flex().
+					Flexed(
+						1,
+						wg.Flex().
+							Rigid(
+								wg.Flex().
+									Rigid(
+										wg.Icon().Color("PanelText").Scale(1).Src(&icons2.DeviceWidgets).Fn,
+									).
+									// Rigid(
+									// 	wg.Caption(fmt.Sprint(*txs.BlockIndex)).Fn,
+									// 	// wg.buttonIconText(txs.clickBlock,
+									// 	// 	fmt.Sprint(*txs.BlockIndex),
+									// 	// 	&icons2.DeviceWidgets,
+									// 	// 	wg.blockPage(*txs.BlockIndex)),
+									// ).
+									Rigid(
+										wg.Caption(fmt.Sprintf("%d ", txs.BlockIndex)).Fn,
+									).
+									Fn,
+							).
+							Rigid(
+								wg.Flex().
+									Rigid(
+										wg.Icon().Color("PanelText").Scale(1).Src(&icons2.ActionCheckCircle).Fn,
+									).
+									Rigid(
+										wg.Caption(fmt.Sprintf("%d ", txs.Confirmations)).Fn,
+									).
+									Fn,
+							).
+							Rigid(
+								wg.Flex().
+									Rigid(
+										func(gtx l.Context) l.Dimensions {
+											switch txs.Category {
+											case "generate":
+												return wg.Icon().Color("PanelText").Scale(1).Src(&icons2.ActionStars).Fn(gtx)
+											case "immature":
+												return wg.Icon().Color("PanelText").Scale(1).Src(&icons2.ImageTimeLapse).Fn(gtx)
+											case "receive":
+												return wg.Icon().Color("PanelText").Scale(1).Src(&icons2.ActionPlayForWork).Fn(gtx)
+											case "unknown":
+												return wg.Icon().Color("PanelText").Scale(1).Src(&icons2.AVNewReleases).Fn(gtx)
+											}
+											return l.Dimensions{}
+										},
+									).
+									Rigid(
+										wg.Caption(txs.Category+" ").Fn,
+									).
+									Fn,
+							).
+							Rigid(
+								wg.Flex().
+									Rigid(
+										wg.Icon().Color("PanelText").Scale(1).Src(&icons2.DeviceAccessTime).Fn,
+									).
+									Rigid(
+										wg.Caption(
+											time.Unix(
+												txs.Time,
+												0,
+											).Format("02 Jan 06 15:04:05 MST"),
+										).Color("PanelText").Fn,
+									).
+									Fn,
+							).Fn,
+					).Fn,
 			).Fn,
 		).Fn
 }

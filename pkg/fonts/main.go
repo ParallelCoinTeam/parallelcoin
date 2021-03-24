@@ -2,7 +2,7 @@
 // can be found in the LICENSE file.
 
 // this will run this generator if go generate is called on this directory
-//go:generate go run gen.go log.go
+//go:generate go run main.go logmain.go
 
 package main
 

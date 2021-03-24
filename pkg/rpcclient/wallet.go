@@ -79,8 +79,8 @@ func (r FutureListTransactionsResult) Receive() ([]btcjson.ListTransactionsResul
 // by invoking the Receive function on the returned instance.
 //
 // See ListTransactions for the blocking version and more details.
-func (c *Client) ListTransactionsAsync(account *string) FutureListTransactionsResult {
-	cmd := btcjson.NewListTransactionsCmd(account, nil, nil, nil)
+func (c *Client) ListTransactionsAsync(account string) FutureListTransactionsResult {
+	cmd := btcjson.NewListTransactionsCmd(&account, nil, nil, nil)
 	D.S(cmd)
 	return c.sendCmd(cmd)
 }
@@ -89,7 +89,7 @@ func (c *Client) ListTransactionsAsync(account *string) FutureListTransactionsRe
 //
 // See the ListTransactionsCount and ListTransactionsCountFrom to control the number of transactions returned and
 // starting point, respectively.
-func (c *Client) ListTransactions(account *string) ([]btcjson.ListTransactionsResult, error) {
+func (c *Client) ListTransactions(account string) ([]btcjson.ListTransactionsResult, error) {
 	return c.ListTransactionsAsync(account).Receive()
 }
 

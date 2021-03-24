@@ -236,7 +236,7 @@ func (wg *WalletGUI) processWalletBlockNotification() bool {
 	wg.State.SetBalance(confirmed.ToDUO())
 	var atr []btcjson.ListTransactionsResult
 	// str := wg.State.allTxs.Load()
-	if atr, e = wg.WalletClient.ListTransactionsCountFrom("default", 2<<16, /*len(str)*/ 0); E.Chk(e) {
+	if atr, e = wg.WalletClient.ListTransactionsCount("default", 2<<32); E.Chk(e) {
 		return false
 	}
 	// D.Ln(len(atr))
