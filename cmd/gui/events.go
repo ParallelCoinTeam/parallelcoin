@@ -2,13 +2,12 @@ package gui
 
 import (
 	"encoding/json"
-	"github.com/p9c/pod/pkg/control/p2padvt"
 	"github.com/p9c/pod/pkg/amt"
+	"github.com/p9c/pod/pkg/control/p2padvt"
 	"github.com/p9c/pod/pkg/podcfg"
 	"github.com/p9c/pod/pkg/transport"
 	"github.com/p9c/pod/pkg/wire"
 	"io/ioutil"
-	"path/filepath"
 	"time"
 	
 	"github.com/p9c/pod/pkg/btcjson"
@@ -408,10 +407,10 @@ func (wg *WalletGUI) ChainNotifications() *rpcclient.NotificationHandlers {
 		// 	wg.invalidate <- struct{}{}
 		// },
 		OnTxAccepted: func(hash *chainhash.Hash, amount amt.Amount) {
-			if wg.syncing.Load() {
-				D.Ln("OnTxAccepted but we are syncing")
-				return
-			}
+			// if wg.syncing.Load() {
+			// 	D.Ln("OnTxAccepted but we are syncing")
+			// 	return
+			// }
 			D.Ln("(((NOTIFICATION))) OnTxAccepted")
 			D.Ln(hash, amount)
 			// if wg.processWalletBlockNotification() {

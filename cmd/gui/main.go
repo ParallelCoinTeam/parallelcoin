@@ -169,31 +169,31 @@ func processAdvtMsg(ctx interface{}, src net.Addr, dst string, b []byte) (e erro
 		D.Ln("ignoring own advertisment message")
 		return
 	}
-	var pi []btcjson.GetPeerInfoResult
-	if pi, e = wg.ChainClient.GetPeerInfo(); E.Chk(e) {
-	}
-	// I.S(pi)
-	for i := range pi {
-		for k := range j.IPs {
-			jpa := net.JoinHostPort(k, fmt.Sprint(j.P2P))
-			// I.Ln(jpa, pi[i].Addr, pi[i].AddrLocal)
-			if jpa == pi[i].Addr {
-				I.Ln("not connecting to node already connected outbound")
-				return
-			}
-			if jpa == pi[i].AddrLocal {
-				I.Ln("not connecting to node already connected inbound")
-				return
-			}
-		}
-		// for addy := range j.IPs {
-		// 	if addy == pi[i].Addr || addy == pi[i].AddrLocal {
-		// 		I.Ln("node already connected", pi[i].Inbound)
-		// 		return
-		// 	}
-		// }
-	}
 	if _, ok := wg.otherNodes[peerUUID]; !ok {
+		var pi []btcjson.GetPeerInfoResult
+		if pi, e = wg.ChainClient.GetPeerInfo(); E.Chk(e) {
+		}
+		// I.S(pi)
+		for i := range pi {
+			for k := range j.IPs {
+				jpa := net.JoinHostPort(k, fmt.Sprint(j.P2P))
+				// I.Ln(jpa, pi[i].Addr, pi[i].AddrLocal)
+				if jpa == pi[i].Addr {
+					I.Ln("not connecting to node already connected outbound")
+					return
+				}
+				if jpa == pi[i].AddrLocal {
+					I.Ln("not connecting to node already connected inbound")
+					return
+				}
+			}
+			// for addy := range j.IPs {
+			// 	if addy == pi[i].Addr || addy == pi[i].AddrLocal {
+			// 		I.Ln("node already connected", pi[i].Inbound)
+			// 		return
+			// 	}
+			// }
+		}
 		// if we haven't already added it to the permanent peer list, we can add it now
 		I.Ln("connecting to lan peer with same PSK", j.IPs, peerUUID)
 		wg.otherNodes[peerUUID] = &nodeSpec{}
