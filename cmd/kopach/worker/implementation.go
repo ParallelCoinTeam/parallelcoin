@@ -2,8 +2,8 @@ package worker
 
 import (
 	"crypto/cipher"
-	"github.com/p9c/pod/cmd/kopach/control/templates"
 	"github.com/p9c/pod/pkg/bits"
+	"github.com/p9c/pod/pkg/control/templates"
 	"github.com/p9c/pod/pkg/fork"
 	"math/rand"
 	"net"
@@ -13,13 +13,13 @@ import (
 	
 	"github.com/p9c/pod/pkg/util/qu"
 	
-	"github.com/p9c/pod/cmd/kopach/control/hashrate"
-	"github.com/p9c/pod/cmd/kopach/control/sol"
 	"github.com/p9c/pod/pkg/blockchain"
+	"github.com/p9c/pod/pkg/control/hashrate"
+	"github.com/p9c/pod/pkg/control/sol"
 	
 	"go.uber.org/atomic"
 	
-	"github.com/p9c/pod/cmd/kopach/control"
+	"github.com/p9c/pod/pkg/control"
 	"github.com/p9c/pod/pkg/pipe/stdconn"
 	"github.com/p9c/pod/pkg/ring"
 	"github.com/p9c/pod/pkg/transport"

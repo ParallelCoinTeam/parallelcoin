@@ -7,7 +7,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
-	"github.com/p9c/pod/cmd/kopach/control/peersummary"
+	"github.com/p9c/pod/pkg/control/peersummary"
 	"github.com/p9c/pod/pkg/amt"
 	block2 "github.com/p9c/pod/pkg/block"
 	"github.com/p9c/pod/pkg/fork"

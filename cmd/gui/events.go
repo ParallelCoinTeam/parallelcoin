@@ -2,7 +2,7 @@ package gui
 
 import (
 	"encoding/json"
-	"github.com/p9c/pod/cmd/kopach/control/p2padvt"
+	"github.com/p9c/pod/pkg/control/p2padvt"
 	"github.com/p9c/pod/pkg/amt"
 	"github.com/p9c/pod/pkg/podcfg"
 	"github.com/p9c/pod/pkg/transport"

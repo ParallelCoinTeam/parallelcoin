@@ -2,7 +2,7 @@ package client
 
 import (
 	"errors"
-	"github.com/p9c/pod/cmd/kopach/control/templates"
+	"github.com/p9c/pod/pkg/control/templates"
 	"io"
 	"net/rpc"
 )

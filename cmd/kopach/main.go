@@ -4,8 +4,8 @@ import (
 	"context"
 	"crypto/rand"
 	"fmt"
-	"github.com/p9c/pod/cmd/kopach/control/sol"
-	"github.com/p9c/pod/cmd/kopach/control/templates"
+	"github.com/p9c/pod/pkg/control/sol"
+	"github.com/p9c/pod/pkg/control/templates"
 	"github.com/p9c/pod/pkg/logg"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/podcfg"
@@ -14,7 +14,7 @@ import (
 	"runtime"
 	"time"
 	
-	"github.com/p9c/pod/cmd/kopach/control/p2padvt"
+	"github.com/p9c/pod/pkg/control/p2padvt"
 	
 	"github.com/niubaoshu/gotiny"
 	
@@ -25,11 +25,11 @@ import (
 	"go.uber.org/atomic"
 	
 	"github.com/p9c/pod/cmd/kopach/client"
-	"github.com/p9c/pod/cmd/kopach/control"
-	"github.com/p9c/pod/cmd/kopach/control/hashrate"
-	"github.com/p9c/pod/cmd/kopach/control/job"
-	"github.com/p9c/pod/cmd/kopach/control/pause"
 	"github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/control"
+	"github.com/p9c/pod/pkg/control/hashrate"
+	"github.com/p9c/pod/pkg/control/job"
+	"github.com/p9c/pod/pkg/control/pause"
 	"github.com/p9c/pod/pkg/pipe/stdconn/worker"
 	rav "github.com/p9c/pod/pkg/ring"
 	"github.com/p9c/pod/pkg/transport"
