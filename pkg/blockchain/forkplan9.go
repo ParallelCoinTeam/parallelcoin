@@ -2,13 +2,14 @@ package blockchain
 
 import (
 	"fmt"
+	bits2 "github.com/p9c/pod/pkg/bits"
+	"github.com/p9c/pod/pkg/fork"
 	"math/big"
 	"strings"
-
+	
 	"github.com/VividCortex/ewma"
 	
-	"github.com/p9c/pod/pkg/blockchain/fork"
-	"github.com/p9c/pod/pkg/blockchain/wire"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 // GetAlgStamps ...
@@ -151,7 +152,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNodeP *BlockNode, algoN
 
 	// adjustment *= adjustment
 	bigAdjustment := big.NewFloat(adjustment)
-	bigOldTarget := big.NewFloat(1.0).SetInt(fork.CompactToBig(bits))
+	bigOldTarget := big.NewFloat(1.0).SetInt(bits2.CompactToBig(bits))
 	bigNewTargetFloat := big.NewFloat(1.0).Mul(bigAdjustment, bigOldTarget)
 	newTarget, _ := bigNewTargetFloat.Int(nil)
 	if newTarget == nil {
@@ -159,10 +160,10 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNodeP *BlockNode, algoN
 		return
 	}
 	if newTarget.Cmp(&fork.FirstPowLimit) < 0 {
-		newTargetBits = BigToCompact(newTarget)
+		newTargetBits = bits2.BigToCompact(newTarget)
 		// Tracef("newTarget %064x %08x", newTarget, newTargetBits)
 	}
-	if l {
+	// if l {
 		// if lastNode.version == algoVer {
 		I.Ln(func() string {
 			an := fork.List[1].AlgoVers[algoVer]
@@ -196,7 +197,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNodeP *BlockNode, algoN
 			)
 		}())
 		// }
-	}
+	// }
 	return
 }
 
@@ -224,7 +225,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9old(lastNode *BlockNode, alg
 	adjustment = (allTimeDiv + algDiv + dayDiv + hourDiv + qhourDiv +
 		timeSinceAlgo) / 6
 	bigAdjustment := big.NewFloat(adjustment)
-	bigOldTarget := big.NewFloat(1.0).SetInt(fork.CompactToBig(last.bits))
+	bigOldTarget := big.NewFloat(1.0).SetInt(bits2.CompactToBig(last.bits))
 	bigNewTargetFloat := big.NewFloat(1.0).Mul(bigAdjustment, bigOldTarget)
 	newTarget, _ := bigNewTargetFloat.Int(nil)
 	if newTarget == nil {
@@ -232,7 +233,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9old(lastNode *BlockNode, alg
 		return
 	}
 	if newTarget.Cmp(&fork.FirstPowLimit) < 0 {
-		newTargetBits = BigToCompact(newTarget)
+		newTargetBits = bits2.BigToCompact(newTarget)
 		T.F("newTarget %064x %08x", newTarget, newTargetBits)
 	}
 	if l {

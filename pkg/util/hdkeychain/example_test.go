@@ -3,7 +3,7 @@ package hdkeychain_test
 import (
 	"fmt"
 	
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
+	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/util/hdkeychain"
 )
 
@@ -12,13 +12,13 @@ import (
 func ExampleNewMaster() {
 	// Generate a random seed at the recommended length.
 	seed, e := hdkeychain.GenerateSeed(hdkeychain.RecommendedSeedLen)
-	if e != nil  {
-		hdkeychain.		return
+	if e != nil {
+		return
 	}
 	// Generate a new master node using the seed.
-	key, e := hdkeychain.NewMaster(seed, &netparams.MainNetParams)
-	if e != nil  {
-		hdkeychain.		return
+	key, e := hdkeychain.NewMaster(seed, &chaincfg.MainNetParams)
+	if e != nil {
+		return
 	}
 	// Show that the generated master node extended key is private.
 	fmt.Println("Private Extended Key?:", key.IsPrivate())
@@ -48,43 +48,43 @@ func Example_defaultWalletLayout() {
 	master := "xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi"
 	// Start by getting an extended key instance for the master node. This gives the path: m
 	masterKey, e := hdkeychain.NewKeyFromString(master)
-	if e != nil  {
-		hdkeychain.		return
+	if e != nil {
+		return
 	}
 	// Derive the extended key for account 0.  This gives the path: m/0H
 	acct0, e := masterKey.Child(hdkeychain.HardenedKeyStart + 0)
-	if e != nil  {
-		hdkeychain.		return
+	if e != nil {
+		return
 	}
 	// Derive the extended key for the account 0 external chain.  This gives the path:   m/0H/0
 	acct0Ext, e := acct0.Child(0)
-	if e != nil  {
-		hdkeychain.		return
+	if e != nil {
+		return
 	}
 	// Derive the extended key for the account 0 internal chain.  This gives the path: m/0H/1
 	acct0Int, e := acct0.Child(1)
-	if e != nil  {
-		hdkeychain.		return
+	if e != nil {
+		return
 	}
 	// At this point, acct0Ext and acct0Int are ready to derive the keys for the external and internal wallet chains.
 	// Derive the 10th extended key for the account 0 external chain. This gives the path: m/0H/0/10
 	acct0Ext10, e := acct0Ext.Child(10)
-	if e != nil  {
-		hdkeychain.		return
+	if e != nil {
+		return
 	}
 	// Derive the 1st extended key for the account 0 internal chain.  This gives the path:   m/0H/1/0
 	acct0Int0, e := acct0Int.Child(0)
-	if e != nil  {
-		hdkeychain.		return
+	if e != nil {
+		return
 	}
 	// Get and show the address associated with the extended keys for the main bitcoin	network.
-	acct0ExtAddr, e := acct0Ext10.Address(&netparams.MainNetParams)
-	if e != nil  {
-		hdkeychain.		return
+	acct0ExtAddr, e := acct0Ext10.Address(&chaincfg.MainNetParams)
+	if e != nil {
+		return
 	}
-	acct0IntAddr, e := acct0Int0.Address(&netparams.MainNetParams)
-	if e != nil  {
-		hdkeychain.		return
+	acct0IntAddr, e := acct0Int0.Address(&chaincfg.MainNetParams)
+	if e != nil {
+		return
 	}
 	fmt.Println("Account 0 External Address 10:", acct0ExtAddr)
 	fmt.Println("Account 0 Internal Address 0:", acct0IntAddr)
@@ -111,13 +111,13 @@ func Example_audits() {
 	//
 	//   m
 	masterKey, e := hdkeychain.NewKeyFromString(master)
-	if e != nil  {
-		hdkeychain.		return
+	if e != nil {
+		return
 	}
 	// Neuter the master key to generate a master public extended key.  This gives the path:   N(m/*)
 	masterPubKey, e := masterKey.Neuter()
-	if e != nil  {
-		hdkeychain.		return
+	if e != nil {
+		return
 	}
 	// Share the master public extended key with the auditor.
 	fmt.Println("Audit key N(m/*):", masterPubKey)

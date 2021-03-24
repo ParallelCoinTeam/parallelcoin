@@ -7,11 +7,11 @@ import (
 	
 	"github.com/jessevdk/go-flags"
 	
-	"github.com/p9c/pod/app/appdata"
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
-	"github.com/p9c/pod/pkg/blockchain/wire"
+	"github.com/p9c/pod/pkg/appdata"
+	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/database"
 	_ "github.com/p9c/pod/pkg/database/ffldb"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 const (
@@ -25,7 +25,7 @@ var (
 	podHomeDir      = appdata.Dir("pod", false)
 	defaultDataDir  = filepath.Join(podHomeDir, "data")
 	knownDbTypes    = database.SupportedDrivers()
-	activeNetParams = &netparams.MainNetParams
+	activeNetParams = &chaincfg.MainNetParams
 )
 
 // config defines the configuration options for findcheckpoint. See loadConfig for details on the configuration load
@@ -58,7 +58,7 @@ func validDbType(
 // network matches wire.TestNet3. A proper upgrade to move the data and log directories for this network to "testnet3"
 // is planned for the future, at which point this function can be removed and the network parameter's name used instead.
 func netName(
-	chainParams *netparams.Params,
+	chainParams *chaincfg.Params,
 ) string {
 	switch chainParams.Net {
 	case wire.TestNet3:
@@ -80,7 +80,7 @@ func loadConfig() (*config, []string, error) {
 	parser := flags.NewParser(&cfg, flags.Default)
 	remainingArgs, e := parser.Parse()
 	if e != nil {
-		if e, ok := err.(*flags.Error); !ok || e.Type != flags.ErrHelp {
+		if e, ok := e.(*flags.Error); !ok || e.Type != flags.ErrHelp {
 			parser.WriteHelp(os.Stderr)
 		}
 		return nil, nil, e
@@ -91,21 +91,21 @@ func loadConfig() (*config, []string, error) {
 	// Count number of network flags passed; assign active network netparams while we're at it
 	if cfg.TestNet3 {
 		numNets++
-		activeNetParams = &netparams.TestNet3Params
+		activeNetParams = &chaincfg.TestNet3Params
 	}
 	if cfg.RegressionTest {
 		numNets++
-		activeNetParams = &netparams.RegressionTestParams
+		activeNetParams = &chaincfg.RegressionTestParams
 	}
 	if cfg.SimNet {
 		numNets++
-		activeNetParams = &netparams.SimNetParams
+		activeNetParams = &chaincfg.SimNetParams
 	}
 	if numNets > 1 {
 		str := "%s: The testnet, regtest, and simnet netparams can't be " +
 			"used together -- choose one of the three"
 		e := fmt.Errorf(str, funcName)
-		_, _ = fmt.Fprintln(os.Stderr, err)
+		_, _ = fmt.Fprintln(os.Stderr, e)
 		parser.WriteHelp(os.Stderr)
 		return nil, nil, e
 	}
@@ -114,7 +114,7 @@ func loadConfig() (*config, []string, error) {
 		str := "%s: The specified database type [%v] is invalid -- " +
 			"supported types %v"
 		e := fmt.Errorf(str, "loadConfig", cfg.DbType, knownDbTypes)
-		_, _ = fmt.Fprintln(os.Stderr, err)
+		_, _ = fmt.Fprintln(os.Stderr, e)
 		parser.WriteHelp(os.Stderr)
 		return nil, nil, e
 	}
@@ -128,7 +128,7 @@ func loadConfig() (*config, []string, error) {
 		str := "%s: The specified number of candidates is out of " +
 			"range -- parsed [%v]"
 		e = fmt.Errorf(str, "loadConfig", cfg.NumCandidates)
-		_, _ = fmt.Fprintln(os.Stderr, err)
+		_, _ = fmt.Fprintln(os.Stderr, e)
 		parser.WriteHelp(os.Stderr)
 		return nil, nil, e
 	}

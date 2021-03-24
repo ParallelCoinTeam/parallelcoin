@@ -3,22 +3,21 @@ package app
 import (
 	"github.com/gookit/color"
 	"github.com/p9c/pod/pkg/logg"
+	"github.com/p9c/pod/pkg/pod"
 	"os"
 	"os/exec"
 	
-	"github.com/p9c/pod/app/config"
+	"github.com/p9c/pod/pkg/podconfig"
 	
 	"github.com/urfave/cli"
-	
-	"github.com/p9c/pod/app/conte"
 )
 
-var initHandle = func(cx *conte.Xt) func(c *cli.Context) (e error) {
+var initHandle = func(cx *pod.State) func(c *cli.Context) (e error) {
 	return func(c *cli.Context) (e error) {
 		logg.AppColorizer = color.Bit24(255, 255, 255, false).Sprint
 		logg.App = "  init"
 		I.Ln("running configuration and wallet initialiser")
-		config.Configure(cx, "init", true)
+		podconfig.Configure(cx, "init", true)
 		args := append(os.Args[1:len(os.Args)-1], "wallet")
 		D.Ln(args)
 		var command []string

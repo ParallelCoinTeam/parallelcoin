@@ -2,7 +2,10 @@ package walletmain
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/logg"
+	"github.com/p9c/pod/pkg/podcfg"
+	walletrpc2 "github.com/p9c/pod/pkg/walletrpc"
 	
 	// This enables pprof
 	// _ "net/http/pprof"
@@ -10,13 +13,10 @@ import (
 	
 	"github.com/p9c/pod/pkg/util/qu"
 	
-	"github.com/p9c/pod/app/conte"
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
 	"github.com/p9c/pod/pkg/pod"
-	"github.com/p9c/pod/pkg/rpc/legacy"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/wallet"
-	"github.com/p9c/pod/pkg/wallet/chain"
+	"github.com/p9c/pod/pkg/chainclient"
 )
 
 // Main is a work-around main function that is required since deferred functions
@@ -24,7 +24,7 @@ import (
 // runs this function and checks for a non-nil error, at point any defers have
 // already run, and if the error is non-nil, the program can be exited with an
 // error exit status.
-func Main(cx *conte.Xt) (e error) {
+func Main(cx *pod.State) (e error) {
 	// cx.WaitGroup.Add(1)
 	cx.WaitAdd()
 	// if *config.Profile != "" {
@@ -41,7 +41,7 @@ func Main(cx *conte.Xt) (e error) {
 	// Create and start HTTP server to serve wallet client connections. This will be updated with the wallet and chain
 	// server RPC client created below after each is created.
 	D.Ln("starting RPC servers")
-	var legacyServer *legacy.Server
+	var legacyServer *walletrpc2.Server
 	if legacyServer, e = startRPCServers(cx, loader); E.Chk(e) {
 		E.Ln("unable to create RPC servers:", e)
 		return
@@ -90,31 +90,31 @@ func Main(cx *conte.Xt) (e error) {
 }
 
 // LoadWallet ...
-func LoadWallet(loader *wallet.Loader, cx *conte.Xt, legacyServer *legacy.Server) (e error) {
-	D.Ln("starting rpc client connection handler", *cx.Config.WalletPass)
+func LoadWallet(loader *wallet.Loader, cx *pod.State, legacyServer *walletrpc2.Server) (e error) {
+	T.Ln("starting rpc client connection handler", *cx.Config.WalletPass)
 	// Create and start chain RPC client so it's ready to connect to the wallet when
 	// loaded later. Load the wallet database. It must have been created already or
 	// this will return an appropriate error.
 	var w *wallet.Wallet
-	D.Ln("^^^^^^^^^^^^^ opening existing wallet")
+	T.Ln("opening existing wallet")
 	if w, e = loader.OpenExistingWallet([]byte(*cx.Config.WalletPass), true, cx.Config, nil); E.Chk(e) {
-		D.Ln("^^^^^^^^^^^^^ failed to open existing wallet")
+		T.Ln("failed to open existing wallet")
 		return
 	}
-	D.Ln("^^^^^^^^^^^^^ opened existing wallet")
+	T.Ln("opened existing wallet")
 	// go func() {
 	// W.Ln("refilling mining addresses", cx.Config, cx.StateCfg)
 	// addresses.RefillMiningAddresses(w, cx.Config, cx.StateCfg)
 	// W.Ln("done refilling mining addresses")
 	// D.S(*cx.Config.MiningAddrs)
-	// save.Pod(cx.Config)
+	// save.Save(cx.Config)
 	// }()
 	loader.Wallet = w
 	// D.Ln("^^^^^^^^^^^ sending back wallet")
 	// cx.WalletChan <- w
-	D.Ln("starting rpcClientConnectLoop")
+	T.Ln("starting rpcClientConnectLoop")
 	go rpcClientConnectLoop(cx, legacyServer, loader)
-	D.Ln("^^^^^^^^^^^^^ adding interrupt handler to unload wallet")
+	T.Ln("adding interrupt handler to unload wallet")
 	// Add interrupt handlers to shutdown the various process components before
 	// exiting. Interrupt handlers run in LIFO order, so the wallet (which should be
 	// closed last) is added first.
@@ -130,9 +130,9 @@ func LoadWallet(loader *wallet.Loader, cx *conte.Xt, legacyServer *legacy.Server
 	if legacyServer != nil {
 		interrupt.AddHandler(
 			func() {
-				F.Ln("stopping wallet RPC server")
+				D.Ln("stopping wallet RPC server")
 				legacyServer.Stop()
-				F.Ln("wallet RPC server shutdown")
+				D.Ln("wallet RPC server shutdown")
 			},
 		)
 	}
@@ -154,17 +154,17 @@ func LoadWallet(loader *wallet.Loader, cx *conte.Xt, legacyServer *legacy.Server
 // associated with the server for RPC pass-through and to enable additional
 // methods.
 func rpcClientConnectLoop(
-	cx *conte.Xt, legacyServer *legacy.Server,
+	cx *pod.State, legacyServer *walletrpc2.Server,
 	loader *wallet.Loader,
 ) {
-	D.Ln("^^^^^^^^^^^^^^^ rpcClientConnectLoop", logg.Caller("which was started at:", 2))
+	T.Ln("rpcClientConnectLoop", logg.Caller("which was started at:", 2))
 	// var certs []byte
 	// if !cx.PodConfig.UseSPV {
-	certs := pod.ReadCAFile(cx.Config)
+	certs := podcfg.ReadCAFile(cx.Config)
 	// }
 	for {
 		var (
-			chainClient chain.Interface
+			chainClient chainclient.Interface
 			e           error
 		)
 		// if cx.PodConfig.UseSPV {
@@ -198,8 +198,8 @@ func rpcClientConnectLoop(
 		// 		log<-cl.Errorf{"couldn't start Neutrino client: %s", e)
 		// 	}
 		// } else {
-		var cc *chain.RPCClient
-		D.Ln("starting wallet's ChainClient")
+		var cc *chainclient.RPCClient
+		T.Ln("starting wallet's ChainClient")
 		cc, e = StartChainRPC(cx.Config, cx.ActiveNet, certs, cx.KillAll)
 		if e != nil {
 			E.Ln(
@@ -207,7 +207,7 @@ func rpcClientConnectLoop(
 			)
 			continue
 		}
-		D.Ln("^^^^^^^^^ storing chain client")
+		T.Ln("storing chain client")
 		cx.ChainClient = cc
 		cx.ChainClientReady.Q()
 		chainClient = cc
@@ -217,7 +217,7 @@ func rpcClientConnectLoop(
 		// loaded at a later time with a client that has already disconnected. A mutex
 		// is used to make this concurrent safe.
 		associateRPCClient := func(w *wallet.Wallet) {
-			D.Ln(">>>>>>>>>>> associating chain client")
+			T.Ln("associating chain client")
 			if w != nil {
 				w.SynchronizeRPC(chainClient)
 			}
@@ -225,19 +225,19 @@ func rpcClientConnectLoop(
 				legacyServer.SetChainServer(chainClient)
 			}
 		}
-		D.Ln("adding wallet loader hook to connect to chain")
+		T.Ln("adding wallet loader hook to connect to chain")
 		mu := new(sync.Mutex)
 		loader.RunAfterLoad(
 			func(w *wallet.Wallet) {
-				D.Ln("running associate chain client")
+				T.Ln("running associate chain client")
 				mu.Lock()
 				associate := associateRPCClient
 				mu.Unlock()
 				if associate != nil {
 					associate(w)
-					D.Ln("wallet is now associated by chain client")
+					T.Ln("wallet is now associated by chain client")
 				} else {
-					D.Ln("wallet chain client associate function is nil")
+					T.Ln("wallet chain client associate function is nil")
 				}
 			},
 		)
@@ -265,11 +265,11 @@ func rpcClientConnectLoop(
 // services. This function uses the RPC options from the global config and there
 // is no recovery in case the server is not available or if there is an
 // authentication error. Instead, all requests to the client will simply error.
-func StartChainRPC(config *pod.Config, activeNet *netparams.Params, certs []byte, quit qu.C) (*chain.RPCClient, error) {
+func StartChainRPC(config *podcfg.Config, activeNet *chaincfg.Params, certs []byte, quit qu.C) (*chainclient.RPCClient, error) {
 	D.Ln(
 		">>>>>>>>>>>>>>> attempting RPC client connection to %v, TLS: %s", *config.RPCConnect, fmt.Sprint(*config.TLS),
 	)
-	rpcC, e := chain.NewRPCClient(
+	rpcC, e := chainclient.NewRPCClient(
 		activeNet,
 		*config.RPCConnect,
 		*config.Username,

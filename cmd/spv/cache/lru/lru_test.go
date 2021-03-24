@@ -16,7 +16,7 @@ func assertEqual(t *testing.T, a interface{}, b interface{}, message string) {
 	if len(message) == 0 {
 		message = fmt.Sprintf("%v != %v", a, b)
 	}
-	t.F.Ln(message)
+	t.Fatal(message)
 }
 
 // sizeable is a simple struct that represents an element of arbitrary size
@@ -200,7 +200,7 @@ func TestCacheFailsInsertionSizeBiggerCapacity(t *testing.T) {
 
 	e := c.Put(1, &sizeable{value: 1, size: 3})
 	if e == nil {
-		t.F.Ln("shouldn't be able to put elements larger than cache")
+		t.Fatal("shouldn't be able to put elements larger than cache")
 	}
 	assertEqual(t, c.Len(), 0, "")
 }
@@ -215,7 +215,7 @@ func TestManySmallElementCanInsertAfterBigEviction(t *testing.T) {
 
 	e := c.Put(1, &sizeable{value: 1, size: 3})
 	if e != nil {
-		t.F.Ln("couldn't insert element")
+		t.Fatal("couldn't insert element")
 	}
 
 	assertEqual(t, c.Len(), 1, "")
@@ -321,7 +321,7 @@ func TestConcurrencySimple(t *testing.T) {
 
 			if e != nil {
 
-				t.F.Ln(e)
+				t.Fatal(e)
 			}
 		}(i)
 	}
@@ -333,9 +333,9 @@ func TestConcurrencySimple(t *testing.T) {
 			defer wg.Done()
 			_, e := c.Get(i)
 
-			if e != nil && err != cache.ErrElementNotFound {
+			if e != nil && e != cache.ErrElementNotFound {
 
-				t.F.Ln(e)
+				t.Fatal(e)
 			}
 		}(i)
 	}
@@ -362,7 +362,7 @@ func TestConcurrencySmallCache(t *testing.T) {
 
 			if e != nil {
 
-				t.F.Ln(e)
+				t.Fatal(e)
 			}
 		}(i)
 	}
@@ -374,9 +374,9 @@ func TestConcurrencySmallCache(t *testing.T) {
 			defer wg.Done()
 			_, e := c.Get(i)
 
-			if e != nil && err != cache.ErrElementNotFound {
+			if e != nil && e != cache.ErrElementNotFound {
 
-				t.F.Ln(e)
+				t.Fatal(e)
 			}
 		}(i)
 	}
@@ -403,7 +403,7 @@ func TestConcurrencyBigCache(t *testing.T) {
 
 			if e != nil {
 
-				t.F.Ln(e)
+				t.Fatal(e)
 			}
 		}(i)
 	}
@@ -415,9 +415,9 @@ func TestConcurrencyBigCache(t *testing.T) {
 			defer wg.Done()
 			_, e := c.Get(i)
 
-			if e != nil && err != cache.ErrElementNotFound {
+			if e != nil && e != cache.ErrElementNotFound {
 
-				t.F.Ln(e)
+				t.Fatal(e)
 			}
 		}(i)
 	}

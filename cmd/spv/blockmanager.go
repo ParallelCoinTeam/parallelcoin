@@ -4,6 +4,9 @@ import (
 	"bytes"
 	"container/list"
 	"fmt"
+	"github.com/p9c/pod/pkg/bits"
+	"github.com/p9c/pod/pkg/block"
+	"github.com/p9c/pod/pkg/fork"
 	"math"
 	"math/big"
 	"sync"
@@ -15,14 +18,12 @@ import (
 	"github.com/p9c/pod/cmd/spv/headerfs"
 	"github.com/p9c/pod/cmd/spv/headerlist"
 	"github.com/p9c/pod/pkg/blockchain"
-	"github.com/p9c/pod/pkg/blockchain/chaincfg"
-	"github.com/p9c/pod/pkg/blockchain/chainhash"
-	"github.com/p9c/pod/pkg/blockchain/fork"
-	"github.com/p9c/pod/pkg/blockchain/tx/txscript"
-	"github.com/p9c/pod/pkg/blockchain/wire"
-	"github.com/p9c/pod/pkg/coding/gcs"
-	"github.com/p9c/pod/pkg/coding/gcs/builder"
-	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/gcs"
+	"github.com/p9c/pod/pkg/gcs/builder"
+	"github.com/p9c/pod/pkg/txscript"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 const (
@@ -601,7 +602,7 @@ func (b *blockManager) getUncheckpointedCFHeaders(
 				targetHeight, header.BlockHash(), fType,
 			)
 			badPeers, e := resolveCFHeaderMismatch(
-				block.MsgBlock(), fType, filtersFromPeers,
+				block.WireBlock(), fType, filtersFromPeers,
 			)
 			if e != nil {
 				return e
@@ -1029,7 +1030,7 @@ func (b *blockManager) resolveConflict(
 				targetHeight, header.BlockHash(), fType,
 			)
 			badPeers, e := resolveCFHeaderMismatch(
-				block.MsgBlock(), fType, filtersFromPeers,
+				block.WireBlock(), fType, filtersFromPeers,
 			)
 			if e != nil {
 				return nil, e
@@ -1105,7 +1106,7 @@ func checkForCFHeaderMismatch(
 // reconstruct and verify from the filter in question. We'll return all the peers that returned what we believe to in
 // invalid filter.
 func resolveCFHeaderMismatch(
-	block *wire.MsgBlock, fType wire.FilterType, filtersFromPeers map[string]*gcs.Filter,
+	block *wire.Block, fType wire.FilterType, filtersFromPeers map[string]*gcs.Filter,
 ) ([]string, error) {
 	badPeers := make(map[string]struct{})
 	blockHash := block.BlockHash()
@@ -1352,7 +1353,7 @@ func checkCFCheckptSanity(
 //
 // It must be run as a goroutine.
 //
-// It processes block and inv messages in a separate goroutine from the peer handlers so the block (MsgBlock) messages
+// It processes block and inv messages in a separate goroutine from the peer handlers so the block (Block) messages
 // are handled by a single thread without needing to lock memory data structures.
 //
 // This is important because the block manager controls which blocks are needed and how the fetching should proceed.
@@ -1996,8 +1997,8 @@ func (b *blockManager) checkHeaderSanity(
 		return e
 	}
 	blockHeader.Bits = diff
-	stubBlock := util.NewBlock(
-		&wire.MsgBlock{
+	stubBlock := block.NewBlock(
+		&wire.Block{
 			Header: *blockHeader,
 		},
 	)
@@ -2083,7 +2084,7 @@ func (b *blockManager) calcNextRequiredDifficulty(
 	//
 	// The result uses integer division which means it will be slightly rounded down. Bitcoind also uses integer
 	// division to calculate this result.
-	oldTarget := fork.CompactToBig(lastNode.Header.Bits)
+	oldTarget := bits.CompactToBig(lastNode.Header.Bits)
 	newTarget := new(big.Int).Mul(oldTarget, big.NewInt(adjustedTimespan))
 	targetTimeSpan := b.server.chainParams.TargetTimespan
 	newTarget.Div(newTarget, big.NewInt(targetTimeSpan))
@@ -2093,7 +2094,7 @@ func (b *blockManager) calcNextRequiredDifficulty(
 	}
 	// Log new target difficulty and return it. The new target logging is intentionally converting the bits back to a
 	// number instead of using newTarget since conversion to the compact representation loses precision.
-	newTargetBits := blockchain.BigToCompact(newTarget)
+	newTargetBits := bits.BigToCompact(newTarget)
 	D.C(
 		func() string {
 			return fmt.Sprintf(
@@ -2101,7 +2102,7 @@ func (b *blockManager) calcNextRequiredDifficulty(
 					"%064x) new target %08x (%064x) actual timespan %v, adjusted timespan %v, target timespan %v",
 				lastNode.Height+1,
 				lastNode.Header.Bits, oldTarget,
-				newTargetBits, fork.CompactToBig(newTargetBits),
+				newTargetBits, bits.CompactToBig(newTargetBits),
 				time.Duration(actualTimespan)*time.Second,
 				time.Duration(adjustedTimespan)*time.Second,
 				b.server.chainParams.TargetTimespan,

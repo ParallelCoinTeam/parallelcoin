@@ -1,12 +1,12 @@
 package node
 
 import (
+	"github.com/p9c/pod/pkg/pod"
 	"io"
 	"os"
 	"path/filepath"
 	
-	"github.com/p9c/pod/app/apputil"
-	"github.com/p9c/pod/app/conte"
+	"github.com/p9c/pod/pkg/apputil"
 	"github.com/p9c/pod/pkg/database/blockdb"
 )
 
@@ -30,7 +30,7 @@ func dirEmpty(dirPath string) (bool, error) {
 }
 
 // doUpgrades performs upgrades to pod as new versions require it
-func doUpgrades(cx *conte.Xt) (e error) {
+func doUpgrades(cx *pod.State) (e error) {
 	e = upgradeDBPaths(cx)
 	if e != nil {
 		return e
@@ -57,7 +57,7 @@ func oldPodHomeDir() string {
 
 // upgradeDBPathNet moves the database for a specific network from its location prior to pod version 0.2.0 and uses
 // heuristics to ascertain the old database type to rename to the new format.
-func upgradeDBPathNet(cx *conte.Xt, oldDbPath, netName string) (e error) {
+func upgradeDBPathNet(cx *pod.State, oldDbPath, netName string) (e error) {
 	// Prior to version 0.2.0, the database was named the same thing for both sqlite and leveldb. Use heuristics to
 	// figure out the type of the database and move it to the new path and name introduced with version 0.2.0
 	// accordingly.
@@ -91,7 +91,7 @@ func upgradeDBPathNet(cx *conte.Xt, oldDbPath, netName string) (e error) {
 }
 
 // upgradeDBPaths moves the databases from their locations prior to pod version 0.2.0 to their new locations
-func upgradeDBPaths(cx *conte.Xt) (e error) {
+func upgradeDBPaths(cx *pod.State) (e error) {
 	// Prior to version 0.2.0 the databases were in the "db" directory and their names were suffixed by "testnet" and
 	// "regtest" for their respective networks. Chk for the old database and update it to the new path introduced with
 	// version 0.2.0 accordingly.

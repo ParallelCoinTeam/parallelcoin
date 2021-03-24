@@ -3,6 +3,8 @@ package worker
 import (
 	"crypto/cipher"
 	"github.com/p9c/pod/cmd/kopach/control/templates"
+	"github.com/p9c/pod/pkg/bits"
+	"github.com/p9c/pod/pkg/fork"
 	"math/rand"
 	"net"
 	"os"
@@ -14,18 +16,17 @@ import (
 	"github.com/p9c/pod/cmd/kopach/control/hashrate"
 	"github.com/p9c/pod/cmd/kopach/control/sol"
 	"github.com/p9c/pod/pkg/blockchain"
-	"github.com/p9c/pod/pkg/blockchain/fork"
 	
 	"go.uber.org/atomic"
 	
 	"github.com/p9c/pod/cmd/kopach/control"
-	"github.com/p9c/pod/pkg/comm/stdconn"
-	"github.com/p9c/pod/pkg/comm/transport"
-	"github.com/p9c/pod/pkg/data/ring"
+	"github.com/p9c/pod/pkg/pipe/stdconn"
+	"github.com/p9c/pod/pkg/ring"
+	"github.com/p9c/pod/pkg/transport"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
-const RoundsPerAlgo = 1024
+const CountPerRound = 500
 
 type Worker struct {
 	mx               sync.Mutex
@@ -55,16 +56,16 @@ type Counter struct {
 
 // NewCounter returns an initialized algorithm rolling counter that ensures each
 // miner does equal amounts of every algorithm
-func NewCounter(roundsPerAlgo int32) (c *Counter) {
+func NewCounter(countPerRound int32) (c *Counter) {
 	// these will be populated when work arrives
 	var algos []int32
 	// Start the counter at a random position
 	rand.Seed(time.Now().UnixNano())
 	c = &Counter{}
-	c.C.Store(int32(rand.Intn(int(roundsPerAlgo)+1) + 1))
+	c.C.Store(int32(rand.Intn(int(countPerRound)+1) + 1))
 	c.Algos.Store(algos)
-	c.RoundsPerAlgo.Store(roundsPerAlgo)
-	c.rpa = roundsPerAlgo
+	c.RoundsPerAlgo.Store(countPerRound)
+	c.rpa = countPerRound
 	return
 }
 
@@ -74,13 +75,13 @@ func (c *Counter) GetAlgoVer(height int32) (ver int32) {
 	algs := fork.GetAlgoVerSlice(height)
 	// D.Ln(algs)
 	if c.RoundsPerAlgo.Load() < 1 {
-		D.Ln("RoundsPerAlgo is", c.RoundsPerAlgo.Load(), len(algs))
+		D.Ln("CountPerRound is", c.RoundsPerAlgo.Load(), len(algs))
 		return 0
 	}
 	if len(algs) > 0 {
 		ver = algs[c.C.Load()%int32(len(algs))]
 		// ver = algs[(c.C.Load()/
-		// 	c.RoundsPerAlgo.Load())%
+		// 	c.CountPerRound.Load())%
 		// 	int32(len(algs))]
 		c.C.Add(1)
 	}
@@ -115,12 +116,12 @@ func (c *Counter) GetAlgoVer(height int32) (ver int32) {
 // allow a worker to be configured to run on a bare metal system with a different launcher main
 func NewWithConnAndSemaphore(id string, conn *stdconn.StdConn, quit qu.C, uuid uint64) *Worker {
 	T.Ln("creating new worker")
-	// msgBlock := wire.MsgBlock{Header: wire.BlockHeader{}}
+	// msgBlock := wire.WireBlock{Header: wire.BlockHeader{}}
 	w := &Worker{
 		id:            id,
 		pipeConn:      conn,
 		quit:          quit,
-		roller:        NewCounter(RoundsPerAlgo),
+		roller:        NewCounter(CountPerRound),
 		startChan:     qu.T(),
 		stopChan:      qu.T(),
 		hashSampleBuf: ring.NewBufferUint64(1000),
@@ -227,8 +228,8 @@ out:
 					// D.S(blockHeader)
 					hash := blockHeader.BlockHashWithAlgos(newHeight)
 					bigHash := blockchain.HashToBig(&hash)
-					if bigHash.Cmp(fork.CompactToBig(blockHeader.Bits)) <= 0 {
-						D.Ln("found solution", newHeight)
+					if bigHash.Cmp(bits.CompactToBig(blockHeader.Bits)) <= 0 {
+						D.Ln("found solution", newHeight, w.templatesMessage.Nonce, w.templatesMessage.UUID)
 						srs := sol.Encode(w.templatesMessage.Nonce, w.templatesMessage.UUID, blockHeader)
 						e := w.dispatchConn.SendMany(
 							sol.Magic,

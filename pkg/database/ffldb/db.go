@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+	"github.com/p9c/pod/pkg/block"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -18,11 +19,10 @@ import (
 	"github.com/btcsuite/goleveldb/leveldb/opt"
 	"github.com/btcsuite/goleveldb/leveldb/util"
 	
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
-	"github.com/p9c/pod/pkg/blockchain/wire"
-	database "github.com/p9c/pod/pkg/database"
-	u "github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/database"
 	"github.com/p9c/pod/pkg/util/treap"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 const (
@@ -71,14 +71,14 @@ const (
 
 // bulkFetchData is allows a block location to be specified along with the index it was requested from.
 //
-// This in turn allows the bulk data loading functions to sort the data accesses based on the location to improve
+// This in turn allows the bulk data loading functions to txsort the data accesses based on the location to improve
 // performance while keeping track of which result the data is for.
 type bulkFetchData struct {
 	*blockLocation
 	replyIndex int
 }
 
-// bulkFetchDataSorter implements sort.
+// bulkFetchDataSorter implements txsort.
 //
 // Interface to allow a slice of bulkFetchData to be sorted. In particular it sorts by file and then offset so that
 // reads from files are grouped and linear.
@@ -98,7 +98,7 @@ func (s bulkFetchDataSorter) Swap(i, j int) {
 	s[i], s[j] = s[j], s[i]
 }
 
-// Less returns whether the item with index i should sort before the item with index j.
+// Less returns whether the item with index i should txsort before the item with index j.
 //
 // It is part of the sort.Interface implementation.
 func (s bulkFetchDataSorter) Less(i, j int) bool {
@@ -1066,7 +1066,7 @@ func (tx *transaction) hasBlock(hash *chainhash.Hash) bool {
 //   - ErrTxClosed if the transaction has already been closed
 //
 // This function is part of the database.Tx interface implementation.
-func (tx *transaction) StoreBlock(block *u.Block) (e error) {
+func (tx *transaction) StoreBlock(block *block.Block) (e error) {
 	// Ensure transaction state is valid.
 	if e := tx.checkClosed(); E.Chk(e) {
 		return e
@@ -1209,7 +1209,7 @@ func (tx *transaction) FetchBlockHeaders(hashes []chainhash.Hash) ([][]byte, err
 }
 
 // FetchBlock returns the raw serialized bytes for the block identified by the given hash. The raw bytes are in the
-// format returned by Serialize on a wire.MsgBlock.
+// format returned by Serialize on a wire.Block.
 //
 // Returns the following errors as required by the interface contract:
 //
@@ -1253,7 +1253,7 @@ func (tx *transaction) FetchBlock(hash *chainhash.Hash) ([]byte, error) {
 
 // FetchBlocks returns the raw serialized bytes for the blocks identified by the given hashes.
 //
-// The raw bytes are in the format returned by Serialize on a wire.MsgBlock.
+// The raw bytes are in the format returned by Serialize on a wire.Block.
 //
 // Returns the following errors as required by the interface contract:
 //
@@ -1322,7 +1322,7 @@ func (tx *transaction) fetchPendingRegion(region *database.BlockRegion) ([]byte,
 // Depending on the backend implementation, this can provide significant savings by avoiding the need to load entire
 // blocks.
 //
-// The raw bytes are in the format returned by Serialize on a wire.MsgBlock and the Offset field in the provided
+// The raw bytes are in the format returned by Serialize on a wire.Block and the Offset field in the provided
 // BlockRegion is zero-based and relative to the start of the block (byte 0).
 //
 // Returns the following errors as required by the interface contract:
@@ -1389,7 +1389,7 @@ func (tx *transaction) FetchBlockRegion(region *database.BlockRegion) ([]byte, e
 // function. Depending on the backend implementation, this can provide significant savings by avoiding the need to load
 // entire blocks.
 //
-// The raw bytes are in the format returned by Serialize on a wire.MsgBlock and the Offset fields in the provided
+// The raw bytes are in the format returned by Serialize on a wire.Block and the Offset fields in the provided
 // BlockRegions are zero-based and relative to the start of the block (byte 0).
 //
 // Returns the following errors as required by the interface contract:
@@ -1420,7 +1420,7 @@ func (tx *transaction) FetchBlockRegions(regions []database.BlockRegion) ([][]by
 	// NOTE: A potential optimization here would be to combine adjacent regions to reduce the number of reads.
 	//
 	// In order to improve efficiency of loading the bulk data, first grab the block location for all of the requested
-	// block hashes and sort the reads by filenum:offset so that all reads are grouped by file and linear within each
+	// block hashes and txsort the reads by filenum:offset so that all reads are grouped by file and linear within each
 	// file.
 	//
 	// This can result in quite a significant performance increase depending on how spread out the requested hashes are

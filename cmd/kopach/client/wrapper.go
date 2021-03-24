@@ -20,7 +20,7 @@ func New(conn io.ReadWriteCloser) *Client {
 // NewJob is a delivery of a new job for the worker, this starts a miner
 // note that since this implements net/rpc by default this is gob encoded
 func (c *Client) NewJob(templates *templates.Message) (e error) {
-	T.Ln("sending new templates")
+	// T.Ln("sending new templates")
 	// D.S(templates)
 	if templates == nil {
 		e = errors.New("templates is nil")
@@ -33,6 +33,7 @@ func (c *Client) NewJob(templates *templates.Message) (e error) {
 	if reply != true {
 		e = errors.New("new templates command not acknowledged")
 	}
+	D.Ln("new job delivered to workers")
 	return
 }
 

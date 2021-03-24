@@ -5,6 +5,8 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"github.com/p9c/pod/pkg/amt"
+	"github.com/p9c/pod/pkg/block"
 	"io"
 	"math"
 	"math/rand"
@@ -12,8 +14,8 @@ import (
 	"strings"
 	"sync"
 	
-	"github.com/p9c/pod/pkg/blockchain/chainhash"
-	"github.com/p9c/pod/pkg/blockchain/mining"
+	"github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/mining"
 	"github.com/p9c/pod/pkg/util"
 )
 
@@ -155,7 +157,7 @@ func (ef *FeeEstimator) ObserveTransaction(
 		size := uint32(GetTxVirtualSize(t.Tx))
 		ef.observed[hash] = &observedTransaction{
 			hash:     hash,
-			feeRate:  NewSatoshiPerByte(util.Amount(t.Fee), size),
+			feeRate:  NewSatoshiPerByte(amt.Amount(t.Fee), size),
 			observed: t.Height,
 			mined:    mining.UnminedHeight,
 		}
@@ -164,7 +166,7 @@ func (ef *FeeEstimator) ObserveTransaction(
 
 // RegisterBlock informs the fee estimator of a new block to take into account.
 func (ef *FeeEstimator) RegisterBlock(
-	block *util.Block,
+	block *block.Block,
 ) (e error) {
 	ef.mtx.Lock()
 	defer ef.mtx.Unlock()
@@ -524,12 +526,12 @@ func (rb *registeredBlock) serialize(
 }
 
 // Fee returns the fee for a transaction of a given size for the given fee rate.
-func (rate SatoshiPerByte) Fee(size uint32) util.Amount {
+func (rate SatoshiPerByte) Fee(size uint32) amt.Amount {
 	// If our rate is the error value, return that.
 	if rate == SatoshiPerByte(-1) {
-		return util.Amount(-1)
+		return amt.Amount(-1)
 	}
-	return util.Amount(float64(rate) * float64(size))
+	return amt.Amount(float64(rate) * float64(size))
 }
 
 // ToBtcPerKb returns a float value that represents the given SatoshiPerByte converted to satoshis per kb.
@@ -562,7 +564,7 @@ func NewFeeEstimator(maxRollback, minRegisteredBlocks uint32) *FeeEstimator {
 }
 
 // NewSatoshiPerByte creates a SatoshiPerByte from an Amount and a size in bytes.
-func NewSatoshiPerByte(fee util.Amount, size uint32) SatoshiPerByte {
+func NewSatoshiPerByte(fee amt.Amount, size uint32) SatoshiPerByte {
 	return SatoshiPerByte(float64(fee) / float64(size))
 }
 

@@ -3,8 +3,8 @@ package templates
 import (
 	"errors"
 	"github.com/niubaoshu/gotiny"
-	"github.com/p9c/pod/pkg/blockchain/chainhash"
-	"github.com/p9c/pod/pkg/blockchain/wire"
+	"github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/wire"
 	"time"
 )
 
@@ -72,12 +72,12 @@ func (m *Message) GenBlockHeader(vers int32) *wire.BlockHeader {
 }
 
 // Reconstruct takes a received block from the wire and reattaches the transactions
-func (m *Message) Reconstruct(hdr *wire.BlockHeader) (mb *wire.MsgBlock, e error) {
+func (m *Message) Reconstruct(hdr *wire.BlockHeader) (mb *wire.Block, e error) {
 	if hdr.PrevBlock != m.PrevBlock {
 		e = errors.New("block is not for same parent block")
 		return
 	}
-	mb = &wire.MsgBlock{Header: *hdr, Transactions: m.txs[hdr.Version]}
+	mb = &wire.Block{Header: *hdr, Transactions: m.txs[hdr.Version]}
 	return
 }
 

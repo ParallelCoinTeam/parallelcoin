@@ -3,7 +3,7 @@ package blockchain
 import (
 	"fmt"
 	
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	chainhash "github.com/p9c/pod/pkg/chainhash"
 )
 
 // ThresholdState define the various threshold states used when voting on consensus changes.

@@ -3,6 +3,7 @@ package spv
 import (
 	"errors"
 	"fmt"
+	"github.com/p9c/pod/pkg/amt"
 	"net"
 	"strconv"
 	"sync"
@@ -14,17 +15,15 @@ import (
 	"github.com/p9c/pod/cmd/spv/cache/lru"
 	"github.com/p9c/pod/cmd/spv/filterdb"
 	"github.com/p9c/pod/cmd/spv/headerfs"
+	"github.com/p9c/pod/pkg/addrmgr"
 	"github.com/p9c/pod/pkg/blockchain"
-	"github.com/p9c/pod/pkg/blockchain/chaincfg"
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
-	"github.com/p9c/pod/pkg/blockchain/chainhash"
-	"github.com/p9c/pod/pkg/blockchain/wire"
-	"github.com/p9c/pod/pkg/comm/peer"
-	"github.com/p9c/pod/pkg/comm/peer/addrmgr"
-	"github.com/p9c/pod/pkg/comm/peer/connmgr"
-	"github.com/p9c/pod/pkg/database/walletdb"
-	"github.com/p9c/pod/pkg/util"
-	"github.com/p9c/pod/pkg/wallet/waddrmgr"
+	"github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/connmgr"
+	"github.com/p9c/pod/pkg/peer"
+	"github.com/p9c/pod/pkg/waddrmgr"
+	"github.com/p9c/pod/pkg/walletdb"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 type (
@@ -55,7 +54,7 @@ type (
 			wire.Message,
 		) bool, qu.C, ...QueryOption,
 		)
-		chainParams       netparams.Params
+		chainParams       chaincfg.Params
 		addrManager       *addrmgr.AddrManager
 		connManager       *connmgr.ConnManager
 		blockManager      *blockManager
@@ -91,7 +90,7 @@ type (
 		// Database is an *open* database instance that we'll use to storm indexes of teh chain.
 		Database walletdb.DB
 		// ChainParams is the chain that we're running on.
-		ChainParams netparams.Params
+		ChainParams chaincfg.Params
 		// ConnectPeers is a slice of hosts that should be connected to on startup, and be established as persistent
 		// peers.
 		//
@@ -240,8 +239,8 @@ func (s *ChainService) BestBlock() (*waddrmgr.BlockStamp, error) {
 		nil
 }
 
-// ChainParams returns a copy of the ChainService's netparams.Params.
-func (s *ChainService) ChainParams() netparams.Params {
+// ChainParams returns a copy of the ChainService's chaincfg.Params.
+func (s *ChainService) ChainParams() chaincfg.Params {
 	return s.chainParams
 }
 
@@ -712,10 +711,10 @@ func (sp *ServerPeer) OnAddr(_ *peer.Peer, msg *wire.MsgAddr) {
 // disconnected if an invalid fee filter value is provided.
 func (sp *ServerPeer) OnFeeFilter(_ *peer.Peer, msg *wire.MsgFeeFilter) {
 	// Chk that the passed minimum fee is a valid amount.
-	if msg.MinFee < 0 || msg.MinFee > int64(util.MaxSatoshi) {
+	if msg.MinFee < 0 || msg.MinFee > int64(amt.MaxSatoshi) {
 		D.F(
 			"peer %v sent an invalid feefilter '%v' -- disconnecting %s",
-			sp, util.Amount(msg.MinFee),
+			sp, amt.Amount(msg.MinFee),
 		)
 		sp.Disconnect()
 		return
@@ -957,7 +956,7 @@ func (ps *peerState) forAllPeers(closure func(sp *ServerPeer)) {
 // NewChainService returns a new chain service configured to connect to the bitcoin network type specified by
 // chainParams. Use start to begin syncing with peers.
 func NewChainService(cfg Config) (*ChainService, error) {
-	// First, we'll sort out the methods that we'll use to established outbound TCP connections, as well as perform any
+	// First, we'll txsort out the methods that we'll use to established outbound TCP connections, as well as perform any
 	// DNS queries.
 	//
 	// If the dialler was specified, then we'll use that in place of the default net.Dial function.

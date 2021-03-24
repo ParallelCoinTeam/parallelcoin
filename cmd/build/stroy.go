@@ -12,8 +12,8 @@ import (
 	"strings"
 	"time"
 	
-	"github.com/p9c/pod/app/appdata"
-	"github.com/p9c/pod/app/apputil"
+	"github.com/p9c/pod/pkg/appdata"
+	"github.com/p9c/pod/pkg/apputil"
 	
 	"gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/plumbing"
@@ -260,7 +260,7 @@ func writeVersionFile() bool {
 	}
 	// fmt.Println(maxVersion, maxString)
 	Tag = maxString
-	// sort.Ints(versionsI)
+	// txsort.Ints(versionsI)
 	// if runtime.GOOS == "windows" {
 	_, file, _, _ := runtime.Caller(0)
 	fmt.Fprintln(os.Stderr, "file", file)

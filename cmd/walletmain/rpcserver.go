@@ -4,6 +4,8 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
+	"github.com/p9c/pod/pkg/podcfg"
+	walletrpc2 "github.com/p9c/pod/pkg/walletrpc"
 	"io/ioutil"
 	"net"
 	"os"
@@ -12,10 +14,7 @@ import (
 	"strings"
 	"time"
 	
-	"github.com/p9c/pod/app/conte"
-	
 	"github.com/p9c/pod/pkg/pod"
-	"github.com/p9c/pod/pkg/rpc/legacy"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/wallet"
 )
@@ -24,7 +23,7 @@ type listenFunc func(net string, laddr string) (net.Listener, error)
 
 // GenerateRPCKeyPair generates a new RPC TLS keypair and writes the cert and possibly also the key in PEM format to the
 // paths specified by the config. If successful, the new keypair is returned.
-func GenerateRPCKeyPair(config *pod.Config, writeKey bool) (tls.Certificate, error) {
+func GenerateRPCKeyPair(config *podcfg.Config, writeKey bool) (tls.Certificate, error) {
 	D.Ln("generating TLS certificates")
 	// Create directories for cert and key files if they do not yet exist.
 	D.Ln("rpc tls ", *config.RPCCert, " ", *config.RPCKey)
@@ -154,7 +153,7 @@ func makeListeners(normalizedListenAddrs []string, listen listenFunc) []net.List
 // OpenRPCKeyPair creates or loads the RPC TLS keypair specified by the
 // application config. This function respects the pod.Config.OneTimeTLSKey
 // setting.
-func OpenRPCKeyPair(config *pod.Config) (tls.Certificate, error) {
+func OpenRPCKeyPair(config *podcfg.Config) (tls.Certificate, error) {
 	// Chk for existence of the TLS key file. If one time TLS keys are enabled but a
 	// key already exists, this function should error since it's possible that a
 	// persistent certificate was copied to a remote machine. Otherwise, generate a
@@ -179,10 +178,10 @@ func OpenRPCKeyPair(config *pod.Config) (tls.Certificate, error) {
 		return tls.LoadX509KeyPair(*config.RPCCert, *config.RPCKey)
 	}
 }
-func startRPCServers(cx *conte.Xt, walletLoader *wallet.Loader) (*legacy.Server, error) {
+func startRPCServers(cx *pod.State, walletLoader *wallet.Loader) (*walletrpc2.Server, error) {
 	T.Ln("startRPCServers")
 	var (
-		legacyServer *legacy.Server
+		legacyServer *walletrpc2.Server
 		walletListen = net.Listen
 		keyPair      tls.Certificate
 		e            error
@@ -213,13 +212,13 @@ func startRPCServers(cx *conte.Xt, walletLoader *wallet.Loader) (*legacy.Server,
 			e := errors.New("failed to create listeners for legacy RPC server")
 			return nil, e
 		}
-		opts := legacy.Options{
+		opts := walletrpc2.Options{
 			Username:            *cx.Config.Username,
 			Password:            *cx.Config.Password,
 			MaxPOSTClients:      int64(*cx.Config.WalletRPCMaxClients),
 			MaxWebsocketClients: int64(*cx.Config.WalletRPCMaxWebsockets),
 		}
-		legacyServer = legacy.NewServer(&opts, walletLoader, listeners, nil)
+		legacyServer = walletrpc2.NewServer(&opts, walletLoader, listeners, nil)
 	}
 	// Error when no legacy RPC servers can be started.
 	if legacyServer == nil {
@@ -230,7 +229,7 @@ func startRPCServers(cx *conte.Xt, walletLoader *wallet.Loader) (*legacy.Server,
 
 // startWalletRPCServices associates each of the (optionally-nil) RPC servers with a wallet to enable remote wallet
 // access. For the legacy JSON-RPC server it enables methods that require a loaded wallet.
-func startWalletRPCServices(wallet *wallet.Wallet, legacyServer *legacy.Server) {
+func startWalletRPCServices(wallet *wallet.Wallet, legacyServer *walletrpc2.Server) {
 	if legacyServer != nil {
 		D.Ln("starting legacy wallet rpc server")
 		legacyServer.RegisterWallet(wallet)

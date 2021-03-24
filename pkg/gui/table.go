@@ -191,8 +191,8 @@ func (t *Table) Fn(gtx l.Context) l.Dimensions {
 	// 	}
 	// 	columnsToRender = append(columnsToRender, priorities[i].Column)
 	// }
-	// // sort the columns to render into their original order
-	// sort.Ints(columnsToRender)
+	// // txsort the columns to render into their original order
+	// txsort.Ints(columnsToRender)
 	// // D.S(columnsToRender)
 	// // D.Ln(len(columnsToRender))
 	// // All fields will be expanded by the following ratio to reach the target width

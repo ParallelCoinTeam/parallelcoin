@@ -5,13 +5,13 @@ import (
 	"bytes"
 	js "encoding/json"
 	"fmt"
+	"github.com/p9c/pod/pkg/pod"
 	"io"
 	"os"
 	"strings"
 	
-	"github.com/p9c/pod/app/conte"
-	"github.com/p9c/pod/pkg/rpc/btcjson"
-	"github.com/p9c/pod/pkg/rpc/ctl"
+	"github.com/p9c/pod/pkg/btcjson"
+	"github.com/p9c/pod/pkg/rpcctl"
 )
 
 // HelpPrint is the uninitialized help print function
@@ -20,7 +20,7 @@ var HelpPrint = func() {
 }
 
 // Main is the entry point for the pod.Ctl component
-func Main(args []string, cx *conte.Xt) {
+func Main(args []string, cx *pod.State) {
 	// Ensure the specified method identifies a valid registered command and is one of the usable types.
 	method := args[0]
 	var usageFlags btcjson.UsageFlag
@@ -59,7 +59,7 @@ func Main(args []string, cx *conte.Xt) {
 		params = append(params, arg)
 	}
 	var result []byte
-	if result, e = ctl.Call(cx, *cx.Config.Wallet, method, params...); E.Chk(e) {
+	if result, e = rpcctl.Call(cx, *cx.Config.Wallet, method, params...); E.Chk(e) {
 		return
 	}
 	// // Attempt to create the appropriate command using the arguments provided by the user.

@@ -1,8 +1,8 @@
 package database
 
 import (
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
-	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/block"
+	"github.com/p9c/pod/pkg/chainhash"
 )
 
 // Cursor represents a cursor over key/value pairs and nested buckets of a bucket.
@@ -192,7 +192,7 @@ type Tx interface {
 	//   - ErrTxClosed if the transaction has already been closed
 	//
 	// Other errors are possible depending on the implementation.
-	StoreBlock(block *util.Block) error
+	StoreBlock(block *block.Block) error
 	// HasBlock returns whether or not a block with the given hash exists in the database.
 	//
 	// The interface contract guarantees at least the following errors will be returned (other implementation-specific
@@ -256,7 +256,7 @@ type Tx interface {
 	// allows support for memory-mapped database implementations.
 	FetchBlockHeaders(hashes []chainhash.Hash) ([][]byte, error)
 	// FetchBlock returns the raw serialized bytes for the block identified by the given hash. The raw bytes are in the
-	// format returned by Serialize on a wire.MsgBlock.
+	// format returned by Serialize on a wire.WireBlock.
 	//
 	// The interface contract guarantees at least the following errors will be returned (other implementation-specific
 	// errors are possible):
@@ -272,7 +272,7 @@ type Tx interface {
 	// allows support for memory-mapped database implementations.
 	FetchBlock(hash *chainhash.Hash) ([]byte, error)
 	// FetchBlocks returns the raw serialized bytes for the blocks identified by the given hashes. The raw bytes are in
-	// the format returned by Serialize on a wire.MsgBlock.
+	// the format returned by Serialize on a wire.WireBlock.
 	//
 	// The interface contract guarantees at least the following errors will be returned (other implementation-specific
 	// errors are possible):
@@ -293,7 +293,7 @@ type Tx interface {
 	// function. Depending on the backend implementation, this can provide significant savings by avoiding the need to
 	// load entire blocks.
 	//
-	// The raw bytes are in the format returned by Serialize on a wire.MsgBlock and the Offset field in the provided
+	// The raw bytes are in the format returned by Serialize on a wire.WireBlock and the Offset field in the provided
 	// BlockRegion is zero-based and relative to the start of the block (byte 0).
 	//
 	// The interface contract guarantees at least the following errors will be returned (other implementation-specific
@@ -318,7 +318,7 @@ type Tx interface {
 	// function. Depending on the backend implementation, this can provide significant savings by avoiding the need to
 	// load entire blocks.
 	//
-	// The raw bytes are in the format returned by Serialize on a wire.MsgBlock and the Offset fields in the provided
+	// The raw bytes are in the format returned by Serialize on a wire.WireBlock and the Offset fields in the provided
 	// BlockRegions are zero-based and relative to the start of the block (byte 0).
 	//
 	// The interface contract guarantees at least the following errors will be returned (other implementation-specific

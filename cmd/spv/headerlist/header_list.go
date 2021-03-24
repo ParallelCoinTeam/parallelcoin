@@ -1,6 +1,6 @@
 package headerlist
 
-import "github.com/p9c/pod/pkg/blockchain/wire"
+import "github.com/p9c/pod/pkg/wire"
 
 // Chain is an interface that stores a list of Nodes. Each node represents a header in the main chain and also includes
 // a height along with it. This is meant to serve as a replacement to list.List which provides similar functionality,

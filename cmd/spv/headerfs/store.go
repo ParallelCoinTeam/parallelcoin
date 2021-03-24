@@ -4,17 +4,17 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+	"github.com/p9c/pod/pkg/chaincfg"
 	"os"
 	"path/filepath"
 	"sync"
 	
 	"github.com/p9c/pod/pkg/blockchain"
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
-	"github.com/p9c/pod/pkg/blockchain/chainhash"
-	"github.com/p9c/pod/pkg/blockchain/wire"
-	"github.com/p9c/pod/pkg/coding/gcs/builder"
-	"github.com/p9c/pod/pkg/database/walletdb"
-	"github.com/p9c/pod/pkg/wallet/waddrmgr"
+	"github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/gcs/builder"
+	"github.com/p9c/pod/pkg/waddrmgr"
+	"github.com/p9c/pod/pkg/walletdb"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 // BlockHeaderStore is an interface that provides an abstraction for a generic store for block headers.
@@ -113,7 +113,7 @@ var _ BlockHeaderStore = (*blockHeaderStore)(nil)
 // initial start up of the blockHeaderStore, then the initial genesis header will need to be inserted.
 func NewBlockHeaderStore(
 	filePath string, db walletdb.DB,
-	netParams *netparams.Params,
+	netParams *chaincfg.Params,
 ) (BlockHeaderStore, error) {
 	hStore, e := newHeaderStore(db, filePath, Block)
 	if e != nil {
@@ -486,7 +486,7 @@ type FilterHeaderStore struct {
 // then the initial genesis filter header will need to be inserted.
 func NewFilterHeaderStore(
 	filePath string, db walletdb.DB,
-	filterType HeaderType, netParams *netparams.Params,
+	filterType HeaderType, netParams *chaincfg.Params,
 ) (*FilterHeaderStore, error) {
 	fStore, e := newHeaderStore(db, filePath, filterType)
 	if e != nil {

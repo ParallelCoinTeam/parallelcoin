@@ -9,9 +9,9 @@ import (
 	"github.com/p9c/pod/cmd/spv/cache"
 	"github.com/p9c/pod/cmd/spv/cache/lru"
 	"github.com/p9c/pod/cmd/spv/filterdb"
-	"github.com/p9c/pod/pkg/blockchain/chainhash"
-	"github.com/p9c/pod/pkg/coding/gcs"
-	"github.com/p9c/pod/pkg/coding/gcs/builder"
+	"github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/gcs"
+	"github.com/p9c/pod/pkg/gcs/builder"
 )
 
 var (
@@ -75,7 +75,7 @@ func TestBigFilterEvictsEverything(t *testing.T) {
 // 	var size uint64
 // 	for i, b := range blocks {
 // 		header := headerfs.BlockHeader{
-// 			BlockHeader: &b.MsgBlock().Header,
+// 			BlockHeader: &b.WireBlock().Header,
 // 			Height:      uint32(i),
 // 		}
 // 		headers.WriteHeaders(header)
@@ -89,7 +89,7 @@ func TestBigFilterEvictsEverything(t *testing.T) {
 // 	cs := &ChainService{
 // 		BlockCache:   lru.NewCache(size),
 // 		BlockHeaders: headers,
-// 		chainParams: netparams.Params{
+// 		chainParams: chaincfg.Params{
 // 			PowLimit: maxPowLimit,
 // 		},
 // 		timeSource: blockchain.NewMedianTime(),
@@ -118,7 +118,7 @@ func TestBigFilterEvictsEverything(t *testing.T) {
 // 				// Execute the callback with the found block,
 // 				// and wait for the quit channel to be closed.
 // 				quit := qu.T()
-// 				f(nil, b.MsgBlock(), quit)
+// 				f(nil, b.WireBlock(), quit)
 // 				select {
 // 				case <-quit:
 // 				case <-time.After(1 * time.Second):
@@ -241,7 +241,7 @@ func assertEqual(t *testing.T, a interface{}, b interface{}, message string) {
 	if len(message) == 0 {
 		message = fmt.Sprintf("%v != %v", a, b)
 	}
-	t.F.Ln(message)
+	t.Fatal(message)
 }
 
 // getRandFilter generates a random GCS filter that contains numElements. It will then convert that filter into
@@ -251,6 +251,7 @@ func assertEqual(t *testing.T, a interface{}, b interface{}, message string) {
 func genRandFilter(numElements uint32, t *testing.T) (
 	*chainhash.Hash, *gcs.Filter, uint64,
 ) {
+	var e error
 	elements := make([][]byte, numElements)
 	for i := uint32(0); i < numElements; i++ {
 		var elem [20]byte
@@ -295,7 +296,7 @@ func genRandomBlockHash() *chainhash.Hash {
 func getFilter(cs *ChainService, b *chainhash.Hash, t *testing.T) *gcs.Filter {
 	val, e := cs.getFilterFromCache(b, filterdb.RegularFilter)
 	if e != nil {
-		t.F.Ln(e)
+		t.Fatal(e)
 	}
 	return val
 }

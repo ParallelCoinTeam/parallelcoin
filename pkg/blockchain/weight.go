@@ -1,8 +1,9 @@
 package blockchain
 
 import (
-	"github.com/p9c/pod/pkg/blockchain/wire"
+	"github.com/p9c/pod/pkg/block"
 	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 const (
@@ -35,8 +36,8 @@ const (
 // Currently the weight metric is simply the sum of the block's serialized size
 // without any witness data scaled proportionally by the WitnessScaleFactor, and
 // the block's serialized size including any witness data.
-func GetBlockWeight(blk *util.Block) int64 {
-	msgBlock := blk.MsgBlock()
+func GetBlockWeight(blk *block.Block) int64 {
+	msgBlock := blk.WireBlock()
 	baseSize := msgBlock.SerializeSizeStripped()
 	totalSize := msgBlock.SerializeSize()
 	// (baseSize * 3) + totalSize

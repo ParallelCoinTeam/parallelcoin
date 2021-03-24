@@ -1,8 +1,8 @@
 package blockchain
 
 import (
-	"github.com/p9c/pod/pkg/blockchain/tx/txscript"
-	ec "github.com/p9c/pod/pkg/coding/ecc"
+	ec "github.com/p9c/pod/pkg/ecc"
+	"github.com/p9c/pod/pkg/txscript"
 )
 
 // In order to reduce the size of stored scripts, a domain specific compression algorithm is used which recognizes
@@ -463,7 +463,7 @@ func putVLQ(target []byte, n uint64) int {
 // represented in exactly one way, and each representation stands for exactly one integer.
 //
 // Another nice property of this encoding is that it provides a compact representation of values that are typically used
-// to indicate sizes. For example, the values 0 - 127 are represented with a single byte, 128 - 16511 with two bytes,
+// to indicate txsizes. For example, the values 0 - 127 are represented with a single byte, 128 - 16511 with two bytes,
 // and 16512 - 2113663 with three bytes.
 //
 // While the encoding allows arbitrarily large integers, it is artificially limited in this code to an unsigned 64-bit

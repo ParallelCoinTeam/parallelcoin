@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"testing"
 	
-	"github.com/p9c/pod/pkg/blockchain/wire"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 // testNoncePrng provides a deterministic prng for the nonce in generated fake nodes. The ensures that the node have
@@ -378,7 +378,7 @@ func TestChainViewNil(t *testing.T) {
 	// Ensure two unininitialized views are considered equal.
 	view := newChainView(nil)
 	if !view.Equals(newChainView(nil)) {
-		t.F.Ln("uninitialized nil views unequal")
+		t.Fatal("uninitialized nil views unequal")
 	}
 	// Ensure the genesis of an uninitialized view does not produce a node.
 	if genesis := view.Genesis(); genesis != nil {

@@ -2,11 +2,12 @@ package blockchain
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/block"
 	"time"
 	
-	chaincfg "github.com/p9c/pod/pkg/blockchain/chaincfg"
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
-	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
+	"github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/txscript"
 	"github.com/p9c/pod/pkg/util"
 )
 
@@ -171,7 +172,7 @@ func isNonstandardTransaction(tx *util.Tx) bool {
 //
 // The intent is that candidates are reviewed by a developer to make the final decision and then manually added to the
 // list of checkpoints for a network. This function is safe for concurrent access.
-func (b *BlockChain) IsCheckpointCandidate(block *util.Block) (bool, error) {
+func (b *BlockChain) IsCheckpointCandidate(block *block.Block) (bool, error) {
 	b.ChainLock.RLock()
 	defer b.ChainLock.RUnlock()
 	// A checkpoint must be in the main chain.
@@ -204,7 +205,7 @@ func (b *BlockChain) IsCheckpointCandidate(block *util.Block) (bool, error) {
 	// A checkpoint must have timestamps for the block and the blocks on either side of it in order (due to the median
 	// time allowance this is not always the case).
 	prevTime := time.Unix(node.parent.timestamp, 0)
-	curTime := block.MsgBlock().Header.Timestamp
+	curTime := block.WireBlock().Header.Timestamp
 	nextTime := time.Unix(nextNode.timestamp, 0)
 	if prevTime.After(curTime) || nextTime.Before(curTime) {
 		return false, nil

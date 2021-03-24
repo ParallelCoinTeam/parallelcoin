@@ -2,6 +2,8 @@ package wallet
 
 import (
 	"errors"
+	"github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/podcfg"
 	"os"
 	"path/filepath"
 	"sync"
@@ -9,11 +11,9 @@ import (
 	
 	"github.com/p9c/pod/pkg/util/qu"
 	
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
-	"github.com/p9c/pod/pkg/database/walletdb"
-	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/util/prompt"
-	"github.com/p9c/pod/pkg/wallet/waddrmgr"
+	"github.com/p9c/pod/pkg/waddrmgr"
+	"github.com/p9c/pod/pkg/walletdb"
 )
 
 // Loader implements the creating of new and opening of existing wallets, while providing a callback system for other
@@ -23,7 +23,7 @@ import (
 // Loader is safe for concurrent access.
 type Loader struct {
 	Callbacks      []func(*Wallet)
-	ChainParams    *netparams.Params
+	ChainParams    *chaincfg.Params
 	DDDirPath      string
 	RecoveryWindow uint32
 	Wallet         *Wallet
@@ -55,7 +55,7 @@ func (ld *Loader) CreateNewWallet(
 	pubPassphrase, privPassphrase, seed []byte,
 	bday time.Time,
 	noStart bool,
-	podConfig *pod.Config,
+	podConfig *podcfg.Config,
 	quit qu.C,
 ) (*Wallet, error) {
 	ld.Mutex.Lock()
@@ -116,7 +116,7 @@ func (ld *Loader) LoadedWallet() (*Wallet, bool) {
 func (ld *Loader) OpenExistingWallet(
 	pubPassphrase []byte,
 	canConsolePrompt bool,
-	podConfig *pod.Config,
+	podConfig *podcfg.Config,
 	quit qu.C,
 ) (*Wallet, error) {
 	defer ld.Mutex.Unlock()
@@ -243,7 +243,7 @@ func (ld *Loader) onLoaded(db walletdb.DB) {
 
 // NewLoader constructs a Loader with an optional recovery window. If the recovery window is non-zero, the wallet will
 // attempt to recovery addresses starting from the last SyncedTo height.
-func NewLoader(chainParams *netparams.Params, dbDirPath string, recoveryWindow uint32) *Loader {
+func NewLoader(chainParams *chaincfg.Params, dbDirPath string, recoveryWindow uint32) *Loader {
 	l := &Loader{
 		ChainParams:    chainParams,
 		DDDirPath:      dbDirPath,

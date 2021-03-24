@@ -83,7 +83,7 @@ func (l *Label) Font(font string) *Label {
 	return l
 }
 
-// ScaleType is a map of the set of label sizes
+// ScaleType is a map of the set of label txsizes
 type ScaleType map[string]float32
 
 // Scales is the ratios against

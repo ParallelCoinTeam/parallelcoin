@@ -3,19 +3,18 @@ package blockchain
 import (
 	"container/list"
 	"fmt"
+	block2 "github.com/p9c/pod/pkg/block"
+	"github.com/p9c/pod/pkg/fork"
 	"sync"
 	"time"
 	
 	"go.uber.org/atomic"
 	
-	chaincfg "github.com/p9c/pod/pkg/blockchain/chaincfg"
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
-	"github.com/p9c/pod/pkg/blockchain/fork"
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
-	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
-	"github.com/p9c/pod/pkg/blockchain/wire"
-	database "github.com/p9c/pod/pkg/database"
-	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/database"
+	"github.com/p9c/pod/pkg/txscript"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 const // maxOrphanBlocks is the maximum number of orphan blocks that can be
@@ -38,7 +37,7 @@ type BlockLocator []*chainhash.Hash
 // It is a normal block plus an expiration time to prevent caching the orphan
 // forever.
 type orphanBlock struct {
-	block      *util.Block
+	block      *block2.Block
 	expiration time.Time
 }
 
@@ -87,7 +86,7 @@ type BlockChain struct {
 	checkpoints         []chaincfg.Checkpoint
 	checkpointsByHeight map[int32]*chaincfg.Checkpoint
 	db                  database.DB
-	params              *netparams.Params
+	params              *chaincfg.Params
 	timeSource          MedianTimeSource
 	sigCache            *txscript.SigCache
 	indexManager        IndexManager
@@ -197,7 +196,7 @@ func (b *BlockChain) GetOrphanRoot(hash *chainhash.Hash) *chainhash.Hash {
 			break
 		}
 		orphanRoot = prevHash
-		prevHash = &orphan.block.MsgBlock().Header.PrevBlock
+		prevHash = &orphan.block.WireBlock().Header.PrevBlock
 	}
 	return orphanRoot
 }
@@ -214,7 +213,7 @@ func (b *BlockChain) removeOrphanBlock(orphan *orphanBlock) {
 	// Remove the reference from the previous orphan index too. An indexing for loop
 	// is intentionally used over a range here as range does not reevaluate the
 	// slice on each iteration nor does it adjust the index for the modified slice.
-	prevHash := &orphan.block.MsgBlock().Header.PrevBlock
+	prevHash := &orphan.block.WireBlock().Header.PrevBlock
 	orphans := b.prevOrphans[*prevHash]
 	for i := 0; i < len(orphans); i++ {
 		hash := orphans[i].block.Hash()
@@ -238,7 +237,7 @@ func (b *BlockChain) removeOrphanBlock(orphan *orphanBlock) {
 // any expired blocks so a separate cleanup poller doesn't need to be run. It
 // also imposes a maximum limit on the number of outstanding orphan blocks and
 // will remove the oldest received orphan block if the limit is exceeded.
-func (b *BlockChain) addOrphanBlock(block *util.Block) {
+func (b *BlockChain) addOrphanBlock(block *block2.Block) {
 	// Remove expired orphan blocks.
 	for _, oBlock := range b.orphans {
 		if time.Now().After(oBlock.expiration) {
@@ -272,7 +271,7 @@ func (b *BlockChain) addOrphanBlock(block *util.Block) {
 	}
 	b.orphans[*block.Hash()] = oBlock
 	// Add to previous hash lookup index for faster dependency lookups.
-	prevHash := &block.MsgBlock().Header.PrevBlock
+	prevHash := &block.WireBlock().Header.PrevBlock
 	b.prevOrphans[*prevHash] = append(b.prevOrphans[*prevHash], oBlock)
 }
 
@@ -468,11 +467,11 @@ func (b *BlockChain) getReorganizeNodes(node *BlockNode) (*list.List, *list.List
 // inefficient to repeat it. This function MUST be called with the chain state
 // lock held (for writes).
 func (b *BlockChain) connectBlock(
-	node *BlockNode, block *util.Block,
+	node *BlockNode, block *block2.Block,
 	view *UtxoViewpoint, stxos []SpentTxOut,
 ) (e error) {
 	// Make sure it's extending the end of the best chain.
-	prevHash := &block.MsgBlock().Header.PrevBlock
+	prevHash := &block.WireBlock().Header.PrevBlock
 	if !prevHash.IsEqual(&b.BestChain.Tip().hash) {
 		str := "connectBlock must be called with a block that extends the" +
 			" main chain"
@@ -506,8 +505,8 @@ func (b *BlockChain) connectBlock(
 	b.stateLock.RLock()
 	curTotalTxns := b.stateSnapshot.TotalTxns
 	b.stateLock.RUnlock()
-	numTxns := uint64(len(block.MsgBlock().Transactions))
-	blockSize := uint64(block.MsgBlock().SerializeSize())
+	numTxns := uint64(len(block.WireBlock().Transactions))
+	blockSize := uint64(block.WireBlock().SerializeSize())
 	blockWeight := uint64(GetBlockWeight(block))
 	state := newBestState(
 		node, blockSize, blockWeight, numTxns,
@@ -594,7 +593,7 @@ func (b *BlockChain) connectBlock(
 // disconnectBlock handles disconnecting the passed node/block from the end of the main (best) chain. This function MUST
 // be called with the chain state lock held (for writes).
 func (b *BlockChain) disconnectBlock(
-	node *BlockNode, block *util.Block,
+	node *BlockNode, block *block2.Block,
 	view *UtxoViewpoint,
 ) (e error) {
 	// Make sure the node being disconnected is the end of the best chain.
@@ -606,7 +605,7 @@ func (b *BlockChain) disconnectBlock(
 	}
 	// Load the previous block since some details for it are needed below.
 	prevNode := node.parent
-	var prevBlock *util.Block
+	var prevBlock *block2.Block
 	e = b.db.View(
 		func(dbTx database.Tx) (e error) {
 			prevBlock, e = dbFetchBlockByNode(dbTx, prevNode)
@@ -626,10 +625,10 @@ func (b *BlockChain) disconnectBlock(
 	b.stateLock.RLock()
 	curTotalTxns := b.stateSnapshot.TotalTxns
 	b.stateLock.RUnlock()
-	numTxns := uint64(len(prevBlock.MsgBlock().Transactions))
-	blockSize := uint64(prevBlock.MsgBlock().SerializeSize())
+	numTxns := uint64(len(prevBlock.WireBlock().Transactions))
+	blockSize := uint64(prevBlock.WireBlock().SerializeSize())
 	blockWeight := uint64(GetBlockWeight(prevBlock))
-	newTotalTxns := curTotalTxns - uint64(len(block.MsgBlock().Transactions))
+	newTotalTxns := curTotalTxns - uint64(len(block.WireBlock().Transactions))
 	state := newBestState(
 		prevNode, blockSize, blockWeight, numTxns,
 		newTotalTxns, prevNode.CalcPastMedianTime(),
@@ -697,7 +696,7 @@ func (b *BlockChain) disconnectBlock(
 }
 
 // countSpentOutputs returns the number of utxos the passed block spends.
-func countSpentOutputs(block *util.Block) int {
+func countSpentOutputs(block *block2.Block) int {
 	// Exclude the coinbase transaction since it can't spend anything.
 	var numSpent int
 	for _, tx := range block.Transactions()[1:] {
@@ -752,9 +751,9 @@ func (b *BlockChain) reorganizeChain(detachNodes, attachNodes *list.List) (e err
 	// being disconnected must be loaded from the database during the reorg check phase below and then they are needed
 	// again when doing the actual database updates. Rather than doing two loads, cache the loaded data into these
 	// slices.
-	detachBlocks := make([]*util.Block, 0, detachNodes.Len())
+	detachBlocks := make([]*block2.Block, 0, detachNodes.Len())
 	detachSpentTxOuts := make([][]SpentTxOut, 0, detachNodes.Len())
-	attachBlocks := make([]*util.Block, 0, attachNodes.Len())
+	attachBlocks := make([]*block2.Block, 0, attachNodes.Len())
 	// Disconnect all of the blocks back to the point of the fork. This entails loading the blocks and their associated
 	// spent txos from the database and using that information to unspend all of the spent txos and remove the utxos
 	// created by the blocks.
@@ -762,7 +761,7 @@ func (b *BlockChain) reorganizeChain(detachNodes, attachNodes *list.List) (e err
 	view.SetBestHash(&oldBest.hash)
 	for e := detachNodes.Front(); e != nil; e = e.Next() {
 		n := e.Value.(*BlockNode)
-		var block *util.Block
+		var block *block2.Block
 		e := b.db.View(
 			func(dbTx database.Tx) (e error) {
 				block, e = dbFetchBlockByNode(dbTx, n)
@@ -822,7 +821,7 @@ func (b *BlockChain) reorganizeChain(detachNodes, attachNodes *list.List) (e err
 	// approach catches these issues before ever modifying the chain.
 	for e := attachNodes.Front(); e != nil; e = e.Next() {
 		n := e.Value.(*BlockNode)
-		var block *util.Block
+		var block *block2.Block
 		er := b.db.View(
 			func(dbTx database.Tx) (e error) {
 				block, e = dbFetchBlockByNode(dbTx, n)
@@ -950,7 +949,7 @@ func (b *BlockChain) reorganizeChain(detachNodes, attachNodes *list.List) (e err
 //    This is useful when using checkpoints.
 //
 // This function MUST be called with the chain state lock held (for writes).
-func (b *BlockChain) connectBestChain(node *BlockNode, block *util.Block, flags BehaviorFlags) (bool, error) {
+func (b *BlockChain) connectBestChain(node *BlockNode, block *block2.Block, flags BehaviorFlags) (bool, error) {
 	T.Ln("running connectBestChain")
 	fastAdd := flags&BFFastAdd == BFFastAdd
 	flushIndexState := func() {
@@ -962,7 +961,7 @@ func (b *BlockChain) connectBestChain(node *BlockNode, block *util.Block, flags 
 		}
 	}
 	// We are extending the main (best) chain with a new block. This is the most common case.
-	parentHash := &block.MsgBlock().Header.PrevBlock
+	parentHash := &block.WireBlock().Header.PrevBlock
 	if parentHash.IsEqual(&b.BestChain.Tip().hash) {
 		T.Ln("extending main chain")
 		// Skip checks if node has already been fully validated.
@@ -1448,10 +1447,10 @@ type IndexManager interface {
 	Init(*BlockChain, <-chan struct{}) error
 	// ConnectBlock is invoked when a new block has been connected to the main chain. The set of output spent within a
 	// block is also passed in so indexers can access the previous output scripts input spent if required.
-	ConnectBlock(database.Tx, *util.Block, []SpentTxOut) error
+	ConnectBlock(database.Tx, *block2.Block, []SpentTxOut) error
 	// DisconnectBlock is invoked when a block has been disconnected from the main chain. The set of outputs scripts
 	// that were spent within this block is also returned so indexers can clean up the prior index state for this block.
-	DisconnectBlock(database.Tx, *util.Block, []SpentTxOut) error
+	DisconnectBlock(database.Tx, *block2.Block, []SpentTxOut) error
 }
 
 // Config is a descriptor which specifies the blockchain instance configuration.
@@ -1464,7 +1463,7 @@ type Config struct {
 	// desire the behavior.
 	Interrupt <-chan struct{}
 	// ChainParams identifies which chain parameters the chain is associated with. This field is required.
-	ChainParams *netparams.Params
+	ChainParams *chaincfg.Params
 	// Checkpoints hold caller-defined checkpoints that should be added to the default checkpoints in ChainParams.
 	// Checkpoints must be sorted by height. This field can be nil if the caller does not wish to specify any
 	// checkpoints.

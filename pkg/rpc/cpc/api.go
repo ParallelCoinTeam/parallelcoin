@@ -1,9 +1,9 @@
-package api
+package cpc
 
 import (
-	"github.com/p9c/pod/pkg/rpc/btcjson"
-	"github.com/p9c/pod/pkg/rpc/chainrpc"
-	qu "github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/pod/pkg/btcjson"
+	"github.com/p9c/pod/pkg/chainrpc"
+	"github.com/p9c/pod/pkg/util/qu"
 )
 
 // StartAPI starts up the api handler server that receives rpc.API messages and runs the handler and returns the result
@@ -21,17 +21,17 @@ func StartAPI(server *chainrpc.Server, quit qu.C) {
 					Fn(
 						server, msg.Params.(btcjson.AddNodeCmd),
 						nil,
-				); E.Chk(e) {
+					); E.Chk(e) {
 				}
 				msg.Ch.(chan chainrpc.AddNodeRes) <- chainrpc.AddNodeRes{
-					Res: nil, Err: err,
+					Res: nil, Err: e,
 				}
 			case msg := <-nrh["createrawtransaction"].Call:
 				if res, e = nrh["createrawtransaction"].
 					Fn(server, msg.Params.(btcjson.CreateRawTransactionCmd), nil); E.Chk(e) {
 				}
 				msg.Ch.(chan chainrpc.CreateRawTransactionRes) <- chainrpc.CreateRawTransactionRes{
-					Res: res.(*string), Err: err,
+					Res: res.(*string), Err: e,
 				}
 			case msg := <-nrh["decoderawtransaction"].Call:
 				var ret btcjson.TxRawDecodeResult
@@ -43,23 +43,23 @@ func StartAPI(server *chainrpc.Server, quit qu.C) {
 					ret = res.(btcjson.TxRawDecodeResult)
 				}
 				msg.Ch.(chan chainrpc.DecodeRawTransactionRes) <- chainrpc.DecodeRawTransactionRes{
-					Res: &ret, Err: err,
+					Res: &ret, Err: e,
 				}
 			case msg := <-nrh["decodescript"].Call:
 				if res, e = nrh["decodescript"].Fn(server, msg.Params.(btcjson.DecodeScriptCmd), nil); E.Chk(e) {
 				}
 				msg.Ch.(chan chainrpc.DecodeScriptRes) <- chainrpc.DecodeScriptRes{
-					Res: res.(*btcjson.DecodeScriptResult), Err: err,
+					Res: res.(*btcjson.DecodeScriptResult), Err: e,
 				}
 			case msg := <-nrh["estimatefee"].Call:
 				if res, e = nrh["estimatefee"].
 					Fn(
 						server, msg.Params.(btcjson.EstimateFeeCmd),
 						nil,
-				); E.Chk(e) {
+					); E.Chk(e) {
 				}
 				msg.Ch.(chan chainrpc.EstimateFeeRes) <- chainrpc.EstimateFeeRes{
-					Res: res.(*float64), Err: err,
+					Res: res.(*float64), Err: e,
 				}
 			case <-quit.Wait():
 				return

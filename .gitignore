@@ -39,8 +39,6 @@ yarn-error.log*
 rcc.cpp
 *_vfsdata**
 
-pod
-
 dist/
 node_modules/
 .cache/
@@ -51,11 +49,11 @@ pod_mon*
 go_build*
 pod.exe
 
-pkg/comm/transport/cmd/example/example.exe
+pkg/transport/cmd/listenservemulticast/example.exe
 
 app/launcher/launcher.exe
 
-pod.exe~
+pod.exe*
 *.trace
 
 legacy/src/boost_1_58_0.tar.gz

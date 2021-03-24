@@ -6,13 +6,13 @@ import (
 	"strings"
 	"time"
 	
-	"github.com/p9c/pod/app/appdata"
+	"github.com/p9c/pod/pkg/appdata"
 	"github.com/p9c/pod/pkg/blockchain"
-	"github.com/p9c/pod/pkg/blockchain/chaincfg"
-	"github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/database"
 	
-	"github.com/p9c/pod/pkg/comm/peer"
+	"github.com/p9c/pod/pkg/peer"
 	// This ensures the database drivers get registered
 	_ "github.com/p9c/pod/pkg/database/ffldb"
 )
@@ -624,7 +624,7 @@ func loadConfig() (
 		fmt.Fprintln(os.Stderr, usageMessage)
 		return nil, nil, e
 	}
-	// Limit the block priority and minimum block sizes to max block size.
+	// Limit the block priority and minimum block txsizes to max block size.
 	cfg.BlockPrioritySize = minUint32(cfg.BlockPrioritySize, cfg.BlockMaxSize)
 	cfg.BlockMinSize = minUint32(cfg.BlockMinSize, cfg.BlockMaxSize)
 	cfg.BlockMinWeight = minUint32(cfg.BlockMinWeight, cfg.BlockMaxWeight)
@@ -677,7 +677,7 @@ func loadConfig() (
 	// Chk mining addresses are valid and saved parsed versions.
 	StateCfg.ActiveMiningAddrs = make([]util.Address, 0, len(cfg.MiningAddrs))
 	for _, strAddr := range cfg.MiningAddrs {
-		addr, e := util.DecodeAddress(strAddr, ActiveNetParams.Params)
+		addr, e := util.DecodeAddress(strAddr, Activechaincfg.Params)
 		if e != nil  {
 			str := "%s: mining address '%s' failed to decode: %v"
 			e := fmt.Errorf(str, funcName, strAddr, e)
@@ -685,7 +685,7 @@ func loadConfig() (
 			fmt.Fprintln(os.Stderr, usageMessage)
 			return nil, nil, e
 		}
-		if !addr.IsForNet(ActiveNetParams.Params) {
+		if !addr.IsForNet(Activechaincfg.Params) {
 			str := "%s: mining address '%s' is on the wrong network"
 			e := fmt.Errorf(str, funcName, strAddr)
 			fmt.Fprintln(os.Stderr, e)

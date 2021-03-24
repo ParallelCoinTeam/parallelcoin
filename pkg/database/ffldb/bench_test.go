@@ -1,13 +1,13 @@
 package ffldb
 
 import (
+	block2 "github.com/p9c/pod/pkg/block"
 	"os"
 	"path/filepath"
 	"testing"
 	
-	chaincfg "github.com/p9c/pod/pkg/blockchain/chaincfg"
-	database "github.com/p9c/pod/pkg/database"
-	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/database"
 )
 
 // BenchmarkBlockHeader benchmarks how long it takes to load the mainnet genesis block header.
@@ -17,7 +17,7 @@ func BenchmarkBlockHeader(b *testing.B) {
 	_ = os.RemoveAll(dbPath)
 	db, e := database.Create("ffldb", dbPath, blockDataNet)
 	if e != nil  {
-		b.F.Ln(err)
+		b.Fatal(e)
 	}
 	defer func() {
 		if e := os.RemoveAll(dbPath); E.Chk(e) {
@@ -28,11 +28,11 @@ func BenchmarkBlockHeader(b *testing.B) {
 		}
 	}()
 	e = db.Update(func(tx database.Tx) (e error) {
-		block := util.NewBlock(chaincfg.MainNetParams.GenesisBlock)
+		block := block2.NewBlock(chaincfg.MainNetParams.GenesisBlock)
 		return tx.StoreBlock(block)
 	})
 	if e != nil  {
-		b.F.Ln(err)
+		b.Fatal(e)
 	}
 	b.ReportAllocs()
 	b.ResetTimer()
@@ -47,7 +47,7 @@ func BenchmarkBlockHeader(b *testing.B) {
 		return nil
 	})
 	if e != nil  {
-		b.F.Ln(err)
+		b.Fatal(e)
 	}
 	// Don't benchmark teardown.
 	b.StopTimer()
@@ -60,7 +60,7 @@ func BenchmarkBlock(b *testing.B) {
 	_ = os.RemoveAll(dbPath)
 	db, e := database.Create("ffldb", dbPath, blockDataNet)
 	if e != nil  {
-		b.F.Ln(err)
+		b.Fatal(e)
 	}
 	defer func() {
 		if e := os.RemoveAll(dbPath); E.Chk(e) {
@@ -71,11 +71,11 @@ func BenchmarkBlock(b *testing.B) {
 		}
 	}()
 	e = db.Update(func(tx database.Tx) (e error) {
-		block := util.NewBlock(chaincfg.MainNetParams.GenesisBlock)
+		block := block2.NewBlock(chaincfg.MainNetParams.GenesisBlock)
 		return tx.StoreBlock(block)
 	})
 	if e != nil  {
-		b.F.Ln(err)
+		b.Fatal(e)
 	}
 	b.ReportAllocs()
 	b.ResetTimer()
@@ -90,7 +90,7 @@ func BenchmarkBlock(b *testing.B) {
 		return nil
 	})
 	if e != nil  {
-		b.F.Ln(err)
+		b.Fatal(e)
 	}
 	// Don't benchmark teardown.
 	b.StopTimer()

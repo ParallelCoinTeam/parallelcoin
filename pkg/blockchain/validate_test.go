@@ -1,15 +1,16 @@
 package blockchain
 
 import (
+	block2 "github.com/p9c/pod/pkg/block"
 	"math"
 	"reflect"
 	"testing"
 	"time"
 	
-	chaincfg "github.com/p9c/pod/pkg/blockchain/chaincfg"
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
-	"github.com/p9c/pod/pkg/blockchain/wire"
+	"github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 // TestSequenceLocksActive tests the SequenceLockActive function to ensure it works as expected in all possible
@@ -60,7 +61,7 @@ import (
 // func TestCheckConnectBlockTemplate(// 	t *testing.T) {
 // 	// Create a new database and chain instance to run tests against.
 // 	chain, teardownFunc, e := chainSetup("checkconnectblocktemplate",
-// 		&netparams.MainNetParams)
+// 		&chaincfg.MainNetParams)
 // 	if e != nil  {
 // 		t.Errorf("Failed to setup chain instance: %v", e)
 // 		return
@@ -99,7 +100,7 @@ import (
 // 	// Block 3 should fail to connect since it's already inserted.
 // 	e = chain.CheckConnectBlockTemplate(blocks[3])
 // 	if e ==  nil {
-// 		t.F.Ln("CheckConnectBlockTemplate: Did not received expected error " +
+// 		t.Fatal("CheckConnectBlockTemplate: Did not received expected error " +
 // 			"on block 3")
 // 	}
 // 	// Block 4 should connect successfully to tip of chain.
@@ -111,11 +112,11 @@ import (
 // 	// Block 3a should fail to connect since does not build on chain tip.
 // 	e = chain.CheckConnectBlockTemplate(blocks[5])
 // 	if e ==  nil {
-// 		t.F.Ln("CheckConnectBlockTemplate: Did not received expected error " +
+// 		t.Fatal("CheckConnectBlockTemplate: Did not received expected error " +
 // 			"on block 3a")
 // 	}
 // 	// Block 4 should connect even if proof of work is invalid.
-// 	invalidPowBlock := *blocks[4].MsgBlock()
+// 	invalidPowBlock := *blocks[4].Block()
 // 	invalidPowBlock.Header.Nonce++
 // 	e = chain.CheckConnectBlockTemplate(util.NewBlock(&invalidPowBlock))
 // 	if e != nil  {
@@ -123,11 +124,11 @@ import (
 // 			"block 4 with bad nonce: %v", e)
 // 	}
 // 	// Invalid block building on chain tip should fail to connect.
-// 	invalidBlock := *blocks[4].MsgBlock()
+// 	invalidBlock := *blocks[4].Block()
 // 	invalidBlock.Header.Bits--
 // 	e = chain.CheckConnectBlockTemplate(util.NewBlock(&invalidBlock))
 // 	if e ==  nil {
-// 		t.F.Ln("CheckConnectBlockTemplate: Did not received expected error " +
+// 		t.Fatal("CheckConnectBlockTemplate: Did not received expected error " +
 // 			"on block 4 with invalid difficulty bits")
 // 	}
 // }
@@ -135,7 +136,7 @@ import (
 // TestCheckBlockSanity tests the CheckBlockSanity function to ensure it works as expected.
 func TestCheckBlockSanity(t *testing.T) {
 	powLimit := chaincfg.MainNetParams.PowLimit
-	block := util.NewBlock(&Block100000)
+	block := block2.NewBlock(&Block100000)
 	timeSource := NewMedianTime()
 	e := CheckBlockSanity(
 		block,
@@ -143,21 +144,21 @@ func TestCheckBlockSanity(t *testing.T) {
 		timeSource,
 		false,
 		1,
-		block.MsgBlock().Header.Timestamp.Truncate(time.Second).Add(-time.Second),
+		block.WireBlock().Header.Timestamp.Truncate(time.Second).Add(-time.Second),
 	)
 	if e != nil  {
 		t.Errorf("CheckBlockSanity: %v", e)
 	}
 	// Ensure a block that has a timestamp with a precision higher than one second fails.
-	timestamp := block.MsgBlock().Header.Timestamp
-	block.MsgBlock().Header.Timestamp = timestamp.Add(time.Nanosecond)
+	timestamp := block.WireBlock().Header.Timestamp
+	block.WireBlock().Header.Timestamp = timestamp.Add(time.Nanosecond)
 	e = CheckBlockSanity(
 		block,
 		powLimit,
 		timeSource,
 		false,
 		1,
-		block.MsgBlock().Header.Timestamp.Truncate(time.Second).Add(-time.Second),
+		block.WireBlock().Header.Timestamp.Truncate(time.Second).Add(-time.Second),
 	)
 	if e ==  nil {
 		t.Errorf("CheckBlockSanity: error is nil when it shouldn't be")
@@ -181,7 +182,7 @@ func TestCheckSerializedHeight(t *testing.T) {
 	tests := []struct {
 		sigScript  []byte // Serialized data
 		wantHeight int32  // Expected height
-		err        error  // Expected error type
+		e        error  // Expected error type
 	}{
 		// No serialized height length.
 		{[]byte{}, 0, missingHeightError},
@@ -206,15 +207,15 @@ func TestCheckSerializedHeight(t *testing.T) {
 		msgTx.TxIn[0].SignatureScript = test.sigScript
 		tx := util.NewTx(msgTx)
 		e := checkSerializedHeight(tx, test.wantHeight)
-		if reflect.TypeOf(err) != reflect.TypeOf(test.err) {
+		if reflect.TypeOf(e) != reflect.TypeOf(test.e) {
 			t.Errorf(
 				"checkSerializedHeight #%d wrong error type "+
-					"got: %v <%T>, want: %T", i, e, e, test.err,
+					"got: %v <%T>, want: %T", i, e, e, test.e,
 			)
 			continue
 		}
-		if rerr, ok := err.(RuleError); ok {
-			trerr := test.err.(RuleError)
+		if rerr, ok := e.(RuleError); ok {
+			trerr := test.e.(RuleError)
 			if rerr.ErrorCode != trerr.ErrorCode {
 				t.Errorf(
 					"checkSerializedHeight #%d wrong "+
@@ -228,7 +229,7 @@ func TestCheckSerializedHeight(t *testing.T) {
 }
 
 // Block100000 defines block 100,000 of the block chain. It is used to test Block operations.
-var Block100000 = wire.MsgBlock{
+var Block100000 = wire.Block{
 	Header: wire.BlockHeader{
 		Version: 1,
 		PrevBlock: chainhash.Hash(

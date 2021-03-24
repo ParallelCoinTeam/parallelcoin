@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"hash/crc32"
 	
-	database "github.com/p9c/pod/pkg/database"
+	"github.com/p9c/pod/pkg/database"
 )
 
 // serializeWriteRow serialize the current block file and offset where new will be written into a format suitable for

@@ -2,9 +2,6 @@ package p2padvt
 
 import (
 	"github.com/niubaoshu/gotiny"
-	"github.com/p9c/pod/pkg/blockchain/wire"
-	"github.com/p9c/pod/pkg/pod"
-	"github.com/p9c/pod/pkg/rpc/chainrpc"
 	
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/routeable"
@@ -20,19 +17,19 @@ type Advertisment struct {
 	P2P uint16
 	// UUID is a unique identifier randomly generated at each initialisation
 	UUID uint64
-	// Services reflects the services available, in time the controller will be
-	// merged into wire, along with other key protocols implemented in pod
-	Services wire.ServiceFlag
+	// // Services reflects the services available, in time the controller will be
+	// // merged into wire, along with other key protocols implemented in pod
+	// Services wire.ServiceFlag
 }
 
 // Get returns an advertisment message
-func Get(uuid uint64, cfg *pod.Config, node *chainrpc.Node) []byte {
+func Get(uuid uint64, listeners string) []byte {
 	_, ips := routeable.GetAddressesAndInterfaces()
 	adv := &Advertisment{
-		IPs:      ips,
-		P2P:      util.GetActualPort((*cfg.P2PListeners)[0]),
-		UUID:     uuid,
-		Services: node.Services,
+		IPs:  ips,
+		P2P:  util.GetActualPort(listeners),
+		UUID: uuid,
+		// Services: node.Services,
 	}
 	ad := gotiny.Marshal(&adv)
 	return ad

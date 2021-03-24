@@ -2,12 +2,13 @@ package blockchain
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/block"
 	
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
-	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
-	"github.com/p9c/pod/pkg/blockchain/wire"
-	database "github.com/p9c/pod/pkg/database"
+	"github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/database"
+	"github.com/p9c/pod/pkg/txscript"
 	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 // txoFlags is a bitmask defining additional information and state for a transaction output in a utxo view.
@@ -227,7 +228,7 @@ func (view *UtxoViewpoint) connectTransaction(tx *util.Tx, blockHeight int32, st
 // connectTransactions updates the view by adding all new utxos created by all of the transactions in the passed block,
 // marking all utxos the transactions spend as spent, and setting the best hash for the view to the passed block. In
 // addition, when the 'stxos' argument is not nil, it will be updated to append an entry for each spent txout.
-func (view *UtxoViewpoint) connectTransactions(block *util.Block, stxos *[]SpentTxOut) (e error) {
+func (view *UtxoViewpoint) connectTransactions(block *block.Block, stxos *[]SpentTxOut) (e error) {
 	for _, tx := range block.Transactions() {
 		e = view.connectTransaction(tx, block.Height(), stxos)
 		if e != nil {
@@ -265,7 +266,7 @@ func (view *UtxoViewpoint) fetchEntryByHash(db database.DB, hash *chainhash.Hash
 // disconnectTransactions updates the view by removing all of the transactions created by the passed block, restoring
 // all utxos the transactions spent by using the provided spent txo information, and setting the best hash for the view
 // to the block before the passed block.
-func (view *UtxoViewpoint) disconnectTransactions(db database.DB, block *util.Block, stxos []SpentTxOut) (e error) {
+func (view *UtxoViewpoint) disconnectTransactions(db database.DB, block *block.Block, stxos []SpentTxOut) (e error) {
 	// Sanity check the correct number of stxos are provided.
 	if len(stxos) != countSpentOutputs(block) {
 		return AssertError(
@@ -366,7 +367,7 @@ func (view *UtxoViewpoint) disconnectTransactions(db database.DB, block *util.Bl
 	}
 	// Update the best hash for view to the previous block since all of the transactions for the current block have been
 	// disconnected.
-	view.SetBestHash(&block.MsgBlock().Header.PrevBlock)
+	view.SetBestHash(&block.WireBlock().Header.PrevBlock)
 	return nil
 }
 
@@ -444,7 +445,7 @@ func (view *UtxoViewpoint) fetchUtxos(db database.DB, outpoints map[wire.OutPoin
 // fetchInputUtxos loads the unspent transaction outputs for the inputs referenced by the transactions in the given
 // block into the view from the database as needed. In particular, referenced entries that are earlier in the block are
 // added to the view and entries that are already in the view are not modified.
-func (view *UtxoViewpoint) fetchInputUtxos(db database.DB, block *util.Block) (e error) {
+func (view *UtxoViewpoint) fetchInputUtxos(db database.DB, block *block.Block) (e error) {
 	// Build a map of in-flight transactions because some of the inputs in this block could be referencing other
 	// transactions earlier in this block which are not yet in the chain.
 	txInFlight := map[chainhash.Hash]int{}

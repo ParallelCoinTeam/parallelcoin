@@ -2,6 +2,8 @@ package app
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/pod"
+	walletrpc2 "github.com/p9c/pod/pkg/walletrpc"
 	"github.com/p9c/pod/version"
 	"os"
 	"path/filepath"
@@ -9,22 +11,20 @@ import (
 	
 	"github.com/urfave/cli"
 	
-	au "github.com/p9c/pod/app/apputil"
-	"github.com/p9c/pod/app/config"
-	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/cmd/kopach/kopach_worker"
 	"github.com/p9c/pod/cmd/node"
 	"github.com/p9c/pod/cmd/node/mempool"
 	"github.com/p9c/pod/cmd/walletmain"
-	"github.com/p9c/pod/pkg/coding/base58"
+	au "github.com/p9c/pod/pkg/apputil"
+	"github.com/p9c/pod/pkg/base58"
 	"github.com/p9c/pod/pkg/database/blockdb"
-	"github.com/p9c/pod/pkg/rpc/legacy"
+	"github.com/p9c/pod/pkg/podconfig"
 	"github.com/p9c/pod/pkg/util/hdkeychain"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
 // getApp defines the pod app
-func getApp(cx *conte.Xt) (a *cli.App) {
+func getApp(cx *pod.State) (a *cli.App) {
 	return &cli.App{
 		Name:        "pod",
 		Version:     version.Get(),
@@ -115,7 +115,7 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 						"resetchain",
 						"reset the chain",
 						func(c *cli.Context) (e error) {
-							config.Configure(cx, "resetchain", true)
+							podconfig.Configure(cx, "resetchain", true)
 							dbName := blockdb.NamePrefix + "_" + *cx.Config.DbType
 							if *cx.Config.DbType == "sqlite" {
 								dbName += ".db"
@@ -188,7 +188,7 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 						"resetchain",
 						"reset the chain",
 						func(c *cli.Context) (e error) {
-							config.Configure(cx, "resetchain", true)
+							podconfig.Configure(cx, "resetchain", true)
 							dbName := blockdb.NamePrefix + "_" + *cx.Config.DbType
 							if *cx.Config.DbType == "sqlite" {
 								dbName += ".db"
@@ -216,7 +216,7 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 						"drophistory", "drop the transaction history in the wallet (for "+
 							"development and testing as well as clearing up transaction mess)",
 						func(c *cli.Context) (e error) {
-							config.Configure(cx, "wallet", true)
+							podconfig.Configure(cx, "wallet", true)
 							I.Ln("dropping wallet history")
 							go func() {
 								D.Ln("starting wallet")
@@ -229,7 +229,7 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 							// D.Ln("waiting for walletChan")
 							// cx.WalletServer = <-cx.WalletChan
 							// D.Ln("walletChan sent")
-							e = legacy.DropWalletHistory(cx.WalletServer, cx.Config)(c)
+							e = walletrpc2.DropWalletHistory(cx.WalletServer, cx.Config)(c)
 							return
 						}, au.SubCommands(), nil,
 					),
@@ -642,9 +642,9 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 				cx.Config.LAN,
 			),
 			au.Bool(
-				"disablecontroller",
-				"disables multicast (this is force default for node unless explicitly enabled)",
-				cx.Config.DisableController,
+				"controller",
+				"enables multicast",
+				cx.Config.Controller,
 			),
 			au.Bool(
 				"autoports",
@@ -807,6 +807,11 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 			au.Bool(
 				"walletoff",
 				"Starts with wallet turned off",
+				cx.Config.WalletOff,
+			),
+			au.Bool(
+				"discover",
+				"enable LAN multicast peer discovery in GUI wallet",
 				cx.Config.WalletOff,
 			),
 			au.Bool(

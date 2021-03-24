@@ -1,12 +1,12 @@
 package cfg
 
 import (
-	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/pkg/gui"
+	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/util/qu"
 )
 
-func New(cx *conte.Xt, w *gui.Window) *Config {
+func New(cx *pod.State, w *gui.Window) *Config {
 	cfg := &Config{
 		Window: w,
 		cx:     cx,
@@ -16,7 +16,7 @@ func New(cx *conte.Xt, w *gui.Window) *Config {
 }
 
 type Config struct {
-	cx *conte.Xt
+	cx *pod.State
 	*gui.Window
 	Bools      map[string]*gui.Bool
 	lists      map[string]*gui.List

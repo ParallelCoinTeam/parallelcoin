@@ -1,6 +1,8 @@
 package gui
 
 import (
+	"github.com/p9c/pod/pkg/amt"
+	"github.com/p9c/pod/pkg/btcaddr"
 	"image"
 	"path/filepath"
 	"strconv"
@@ -9,13 +11,12 @@ import (
 	"gioui.org/op/paint"
 	"github.com/atotto/clipboard"
 	
-	"github.com/p9c/pod/pkg/coding/qrcode"
-	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/qrcode"
 )
 
 func (wg *WalletGUI) GetNewReceivingAddress() {
 	D.Ln("GetNewReceivingAddress")
-	var addr util.Address
+	var addr btcaddr.Address
 	var e error
 	if addr, e = wg.WalletClient.GetNewAddress("default"); !E.Chk(e) {
 		D.Ln(
@@ -25,12 +26,12 @@ func (wg *WalletGUI) GetNewReceivingAddress() {
 		// save to addressbook
 		var ae AddressEntry
 		ae.Address = addr.EncodeAddress()
-		var amt float64
-		if amt, e = strconv.ParseFloat(
+		var amount float64
+		if amount, e = strconv.ParseFloat(
 			wg.inputs["receiveAmount"].GetText(),
 			64,
 		); !E.Chk(e) {
-			if ae.Amount, e = util.NewAmount(amt); E.Chk(e) {
+			if ae.Amount, e = amt.NewAmount(amount); E.Chk(e) {
 			}
 		}
 		msg := wg.inputs["receiveMessage"].GetText()
@@ -47,7 +48,7 @@ func (wg *WalletGUI) GetNewReceivingAddress() {
 		}
 		D.S(wg.State.receiveAddresses)
 		wg.State.SetReceivingAddress(addr)
-		filename := filepath.Join(wg.cx.DataDir, "state.json")
+		filename := filepath.Join(*wg.cx.Config.DataDir, "state.json")
 		if e := wg.State.Save(filename, wg.cx.Config.WalletPass); E.Chk(e) {
 		}
 		wg.invalidate <- struct{}{}

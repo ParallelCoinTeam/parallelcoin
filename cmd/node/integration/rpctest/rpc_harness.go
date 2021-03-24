@@ -2,6 +2,10 @@ package rpctest
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/amt"
+	"github.com/p9c/pod/pkg/block"
+	"github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/btcaddr"
 	"io/ioutil"
 	"net"
 	"os"
@@ -13,11 +17,10 @@ import (
 	
 	"github.com/p9c/pod/pkg/util/qu"
 	
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
-	"github.com/p9c/pod/pkg/blockchain/chainhash"
-	"github.com/p9c/pod/pkg/blockchain/wire"
-	"github.com/p9c/pod/pkg/rpc/rpcclient"
+	"github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/rpcclient"
 	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 const (
@@ -57,7 +60,7 @@ type HarnessTestCase func(r *Harness, t *testing.T)
 // includes an in-memory wallet to streamline various classes of tests.
 type Harness struct {
 	// ActiveNet is the parameters of the blockchain the Harness belongs to.
-	ActiveNet      *netparams.Params
+	ActiveNet      *chaincfg.Params
 	Node           *rpcclient.Client
 	node           *node
 	handlers       *rpcclient.NotificationHandlers
@@ -72,12 +75,12 @@ type Harness struct {
 // configuration may be passed. In the case that a nil config is passed, a default configuration will be used. NOTE:
 // This function is safe for concurrent access.
 func New(
-	activeNet *netparams.Params, handlers *rpcclient.NotificationHandlers,
+	activeNet *chaincfg.Params, handlers *rpcclient.NotificationHandlers,
 	extraArgs []string,
 ) (*Harness, error) {
 	harnessStateMtx.Lock()
 	defer harnessStateMtx.Unlock()
-	// Add a flag for the appropriate network type based on the provided chain netparams.
+	// Add a flag for the appropriate network type based on the provided chain chaincfg.
 	switch activeNet.Net {
 	case wire.MainNet:
 		// No extra flags since mainnet is the default
@@ -178,7 +181,7 @@ func (h *Harness) SetUp(createTestChain bool, numMatureOutputs uint32) (e error)
 	}
 	h.wallet.Start()
 	// Filter transactions that pay to the coinbase associated with the wallet.
-	filterAddrs := []util.Address{h.wallet.coinbaseAddr}
+	filterAddrs := []btcaddr.Address{h.wallet.coinbaseAddr}
 	if e := h.Node.LoadTxFilter(true, filterAddrs, nil); E.Chk(e) {
 		return e
 	}
@@ -242,7 +245,6 @@ func (h *Harness) TearDown() (e error) {
 // function returns with an error.
 func (h *Harness) connectRPCClient() (e error) {
 	var client *rpcclient.Client
-	var e error
 	rpcConf := h.node.config.rpcConnConfig()
 	for i := 0; i < h.maxConnRetries; i++ {
 		if client, e = rpcclient.New(&rpcConf, h.handlers, qu.T()); E.Chk(e) {
@@ -261,13 +263,13 @@ func (h *Harness) connectRPCClient() (e error) {
 
 // NewAddress returns a fresh address spendable by the Harness' internal wallet. This function is safe for concurrent
 // access.
-func (h *Harness) NewAddress() (util.Address, error) {
+func (h *Harness) NewAddress() (btcaddr.Address, error) {
 	return h.wallet.NewAddress()
 }
 
 // ConfirmedBalance returns the confirmed balance of the Harness' internal wallet. This function is safe for concurrent
 // access.
-func (h *Harness) ConfirmedBalance() util.Amount {
+func (h *Harness) ConfirmedBalance() amt.Amount {
 	return h.wallet.ConfirmedBalance()
 }
 
@@ -275,7 +277,7 @@ func (h *Harness) ConfirmedBalance() util.Amount {
 // outputs creating new outputs according to targetOutputs. This function is safe for concurrent access.
 func (h *Harness) SendOutputs(
 	targetOutputs []*wire.TxOut,
-	feeRate util.Amount,
+	feeRate amt.Amount,
 ) (*chainhash.Hash, error) {
 	return h.wallet.SendOutputs(targetOutputs, feeRate)
 }
@@ -285,7 +287,7 @@ func (h *Harness) SendOutputs(
 // for concurrent access.
 func (h *Harness) SendOutputsWithoutChange(
 	targetOutputs []*wire.TxOut,
-	feeRate util.Amount,
+	feeRate amt.Amount,
 ) (*chainhash.Hash, error) {
 	return h.wallet.SendOutputsWithoutChange(targetOutputs, feeRate)
 }
@@ -299,7 +301,7 @@ func (h *Harness) SendOutputsWithoutChange(
 // for concurrent access.
 func (h *Harness) CreateTransaction(
 	targetOutputs []*wire.TxOut,
-	feeRate util.Amount, change bool,
+	feeRate amt.Amount, change bool,
 ) (*wire.MsgTx, error) {
 	return h.wallet.CreateTransaction(targetOutputs, feeRate, change)
 }
@@ -330,7 +332,7 @@ func (h *Harness) P2PAddress() string {
 func (h *Harness) GenerateAndSubmitBlock(
 	txns []*util.Tx, blockVersion uint32,
 	blockTime time.Time,
-) (*util.Block, error) {
+) (*block.Block, error) {
 	return h.GenerateAndSubmitBlockWithCustomCoinbaseOutputs(
 		txns,
 		blockVersion, blockTime, []wire.TxOut{},
@@ -348,7 +350,7 @@ func (h *Harness) GenerateAndSubmitBlock(
 func (h *Harness) GenerateAndSubmitBlockWithCustomCoinbaseOutputs(
 	txns []*util.Tx, blockVersion uint32, blockTime time.Time,
 	mineTo []wire.TxOut,
-) (*util.Block, error) {
+) (*block.Block, error) {
 	h.Lock()
 	defer h.Unlock()
 	if blockVersion == ^uint32(0) {
@@ -362,7 +364,7 @@ func (h *Harness) GenerateAndSubmitBlockWithCustomCoinbaseOutputs(
 	if e != nil {
 		return nil, e
 	}
-	prevBlock := util.NewBlock(mBlock)
+	prevBlock := block.NewBlock(mBlock)
 	prevBlock.SetHeight(prevBlockHeight)
 	// Create a new block including the specified transactions
 	newBlock, e := CreateBlock(
@@ -398,5 +400,5 @@ func generateListeningAddresses() (string, string) {
 func baseDir() (string, error) {
 	dirPath := filepath.Join(os.TempDir(), "pod", "rpctest")
 	e := os.MkdirAll(dirPath, 0755)
-	return dirPath, err
+	return dirPath, e
 }

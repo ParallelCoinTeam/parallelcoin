@@ -4,7 +4,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/p9c/pod/pkg/logg"
+	"github.com/p9c/pod/pkg/podcfg"
 	"io/ioutil"
 	"path/filepath"
 	"time"
@@ -15,10 +15,8 @@ import (
 	l "gioui.org/layout"
 	"gioui.org/text"
 	
-	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/gui"
-	p9icons "github.com/p9c/pod/pkg/gui/ico/svg"
-	"github.com/p9c/pod/pkg/pod"
+	p9icons "github.com/p9c/pod/pkg/icons/svg"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
@@ -30,7 +28,7 @@ func (wg *WalletGUI) unlockWallet(pass string) {
 	*wg.cx.Config.WalletOff = false
 	wg.cx.Config.Unlock()
 	// load config into a fresh variable
-	cfg, _ := pod.EmptyConfig()
+	cfg, _ := podcfg.EmptyConfig()
 	var cfgFile []byte
 	var e error
 	if cfgFile, e = ioutil.ReadFile(*wg.cx.Config.ConfigFile); E.Chk(e) {
@@ -46,14 +44,20 @@ func (wg *WalletGUI) unlockWallet(pass string) {
 		D.Ln(pass, bh, *cfg.WalletPass)
 		if *cfg.WalletPass == bh {
 			D.Ln("loading previously saved state")
-			filename := filepath.Join(wg.cx.DataDir, "state.json")
-			if logg.FileExists(filename) {
-				D.Ln("#### loading state data...")
-				if e = wg.State.Load(filename, wg.cx.Config.WalletPass); E.Chk(e) {
-					// interrupt.Request()
-				}
+			filename := filepath.Join(*wg.cx.Config.DataDir, "state.json")
+			// if logg.FileExists(filename) {
+			I.Ln("#### loading state data...")
+			if e = wg.State.Load(filename, wg.cx.Config.WalletPass); !E.Chk(e) {
 				D.Ln("#### loaded state data")
 			}
+			// it is as though it is loaded if it didn't exist
+			wg.stateLoaded.Store(true)
+			// the entered password matches the stored hash
+			*wg.cx.Config.NodeOff = false
+			*wg.cx.Config.WalletOff = false
+			podcfg.Save(wg.cx.Config)
+			wg.WalletWatcher = wg.Watcher()
+			// }
 			//
 			// qrText := fmt.Sprintf("parallelcoin:%s?amount=%s&message=%s",
 			// 	wg.State.currentReceivingAddress.Load().EncodeAddress(),
@@ -79,12 +83,6 @@ func (wg *WalletGUI) unlockWallet(pass string) {
 			// 		).Fn
 			// 	// *wg.currentReceiveQRCode = iop
 			// }
-			wg.stateLoaded.Store(true)
-			// the entered password matches the stored hash
-			*wg.cx.Config.NodeOff = false
-			*wg.cx.Config.WalletOff = false
-			save.Pod(wg.cx.Config)
-			wg.WalletWatcher = wg.Watcher()
 		}
 	} else {
 		D.Ln("failed to unlock the wallet")
@@ -100,7 +98,7 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
 	wg.unlockPassword = wg.Password(
 		"enter password", &password, "DocText",
 		"DocBg", "PanelBg", func(pass string) {
-			go wg.unlockWallet(pass)
+			wg.unlockWallet(pass)
 		},
 	)
 	wg.unlockPage.SetThemeHook(
@@ -113,7 +111,7 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
 			if wgb, ok := wg.config.Bools["DarkTheme"]; ok {
 				wgb.Value(*wg.Dark)
 			}
-			save.Pod(wg.cx.Config)
+			podcfg.Save(wg.cx.Config)
 		},
 	)
 	a.Pages(
@@ -279,18 +277,19 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
 																					wg.Inset(
 																						0.25,
 																						wg.ButtonLayout(
-																							unlockButton.SetClick(
-																								func() {
-																									// pass := wg.unlockPassword.Editor().Text()
-																									pass := wg.unlockPassword.GetPassword()
-																									D.Ln(
-																										">>>>>>>>>>> unlock password",
-																										pass,
-																									)
-																									wg.unlockWallet(pass)
-																									
-																								},
-																							),
+																							unlockButton,
+																							// .SetClick(
+																							// 	func() {
+																							// 		// pass := wg.unlockPassword.Editor().Text()
+																							// 		pass := wg.unlockPassword.GetPassword()
+																							// 		D.Ln(
+																							// 			">>>>>>>>>>> unlock password",
+																							// 			pass,
+																							// 		)
+																							// 		wg.unlockWallet(pass)
+																							//
+																							// 	},
+																							// ),
 																						).Background("Primary").
 																							CornerRadius(0.5).
 																							Corners(0).

@@ -2,12 +2,13 @@ package mempool
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/amt"
 	"time"
 	
 	"github.com/p9c/pod/pkg/blockchain"
-	"github.com/p9c/pod/pkg/blockchain/tx/txscript"
-	"github.com/p9c/pod/pkg/blockchain/wire"
+	"github.com/p9c/pod/pkg/txscript"
 	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 const (
@@ -42,7 +43,7 @@ const (
 	// used to help determine if a transaction is considered dust and as a base for
 	// calculating minimum required fees for larger transactions. This value is in
 	// Satoshi/1000 bytes.
-	DefaultMinRelayTxFee = util.Amount(1000)
+	DefaultMinRelayTxFee = amt.Amount(1000)
 	// maxStandardMultiSigKeys is the maximum number of public keys allowed in a
 	// multi-signature transaction output script for it to be considered standard.
 	maxStandardMultiSigKeys = 3
@@ -51,7 +52,7 @@ const (
 // calcMinRequiredTxRelayFee returns the minimum transaction fee required for a
 // transaction with the passed serialized size to be accepted into the memory
 // pool and relayed.
-func calcMinRequiredTxRelayFee(serializedSize int64, minRelayTxFee util.Amount) int64 {
+func calcMinRequiredTxRelayFee(serializedSize int64, minRelayTxFee amt.Amount) int64 {
 	// Calculate the minimum fee for a transaction to be allowed into the mempool
 	// and relayed by scaling the base fee ( which is the minimum free transaction
 	// relay fee). minTxRelayFee is in Satoshi/kB so multiply by serializedSize (
@@ -63,8 +64,8 @@ func calcMinRequiredTxRelayFee(serializedSize int64, minRelayTxFee util.Amount) 
 	}
 	// Set the minimum fee to the maximum possible value if the calculated fee is
 	// not in the valid range for monetary amounts.
-	if minFee < 0 || minFee > int64(util.MaxSatoshi) {
-		minFee = int64(util.MaxSatoshi)
+	if minFee < 0 || minFee > int64(amt.MaxSatoshi) {
+		minFee = int64(amt.MaxSatoshi)
 	}
 	return minFee
 }
@@ -168,7 +169,7 @@ func checkPkScriptStandard(pkScript []byte, scriptClass txscript.ScriptClass) (e
 // Dust is defined in terms of the minimum transaction relay fee. In particular,
 // if the cost to the network to spend coins is more than 1/3 of the minimum
 // transaction relay fee, it is considered dust.
-func isDust(txOut *wire.TxOut, minRelayTxFee util.Amount) bool {
+func isDust(txOut *wire.TxOut, minRelayTxFee amt.Amount) bool {
 	// Unspendable outputs are considered dust.
 	if txscript.IsUnspendable(txOut.PkScript) {
 		return true
@@ -262,7 +263,7 @@ func isDust(txOut *wire.TxOut, minRelayTxFee util.Amount) bool {
 // worth).
 func checkTransactionStandard(
 	tx *util.Tx, height int32,
-	medianTimePast time.Time, minRelayTxFee util.Amount,
+	medianTimePast time.Time, minRelayTxFee amt.Amount,
 	maxTxVersion int32,
 ) (e error) {
 	// The transaction must be a currently supported version.

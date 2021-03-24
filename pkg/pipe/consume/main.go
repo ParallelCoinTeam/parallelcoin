@@ -2,9 +2,9 @@ package consume
 
 import (
 	"github.com/niubaoshu/gotiny"
-	"github.com/p9c/pod/pkg/comm/pipe"
-	"github.com/p9c/pod/pkg/comm/stdconn/worker"
 	"github.com/p9c/pod/pkg/logg"
+	"github.com/p9c/pod/pkg/pipe"
+	"github.com/p9c/pod/pkg/pipe/stdconn/worker"
 	"github.com/p9c/pod/pkg/util/qu"
 )
 

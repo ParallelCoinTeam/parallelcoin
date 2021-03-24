@@ -3,9 +3,9 @@ package blockchain_test
 import (
 	"os"
 	
-	"github.com/p9c/pod/pkg/blockchain/wire"
-	database "github.com/p9c/pod/pkg/database"
+	"github.com/p9c/pod/pkg/database"
 	_ "github.com/p9c/pod/pkg/database/ffldb"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 const (
@@ -19,8 +19,9 @@ const (
 
 // filesExists returns whether or not the named file or directory exists.
 func fileExists(name string) bool {
+	var e error
 	if _, e = os.Stat(name); E.Chk(e) {
-		if os.IsNotExist(err) {
+		if os.IsNotExist(e) {
 			return false
 		}
 	}
@@ -39,7 +40,7 @@ func isSupportedDbType(dbType string) bool {
 }
 
 // // chainSetup is used to create a new db and chain instance with the genesis block already inserted.  In addition to the new chain instance, it returns a teardown function the caller should invoke when done testing to clean up.
-// func chainSetup(	dbName string, netparams *netparams.Params) (*blockchain.BlockChain, func(), error) {
+// func chainSetup(	dbName string, netparams *chaincfg.Params) (*blockchain.BlockChain, func(), error) {
 // 	if !isSupportedDbType(testDbType) {
 // 		return nil, nil, fmt.Errorf("unsupported db type %v", testDbType)
 // 	}
@@ -106,7 +107,7 @@ func isSupportedDbType(dbType string) bool {
 // 	}
 // 	// Create a new database and chain instance to run tests against.
 // 	chain, teardownFunc, e := chainSetup("fullblocktest",
-// 		&netparams.RegressionTestParams)
+// 		&chaincfg.RegressionTestParams)
 // 	if e != nil  {
 // 		t.Errorf("Failed to setup chain instance: %v", err)
 // 		return
@@ -180,7 +181,7 @@ func isSupportedDbType(dbType string) bool {
 // 		t.Logf("Testing block %s (hash %s, height %d)", item.Name,
 // 			blockHash, blockHeight)
 // 		// Ensure there is an error due to deserializing the block.
-// 		var msgBlock wire.MsgBlock
+// 		var msgBlock wire.Block
 // 		e := msgBlock.BtcDecode(bytes.NewReader(item.RawBlock), 0, wire.BaseEncoding)
 // 		if _, ok := err.(*wire.MessageError); !ok {
 // 			t.Fatalf("block %q (hash %s, height %d) should have "+

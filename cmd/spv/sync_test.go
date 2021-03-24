@@ -6,6 +6,8 @@ import (
 	"bytes"
 	"encoding/hex"
 	"fmt"
+	"github.com/p9c/pod/pkg/amt"
+	"github.com/p9c/pod/pkg/btcaddr"
 	"io"
 	"reflect"
 	"runtime"
@@ -16,18 +18,17 @@ import (
 	
 	"github.com/p9c/pod/cmd/node/integration/rpctest"
 	"github.com/p9c/pod/cmd/spv"
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
-	"github.com/p9c/pod/pkg/blockchain/chainhash"
-	"github.com/p9c/pod/pkg/blockchain/tx/txauthor"
-	"github.com/p9c/pod/pkg/blockchain/tx/txscript"
-	"github.com/p9c/pod/pkg/blockchain/wire"
-	ec "github.com/p9c/pod/pkg/coding/ecc"
-	"github.com/p9c/pod/pkg/coding/gcs/builder"
-	_ "github.com/p9c/pod/pkg/database/walletdb/bdb"
-	"github.com/p9c/pod/pkg/rpc/btcjson"
-	"github.com/p9c/pod/pkg/rpc/rpcclient"
+	"github.com/p9c/pod/pkg/btcjson"
+	"github.com/p9c/pod/pkg/chainhash"
+	ec "github.com/p9c/pod/pkg/ecc"
+	"github.com/p9c/pod/pkg/gcs/builder"
+	"github.com/p9c/pod/pkg/rpcclient"
+	"github.com/p9c/pod/pkg/txauthor"
+	"github.com/p9c/pod/pkg/txscript"
 	"github.com/p9c/pod/pkg/util"
-	"github.com/p9c/pod/pkg/wallet/waddrmgr"
+	"github.com/p9c/pod/pkg/waddrmgr"
+	_ "github.com/p9c/pod/pkg/walletdb/bdb"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 var (
@@ -162,11 +163,11 @@ var (
 type secSource struct {
 	keys    map[string]*ec.PrivateKey
 	scripts map[string]*[]byte
-	params  *netparams.Params
+	params  *chaincfg.Params
 }
 
-func (s *secSource) add(privKey *ec.PrivateKey) (util.Address, error) {
-	pubKeyHash := util.Hash160(privKey.PubKey().SerializeCompressed())
+func (s *secSource) add(privKey *ec.PrivateKey) (btcaddr.Address, error) {
+	pubKeyHash := btcaddr.Hash160(privKey.PubKey().SerializeCompressed())
 	addr, e := util.NewAddressWitnessPubKeyHash(pubKeyHash, s.params)
 	if e != nil {
 		return nil, e
@@ -191,7 +192,7 @@ func (s *secSource) add(privKey *ec.PrivateKey) (util.Address, error) {
 }
 
 // GetKey is required by the txscript.KeyDB interface
-func (s *secSource) GetKey(addr util.Address) (
+func (s *secSource) GetKey(addr btcaddr.Address) (
 	*ec.PrivateKey, bool,
 	error,
 ) {
@@ -203,7 +204,7 @@ func (s *secSource) GetKey(addr util.Address) (
 }
 
 // GetScript is required by the txscript.ScriptDB interface
-func (s *secSource) GetScript(addr util.Address) ([]byte, error) {
+func (s *secSource) GetScript(addr btcaddr.Address) ([]byte, error) {
 	script, ok := s.scripts[addr.String()]
 	if !ok {
 		return nil, fmt.Errorf("No script for address %s", addr)
@@ -212,11 +213,11 @@ func (s *secSource) GetScript(addr util.Address) ([]byte, error) {
 }
 
 // ChainParams is required by the SecretsSource interface
-func (s *secSource) ChainParams() *netparams.Params {
+func (s *secSource) ChainParams() *chaincfg.Params {
 	return s.params
 }
 
-func newSecSource(params *netparams.Params) *secSource {
+func newSecSource(params *chaincfg.Params) *secSource {
 	return &secSource{
 		keys:    make(map[string]*ec.PrivateKey),
 		scripts: make(map[string]*[]byte),
@@ -277,7 +278,7 @@ var (
 	rescan                    *spv.Rescan
 	startBlock                waddrmgr.BlockStamp
 	secSrc                    *secSource
-	addr1, addr2, addr3       util.Address
+	addr1, addr2, addr3       btcaddr.Address
 	script1, script2, script3 []byte
 	tx1, tx2, tx3             *wire.MsgTx
 	ourOutPoint               wire.OutPoint
@@ -431,9 +432,9 @@ func testStartRescan(harness *neutrinoHarness, t *testing.T) {
 		t.Fatalf("Couldn't sync h2 to h1: %s", err)
 	}
 	// Spend the outputs we sent ourselves over two blocks.
-	inSrc := func(tx wire.MsgTx) func(target util.Amount) (
-		total util.Amount, inputs []*wire.TxIn,
-		inputValues []util.Amount, scripts [][]byte, e error,
+	inSrc := func(tx wire.MsgTx) func(target amt.Amount) (
+		total amt.Amount, inputs []*wire.TxIn,
+		inputValues []amt.Amount, scripts [][]byte, e error,
 	) {
 		ourIndex := 1 << 30 // Should work on 32-bit systems
 		for i, txo := range tx.TxOut {
@@ -442,9 +443,9 @@ func testStartRescan(harness *neutrinoHarness, t *testing.T) {
 				ourIndex = i
 			}
 		}
-		return func(target util.Amount) (
-			total util.Amount,
-			inputs []*wire.TxIn, inputValues []util.Amount,
+		return func(target amt.Amount) (
+			total amt.Amount,
+			inputs []*wire.TxIn, inputValues []amt.Amount,
 			scripts [][]byte, e error,
 		) {
 			if ourIndex == 1<<30 {
@@ -463,8 +464,8 @@ func testStartRescan(harness *neutrinoHarness, t *testing.T) {
 					},
 				},
 			}
-			inputValues = []util.Amount{
-				util.Amount(tx.TxOut[ourIndex].Value),
+			inputValues = []amt.Amount{
+				amt.Amount(tx.TxOut[ourIndex].Value),
 			}
 			scripts = [][]byte{tx.TxOut[ourIndex].PkScript}
 			e = nil
@@ -641,7 +642,7 @@ func testStartRescan(harness *neutrinoHarness, t *testing.T) {
 	}
 }
 
-func fetchPrevInputScripts(block *wire.MsgBlock, client *rpctest.Harness) ([][]byte, error) {
+func fetchPrevInputScripts(block *wire.Block, client *rpctest.Harness) ([][]byte, error) {
 	var inputScripts [][]byte
 	for i, tx := range block.Transactions {
 		if i == 0 {
@@ -1004,7 +1005,7 @@ func testRandomBlocks(harness *neutrinoHarness, t *testing.T) {
 		)
 	}
 	if lastErr != nil {
-		t.F.Ln(lastErr)
+		t.Fatal(lastErr)
 	}
 }
 
@@ -1019,7 +1020,7 @@ func testRandomBlocks(harness *neutrinoHarness, t *testing.T) {
 // 	// rpcclient.UseLogger(rpcLogger)
 // 	// Create a btcd SimNet node and generate 800 blocks
 // 	h1, e := rpctest.New(
-// 		&netparams.SimNetParams, nil, []string{"--txindex"},
+// 		&chaincfg.SimNetParams, nil, []string{"--txindex"},
 // 	)
 // 	if e != nil  {
 // 		t.Fatalf("Couldn't create harness: %s", err)
@@ -1035,7 +1036,7 @@ func testRandomBlocks(harness *neutrinoHarness, t *testing.T) {
 // 	}
 // 	// Create a second btcd SimNet node
 // 	h2, e := rpctest.New(
-// 		&netparams.SimNetParams, nil, []string{"--txindex"},
+// 		&chaincfg.SimNetParams, nil, []string{"--txindex"},
 // 	)
 // 	if e != nil  {
 // 		t.Fatalf("Couldn't create harness: %s", err)
@@ -1047,7 +1048,7 @@ func testRandomBlocks(harness *neutrinoHarness, t *testing.T) {
 // 	}
 // 	// Create a third btcd SimNet node and generate 1200 blocks
 // 	h3, e := rpctest.New(
-// 		&netparams.SimNetParams, nil, []string{"--txindex"},
+// 		&chaincfg.SimNetParams, nil, []string{"--txindex"},
 // 	)
 // 	if e != nil  {
 // 		t.Fatalf("Couldn't create harness: %s", err)
@@ -1143,7 +1144,7 @@ func testRandomBlocks(harness *neutrinoHarness, t *testing.T) {
 // reorg testing. It brings up and tears down a temporary node, otherwise the
 // nodes try to reconnect to each other which results in unintended reorgs.
 func csd(harnesses []*rpctest.Harness) (e error) {
-	hTemp, e := rpctest.New(&netparams.SimNetParams, nil, nil)
+	hTemp, e := rpctest.New(&chaincfg.SimNetParams, nil, nil)
 	if e != nil {
 		return e
 	}
@@ -1358,7 +1359,7 @@ func waitForSync(
 // should match one we precomputed based on the flow of the test. The rescan starts at the genesis block and the
 // notifications continue until the `quit` channel is closed.
 func startRescan(
-	t *testing.T, svc *spv.ChainService, addr util.Address,
+	t *testing.T, svc *spv.ChainService, addr btcaddr.Address,
 	startBlock *waddrmgr.BlockStamp, quit qu.C,
 ) (
 	*spv.Rescan, <-chan error,

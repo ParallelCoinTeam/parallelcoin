@@ -2,12 +2,12 @@ package filterdb
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/chaincfg"
 	
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
-	"github.com/p9c/pod/pkg/blockchain/chainhash"
-	"github.com/p9c/pod/pkg/coding/gcs"
-	"github.com/p9c/pod/pkg/coding/gcs/builder"
-	"github.com/p9c/pod/pkg/database/walletdb"
+	"github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/gcs"
+	"github.com/p9c/pod/pkg/gcs/builder"
+	"github.com/p9c/pod/pkg/walletdb"
 )
 
 var (
@@ -45,14 +45,14 @@ type FilterDatabase interface {
 // FilterStore is an implementation of the FilterDatabase interface which is backed by boltdb.
 type FilterStore struct {
 	db walletdb.DB
-	// chainParams netparams.Params
+	// chainParams chaincfg.Params
 }
 
 // A compile-time check to ensure the FilterStore adheres to the FilterDatabase interface.
 var _ FilterDatabase = (*FilterStore)(nil)
 
 // New creates a new instance of the FilterStore given an already open database, and the target chain parameters.
-func New(db walletdb.DB, params netparams.Params) (*FilterStore, error) {
+func New(db walletdb.DB, params chaincfg.Params) (*FilterStore, error) {
 	e := walletdb.Update(
 		db, func(tx walletdb.ReadWriteTx) (e error) {
 			// As part of our initial setup, we'll try to create the top level filter bucket. If this already exists, then

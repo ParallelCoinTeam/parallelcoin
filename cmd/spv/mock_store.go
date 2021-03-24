@@ -5,9 +5,9 @@ import (
 	
 	"github.com/p9c/pod/cmd/spv/headerfs"
 	"github.com/p9c/pod/pkg/blockchain"
-	"github.com/p9c/pod/pkg/blockchain/chainhash"
-	"github.com/p9c/pod/pkg/blockchain/wire"
-	"github.com/p9c/pod/pkg/wallet/waddrmgr"
+	"github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/waddrmgr"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 // mockBlockHeaderStore is an implementation of the BlockHeaderStore backed by a simple map.

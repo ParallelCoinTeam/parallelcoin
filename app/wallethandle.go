@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gookit/color"
 	"github.com/p9c/pod/pkg/logg"
+	"github.com/p9c/pod/pkg/pod"
 	"io/ioutil"
 	"os"
 	
@@ -11,18 +12,17 @@ import (
 	
 	"github.com/urfave/cli"
 	
-	"github.com/p9c/pod/app/apputil"
-	"github.com/p9c/pod/app/config"
-	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/cmd/walletmain"
+	"github.com/p9c/pod/pkg/apputil"
+	"github.com/p9c/pod/pkg/podconfig"
 	"github.com/p9c/pod/pkg/wallet"
 )
 
-func WalletHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
+func WalletHandle(cx *pod.State) func(c *cli.Context) (e error) {
 	return func(c *cli.Context) (e error) {
 		logg.AppColorizer = color.Bit24(255, 255, 128, false).Sprint
 		logg.App = "wallet"
-		config.Configure(cx, c.Command.Name, true)
+		podconfig.Configure(cx, c.Command.Name, true)
 		*cx.Config.WalletFile = *cx.Config.DataDir + string(os.PathSeparator) +
 			cx.ActiveNet.Name + string(os.PathSeparator) + wallet.DbName
 		// dbFilename := *cx.Config.DataDir + slash + cx.ActiveNet.
@@ -37,7 +37,7 @@ func WalletHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
 			os.Exit(0)
 		}
 		// for security with apps launching the wallet, the public password can be set with a file that is deleted after
-		walletPassPath := *cx.Config.DataDir + slash + cx.ActiveNet.Params.Name + slash + "wp.txt"
+		walletPassPath := *cx.Config.DataDir + slash + cx.ActiveNet.Name + slash + "wp.txt"
 		D.Ln("reading password from", walletPassPath)
 		if apputil.FileExists(walletPassPath) {
 			var b []byte

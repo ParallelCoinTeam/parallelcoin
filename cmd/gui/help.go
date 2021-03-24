@@ -5,7 +5,7 @@ import (
 	"gioui.org/text"
 	
 	"github.com/p9c/pod/pkg/gui"
-	p9icons "github.com/p9c/pod/pkg/gui/ico/svg"
+	p9icons "github.com/p9c/pod/pkg/icons/svg"
 	"github.com/p9c/pod/version"
 )
 

@@ -215,7 +215,7 @@ func supportedSubsystems() []string {
 subsystems = append(subsystems, subsysID)
 	}
 	// Sort the subsytems for stable display.
-	sort.Strings(subsystems)
+	txsort.Strings(subsystems)
 	return subsystems
 }
 // parseAndSetDebugLevels attempts to parse the specified debug level and set
@@ -432,11 +432,11 @@ return nil, nil, e
 								// Multiple networks can't be selected simultaneously.
 								numNets := 0
 								if cfg.TestNet3 {
-activeNet = &netparams.TestNet3Params
+activeNet = &chaincfg.TestNet3Params
 										numNets++
 									}
 									if cfg.SimNet {
-activeNet = &netparams.SimNetParams
+activeNet = &chaincfg.SimNetParams
 			numNets++
 		}
 		if numNets > 1 {

@@ -2,6 +2,7 @@ package gui
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/amt"
 	"strconv"
 	
 	l "gioui.org/layout"
@@ -9,7 +10,6 @@ import (
 	"github.com/atotto/clipboard"
 	
 	"github.com/p9c/pod/pkg/gui"
-	"github.com/p9c/pod/pkg/util"
 )
 
 const Break1 = 48
@@ -282,14 +282,14 @@ func (rp *ReceivePage) RegenerateButton() l.Widget {
 				SetClick(
 					func() {
 						D.Ln("clicked regenerate button")
-						var amt float64
-						var am util.Amount
+						var amount float64
+						var am amt.Amount
 						var e error
-						if amt, e = strconv.ParseFloat(
+						if amount, e = strconv.ParseFloat(
 							wg.inputs["receiveAmount"].GetText(),
 							64,
 						); !E.Chk(e) {
-							if am, e = util.NewAmount(amt); E.Chk(e) {
+							if am, e = amt.NewAmount(amount); E.Chk(e) {
 							}
 						}
 						msg := wg.inputs["receiveMessage"].GetText()

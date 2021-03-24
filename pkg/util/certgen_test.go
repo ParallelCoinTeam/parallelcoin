@@ -20,7 +20,7 @@ func TestNewTLSCertPair(t *testing.T) {
 	extraHosts := []string{"testtlscert.bogus", "localhost", "127.0.0.1"}
 	cert, key, e := util.NewTLSCertPair(org, validUntil, extraHosts)
 	if e != nil  {
-		t.Fatalf("failed with unexpected error: %v", err)
+		t.Fatalf("failed with unexpected error: %v", e)
 	}
 	// Ensure the PEM-encoded cert that is returned can be decoded.
 	pemCert, _ := pem.Decode(cert)
@@ -35,12 +35,12 @@ func TestNewTLSCertPair(t *testing.T) {
 	// Ensure the DER-encoded key bytes can be successfully parsed.
 	_, e = x509.ParseECPrivateKey(pemKey.Bytes)
 	if e != nil  {
-		t.Fatalf("failed with unexpected error: %v", err)
+		t.Fatalf("failed with unexpected error: %v", e)
 	}
 	// Ensure the DER-encoded cert bytes can be successfully into an X.509 certificate.
 	x509Cert, e := x509.ParseCertificate(pemCert.Bytes)
 	if e != nil  {
-		t.Fatalf("failed with unexpected error: %v", err)
+		t.Fatalf("failed with unexpected error: %v", e)
 	}
 	// Ensure the specified organization is correct.
 	x509Orgs := x509Cert.Subject.Organization
@@ -90,18 +90,18 @@ func TestNewTLSCertPair(t *testing.T) {
 	}
 	// Ensure the cert can be use for the intended purposes.
 	if !x509Cert.IsCA {
-		t.F.Ln("generated cert is not a certificate authority")
+		t.Fatal("generated cert is not a certificate authority")
 	}
 	if x509Cert.KeyUsage&x509.KeyUsageKeyEncipherment == 0 {
-		t.F.Ln("generated cert can't be used for key encipherment")
+		t.Fatal("generated cert can't be used for key encipherment")
 	}
 	if x509Cert.KeyUsage&x509.KeyUsageDigitalSignature == 0 {
-		t.F.Ln("generated cert can't be used for digital signatures")
+		t.Fatal("generated cert can't be used for digital signatures")
 	}
 	if x509Cert.KeyUsage&x509.KeyUsageCertSign == 0 {
-		t.F.Ln("generated cert can't be used for signing other certs")
+		t.Fatal("generated cert can't be used for signing other certs")
 	}
 	if !x509Cert.BasicConstraintsValid {
-		t.F.Ln("generated cert does not have valid basic constraints")
+		t.Fatal("generated cert does not have valid basic constraints")
 	}
 }

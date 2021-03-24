@@ -2,8 +2,8 @@ package spv
 
 import (
 	"github.com/p9c/pod/cmd/spv/headerfs"
-	"github.com/p9c/pod/pkg/blockchain/chainhash"
-	"github.com/p9c/pod/pkg/blockchain/wire"
+	"github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 // headers wraps the different headers and filters used throughout the tests.
@@ -59,11 +59,11 @@ const maxHeight = 20 * uint32(wire.CFCheckptInterval)
 // 		// is created, we query it to add to the slices.
 // 		genesisBlockHeader, _, e = hdrStore.ChainTip()
 // 		if e != nil  {
-// 			t.F.Ln(e)
+// 			t.Fatal(e)
 // 		}
 // 		genesisFilterHeader, _, e = cfStore.ChainTip()
 // 		if e != nil  {
-// 			t.F.Ln(e)
+// 			t.Fatal(e)
 // 		}
 // 		headers, e := generateHeaders(genesisBlockHeader,
 // 			genesisFilterHeader, nil)
@@ -136,7 +136,7 @@ const maxHeight = 20 * uint32(wire.CFCheckptInterval)
 // 		// Finally make sure the filter header tip is what we expect.
 // 		tip, tipHeight, e := cfStore.ChainTip()
 // 		if e != nil  {
-// 			t.F.Ln(e)
+// 			t.Fatal(e)
 // 		}
 // 		if tipHeight != maxHeight {
 // 			t.Fatalf("expected tip height to be %v, was %v",
@@ -219,11 +219,11 @@ const maxHeight = 20 * uint32(wire.CFCheckptInterval)
 // 		// is created, we query it to add to the slices.
 // 		genesisBlockHeader, _, e = hdrStore.ChainTip()
 // 		if e != nil  {
-// 			t.F.Ln(e)
+// 			t.Fatal(e)
 // 		}
 // 		genesisFilterHeader, _, e = cfStore.ChainTip()
 // 		if e != nil  {
-// 			t.F.Ln(e)
+// 			t.Fatal(e)
 // 		}
 // 		// To emulate a full node serving us filter headers derived
 // 		// from different genesis than what we have, we flip a bit in
@@ -469,7 +469,7 @@ const maxHeight = 20 * uint32(wire.CFCheckptInterval)
 // 			err)
 // 	}
 // 	hdrStore, e := headerfs.NewBlockHeaderStore(
-// 		tempDir, db, &netparams.SimNetParams,
+// 		tempDir, db, &chaincfg.SimNetParams,
 // 	)
 // 	if e != nil  {
 // 		db.Close()
@@ -482,7 +482,7 @@ const maxHeight = 20 * uint32(wire.CFCheckptInterval)
 // 	}
 // 	cfStore, e := headerfs.NewFilterHeaderStore(
 // 		tempDir, db, headerfs.RegularFilter,
-// 		&netparams.SimNetParams,
+// 		&chaincfg.SimNetParams,
 // 	)
 // 	if e != nil  {
 // 		cleanUp()

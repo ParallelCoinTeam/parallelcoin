@@ -2,13 +2,15 @@ package mempool
 
 import (
 	"bytes"
+	"github.com/p9c/pod/pkg/amt"
+	block2 "github.com/p9c/pod/pkg/block"
 	"math/rand"
 	"testing"
 	
-	"github.com/p9c/pod/pkg/blockchain/chainhash"
-	"github.com/p9c/pod/pkg/blockchain/mining"
-	"github.com/p9c/pod/pkg/blockchain/wire"
+	"github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/mining"
 	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 // estimateFeeTester interacts with the FeeEstimator to keep track of its expected state.
@@ -76,7 +78,7 @@ func (eft *estimateFeeTester) estimates() [estimateFeeDepth]DUOPerKilobyte {
 
 func (eft *estimateFeeTester) newBlock(txs []*wire.MsgTx) {
 	eft.height++
-	block := util.NewBlock(&wire.MsgBlock{Transactions: txs})
+	block := block2.NewBlock(&wire.Block{Transactions: txs})
 	block.SetHeight(eft.height)
 	eft.last = &lastBlock{block.Hash(), eft.last}
 	e := eft.ef.RegisterBlock(block)
@@ -105,7 +107,7 @@ func (eft *estimateFeeTester) round(
 	// generate new txs.
 	var newTxs []*TxDesc
 	for i := uint32(0); i < txPerRound; i++ {
-		newTx := eft.testTx(util.Amount(rand.Intn(1000000)))
+		newTx := eft.testTx(amt.Amount(rand.Intn(1000000)))
 		eft.ef.ObserveTransaction(newTx)
 		newTxs = append(newTxs, newTx)
 	}
@@ -140,7 +142,7 @@ func (eft *estimateFeeTester) round(
 func (
 eft *estimateFeeTester,
 ) testTx(
-	fee util.Amount,
+	fee amt.Amount,
 ) *TxDesc {
 	eft.version++
 	return &TxDesc{

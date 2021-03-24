@@ -2,11 +2,11 @@ package gui
 
 import (
 	l "gioui.org/layout"
+	"github.com/p9c/pod/pkg/podcfg"
 	"golang.org/x/exp/shiny/materialdesign/icons"
 	
-	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/gui"
-	p9icons "github.com/p9c/pod/pkg/gui/ico/svg"
+	p9icons "github.com/p9c/pod/pkg/icons/svg"
 )
 
 func (wg *WalletGUI) getLoadingPage() (a *gui.App) {
@@ -21,17 +21,27 @@ func (wg *WalletGUI) getLoadingPage() (a *gui.App) {
 			if wgb, ok := wg.config.Bools["DarkTheme"]; ok {
 				wgb.Value(*wg.Dark)
 			}
-			save.Pod(wg.cx.Config)
+			podcfg.Save(wg.cx.Config)
 		},
 	)
 	a.Pages(
 		map[string]l.Widget{
-			"home": wg.Page(
-				"home", gui.Widgets{
+			"loading": wg.Page(
+				"loading", gui.Widgets{
 					gui.WidgetSize{
 						Widget:
 						func(gtx l.Context) l.Dimensions {
 							return a.Flex().Flexed(1, a.Direction().Center().Embed(a.H1("loading").Fn).Fn).Fn(gtx)
+						},
+					},
+				},
+			),
+			"unlocking": wg.Page(
+				"unlocking", gui.Widgets{
+					gui.WidgetSize{
+						Widget:
+						func(gtx l.Context) l.Dimensions {
+							return a.Flex().Flexed(1, a.Direction().Center().Embed(a.H1("unlocking").Fn).Fn).Fn(gtx)
 						},
 					},
 				},

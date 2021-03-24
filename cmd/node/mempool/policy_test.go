@@ -2,25 +2,27 @@ package mempool
 
 import (
 	"bytes"
+	"github.com/p9c/pod/pkg/amt"
+	"github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/btcaddr"
 	"testing"
 	"time"
 	
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
-	"github.com/p9c/pod/pkg/blockchain/chainhash"
-	"github.com/p9c/pod/pkg/blockchain/tx/txscript"
-	"github.com/p9c/pod/pkg/blockchain/wire"
-	ec "github.com/p9c/pod/pkg/coding/ecc"
+	"github.com/p9c/pod/pkg/chainhash"
+	ec "github.com/p9c/pod/pkg/ecc"
+	"github.com/p9c/pod/pkg/txscript"
 	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 // TestCalcMinRequiredTxRelayFee tests the calcMinRequiredTxRelayFee API.
 func TestCalcMinRequiredTxRelayFee(t *testing.T) {
 	
 	tests := []struct {
-		name     string      // test description.
-		size     int64       // Transaction size in bytes.
-		relayFee util.Amount // minimum relay transaction fee.
-		want     int64       // Expected fee.
+		name     string     // test description.
+		size     int64      // Transaction size in bytes.
+		relayFee amt.Amount // minimum relay transaction fee.
+		want     int64      // Expected fee.
 	}{
 		{
 			// Ensure combination of size and fee that are less than 1000 produce a non-zero fee.
@@ -44,8 +46,8 @@ func TestCalcMinRequiredTxRelayFee(t *testing.T) {
 		{
 			"max standard tx size with max satoshi relay fee",
 			maxStandardTxWeight / 4,
-			util.MaxSatoshi,
-			util.MaxSatoshi.Int64(),
+			amt.MaxSatoshi,
+			amt.MaxSatoshi.Int64(),
 		},
 		{
 			"1500 bytes with 5000 relay fee",
@@ -188,7 +190,7 @@ func TestCheckPkScriptStandard(t *testing.T) {
 			
 			t.Fatalf(
 				"TestCheckPkScriptStandard test '%s' "+
-					"failed: %v", test.name, e,
+					"failed: %v", test.name, err,
 			)
 			// continue
 		}
@@ -220,7 +222,7 @@ func TestDust(t *testing.T) {
 	tests := []struct {
 		name     string // test description
 		txOut    wire.TxOut
-		relayFee util.Amount // minimum relay transaction fee.
+		relayFee amt.Amount // minimum relay transaction fee.
 		isDust   bool
 	}{
 		{
@@ -252,8 +254,8 @@ func TestDust(t *testing.T) {
 		{
 			// Maximum allowed value is never dust.
 			"max satoshi amount is never dust",
-			wire.TxOut{Value: util.MaxSatoshi.Int64(), PkScript: pkScript},
-			util.MaxSatoshi,
+			wire.TxOut{Value: amt.MaxSatoshi.Int64(), PkScript: pkScript},
+			amt.MaxSatoshi,
 			false,
 		},
 		{
@@ -293,7 +295,7 @@ func TestCheckTransactionStandard(t *testing.T) {
 	prevOutHash, err := chainhash.NewHashFromStr("01")
 	
 	if err != nil {
-		t.Fatalf("NewShaHashFromStr: unexpected error: %v", e)
+		t.Fatalf("NewShaHashFromStr: unexpected error: %v", err)
 	}
 	dummyPrevOut := wire.OutPoint{Hash: *prevOutHash, Index: 1}
 	dummySigScript := bytes.Repeat([]byte{0x00}, 65)
@@ -303,18 +305,18 @@ func TestCheckTransactionStandard(t *testing.T) {
 		Sequence:         wire.MaxTxInSequenceNum,
 	}
 	addrHash := [20]byte{0x01}
-	addr, err := util.NewAddressPubKeyHash(
+	addr, err := btcaddr.NewPubKeyHash(
 		addrHash[:],
-		&netparams.TestNet3Params,
+		&chaincfg.TestNet3Params,
 	)
 	
 	if err != nil {
-		t.Fatalf("NewAddressPubKeyHash: unexpected error: %v", e)
+		t.Fatalf("NewPubKeyHash: unexpected error: %v", err)
 	}
 	dummyPkScript, err := txscript.PayToAddrScript(addr)
 	
 	if err != nil {
-		t.Fatalf("PayToAddrScript: unexpected error: %v", e)
+		t.Fatalf("PayToAddrScript: unexpected error: %v", err)
 	}
 	dummyTxOut := wire.TxOut{
 		Value:    100000000, // 1 DUO
@@ -523,7 +525,7 @@ func TestCheckTransactionStandard(t *testing.T) {
 		if err != nil && test.isStandard {
 			t.Errorf(
 				"checkTransactionStandard (%s): nonstandard "+
-					"when it should not be: %v", test.name, e,
+					"when it should not be: %v", test.name, err,
 			)
 			continue
 		}
@@ -532,7 +534,7 @@ func TestCheckTransactionStandard(t *testing.T) {
 		if !ok {
 			t.Errorf(
 				"checkTransactionStandard (%s): unexpected "+
-					"error type - got %T", test.name, e,
+					"error type - got %T", test.name, err,
 			)
 			continue
 		}

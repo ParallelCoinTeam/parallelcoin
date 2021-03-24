@@ -4,8 +4,8 @@ import (
 	"reflect"
 	"time"
 	
-	"github.com/p9c/pod/pkg/blockchain/chainhash"
-	"github.com/p9c/pod/pkg/rpc/rpcclient"
+	"github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/rpcclient"
 )
 
 // JoinType is an enum representing a particular type of "node join". A node
@@ -93,7 +93,7 @@ retry:
 // made is flagged as persistent therefore in the case of disconnects, "from" will attempt to reestablish a connection
 // to the "to" harness.
 func ConnectNode(from *Harness, to *Harness) (e error) {
-	peerInfo, e := from.Node.GetPeerI.Ln()
+	peerInfo, e := from.Node.GetPeerInfo()
 	if e != nil {
 		return e
 	}
@@ -103,12 +103,12 @@ func ConnectNode(from *Harness, to *Harness) (e error) {
 		return e
 	}
 	// Block until a new connection has been established.
-	peerInfo, e = from.Node.GetPeerI.Ln()
+	peerInfo, e = from.Node.GetPeerInfo()
 	if e != nil {
 		return e
 	}
 	for len(peerInfo) <= numPeers {
-		peerInfo, e = from.Node.GetPeerI.Ln()
+		peerInfo, e = from.Node.GetPeerInfo()
 		if e != nil {
 			return e
 		}

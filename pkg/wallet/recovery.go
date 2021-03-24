@@ -1,17 +1,17 @@
 package wallet
 
 import (
+	"github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/btcaddr"
 	"time"
 	
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
-	wtxmgr "github.com/p9c/pod/pkg/blockchain/tx/wtxmgr"
-	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
-	"github.com/p9c/pod/pkg/blockchain/wire"
-	"github.com/p9c/pod/pkg/database/walletdb"
-	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/txscript"
 	"github.com/p9c/pod/pkg/util/hdkeychain"
-	waddrmgr "github.com/p9c/pod/pkg/wallet/waddrmgr"
+	"github.com/p9c/pod/pkg/waddrmgr"
+	"github.com/p9c/pod/pkg/walletdb"
+	"github.com/p9c/pod/pkg/wire"
+	"github.com/p9c/pod/pkg/wtxmgr"
 )
 
 // RecoveryManager maintains the state required to recover previously used addresses, and coordinates batched processing
@@ -26,14 +26,14 @@ type RecoveryManager struct {
 	// state encapsulates and allocates the necessary recovery state for all key scopes and subsidiary derivation paths.
 	state *RecoveryState
 	// chainParams are the parameters that describe the chain we're trying to recover funds on.
-	chainParams *netparams.Params
+	chainParams *chaincfg.Params
 }
 
 // NewRecoveryManager initializes a new RecoveryManager with a derivation look-ahead of `recoveryWindow` child indexes,
 // and pre-allocates a backing array for `batchSize` blocks to scan at once.
 func NewRecoveryManager(
 	recoveryWindow, batchSize uint32,
-	chainParams *netparams.Params,
+	chainParams *chaincfg.Params,
 ) *RecoveryManager {
 	return &RecoveryManager{
 		recoveryWindow: recoveryWindow,
@@ -109,7 +109,7 @@ func (rm *RecoveryManager) Resurrect(
 	// In addition, we will re-add any outpoints that are known the wallet to our global set of watched outpoints, so
 	// that we can watch them for spends.
 	for _, credit := range credits {
-		var addrs []util.Address
+		var addrs []btcaddr.Address
 		_, addrs, _, e = txscript.ExtractPkScriptAddrs(
 			credit.PkScript, rm.chainParams,
 		)
@@ -178,7 +178,7 @@ type RecoveryState struct {
 	scopes map[waddrmgr.KeyScope]*ScopeRecoveryState
 	// watchedOutPoints contains the set of all outpoints known to the wallet. This is updated iteratively as new
 	// outpoints are found during a rescan.
-	watchedOutPoints map[wire.OutPoint]util.Address
+	watchedOutPoints map[wire.OutPoint]btcaddr.Address
 }
 
 // NewRecoveryState creates a new RecoveryState using the provided recoveryWindow. Each RecoveryState that is
@@ -188,7 +188,7 @@ func NewRecoveryState(recoveryWindow uint32) *RecoveryState {
 	return &RecoveryState{
 		recoveryWindow:   recoveryWindow,
 		scopes:           scopes,
-		watchedOutPoints: make(map[wire.OutPoint]util.Address),
+		watchedOutPoints: make(map[wire.OutPoint]btcaddr.Address),
 	}
 }
 
@@ -207,7 +207,7 @@ func (rs *RecoveryState) StateForScope(
 }
 
 // WatchedOutPoints returns the global set of outpoints that are known to belong to the wallet during recovery.
-func (rs *RecoveryState) WatchedOutPoints() map[wire.OutPoint]util.Address {
+func (rs *RecoveryState) WatchedOutPoints() map[wire.OutPoint]btcaddr.Address {
 	return rs.watchedOutPoints
 }
 
@@ -215,7 +215,7 @@ func (rs *RecoveryState) WatchedOutPoints() map[wire.OutPoint]util.Address {
 // recovery.
 func (rs *RecoveryState) AddWatchedOutPoint(
 	outPoint *wire.OutPoint,
-	addr util.Address,
+	addr btcaddr.Address,
 ) {
 	rs.watchedOutPoints[*outPoint] = addr
 }
@@ -263,7 +263,7 @@ type BranchRecoveryState struct {
 	// of this branch.
 	nextUnfound uint32
 	// addresses is a map of child index to address for all actively watched addresses belonging to this branch.
-	addresses map[uint32]util.Address
+	addresses map[uint32]btcaddr.Address
 	// invalidChildren records the set of child indexes that derive to invalid keys.
 	invalidChildren map[uint32]struct{}
 }
@@ -273,7 +273,7 @@ type BranchRecoveryState struct {
 func NewBranchRecoveryState(recoveryWindow uint32) *BranchRecoveryState {
 	return &BranchRecoveryState{
 		recoveryWindow:  recoveryWindow,
-		addresses:       make(map[uint32]util.Address),
+		addresses:       make(map[uint32]btcaddr.Address),
 		invalidChildren: make(map[uint32]struct{}),
 	}
 }
@@ -297,12 +297,12 @@ func (brs *BranchRecoveryState) ExtendHorizon() (uint32, uint32) {
 }
 
 // AddAddr adds a freshly derived address from our lookahead into the map of known addresses for this branch.
-func (brs *BranchRecoveryState) AddAddr(index uint32, addr util.Address) {
+func (brs *BranchRecoveryState) AddAddr(index uint32, addr btcaddr.Address) {
 	brs.addresses[index] = addr
 }
 
 // GetAddr returns the address derived from a given child index.
-func (brs *BranchRecoveryState) GetAddr(index uint32) util.Address {
+func (brs *BranchRecoveryState) GetAddr(index uint32) btcaddr.Address {
 	return brs.addresses[index]
 }
 
@@ -334,7 +334,7 @@ func (brs *BranchRecoveryState) NextUnfound() uint32 {
 }
 
 // Addrs returns a map of all currently derived child indexes to the their corresponding addresses.
-func (brs *BranchRecoveryState) Addrs() map[uint32]util.Address {
+func (brs *BranchRecoveryState) Addrs() map[uint32]btcaddr.Address {
 	return brs.addresses
 }
 

@@ -16,7 +16,7 @@ import (
 	
 	"github.com/p9c/pod/pkg/gui"
 	
-	"github.com/p9c/pod/pkg/rpc/ctl"
+	"github.com/p9c/pod/pkg/rpcctl"
 )
 
 type Console struct {
@@ -89,13 +89,13 @@ func (wg *WalletGUI) ConsolePage() *Console {
 				if len(args) == 0 {
 					D.Ln("rpc called help")
 					var result1, result2 []byte
-					if result1, e = ctl.Call(wg.cx, false, method, params...); E.Chk(e) {
+					if result1, e = rpcctl.Call(wg.cx, false, method, params...); E.Chk(e) {
 					}
 					r1 := string(result1)
 					if r1, e = strconv.Unquote(r1); E.Chk(e) {
 					}
 					o = r1 + "\n"
-					if result2, e = ctl.Call(wg.cx, true, method, params...); E.Chk(e) {
+					if result2, e = rpcctl.Call(wg.cx, true, method, params...); E.Chk(e) {
 					}
 					r2 := string(result2)
 					if r2, e = strconv.Unquote(r2); E.Chk(e) {
@@ -140,7 +140,7 @@ func (wg *WalletGUI) ConsolePage() *Console {
 				} else {
 					var out string
 					var isErr bool
-					if result, e = ctl.Call(wg.cx, false, method, params...); E.Chk(e) {
+					if result, e = rpcctl.Call(wg.cx, false, method, params...); E.Chk(e) {
 						isErr = true
 						out = e.Error()
 						I.Ln(out)
@@ -177,9 +177,9 @@ func (wg *WalletGUI) ConsolePage() *Console {
 				}
 			} else {
 				D.Ln("method", method, "args", args)
-				if result, e = ctl.Call(wg.cx, false, method, params...); E.Chk(e) {
+				if result, e = rpcctl.Call(wg.cx, false, method, params...); E.Chk(e) {
 					var errR string
-					if result, e = ctl.Call(wg.cx, true, method, params...); E.Chk(e) {
+					if result, e = rpcctl.Call(wg.cx, true, method, params...); E.Chk(e) {
 						if e != nil {
 							errR = e.Error()
 						}

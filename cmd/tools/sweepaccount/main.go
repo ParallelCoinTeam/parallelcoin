@@ -5,6 +5,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"github.com/p9c/pod/pkg/amt"
 	"github.com/p9c/pod/pkg/logg"
 	"io/ioutil"
 	"os"
@@ -15,17 +16,16 @@ import (
 	"github.com/jessevdk/go-flags"
 	"golang.org/x/crypto/ssh/terminal"
 	
-	"github.com/p9c/pod/app/appdata"
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
-	"github.com/p9c/pod/pkg/blockchain/chainhash"
-	"github.com/p9c/pod/pkg/blockchain/tx/txauthor"
-	"github.com/p9c/pod/pkg/blockchain/tx/txrules"
-	"github.com/p9c/pod/pkg/blockchain/tx/txscript"
-	"github.com/p9c/pod/pkg/blockchain/wire"
-	"github.com/p9c/pod/pkg/rpc/btcjson"
-	"github.com/p9c/pod/pkg/rpc/rpcclient"
-	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/appdata"
+	"github.com/p9c/pod/pkg/btcjson"
+	"github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/rpcclient"
+	"github.com/p9c/pod/pkg/txauthor"
+	"github.com/p9c/pod/pkg/txrules"
+	"github.com/p9c/pod/pkg/txscript"
 	"github.com/p9c/pod/pkg/util/cfgutil"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 var (
@@ -78,7 +78,7 @@ func init() {
 	// Unset localhost defaults if certificate file can not be found.
 	certFileExists, e := cfgutil.FileExists(opts.RPCCertificateFile)
 	if e != nil {
-		fatalf("%v", err)
+		fatalf("%v", e)
 	}
 	if !certFileExists {
 		opts.RPCConnect = ""
@@ -91,18 +91,18 @@ func init() {
 	if opts.TestNet3 && opts.SimNet {
 		fatalf("Multiple bitcoin networks may not be used simultaneously")
 	}
-	var activeNet = &netparams.MainNetParams
+	var activeNet = &chaincfg.MainNetParams
 	if opts.TestNet3 {
-		activeNet = &netparams.TestNet3Params
+		activeNet = &chaincfg.TestNet3Params
 	} else if opts.SimNet {
-		activeNet = &netparams.SimNetParams
+		activeNet = &chaincfg.SimNetParams
 	}
 	if opts.RPCConnect == "" {
 		fatalf("RPC hostname[:port] is required")
 	}
 	rpcConnect, e := cfgutil.NormalizeAddress(opts.RPCConnect, activeNet.WalletRPCServerPort)
 	if e != nil {
-		fatalf("Invalid RPC network address `%v`: %v", opts.RPCConnect, err)
+		fatalf("Invalid RPC network address `%v`: %v", opts.RPCConnect, e)
 	}
 	opts.RPCConnect = rpcConnect
 	if opts.RPCUsername == "" {
@@ -110,7 +110,7 @@ func init() {
 	}
 	certFileExists, e = cfgutil.FileExists(opts.RPCCertificateFile)
 	if e != nil {
-		fatalf("%v", err)
+		fatalf("%v", e)
 	}
 	if !certFileExists {
 		fatalf("RPC certificate file `%s` not found", opts.RPCCertificateFile)
@@ -144,13 +144,13 @@ func makeInputSource(
 	outputs []btcjson.ListUnspentResult,
 ) txauthor.InputSource {
 	var (
-		totalInputValue util.Amount
+		totalInputValue amt.Amount
 		inputs          = make([]*wire.TxIn, 0, len(outputs))
-		inputValues     = make([]util.Amount, 0, len(outputs))
+		inputValues     = make([]amt.Amount, 0, len(outputs))
 		sourceErr       error
 	)
 	for _, output := range outputs {
-		outputAmount, e := util.NewAmount(output.Amount)
+		outputAmount, e := amt.NewAmount(output.Amount)
 		if e != nil {
 			sourceErr = fmt.Errorf(
 				"invalid amount `%v` in listunspent result",
@@ -183,7 +183,7 @@ func makeInputSource(
 	if sourceErr == nil && totalInputValue == 0 {
 		sourceErr = noInputValue{}
 	}
-	return func(util.Amount) (util.Amount, []*wire.TxIn, []util.Amount, [][]byte, error) {
+	return func(amt.Amount) (amt.Amount, []*wire.TxIn, []amt.Amount, [][]byte, error) {
 		return totalInputValue, inputs, inputValues, nil, sourceErr
 	}
 }
@@ -204,7 +204,7 @@ func makeDestinationScriptSource(
 func main() {
 	e := sweep()
 	if e != nil {
-		fatalf("%v", err)
+		fatalf("%v", e)
 	}
 }
 func sweep() (e error) {
@@ -257,7 +257,7 @@ func sweep() (e error) {
 			return errContext(e, "failed to read private passphrase")
 		}
 	}
-	var totalSwept util.Amount
+	var totalSwept amt.Amount
 	var numErrors int
 	var reportError = func(format string, args ...interface{}) {
 		if _, e = fmt.Fprintf(os.Stderr, format, args...); E.Chk(e) {
@@ -275,20 +275,20 @@ func sweep() (e error) {
 		)
 		if e != nil {
 			if e != (noInputValue{}) {
-				reportError("Failed to create unsigned transaction: %v", err)
+				reportError("Failed to create unsigned transaction: %v", e)
 			}
 			continue
 		}
 		// Unlock the wallet, sign the transaction, and immediately lock.
 		e = rpcClient.WalletPassphrase(privatePassphrase, 60)
 		if e != nil {
-			reportError("Failed to unlock wallet: %v", err)
+			reportError("Failed to unlock wallet: %v", e)
 			continue
 		}
 		signedTransaction, complete, e := rpcClient.SignRawTransaction(tx.Tx)
 		_ = rpcClient.WalletLock()
 		if e != nil {
-			reportError("Failed to sign transaction: %v", err)
+			reportError("Failed to sign transaction: %v", e)
 			continue
 		}
 		if !complete {
@@ -298,10 +298,10 @@ func sweep() (e error) {
 		// Publish the signed sweep transaction.
 		txHash, e := rpcClient.SendRawTransaction(signedTransaction, false)
 		if e != nil {
-			reportError("Failed to publish transaction: %v", err)
+			reportError("Failed to publish transaction: %v", e)
 			continue
 		}
-		outputAmount := util.Amount(tx.Tx.TxOut[0].Value)
+		outputAmount := amt.Amount(tx.Tx.TxOut[0].Value)
 		I.F(
 			"Swept %v to destination account with transaction %v\n",
 			outputAmount, txHash,
@@ -333,9 +333,9 @@ func promptSecret(what string) (string, error) {
 }
 
 func saneOutputValue(
-	amount util.Amount,
+	amount amt.Amount,
 ) bool {
-	return amount >= 0 && amount <= util.MaxSatoshi
+	return amount >= 0 && amount <= amount.MaxSatoshi
 }
 
 func parseOutPoint(
@@ -358,7 +358,7 @@ func pickNoun(
 }
 
 var subsystem = logg.AddLoggerSubsystem()
-var ftl, err, wrn, inf, dbg, trc logg.LevelPrinter = logg.GetLogPrinterSet(subsystem)
+var F, E, W, I, D, T logg.LevelPrinter = logg.GetLogPrinterSet(subsystem)
 
 func init() {
 	// var _ = logg.AddFilteredSubsystem(subsystem)
@@ -375,13 +375,13 @@ func init() {
 	I.F("%s", "I.F")
 	D.F("%s", "D.F")
 	T.F("%s", "T.F")
-	ftl.C(func() string { return "ftl.C" })
-	err.C(func() string { return "err.C" })
+	F.C(func() string { return "ftl.C" })
+	E.C(func() string { return "err.C" })
 	W.C(func() string { return "W.C" })
 	I.C(func() string { return "inf.C" })
 	D.C(func() string { return "D.C" })
 	T.C(func() string { return "T.C" })
-	ftl.C(func() string { return "ftl.C" })
+	F.C(func() string { return "ftl.C" })
 	E.Chk(errors.New("E.Chk"))
 	W.Chk(errors.New("W.Chk"))
 	I.Chk(errors.New("inf.Chk"))

@@ -2,9 +2,9 @@ package blockchain
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/bits"
+	"github.com/p9c/pod/pkg/fork"
 	"math/big"
-	
-	"github.com/p9c/pod/pkg/blockchain/fork"
 )
 
 // CalcNextRequiredDifficultyHalcyon calculates the required difficulty for the block after the passed previous block
@@ -56,15 +56,15 @@ func (b *BlockChain) CalcNextRequiredDifficultyHalcyon(
 	if l {
 		T.F("adjusted %d", adjustedTimespan)
 	}
-	oldTarget := CompactToBig(prevNode.bits)
+	oldTarget := bits.CompactToBig(prevNode.bits)
 	newTarget := new(big.Int).
 		Mul(oldTarget, big.NewInt(adjustedTimespan))
 	newTarget = newTarget.
 		Div(newTarget, big.NewInt(b.params.AveragingTargetTimespan))
-	if newTarget.Cmp(CompactToBig(newTargetBits)) > 0 {
-		newTarget.Set(CompactToBig(newTargetBits))
+	if newTarget.Cmp(bits.CompactToBig(newTargetBits)) > 0 {
+		newTarget.Set(bits.CompactToBig(newTargetBits))
 	}
-	newTargetBits = BigToCompact(newTarget)
+	newTargetBits = bits.BigToCompact(newTarget)
 	if l {
 		T.F(
 			"difficulty retarget at block height %d, old %08x new %08x",
@@ -82,7 +82,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyHalcyon(
 				adjustedTimespan,
 				b.params.AveragingTargetTimespan,
 				oldTarget,
-				CompactToBig(newTargetBits),
+				bits.CompactToBig(newTargetBits),
 			)
 		})
 	}

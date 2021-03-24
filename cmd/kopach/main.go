@@ -4,8 +4,11 @@ import (
 	"context"
 	"crypto/rand"
 	"fmt"
+	"github.com/p9c/pod/cmd/kopach/control/sol"
 	"github.com/p9c/pod/cmd/kopach/control/templates"
 	"github.com/p9c/pod/pkg/logg"
+	"github.com/p9c/pod/pkg/pod"
+	"github.com/p9c/pod/pkg/podcfg"
 	"net"
 	"os"
 	"runtime"
@@ -15,25 +18,21 @@ import (
 	
 	"github.com/niubaoshu/gotiny"
 	
-	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/util/qu"
 	
 	"github.com/VividCortex/ewma"
 	"github.com/urfave/cli"
 	"go.uber.org/atomic"
 	
-	"github.com/p9c/pod/pkg/data/ring"
-	
-	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/cmd/kopach/client"
 	"github.com/p9c/pod/cmd/kopach/control"
 	"github.com/p9c/pod/cmd/kopach/control/hashrate"
 	"github.com/p9c/pod/cmd/kopach/control/job"
 	"github.com/p9c/pod/cmd/kopach/control/pause"
-	"github.com/p9c/pod/pkg/blockchain/chainhash"
-	"github.com/p9c/pod/pkg/comm/stdconn/worker"
-	"github.com/p9c/pod/pkg/comm/transport"
-	rav "github.com/p9c/pod/pkg/data/ring"
+	"github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/pipe/stdconn/worker"
+	rav "github.com/p9c/pod/pkg/ring"
+	"github.com/p9c/pod/pkg/transport"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
@@ -60,7 +59,7 @@ type SolutionData struct {
 
 type Worker struct {
 	id                  string
-	cx                  *conte.Xt
+	cx                  *pod.State
 	height              int32
 	active              atomic.Bool
 	conn                *transport.Channel
@@ -83,7 +82,7 @@ type Worker struct {
 	hashCount           atomic.Uint64
 	hashSampleBuf       *rav.BufferUint64
 	hashrate            float64
-	lastNonce           int32
+	lastNonce           uint64
 }
 
 func (w *Worker) Start() {
@@ -132,7 +131,7 @@ func (w *Worker) Stop() {
 	w.quit.Q()
 }
 
-func Handle(cx *conte.Xt) func(c *cli.Context) (e error) {
+func Handle(cx *pod.State) func(c *cli.Context) (e error) {
 	return func(c *cli.Context) (e error) {
 		D.Ln("miner controller starting")
 		randomBytes := make([]byte, 4)
@@ -148,7 +147,7 @@ func Handle(cx *conte.Xt) func(c *cli.Context) (e error) {
 			SetThreads:    make(chan int),
 			solutions:     make([]SolutionData, 0, 2048),
 			Update:        qu.T(),
-			hashSampleBuf: ring.NewBufferUint64(1000),
+			hashSampleBuf: rav.NewBufferUint64(1000),
 		}
 		w.lastSent.Store(time.Now().UnixNano())
 		w.active.Store(false)
@@ -174,7 +173,7 @@ func Handle(cx *conte.Xt) func(c *cli.Context) (e error) {
 		go func() {
 			D.Ln("starting controller watcher")
 			ticker := time.NewTicker(time.Second)
-			logger := time.NewTicker(time.Second * 5)
+			logger := time.NewTicker(time.Second)
 		out:
 			for {
 				select {
@@ -208,23 +207,23 @@ func Handle(cx *conte.Xt) func(c *cli.Context) (e error) {
 				case <-w.StartChan.Wait():
 					D.Ln("received signal on StartChan")
 					*cx.Config.Generate = true
-					save.Pod(cx.Config)
+					podcfg.Save(cx.Config)
 					w.Start()
 				case <-w.StopChan.Wait():
 					D.Ln("received signal on StopChan")
 					*cx.Config.Generate = false
-					save.Pod(cx.Config)
+					podcfg.Save(cx.Config)
 					w.Stop()
 				case s := <-w.PassChan:
 					D.Ln("received signal on PassChan", s)
 					*cx.Config.MinerPass = s
-					save.Pod(cx.Config)
+					podcfg.Save(cx.Config)
 					w.Stop()
 					w.Start()
 				case n := <-w.SetThreads:
 					D.Ln("received signal on SetThreads", n)
 					*cx.Config.GenThreads = n
-					save.Pod(cx.Config)
+					podcfg.Save(cx.Config)
 					if *cx.Config.Generate {
 						// always sanitise
 						if n < 0 {
@@ -277,7 +276,6 @@ var handlers = transport.Handlers{
 		ctx interface{}, src net.Addr, dst string,
 		b []byte,
 	) (e error) {
-		T.Ln("received job")
 		w := ctx.(*Worker)
 		if !w.active.Load() {
 			T.Ln("not active")
@@ -287,22 +285,20 @@ var handlers = transport.Handlers{
 		gotiny.Unmarshal(b, &jr)
 		w.height = jr.Height
 		cN := jr.UUID
-		if int(cN) != *w.cx.Config.UUID {
-			firstSender := w.FirstSender.Load()
-			otherSent := firstSender != cN && firstSender != 0
-			if otherSent {
-				T.Ln("ignoring other controller job")
-				// ignore other controllers while one is active and received first
-				return
-			}
-		} else {
-			// I.Ln("no tworking on job of local controller")
-			// I.Ln("p9 average",fork.P9Average)
-			// T.Ln("now listening to controller at", cN)
-			w.FirstSender.Store(0)
+		firstSender := w.FirstSender.Load()
+		otherSent := firstSender != cN && firstSender != 0
+		if otherSent {
+			T.Ln("ignoring other controller job", jr.Nonce, jr.UUID)
+			// ignore other controllers while one is active and received first
 			return
 		}
-		w.FirstSender.Store(cN)
+		// if jr.Nonce == w.lastNonce {
+		// 	I.Ln("same job again, ignoring (NOT)")
+		// 	// return
+		// }
+		// w.lastNonce = jr.Nonce
+		// w.FirstSender.Store(cN)
+		T.Ln("received job, starting workers on it", jr.Nonce, jr.UUID)
 		w.lastSent.Store(time.Now().UnixNano())
 		for i := range w.clients {
 			if e = w.clients[i].NewJob(&jr); E.Chk(e) {
@@ -321,10 +317,10 @@ var handlers = transport.Handlers{
 		np := advt.UUID
 		// np := p.GetControllerListenerPort()
 		// ns := net.JoinHostPort(strings.Split(ni.String(), ":")[0], fmt.Sprint(np))
-		D.Ln("received pause from server at", ni, np)
+		D.Ln("received pause from server at", ni, np, "stopping", len(w.clients), "workers stopping")
 		if fs == np {
 			for i := range w.clients {
-				D.Ln("sending pause to worker", i, fs, np)
+				// D.Ln("sending pause to worker", i, fs, np)
 				e := w.clients[i].Pause()
 				if e != nil {
 				}
@@ -333,62 +329,62 @@ var handlers = transport.Handlers{
 		w.FirstSender.Store(0)
 		return
 	},
-	// string(sol.Magic): func(
-	// 	ctx interface{}, src net.Addr, dst string,
-	// 	b []byte,
-	// ) (e error) {
-	// 	w := ctx.(*Worker)
-	// 	I.Ln("shuffling work due to solution on network")
-	// 	w.FirstSender.Store(0)
-	// 	// 	D.Ln("solution detected from miner at", src)
-	// 	// 	portSlice := strings.Split(w.FirstSender.Load(), ":")
-	// 	// 	if len(portSlice) < 2 {
-	// 	// 		D.Ln("error with solution", w.FirstSender.Load(), portSlice)
-	// 	// 		return
-	// 	// 	}
-	// 	// 	// port := portSlice[1]
-	// 	// 	// j := sol.LoadSolContainer(b)
-	// 	// 	// senderPort := j.GetSenderPort()
-	// 	// 	// if fmt.Sprint(senderPort) == port {
-	// 	// 	// // W.Ln("we found a solution")
-	// 	// 	// // prepend to list of solutions for GUI display if enabled
-	// 	// 	// if *w.cx.Config.KopachGUI {
-	// 	// 	// 	// D.Ln("length solutions", len(w.solutions))
-	// 	// 	// 	blok := j.GetMsgBlock()
-	// 	// 	// 	w.solutions = append(
-	// 	// 	// 		w.solutions, []SolutionData{
-	// 	// 	// 			{
-	// 	// 	// 				time:   time.Now(),
-	// 	// 	// 				height: int(w.height),
-	// 	// 	// 				algo: fmt.Sprint(
-	// 	// 	// 					fork.GetAlgoName(blok.Header.Version, w.height),
-	// 	// 	// 				),
-	// 	// 	// 				hash:       blok.Header.BlockHashWithAlgos(w.height).String(),
-	// 	// 	// 				indexHash:  blok.Header.BlockHash().String(),
-	// 	// 	// 				version:    blok.Header.Version,
-	// 	// 	// 				prevBlock:  blok.Header.PrevBlock.String(),
-	// 	// 	// 				merkleRoot: blok.Header.MerkleRoot.String(),
-	// 	// 	// 				timestamp:  blok.Header.Timestamp,
-	// 	// 	// 				bits:       blok.Header.Bits,
-	// 	// 	// 				nonce:      blok.Header.Nonce,
-	// 	// 	// 			},
-	// 	// 	// 		}...,
-	// 	// 	// 	)
-	// 	// 	// 	if len(w.solutions) > 2047 {
-	// 	// 	// 		w.solutions = w.solutions[len(w.solutions)-2047:]
-	// 	// 	// 	}
-	// 	// 	// 	w.solutionCount = len(w.solutions)
-	// 	// 	// 	w.Update <- struct{}{}
-	// 	// 	// }
-	// 	// 	// }
-	// 	// 	// D.Ln("no longer listening to", w.FirstSender.Load())
-	// 	// 	// w.FirstSender.Store("")
-	// 	return
-	// },
+	string(sol.Magic): func(
+		ctx interface{}, src net.Addr, dst string,
+		b []byte,
+	) (e error) {
+		// w := ctx.(*Worker)
+		// I.Ln("shuffling work due to solution on network")
+		// w.FirstSender.Store(0)
+		// 	D.Ln("solution detected from miner at", src)
+		// 	portSlice := strings.Split(w.FirstSender.Load(), ":")
+		// 	if len(portSlice) < 2 {
+		// 		D.Ln("error with solution", w.FirstSender.Load(), portSlice)
+		// 		return
+		// 	}
+		// 	// port := portSlice[1]
+		// 	// j := sol.LoadSolContainer(b)
+		// 	// senderPort := j.GetSenderPort()
+		// 	// if fmt.Sprint(senderPort) == port {
+		// 	// // W.Ln("we found a solution")
+		// 	// // prepend to list of solutions for GUI display if enabled
+		// 	// if *w.cx.Config.KopachGUI {
+		// 	// 	// D.Ln("length solutions", len(w.solutions))
+		// 	// 	blok := j.GetMsgBlock()
+		// 	// 	w.solutions = append(
+		// 	// 		w.solutions, []SolutionData{
+		// 	// 			{
+		// 	// 				time:   time.Now(),
+		// 	// 				height: int(w.height),
+		// 	// 				algo: fmt.Sprint(
+		// 	// 					fork.GetAlgoName(blok.Header.Version, w.height),
+		// 	// 				),
+		// 	// 				hash:       blok.Header.BlockHashWithAlgos(w.height).String(),
+		// 	// 				indexHash:  blok.Header.BlockHash().String(),
+		// 	// 				version:    blok.Header.Version,
+		// 	// 				prevBlock:  blok.Header.PrevBlock.String(),
+		// 	// 				merkleRoot: blok.Header.MerkleRoot.String(),
+		// 	// 				timestamp:  blok.Header.Timestamp,
+		// 	// 				bits:       blok.Header.Bits,
+		// 	// 				nonce:      blok.Header.Nonce,
+		// 	// 			},
+		// 	// 		}...,
+		// 	// 	)
+		// 	// 	if len(w.solutions) > 2047 {
+		// 	// 		w.solutions = w.solutions[len(w.solutions)-2047:]
+		// 	// 	}
+		// 	// 	w.solutionCount = len(w.solutions)
+		// 	// 	w.Update <- struct{}{}
+		// 	// }
+		// 	// }
+		// 	// D.Ln("no longer listening to", w.FirstSender.Load())
+		// 	// w.FirstSender.Store("")
+		return
+	},
 }
 
 func (w *Worker) HashReport() float64 {
-	T.Ln("generating hash report")
+	// T.Ln("generating hash report")
 	w.hashSampleBuf.Add(w.hashCount.Load())
 	av := ewma.NewMovingAverage()
 	var i int

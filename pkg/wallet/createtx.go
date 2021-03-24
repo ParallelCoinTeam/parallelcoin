@@ -3,20 +3,21 @@ package wallet
 
 import (
 	"fmt"
-	"github.com/p9c/pod/pkg/wallet/chain"
+	"github.com/p9c/pod/pkg/amt"
+	"github.com/p9c/pod/pkg/chainclient"
+	"github.com/p9c/pod/pkg/btcaddr"
 	"sort"
 	
-	"github.com/p9c/pod/pkg/blockchain/tx/txauthor"
-	"github.com/p9c/pod/pkg/blockchain/tx/txscript"
-	"github.com/p9c/pod/pkg/blockchain/tx/wtxmgr"
-	"github.com/p9c/pod/pkg/blockchain/wire"
-	ec "github.com/p9c/pod/pkg/coding/ecc"
-	"github.com/p9c/pod/pkg/database/walletdb"
-	"github.com/p9c/pod/pkg/util"
-	"github.com/p9c/pod/pkg/wallet/waddrmgr"
+	ec "github.com/p9c/pod/pkg/ecc"
+	"github.com/p9c/pod/pkg/txauthor"
+	"github.com/p9c/pod/pkg/txscript"
+	"github.com/p9c/pod/pkg/waddrmgr"
+	"github.com/p9c/pod/pkg/walletdb"
+	"github.com/p9c/pod/pkg/wire"
+	"github.com/p9c/pod/pkg/wtxmgr"
 )
 
-// byAmount defines the methods needed to satisify sort.Interface to sort credits by their output amount.
+// byAmount defines the methods needed to satisify sort.Interface to txsort credits by their output amount.
 type byAmount []wtxmgr.Credit
 
 func (s byAmount) Len() int           { return len(s) }
@@ -29,13 +30,13 @@ func makeInputSource(eligible []wtxmgr.Credit) txauthor.InputSource {
 	sort.Sort(sort.Reverse(byAmount(eligible)))
 	// Current inputs and their total value. These are closed over by the returned
 	// input source and reused across multiple calls.
-	currentTotal := util.Amount(0)
+	currentTotal := amt.Amount(0)
 	currentInputs := make([]*wire.TxIn, 0, len(eligible))
 	currentScripts := make([][]byte, 0, len(eligible))
-	currentInputValues := make([]util.Amount, 0, len(eligible))
-	return func(target util.Amount) (
-		util.Amount, []*wire.TxIn,
-		[]util.Amount, [][]byte, error,
+	currentInputValues := make([]amt.Amount, 0, len(eligible))
+	return func(target amt.Amount) (
+		amt.Amount, []*wire.TxIn,
+		[]amt.Amount, [][]byte, error,
 	) {
 		for currentTotal < target && len(eligible) != 0 {
 			nextCredit := &eligible[0]
@@ -57,7 +58,7 @@ type secretSource struct {
 }
 
 // GetKey gets the private key for an address if it is available
-func (s secretSource) GetKey(addr util.Address) (privKey *ec.PrivateKey, cmpr bool, e error) {
+func (s secretSource) GetKey(addr btcaddr.Address) (privKey *ec.PrivateKey, cmpr bool, e error) {
 	var ma waddrmgr.ManagedAddress
 	ma, e = s.Address(s.addrmgrNs, addr)
 	if e != nil {
@@ -80,7 +81,7 @@ func (s secretSource) GetKey(addr util.Address) (privKey *ec.PrivateKey, cmpr bo
 }
 
 // GetScript returns pay to script transaction
-func (s secretSource) GetScript(addr util.Address) ([]byte, error) {
+func (s secretSource) GetScript(addr btcaddr.Address) ([]byte, error) {
 	ma, e := s.Address(s.addrmgrNs, addr)
 	if e != nil {
 		return nil, e
@@ -103,9 +104,9 @@ func (s secretSource) GetScript(addr util.Address) ([]byte, error) {
 // current relay fee. The wallet must be unlocked to create the transaction.
 func (w *Wallet) txToOutputs(
 	outputs []*wire.TxOut, account uint32,
-	minconf int32, feeSatPerKb util.Amount,
+	minconf int32, feeSatPerKb amt.Amount,
 ) (tx *txauthor.AuthoredTx, e error) {
-	var chainClient chain.Interface
+	var chainClient chainclient.Interface
 	if chainClient, e = w.requireChainClient(); E.Chk(e) {
 		return nil, e
 	}
@@ -125,7 +126,7 @@ func (w *Wallet) txToOutputs(
 			changeSource := func() (b []byte, e error) {
 				// Derive the change output script. As a hack to allow spending from the
 				// imported account, change addresses are created from account 0.
-				var changeAddr util.Address
+				var changeAddr btcaddr.Address
 				if account == waddrmgr.ImportedAddrAccount {
 					changeAddr, e = w.newChangeAddress(addrmgrNs, 0)
 				} else {
@@ -154,7 +155,7 @@ func (w *Wallet) txToOutputs(
 		return
 	}
 	if tx.ChangeIndex >= 0 && account == waddrmgr.ImportedAddrAccount {
-		changeAmount := util.Amount(tx.Tx.TxOut[tx.ChangeIndex].Value)
+		changeAmount := amt.Amount(tx.Tx.TxOut[tx.ChangeIndex].Value)
 		W.F(
 			"spend from imported account produced change: moving %v from imported account into default account.",
 			changeAmount,
@@ -202,7 +203,7 @@ func (w *Wallet) findEligibleOutputs(
 		//
 		// TODO: Handle multisig outputs by determining if enough of the addresses are
 		//  controlled.
-		var addrs []util.Address
+		var addrs []btcaddr.Address
 		if _, addrs, _, e = txscript.ExtractPkScriptAddrs(
 			output.PkScript, w.chainParams,
 		); E.Chk(e) || len(addrs) != 1 {
@@ -221,7 +222,7 @@ func (w *Wallet) findEligibleOutputs(
 // validateMsgTx verifies transaction input scripts for tx. All previous output
 // scripts from outputs redeemed by the transaction, in the same order they are
 // spent, must be passed in the prevScripts slice.
-func validateMsgTx(tx *wire.MsgTx, prevScripts [][]byte, inputValues []util.Amount) (e error) {
+func validateMsgTx(tx *wire.MsgTx, prevScripts [][]byte, inputValues []amt.Amount) (e error) {
 	hashCache := txscript.NewTxSigHashes(tx)
 	for i, prevScript := range prevScripts {
 		var vm *txscript.Engine

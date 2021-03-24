@@ -1,9 +1,9 @@
 package blockchain
 
 import (
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
-	"github.com/p9c/pod/pkg/blockchain/wire"
+	"github.com/p9c/pod/pkg/chaincfg"
+	chainhash "github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/wire"
 	"reflect"
 	"testing"
 )
@@ -28,7 +28,7 @@ import (
 // 	}
 // 	// Create a new database and chain instance to run tests against.
 // 	chain, teardownFunc, e := chainSetup("haveblock",
-// 		&netparams.MainNetParams)
+// 		&chaincfg.MainNetParams)
 // 	if e != nil  {
 // 		t.Errorf("Failed to setup chain instance: %v", e)
 // 		return
@@ -96,7 +96,7 @@ import (
 // // The tests exercise several combinations of inputs to the CalcSequenceLock function in order to ensure the returned
 // // SequenceLocks are correct for each test instance.
 // func TestCalcSequenceLock(t *testing.T) {
-// 	netParams := &netparams.SimNetParams
+// 	netParams := &chaincfg.SimNetParams
 // 	// We need to activate CSV in order to test the processing logic, so manually craft the block version that's used to
 // 	// signal the soft-fork activation.
 // 	csvBit := netParams.Deployments[chaincfg.DeploymentCSV].BitNumber
@@ -416,7 +416,7 @@ func TestLocateInventory(t *testing.T) {
 	// 	genesis -> 1 -> 2 -> ... -> 15 -> 16  -> 17  -> 18
 	// 	                              \-> 16a -> 17a
 	tip := tstTip
-	chain := newFakeChain(&netparams.MainNetParams)
+	chain := newFakeChain(&chaincfg.MainNetParams)
 	branch0Nodes := chainedNodes(chain.BestChain.Genesis(), 18)
 	branch1Nodes := chainedNodes(branch0Nodes[14], 2)
 	for _, node := range branch0Nodes {
@@ -703,7 +703,7 @@ func TestHeightToHashRange(t *testing.T) {
 	// 	genesis -> 1 -> 2 -> ... -> 15 -> 16  -> 17  -> 18
 	// 	                              \-> 16a -> 17a -> 18a (unvalidated)
 	tip := tstTip
-	chain := newFakeChain(&netparams.MainNetParams)
+	chain := newFakeChain(&chaincfg.MainNetParams)
 	branch0Nodes := chainedNodes(chain.BestChain.Genesis(), 18)
 	branch1Nodes := chainedNodes(branch0Nodes[14], 3)
 	for _, node := range branch0Nodes {
@@ -796,7 +796,7 @@ func TestIntervalBlockHashes(t *testing.T) {
 	// 	genesis -> 1 -> 2 -> ... -> 15 -> 16  -> 17  -> 18
 	// 	                              \-> 16a -> 17a -> 18a (unvalidated)
 	tip := tstTip
-	chain := newFakeChain(&netparams.MainNetParams)
+	chain := newFakeChain(&chaincfg.MainNetParams)
 	branch0Nodes := chainedNodes(chain.BestChain.Genesis(), 18)
 	branch1Nodes := chainedNodes(branch0Nodes[14], 3)
 	for _, node := range branch0Nodes {

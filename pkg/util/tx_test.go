@@ -2,19 +2,20 @@ package util_test
 
 import (
 	"bytes"
+	"github.com/p9c/pod/pkg/block"
 	"io"
 	"reflect"
 	"testing"
-
+	
 	"github.com/davecgh/go-spew/spew"
 	
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
+	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/util"
 )
 
 // TestTx tests the API for Tx.
 func TestTx(t *testing.T) {
-	testTx := Block100000.Transactions[0]
+	testTx := block.Block100000.Transactions[0]
 	tx := util.NewTx(testTx)
 	// Ensure we get the same data back out.
 	if msgTx := tx.MsgTx(); !reflect.DeepEqual(msgTx, testTx) {
@@ -32,7 +33,7 @@ func TestTx(t *testing.T) {
 	wantHashStr := "8c14f0db3df150123e6f3dbbf30f8b955a8249b62ac1d1ff16284aefa3d06d87"
 	wantHash, e := chainhash.NewHashFromStr(wantHashStr)
 	if e != nil  {
-		t.Errorf("NewHashFromStr: %v", err)
+		t.Errorf("NewHashFromStr: %v", e)
 	}
 	// Request the hash multiple times to test generation and caching.
 	for i := 0; i < 2; i++ {
@@ -47,17 +48,17 @@ func TestTx(t *testing.T) {
 // TestNewTxFromBytes tests creation of a Tx from serialized bytes.
 func TestNewTxFromBytes(t *testing.T) {
 	// Serialize the test transaction.
-	testTx := Block100000.Transactions[0]
+	testTx := block.Block100000.Transactions[0]
 	var testTxBuf bytes.Buffer
 	e := testTx.Serialize(&testTxBuf)
 	if e != nil  {
-		t.Errorf("Serialize: %v", err)
+		t.Errorf("Serialize: %v", e)
 	}
 	testTxBytes := testTxBuf.Bytes()
 	// Create a new transaction from the serialized bytes.
 	tx, e := util.NewTxFromBytes(testTxBytes)
 	if e != nil  {
-		t.Errorf("NewTxFromBytes: %v", err)
+		t.Errorf("NewTxFromBytes: %v", e)
 		return
 	}
 	// Ensure the generated MsgTx is correct.
@@ -70,11 +71,11 @@ func TestNewTxFromBytes(t *testing.T) {
 // TestTxErrors tests the error paths for the Tx API.
 func TestTxErrors(t *testing.T) {
 	// Serialize the test transaction.
-	testTx := Block100000.Transactions[0]
+	testTx := block.Block100000.Transactions[0]
 	var testTxBuf bytes.Buffer
 	e := testTx.Serialize(&testTxBuf)
 	if e != nil  {
-		t.Errorf("Serialize: %v", err)
+		t.Errorf("Serialize: %v", e)
 	}
 	testTxBytes := testTxBuf.Bytes()
 	// Truncate the transaction byte buffer to force errors.

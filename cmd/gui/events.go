@@ -2,15 +2,18 @@ package gui
 
 import (
 	"encoding/json"
-	"github.com/p9c/pod/pkg/blockchain/wire"
-	"github.com/p9c/pod/pkg/pod"
+	"github.com/p9c/pod/cmd/kopach/control/p2padvt"
+	"github.com/p9c/pod/pkg/amt"
+	"github.com/p9c/pod/pkg/podcfg"
+	"github.com/p9c/pod/pkg/transport"
+	"github.com/p9c/pod/pkg/wire"
 	"io/ioutil"
 	"path/filepath"
 	"time"
 	
-	"github.com/p9c/pod/pkg/blockchain/chainhash"
-	"github.com/p9c/pod/pkg/rpc/btcjson"
-	"github.com/p9c/pod/pkg/rpc/rpcclient"
+	"github.com/p9c/pod/pkg/btcjson"
+	"github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/rpcclient"
 	"github.com/p9c/pod/pkg/util"
 )
 
@@ -20,140 +23,152 @@ func (wg *WalletGUI) WalletAndClientRunning() bool {
 	return running
 }
 
-func (wg *WalletGUI) Tickers() {
-	first := true
-	D.Ln("updating best block")
-	var e error
-	var height int32
-	var h *chainhash.Hash
-	if h, height, e = wg.ChainClient.GetBestBlock(); E.Chk(e) {
-		// interrupt.Request()
-		return
-	}
-	D.Ln(h, height)
-	wg.State.SetBestBlockHeight(height)
-	wg.State.SetBestBlockHash(h)
-	
-	go func() {
-		var e error
-		seconds := time.Tick(time.Second * 3)
-		fiveSeconds := time.Tick(time.Second * 5)
-	totalOut:
-		for {
-		preconnect:
-			for {
-				select {
-				case <-seconds:
-					D.Ln("---------------------- ready", wg.ready.Load())
-					D.Ln("---------------------- WalletAndClientRunning", wg.WalletAndClientRunning())
-					D.Ln("---------------------- stateLoaded", wg.stateLoaded.Load())
-					D.Ln("preconnect loop")
-					if wg.ChainClient != nil {
-						wg.ChainClient.Disconnect()
-						wg.ChainClient.Shutdown()
-						wg.ChainClient = nil
-					}
-					if wg.WalletClient != nil {
-						wg.WalletClient.Disconnect()
-						wg.WalletClient.Shutdown()
-						wg.WalletClient = nil
-					}
-					if !wg.node.Running() {
-						break
-					}
-					break preconnect
-				case <-fiveSeconds:
-					continue
-				case <-wg.quit.Wait():
-					break totalOut
-				}
-			}
-		out:
-			for {
-				select {
-				case <-seconds:
-					if !wg.cx.IsCurrent() {
-						continue
-					} else {
-						wg.cx.Syncing.Store(false)
-					}
-					D.Ln("---------------------- ready", wg.ready.Load())
-					D.Ln("---------------------- WalletAndClientRunning", wg.WalletAndClientRunning())
-					D.Ln("---------------------- stateLoaded", wg.stateLoaded.Load())
-					wg.node.Start()
-					if e = wg.writeWalletCookie(); E.Chk(e) {
-					}
-					wg.wallet.Start()
-					D.Ln("connecting to chain")
-					if e = wg.chainClient(); E.Chk(e) {
-						break
-					}
-					if wg.wallet.Running() { // && wg.WalletClient == nil {
-						D.Ln("connecting to wallet")
-						if e = wg.walletClient(); E.Chk(e) {
-							break
-						}
-					}
-					if !wg.node.Running() {
-						D.Ln("breaking out node not running")
-						break out
-					}
-					if wg.ChainClient == nil {
-						D.Ln("breaking out chainclient is nil")
-						break out
-					}
-					// if  wg.WalletClient == nil {
-					// 	D.Ln("breaking out walletclient is nil")
-					// 	break out
-					// }
-					if wg.ChainClient.Disconnected() {
-						D.Ln("breaking out chainclient disconnected")
-						break out
-					}
-					// if wg.WalletClient.Disconnected() {
-					// 	D.Ln("breaking out walletclient disconnected")
-					// 	break out
-					// }
-					// var e error
-					if first {
-						wg.updateChainBlock()
-						wg.invalidate <- struct{}{}
-					}
-					
-					if wg.WalletAndClientRunning() {
-						if first {
-							wg.processWalletBlockNotification()
-						}
-						// if wg.stateLoaded.Load() { // || wg.currentReceiveGetNew.Load() {
-						// 	wg.ReceiveAddressbook = func(gtx l.Context) l.Dimensions {
-						// 		var widgets []l.Widget
-						// 		widgets = append(widgets, wg.ReceivePage.GetAddressbookHistoryCards("DocBg")...)
-						// 		le := func(gtx l.Context, index int) l.Dimensions {
-						// 			return widgets[index](gtx)
-						// 		}
-						// 		return wg.Flex().Rigid(
-						// 			wg.lists["receiveAddresses"].Length(len(widgets)).Vertical().
-						// 				ListElement(le).Fn,
-						// 		).Fn(gtx)
-						// 	}
-						// }
-						if wg.stateLoaded.Load() && !wg.State.IsReceivingAddress() { // || wg.currentReceiveGetNew.Load() {
-							wg.GetNewReceivingAddress()
-							if wg.currentReceiveQRCode == nil || wg.currentReceiveRegenerate.Load() { // || wg.currentReceiveGetNew.Load() {
-								wg.GetNewReceivingQRCode(wg.ReceivePage.urn)
-							}
-						}
-					}
-					wg.invalidate <- struct{}{}
-					first = false
-				case <-fiveSeconds:
-				case <-wg.quit.Wait():
-					break totalOut
-				}
-			}
+func (wg *WalletGUI) Advertise() (e error) {
+	if wg.node.Running() && *wg.cx.Config.Discovery {
+		// I.Ln("sending out p2p advertisment")
+		if e = wg.multiConn.SendMany(
+			p2padvt.Magic,
+			transport.GetShards(p2padvt.Get(uint64(*wg.cx.Config.UUID), (*wg.cx.Config.P2PListeners)[0])),
+		); E.Chk(e) {
 		}
-	}()
+	}
+	return
 }
+
+// func (wg *WalletGUI) Tickers() {
+// 	first := true
+// 	D.Ln("updating best block")
+// 	var e error
+// 	var height int32
+// 	var h *chainhash.Hash
+// 	if h, height, e = wg.ChainClient.GetBestBlock(); E.Chk(e) {
+// 		// interrupt.Request()
+// 		return
+// 	}
+// 	D.Ln(h, height)
+// 	wg.State.SetBestBlockHeight(height)
+// 	wg.State.SetBestBlockHash(h)
+// 	go func() {
+// 		var e error
+// 		seconds := time.Tick(time.Second * 3)
+// 		fiveSeconds := time.Tick(time.Second * 5)
+// 	totalOut:
+// 		for {
+// 		preconnect:
+// 			for {
+// 				select {
+// 				case <-seconds:
+// 					D.Ln("preconnect loop")
+// 					if e = wg.Advertise(); D.Chk(e) {
+// 					}
+// 					if wg.ChainClient != nil {
+// 						wg.ChainClient.Disconnect()
+// 						wg.ChainClient.Shutdown()
+// 						wg.ChainClient = nil
+// 					}
+// 					if wg.WalletClient != nil {
+// 						wg.WalletClient.Disconnect()
+// 						wg.WalletClient.Shutdown()
+// 						wg.WalletClient = nil
+// 					}
+// 					if !wg.node.Running() {
+// 						break
+// 					}
+// 					break preconnect
+// 				case <-fiveSeconds:
+// 					continue
+// 				case <-wg.quit.Wait():
+// 					break totalOut
+// 				}
+// 			}
+// 		out:
+// 			for {
+// 				select {
+// 				case <-seconds:
+// 					if e = wg.Advertise(); D.Chk(e) {
+// 					}
+// 					if !wg.cx.IsCurrent() {
+// 						continue
+// 					} else {
+// 						wg.cx.Syncing.Store(false)
+// 					}
+// 					D.Ln("---------------------- ready", wg.ready.Load())
+// 					D.Ln("---------------------- WalletAndClientRunning", wg.WalletAndClientRunning())
+// 					D.Ln("---------------------- stateLoaded", wg.stateLoaded.Load())
+// 					wg.node.Start()
+// 					if e = wg.writeWalletCookie(); E.Chk(e) {
+// 					}
+// 					wg.wallet.Start()
+// 					D.Ln("connecting to chain")
+// 					if e = wg.chainClient(); E.Chk(e) {
+// 						break
+// 					}
+// 					if wg.wallet.Running() { // && wg.WalletClient == nil {
+// 						D.Ln("connecting to wallet")
+// 						if e = wg.walletClient(); E.Chk(e) {
+// 							break
+// 						}
+// 					}
+// 					if !wg.node.Running() {
+// 						D.Ln("breaking out node not running")
+// 						break out
+// 					}
+// 					if wg.ChainClient == nil {
+// 						D.Ln("breaking out chainclient is nil")
+// 						break out
+// 					}
+// 					// if  wg.WalletClient == nil {
+// 					// 	D.Ln("breaking out walletclient is nil")
+// 					// 	break out
+// 					// }
+// 					if wg.ChainClient.Disconnected() {
+// 						D.Ln("breaking out chainclient disconnected")
+// 						break out
+// 					}
+// 					// if wg.WalletClient.Disconnected() {
+// 					// 	D.Ln("breaking out walletclient disconnected")
+// 					// 	break out
+// 					// }
+// 					// var e error
+// 					if first {
+// 						wg.updateChainBlock()
+// 						wg.invalidate <- struct{}{}
+// 					}
+//
+// 					if wg.WalletAndClientRunning() {
+// 						if first {
+// 							wg.processWalletBlockNotification()
+// 						}
+// 						// if wg.stateLoaded.Load() { // || wg.currentReceiveGetNew.Load() {
+// 						// 	wg.ReceiveAddressbook = func(gtx l.Context) l.Dimensions {
+// 						// 		var widgets []l.Widget
+// 						// 		widgets = append(widgets, wg.ReceivePage.GetAddressbookHistoryCards("DocBg")...)
+// 						// 		le := func(gtx l.Context, index int) l.Dimensions {
+// 						// 			return widgets[index](gtx)
+// 						// 		}
+// 						// 		return wg.Flex().Rigid(
+// 						// 			wg.lists["receiveAddresses"].Length(len(widgets)).Vertical().
+// 						// 				ListElement(le).Fn,
+// 						// 		).Fn(gtx)
+// 						// 	}
+// 						// }
+// 						if wg.stateLoaded.Load() && !wg.State.IsReceivingAddress() { // || wg.currentReceiveGetNew.Load() {
+// 							wg.GetNewReceivingAddress()
+// 							if wg.currentReceiveQRCode == nil || wg.currentReceiveRegenerate.Load() { // || wg.currentReceiveGetNew.Load() {
+// 								wg.GetNewReceivingQRCode(wg.ReceivePage.urn)
+// 							}
+// 						}
+// 					}
+// 					wg.invalidate <- struct{}{}
+// 					first = false
+// 				case <-fiveSeconds:
+// 				case <-wg.quit.Wait():
+// 					break totalOut
+// 				}
+// 			}
+// 		}
+// 	}()
+// }
 
 func (wg *WalletGUI) updateThingies() (e error) {
 	// update the configuration
@@ -208,20 +223,20 @@ func (wg *WalletGUI) processWalletBlockNotification() bool {
 		return false
 	}
 	// check account balance
-	var unconfirmed util.Amount
+	var unconfirmed amt.Amount
 	var e error
 	if unconfirmed, e = wg.WalletClient.GetUnconfirmedBalance("default"); E.Chk(e) {
 		return false
 	}
 	wg.State.SetBalanceUnconfirmed(unconfirmed.ToDUO())
-	var confirmed util.Amount
+	var confirmed amt.Amount
 	if confirmed, e = wg.WalletClient.GetBalance("default"); E.Chk(e) {
 		return false
 	}
 	wg.State.SetBalance(confirmed.ToDUO())
 	var atr []btcjson.ListTransactionsResult
 	// str := wg.State.allTxs.Load()
-	if atr, e = wg.WalletClient.ListTransactionsCountFrom("default", 2<<16, /*len(str)*/ 0); E.Chk(e) {
+	if atr, e = wg.WalletClient.ListTransactionsCount("default", 2<<32); E.Chk(e) {
 		return false
 	}
 	// D.Ln(len(atr))
@@ -233,7 +248,6 @@ func (wg *WalletGUI) processWalletBlockNotification() bool {
 	if len(atr) < atrl {
 		atrl = len(atr)
 	}
-	wg.txRecentList = atr[:atrl]
 	wg.txMx.Unlock()
 	wg.RecentTransactions(10, "recent")
 	wg.RecentTransactions(-1, "history")
@@ -248,7 +262,7 @@ func (wg *WalletGUI) forceUpdateChain() {
 	if tip, height, e = wg.ChainClient.GetBestBlock(); E.Chk(e) {
 		return
 	}
-	var block *wire.MsgBlock
+	var block *wire.Block
 	if block, e = wg.ChainClient.GetBlock(tip); E.Chk(e) {
 	}
 	t := block.Header.Timestamp
@@ -300,7 +314,7 @@ func (wg *WalletGUI) ChainNotifications() *rpcclient.NotificationHandlers {
 			// D.S(txs)
 			if wg.processWalletBlockNotification() {
 			}
-			filename := filepath.Join(wg.cx.DataDir, "state.json")
+			filename := filepath.Join(*wg.cx.Config.DataDir, "state.json")
 			if e := wg.State.Save(filename, wg.cx.Config.WalletPass); E.Chk(e) {
 			}
 			// if wg.WalletAndClientRunning() {
@@ -399,7 +413,7 @@ func (wg *WalletGUI) ChainNotifications() *rpcclient.NotificationHandlers {
 		// 	wg.RecentTransactions(-1, "history")
 		// 	wg.invalidate <- struct{}{}
 		// },
-		OnTxAccepted: func(hash *chainhash.Hash, amount util.Amount) {
+		OnTxAccepted: func(hash *chainhash.Hash, amount amt.Amount) {
 			// if wg.cx.Syncing.Load() {
 			// 	return
 			// }
@@ -643,7 +657,7 @@ func (wg *WalletGUI) chainClient() (e error) {
 		return nil
 	}
 	if wg.ChainClient == nil { // || wg.ChainClient.Disconnected() {
-		certs := pod.ReadCAFile(wg.cx.Config)
+		certs := podcfg.ReadCAFile(wg.cx.Config)
 		D.Ln(*wg.cx.Config.RPCConnect)
 		// wg.ChainMutex.Lock()
 		// defer wg.ChainMutex.Unlock()
@@ -683,7 +697,7 @@ func (wg *WalletGUI) walletClient() (e error) {
 		return nil
 	}
 	// walletRPC := (*wg.cx.Config.WalletRPCListeners)[0]
-	certs := pod.ReadCAFile(wg.cx.Config)
+	certs := podcfg.ReadCAFile(wg.cx.Config)
 	I.Ln("config.tls", *wg.cx.Config.TLS)
 	wg.WalletMutex.Lock()
 	if wg.WalletClient, e = rpcclient.New(

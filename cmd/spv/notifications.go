@@ -3,8 +3,8 @@ package spv
 import (
 	"errors"
 	
-	"github.com/p9c/pod/pkg/comm/peer/addrmgr"
-	"github.com/p9c/pod/pkg/comm/peer/connmgr"
+	"github.com/p9c/pod/pkg/addrmgr"
+	"github.com/p9c/pod/pkg/connmgr"
 )
 
 type (

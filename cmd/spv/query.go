@@ -2,6 +2,7 @@ package spv
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/block"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -13,11 +14,10 @@ import (
 	"github.com/p9c/pod/cmd/spv/cache"
 	"github.com/p9c/pod/cmd/spv/filterdb"
 	"github.com/p9c/pod/pkg/blockchain"
-	"github.com/p9c/pod/pkg/blockchain/chainhash"
-	"github.com/p9c/pod/pkg/blockchain/wire"
-	"github.com/p9c/pod/pkg/coding/gcs"
-	"github.com/p9c/pod/pkg/coding/gcs/builder"
-	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/gcs"
+	"github.com/p9c/pod/pkg/gcs/builder"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 var (
@@ -737,7 +737,7 @@ func (s *ChainService) GetCFilter(
 func (s *ChainService) GetBlock(
 	blockHash chainhash.Hash,
 	options ...QueryOption,
-) (foundBlock *util.Block, e error) {
+) (foundBlock *block.Block, e error) {
 	// Fetch the corresponding block header from the database. If this isn't found then we don't have the header for
 	// this so we can't request it.
 	blockHeader, height, e := s.BlockHeaders.FetchHeader(&blockHash)
@@ -779,7 +779,7 @@ func (s *ChainService) GetBlock(
 		func(sp *ServerPeer, resp wire.Message, quit chan<- struct{}) {
 			switch response := resp.(type) {
 			// We're only interested in "block" messages.
-			case *wire.MsgBlock:
+			case *wire.Block:
 				// Only keep this going if we haven't already found a block, or we risk closing
 				// an already closed channel.
 				if foundBlock != nil {
@@ -789,24 +789,24 @@ func (s *ChainService) GetBlock(
 				if response.BlockHash() != blockHash {
 					return
 				}
-				block := util.NewBlock(response)
+				blk := block.NewBlock(response)
 				// Only set height if util hasn't automagically put one in.
-				if block.Height() == util.BlockHeightUnknown {
-					block.SetHeight(int32(height))
+				if blk.Height() == block.BlockHeightUnknown {
+					blk.SetHeight(int32(height))
 				}
-				var pb *util.Block
-				if pb, e = sp.server.GetBlock(block.MsgBlock().Header.PrevBlock); E.Chk(e) {
+				var pb *block.Block
+				if pb, e = sp.server.GetBlock(blk.WireBlock().Header.PrevBlock); E.Chk(e) {
 					return
 				}
-				pbt := pb.MsgBlock().Header.Timestamp
+				pbt := pb.WireBlock().Header.Timestamp
 				// If this claims our block but doesn't pass the sanity check, the peer is trying to bamboozle us.
 				// Disconnect it.
 				if e := blockchain.CheckBlockSanity(
-					block,
+					blk,
 					s.chainParams.PowLimit,
 					s.timeSource,
 					false,
-					block.Height(),
+					blk.Height(),
 					pbt,
 				); E.Chk(e) {
 					W.F("Invalid block for %s received from %s -- disconnecting peer", blockHash, sp.Addr())
@@ -817,7 +817,7 @@ func (s *ChainService) GetBlock(
 				//
 				// At this point, the block matches what we know about it and we declare it
 				// sane. We can kill the query and pass the response back to the caller.
-				foundBlock = block
+				foundBlock = blk
 				close(quit)
 			default:
 			}

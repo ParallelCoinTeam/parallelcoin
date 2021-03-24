@@ -1,7 +1,7 @@
 package gui
 
 import (
-	"github.com/p9c/pod/pkg/rpc/btcjson"
+	"github.com/p9c/pod/pkg/btcjson"
 	"time"
 	
 	"github.com/p9c/pod/pkg/util/qu"
@@ -9,6 +9,8 @@ import (
 
 // Watcher keeps the chain and wallet and rpc clients connected
 func (wg *WalletGUI) Watcher() qu.C {
+	var e error
+	I.Ln("starting up watcher")
 	quit := qu.T()
 	// start things up first
 	if !wg.node.Running() {
@@ -21,7 +23,6 @@ func (wg *WalletGUI) Watcher() qu.C {
 		if e = wg.chainClient(); E.Chk(e) {
 		}
 	}
-	var e error
 	if !wg.wallet.Running() {
 		D.Ln("watcher starting wallet")
 		wg.wallet.Start()
@@ -36,6 +37,7 @@ func (wg *WalletGUI) Watcher() qu.C {
 			out:
 				for {
 					// keep trying until shutdown or the wallet client connects
+					I.Ln("attempting to get blockchain info from wallet")
 					var bci *btcjson.GetBlockChainInfoResult
 					if bci, e = wg.WalletClient.GetBlockChainInfo(); E.Chk(e) {
 						select {
@@ -50,8 +52,6 @@ func (wg *WalletGUI) Watcher() qu.C {
 				}
 			}
 			wg.unlockPassword.Wipe()
-			wg.ready.Store(true)
-			wg.Invalidate()
 			select {
 			case <-time.After(time.Second):
 				break allOut
@@ -61,15 +61,18 @@ func (wg *WalletGUI) Watcher() qu.C {
 		}
 	}
 	go func() {
+		
 		watchTick := time.NewTicker(time.Second)
 		var e error
 	totalOut:
 		for {
 		disconnected:
 			for {
-				// D.Ln("top of watcher loop")
+				D.Ln("top of watcher loop")
 				select {
 				case <-watchTick.C:
+					if e = wg.Advertise(); E.Chk(e) {
+					}
 					if !wg.node.Running() {
 						D.Ln("watcher starting node")
 						wg.node.Start()
@@ -113,6 +116,15 @@ func (wg *WalletGUI) Watcher() qu.C {
 					break totalOut
 				case <-wg.quit.Wait():
 					break totalOut
+				}
+			}
+			if *wg.cx.Config.Controller {
+				if wg.ChainClient != nil {
+					if e = wg.ChainClient.SetGenerate(
+						*wg.cx.Config.Controller,
+						*wg.cx.Config.GenThreads,
+					); !E.Chk(e) {
+					}
 				}
 			}
 		connected:

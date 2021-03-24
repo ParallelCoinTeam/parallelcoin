@@ -4,9 +4,9 @@ import (
 	"encoding/hex"
 	l "gioui.org/layout"
 	"gioui.org/text"
-	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/gui"
-	p9icons "github.com/p9c/pod/pkg/gui/ico/svg"
+	p9icons "github.com/p9c/pod/pkg/icons/svg"
+	"github.com/p9c/pod/pkg/podcfg"
 	"github.com/tyler-smith/go-bip39"
 	"golang.org/x/exp/shiny/materialdesign/icons"
 	"strings"
@@ -396,7 +396,7 @@ func (wg *WalletGUI) cwfTestnetSettings() (out l.Widget) {
 								*wg.cx.Config.MinerPass = "pa55word"
 								*wg.cx.Config.AutoListen = true
 							}
-							save.Pod(wg.cx.Config)
+							podcfg.Save(wg.cx.Config)
 						},
 					),
 				).
@@ -431,7 +431,7 @@ func (wg *WalletGUI) cwfTestnetSettings() (out l.Widget) {
 								*wg.cx.Config.MinerPass = "pa55word"
 								*wg.cx.Config.AutoListen = true
 							}
-							save.Pod(wg.cx.Config)
+							podcfg.Save(wg.cx.Config)
 						},
 					),
 				).

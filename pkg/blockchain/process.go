@@ -3,12 +3,13 @@ package blockchain
 import (
 	"errors"
 	"fmt"
+	"github.com/p9c/pod/pkg/bits"
+	"github.com/p9c/pod/pkg/block"
+	"github.com/p9c/pod/pkg/fork"
 	"time"
 	
-	"github.com/p9c/pod/pkg/blockchain/chainhash"
-	"github.com/p9c/pod/pkg/blockchain/fork"
+	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/database"
-	"github.com/p9c/pod/pkg/util"
 )
 
 // BehaviorFlags is a bitmask defining tweaks to the normal behavior when
@@ -39,14 +40,14 @@ const (
 //
 // This function is safe for concurrent access.
 func (b *BlockChain) ProcessBlock(
-	workerNumber uint32, candidateBlock *util.Block,
+	workerNumber uint32, candidateBlock *block.Block,
 	flags BehaviorFlags, height int32,
 ) (bool, bool, error,) {
 	T.Ln("blockchain.ProcessBlock", height)
 	blockHeight := height
-	var prevBlock *util.Block
+	var prevBlock *block.Block
 	var e error
-	prevBlock, e = b.BlockByHash(&candidateBlock.MsgBlock().Header.PrevBlock)
+	prevBlock, e = b.BlockByHash(&candidateBlock.WireBlock().Header.PrevBlock)
 	if prevBlock != nil {
 		blockHeight = prevBlock.Height() + 1
 	} else {
@@ -58,17 +59,17 @@ func (b *BlockChain) ProcessBlock(
 	fastAdd := flags&BFFastAdd == BFFastAdd
 	blockHash := candidateBlock.Hash()
 	hf := fork.GetCurrent(blockHeight)
-	bhwa := candidateBlock.MsgBlock().BlockHashWithAlgos
+	bhwa := candidateBlock.WireBlock().BlockHashWithAlgos
 	var algo int32
 	switch hf {
 	case 0:
-		if candidateBlock.MsgBlock().Header.Version != 514 {
+		if candidateBlock.WireBlock().Header.Version != 514 {
 			algo = 2
 		} else {
 			algo = 514
 		}
 	case 1:
-		algo = candidateBlock.MsgBlock().Header.Version
+		algo = candidateBlock.WireBlock().Header.Version
 	}
 	// The candidateBlock must not already exist in the main chain or side chains.
 	var exists bool
@@ -90,7 +91,7 @@ func (b *BlockChain) ProcessBlock(
 	var DoNotCheckPow bool
 	pl := fork.GetMinDiff(fork.GetAlgoName(algo, blockHeight), blockHeight)
 	T.F("powLimit %d %s %d %064x", algo, fork.GetAlgoName(algo, blockHeight), blockHeight, pl)
-	ph := &candidateBlock.MsgBlock().Header.PrevBlock
+	ph := &candidateBlock.WireBlock().Header.PrevBlock
 	pn := b.Index.LookupNode(ph)
 	if pn == nil {
 		return false, false, errors.New("could not find parent block of candidate block")
@@ -119,7 +120,7 @@ func (b *BlockChain) ProcessBlock(
 	// otherwise bogus, blocks that could be used to eat memory, and ensuring
 	// expected (versus claimed) proof of work requirements since the previous
 	// checkpoint are met.
-	blockHeader := &candidateBlock.MsgBlock().Header
+	blockHeader := &candidateBlock.WireBlock().Header
 	var checkpointNode *BlockNode
 	if checkpointNode, e = b.findPreviousCheckpoint(); E.Chk(e) {
 		return false, false, e
@@ -142,12 +143,12 @@ func (b *BlockChain) ProcessBlock(
 			// minimum expected based on elapsed time since the last checkpoint and maximum
 			// adjustment allowed by the retarget rules.
 			duration := blockHeader.Timestamp.Sub(checkpointTime)
-			requiredTarget := fork.CompactToBig(
+			requiredTarget := bits.CompactToBig(
 				b.calcEasiestDifficulty(
 					checkpointNode.bits, duration,
 				),
 			)
-			currentTarget := fork.CompactToBig(blockHeader.Bits)
+			currentTarget := bits.CompactToBig(blockHeader.Bits)
 			if currentTarget.Cmp(requiredTarget) > 0 {
 				str := fmt.Sprintf(
 					"processing: candidateBlock target difficulty of %064x is too low when compared to the"+
@@ -197,7 +198,7 @@ func (b *BlockChain) ProcessBlock(
 	T.F(
 		"accepted candidateBlock %d %v %s",
 		blockHeight, bhwa(blockHeight).String(), fork.GetAlgoName(
-			candidateBlock.MsgBlock().
+			candidateBlock.WireBlock().
 				Header.Version, blockHeight,
 		),
 	)

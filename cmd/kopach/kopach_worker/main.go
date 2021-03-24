@@ -2,24 +2,24 @@ package kopach_worker
 
 import (
 	"github.com/gookit/color"
+	"github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/fork"
 	"github.com/p9c/pod/pkg/logg"
+	"github.com/p9c/pod/pkg/pod"
 	"net/rpc"
 	"os"
 	
 	"github.com/urfave/cli"
 	
-	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/cmd/kopach/worker"
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
-	"github.com/p9c/pod/pkg/blockchain/fork"
 )
 
-func KopachWorkerHandle(cx *conte.Xt) func(c *cli.Context) (e error) {
+func KopachWorkerHandle(cx *pod.State) func(c *cli.Context) (e error) {
 	return func(c *cli.Context) (e error) {
 		logg.AppColorizer = color.Bit24(255, 128, 128, false).Sprint
 		logg.App = "worker"
 		if len(os.Args) > 3 {
-			if os.Args[3] == netparams.TestNet3Params.Name {
+			if os.Args[3] == chaincfg.TestNet3Params.Name {
 				fork.IsTestnet = true
 			}
 		}

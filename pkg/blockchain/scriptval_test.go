@@ -5,7 +5,7 @@ import (
 	"runtime"
 	"testing"
 	
-	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
+	txscript "github.com/p9c/pod/pkg/txscript"
 )
 
 // TestCheckBlockScripts ensures that validating the all of the scripts in a known-good block doesn't return an error.
@@ -15,7 +15,7 @@ func TestCheckBlockScripts(t *testing.T) {
 	blockDataFile := fmt.Sprintf("%d.dat.bz2", testBlockNum)
 	blocks, e := loadBlocks(blockDataFile)
 	if e != nil  {
-		t.Errorf("ScriptError loading file: %v\n", err)
+		t.Errorf("ScriptError loading file: %v\n", e)
 		return
 	}
 	if len(blocks) > 1 {
@@ -29,13 +29,13 @@ func TestCheckBlockScripts(t *testing.T) {
 	storeDataFile := fmt.Sprintf("%d.utxostore.bz2", testBlockNum)
 	view, e := loadUtxoView(storeDataFile)
 	if e != nil  {
-		t.Errorf("ScriptError loading txstore: %v\n", err)
+		t.Errorf("ScriptError loading txstore: %v\n", e)
 		return
 	}
 	scriptFlags := txscript.ScriptBip16
 	e = checkBlockScripts(blocks[0], view, scriptFlags, nil, nil)
 	if e != nil  {
-		t.Errorf("Transaction script validation failed: %v\n", err)
+		t.Errorf("Transaction script validation failed: %v\n", e)
 		return
 	}
 }

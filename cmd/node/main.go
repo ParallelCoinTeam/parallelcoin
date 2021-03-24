@@ -3,6 +3,7 @@ package node
 import (
 	"github.com/p9c/pod/cmd/kopach/control"
 	"github.com/p9c/pod/pkg/logg"
+	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/util/qu"
 	"net"
 	"net/http"
@@ -11,13 +12,12 @@ import (
 	"os"
 	"runtime/pprof"
 	
-	"github.com/p9c/pod/app/apputil"
-	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/cmd/node/path"
-	"github.com/p9c/pod/pkg/blockchain/indexers"
+	"github.com/p9c/pod/pkg/apputil"
+	"github.com/p9c/pod/pkg/chainrpc"
 	"github.com/p9c/pod/pkg/database"
 	"github.com/p9c/pod/pkg/database/blockdb"
-	"github.com/p9c/pod/pkg/rpc/chainrpc"
+	"github.com/p9c/pod/pkg/indexers"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
@@ -30,7 +30,7 @@ var winServiceMain func() (bool, error)
 // optional serverChan parameter is mainly used by the service code to be
 // notified with the server once it is setup so it can gracefully stop it when
 // requested from the service control manager.
-func Main(cx *conte.Xt) (e error) {
+func Main(cx *pod.State) (e error) {
 	T.Ln("starting up node main")
 	// cx.WaitGroup.Add(1)
 	cx.WaitAdd()
@@ -138,7 +138,7 @@ func Main(cx *conte.Xt) (e error) {
 		*cx.Config.P2PListeners,
 		db,
 		interrupt.ShutdownRequestChan,
-		conte.GetContext(cx),
+		pod.GetContext(cx),
 		mempoolUpdateHook,
 	)
 	if e != nil {
@@ -147,33 +147,31 @@ func Main(cx *conte.Xt) (e error) {
 	}
 	server.Start()
 	cx.RealNode = server
-	if len(server.RPCServers) > 0 && *cx.Config.CAPI {
-		D.Ln("starting cAPI.....")
-		// chainrpc.RunAPI(server.RPCServers[0], cx.NodeKill)
-		// D.Ln("propagating rpc server handle (node has started)")
-	}
+	// if len(server.RPCServers) > 0 && *cx.Config.CAPI {
+	// 	D.Ln("starting cAPI.....")
+	// 	// chainrpc.RunAPI(server.RPCServers[0], cx.NodeKill)
+	// 	// D.Ln("propagating rpc server handle (node has started)")
+	// }
 	if len(server.RPCServers) > 0 {
 		cx.RPCServer = server.RPCServers[0]
 		D.Ln("sending back node")
 		cx.NodeChan <- cx.RPCServer
 	}
-	if !*cx.Config.DisableController {
-		D.Ln("starting controller")
-		cx.Controller = control.New(
-			cx.Syncing,
-			cx.Config,
-			cx.StateCfg,
-			cx.RealNode,
-			cx.RPCServer,
-			&cx.OtherNodesCounter,
-			mempoolUpdateChan,
-			uint64(*cx.Config.UUID),
-			cx.KillAll,
-		)
-		go cx.Controller.Run()
-		// cx.Controller.Start()
-		D.Ln("controller started")
-	}
+	D.Ln("starting controller")
+	cx.Controller, e = control.New(
+		cx.Syncing,
+		cx.Config,
+		cx.StateCfg,
+		cx.RealNode,
+		cx.RPCServer.Cfg.ConnMgr,
+		mempoolUpdateChan,
+		uint64(*cx.Config.UUID),
+		cx.KillAll,
+		cx.RealNode.StartController, cx.RealNode.StopController,
+	)
+	go cx.Controller.Run()
+	// cx.Controller.Start()
+	D.Ln("controller started")
 	once := true
 	gracefulShutdown := func() {
 		if !once {
@@ -224,7 +222,7 @@ func Main(cx *conte.Xt) (e error) {
 // additional logic such warning the user if there are multiple databases which
 // consume space on the file system and ensuring the regression test database is
 // clean when in regression test mode.
-func loadBlockDB(cx *conte.Xt) (db database.DB, e error) {
+func loadBlockDB(cx *pod.State) (db database.DB, e error) {
 	// The memdb backend does not have a file path associated with it, so handle it
 	// uniquely. We also don't want to worry about the multiple database type
 	// warnings when running with the memory database.
@@ -267,7 +265,7 @@ func loadBlockDB(cx *conte.Xt) (db database.DB, e error) {
 
 // removeRegressionDB removes the existing regression test database if running
 // in regression test mode and it already exists.
-func removeRegressionDB(cx *conte.Xt, dbPath string) (e error) {
+func removeRegressionDB(cx *pod.State, dbPath string) (e error) {
 	// don't do anything if not in regression test mode
 	if !((*cx.Config.Network)[0] == 'r') {
 		return nil
@@ -292,7 +290,7 @@ func removeRegressionDB(cx *conte.Xt, dbPath string) (e error) {
 // warnMultipleDBs shows a warning if multiple block database types are
 // detected. This is not a situation most users want. It is handy for
 // development however to support multiple side-by-side databases.
-func warnMultipleDBs(cx *conte.Xt) {
+func warnMultipleDBs(cx *pod.State) {
 	// This is intentionally not using the known db types which depend on the
 	// database types compiled into the binary since we want to detect legacy db
 	// types as well.

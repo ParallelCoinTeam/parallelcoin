@@ -1,14 +1,14 @@
 package atom
 
 import (
+	"github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/btcaddr"
 	"time"
 	
 	"go.uber.org/atomic"
 	
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
-	chainhash "github.com/p9c/pod/pkg/blockchain/chainhash"
-	"github.com/p9c/pod/pkg/rpc/btcjson"
-	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/btcjson"
+	"github.com/p9c/pod/pkg/chainhash"
 )
 
 // import all the atomics from uber atomic
@@ -113,19 +113,19 @@ func (at *Hash) Swap(n chainhash.Hash) chainhash.Hash {
 // Address is an atomic wrapper around util.Address
 type Address struct {
 	*atomic.String
-	ForNet *netparams.Params
+	ForNet *chaincfg.Params
 }
 
 // NewAddress creates a Hash.
-func NewAddress(tt util.Address, forNet *netparams.Params) *Address {
+func NewAddress(tt btcaddr.Address, forNet *chaincfg.Params) *Address {
 	t := atomic.NewString(tt.EncodeAddress())
 	return &Address{String: t, ForNet: forNet}
 }
 
 // Load atomically loads the wrapped value.
-func (at *Address) Load() util.Address {
-	addr, e := util.DecodeAddress(at.String.Load(), at.ForNet)
-	if e != nil  {
+func (at *Address) Load() btcaddr.Address {
+	addr, e := btcaddr.Decode(at.String.Load(), at.ForNet)
+	if e != nil {
 		return nil
 	}
 	return addr
@@ -133,12 +133,12 @@ func (at *Address) Load() util.Address {
 
 // Store atomically stores the passed value.
 // The passed value is copied so further mutations are not propagated.
-func (at *Address) Store(h util.Address) {
+func (at *Address) Store(h btcaddr.Address) {
 	at.String.Store(h.EncodeAddress())
 }
 
 // Swap atomically swaps the wrapped util.Address and returns the old value.
-func (at *Address) Swap(n util.Address) util.Address {
+func (at *Address) Swap(n btcaddr.Address) btcaddr.Address {
 	o := at.Load()
 	at.Store(n)
 	return o
@@ -180,7 +180,8 @@ func (at *ListTransactionsResult) Store(ltr []btcjson.ListTransactionsResult) {
 
 // Swap atomically swaps the wrapped chainhash.ListTransactionsResult and
 // returns the old value.
-func (at *ListTransactionsResult) Swap(n []btcjson.ListTransactionsResult,
+func (at *ListTransactionsResult) Swap(
+	n []btcjson.ListTransactionsResult,
 ) []btcjson.ListTransactionsResult {
 	o := at.v.Load().([]btcjson.ListTransactionsResult)
 	at.v.Store(n)

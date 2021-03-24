@@ -7,8 +7,8 @@ import (
 	"os"
 	"testing"
 	
-	"github.com/p9c/pod/pkg/database/walletdb"
-	_ "github.com/p9c/pod/pkg/database/walletdb/bdb"
+	"github.com/p9c/pod/pkg/walletdb"
+	_ "github.com/p9c/pod/pkg/walletdb/bdb"
 )
 
 func createTestIndex() (func(), *headerIndex, error) {
@@ -40,7 +40,7 @@ func TestAddHeadersIndexRetrieve(t *testing.T) {
 	if cleanUp, hIndex, e = createTestIndex(); !E.Chk(e) {
 		defer cleanUp()
 	} else {
-		t.Fatalf("unable to create test db: %v", err)
+		t.Fatalf("unable to create test db: %v", e)
 	}
 	// First, we'll create a a series of random headers that we'll use to write into the database.
 	const numHeaders = 100
@@ -49,7 +49,7 @@ func TestAddHeadersIndexRetrieve(t *testing.T) {
 	for i := uint32(0); i < numHeaders; i++ {
 		var header headerEntry
 		if _, e = rand.Read(header.hash[:]); E.Chk(e) {
-			t.Fatalf("unable to read header: %v", err)
+			t.Fatalf("unable to read header: %v", e)
 		}
 		header.height = i
 		headerEntries[i] = header
@@ -57,12 +57,12 @@ func TestAddHeadersIndexRetrieve(t *testing.T) {
 	}
 	// With the headers constructed, we'll write them to disk in a single batch.
 	if e := hIndex.addHeaders(headerEntries); E.Chk(e) {
-		t.Fatalf("unable to add headers: %v", err)
+		t.Fatalf("unable to add headers: %v", e)
 	}
 	// Next, verify that the database tip matches the _final_ header inserted.
 	dbTip, dbHeight, e := hIndex.chainTip()
 	if e != nil {
-		t.Fatalf("unable to obtain chain tip: %v", err)
+		t.Fatalf("unable to obtain chain tip: %v", e)
 	}
 	lastEntry := headerIndex[numHeaders-1]
 	if dbHeight != lastEntry.height {
@@ -81,7 +81,7 @@ func TestAddHeadersIndexRetrieve(t *testing.T) {
 	for i, headerEntry := range headerEntries {
 		height, e := hIndex.heightFromHash(&headerEntry.hash)
 		if e != nil {
-			t.Fatalf("unable to retreive height(%v): %v", i, err)
+			t.Fatalf("unable to retreive height(%v): %v", i, e)
 		}
 		if height != headerEntry.height {
 			t.Fatalf(
@@ -93,12 +93,12 @@ func TestAddHeadersIndexRetrieve(t *testing.T) {
 	// Next if we truncate the index by one, then we should end up at the second to last entry for the tip.
 	newTip := headerIndex[numHeaders-2]
 	if e := hIndex.truncateIndex(&newTip.hash, true); E.Chk(e) {
-		t.Fatalf("unable to truncate index: %v", err)
+		t.Fatalf("unable to truncate index: %v", e)
 	}
 	// This time the database tip should be the _second_ to last entry inserted.
 	dbTip, dbHeight, e = hIndex.chainTip()
 	if e != nil {
-		t.Fatalf("unable to obtain chain tip: %v", err)
+		t.Fatalf("unable to obtain chain tip: %v", e)
 	}
 	lastEntry = headerIndex[numHeaders-2]
 	if dbHeight != lastEntry.height {

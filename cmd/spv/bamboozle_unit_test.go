@@ -1,24 +1,24 @@
 package spv
 
 import (
+	"github.com/p9c/pod/pkg/chaincfg"
 	"io/ioutil"
 	"os"
 	"sort"
 	"testing"
 	
 	"github.com/p9c/pod/cmd/spv/headerfs"
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
-	"github.com/p9c/pod/pkg/blockchain/chainhash"
-	"github.com/p9c/pod/pkg/blockchain/wire"
-	"github.com/p9c/pod/pkg/coding/gcs"
-	"github.com/p9c/pod/pkg/coding/gcs/builder"
-	"github.com/p9c/pod/pkg/database/walletdb"
+	"github.com/p9c/pod/pkg/wire"
+	"github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/gcs"
+	"github.com/p9c/pod/pkg/gcs/builder"
+	"github.com/p9c/pod/pkg/walletdb"
 )
 
 func decodeHashNoError(str string) *chainhash.Hash {
 	hash, e := chainhash.NewHashFromStr(str)
 	if e != nil {
-		panic("Got error decoding hash: " + err.Error())
+		panic("Got error decoding hash: " + e.Error())
 	}
 	return hash
 }
@@ -38,7 +38,7 @@ type checkCFHTestCase struct {
 }
 type resolveCFHTestCase struct {
 	name        string
-	block       *wire.MsgBlock
+	block       *wire.Block
 	idx         int
 	peerFilters map[string]*gcs.Filter
 	badPeers    []string
@@ -94,7 +94,7 @@ var (
 	}
 	// For the purpose of the cfheader mismatch test, we actually only need to have the scripts of each transaction
 	// present.
-	block = &wire.MsgBlock{
+	block = &wire.Block{
 		Transactions: []*wire.MsgTx{
 			{
 				TxOut: []*wire.TxOut{
@@ -409,7 +409,7 @@ func heightToHeader(height uint32) *wire.BlockHeader {
 func runCheckCFCheckptSanityTestCase(t *testing.T, testCase *cfCheckptTestCase) {
 	tempDir, e := ioutil.TempDir("", "neutrino")
 	if e != nil {
-		t.Fatalf("Failed to create temporary directory: %s", err)
+		t.Fatalf("Failed to create temporary directory: %s", e)
 	}
 	defer func() {
 		if e := os.RemoveAll(tempDir); E.Chk(e) {
@@ -417,23 +417,23 @@ func runCheckCFCheckptSanityTestCase(t *testing.T, testCase *cfCheckptTestCase) 
 	}()
 	db, e := walletdb.Create("bdb", tempDir+"/weks.db")
 	if e != nil {
-		t.Fatalf("DBError opening DB: %s", err)
+		t.Fatalf("DBError opening DB: %s", e)
 	}
 	defer func() {
 		if e := db.Close(); E.Chk(e) {
 		}
 	}()
 	hdrStore, e := headerfs.NewBlockHeaderStore(
-		tempDir, db, &netparams.SimNetParams,
+		tempDir, db, &chaincfg.SimNetParams,
 	)
 	if e != nil {
-		t.Fatalf("DBError creating block header store: %s", err)
+		t.Fatalf("DBError creating block header store: %s", e)
 	}
 	cfStore, e := headerfs.NewFilterHeaderStore(
-		tempDir, db, headerfs.RegularFilter, &netparams.SimNetParams,
+		tempDir, db, headerfs.RegularFilter, &chaincfg.SimNetParams,
 	)
 	if e != nil {
-		t.Fatalf("DBError creating filter header store: %s", err)
+		t.Fatalf("DBError creating filter header store: %s", e)
 	}
 	var (
 		height uint32
@@ -475,10 +475,10 @@ func runCheckCFCheckptSanityTestCase(t *testing.T, testCase *cfCheckptTestCase) 
 			},
 		)
 		if e = hdrStore.WriteHeaders(hdrBatch...); E.Chk(e) {
-			t.Fatalf("DBError writing batch of headers: %s", err)
+			t.Fatalf("DBError writing batch of headers: %s", e)
 		}
 		if e = cfStore.WriteHeaders(cfBatch...); E.Chk(e) {
-			t.Fatalf("DBError writing batch of cfheaders: %s", err)
+			t.Fatalf("DBError writing batch of cfheaders: %s", e)
 		}
 	}
 	for i := 0; i < testCase.storeAddHeight; i++ {
@@ -493,7 +493,7 @@ func runCheckCFCheckptSanityTestCase(t *testing.T, testCase *cfCheckptTestCase) 
 				Height:      height,
 			},
 		); E.Chk(e) {
-			t.Fatalf("DBError writing single block header: %s", err)
+			t.Fatalf("DBError writing single block header: %s", e)
 		}
 		if e = cfStore.WriteHeaders(
 			headerfs.FilterHeader{
@@ -502,12 +502,12 @@ func runCheckCFCheckptSanityTestCase(t *testing.T, testCase *cfCheckptTestCase) 
 				Height:     height,
 			},
 		); E.Chk(e) {
-			t.Fatalf("DBError writing single cfheader: %s", err)
+			t.Fatalf("DBError writing single cfheader: %s", e)
 		}
 	}
 	heightDiff, e := checkCFCheckptSanity(testCase.checkpoints, cfStore)
 	if e != nil {
-		t.Fatalf("DBError from checkCFCheckptSanity: %s", err)
+		t.Fatalf("DBError from checkCFCheckptSanity: %s", e)
 	}
 	if heightDiff != testCase.heightDiff {
 		t.Fatalf(
@@ -556,7 +556,7 @@ func TestResolveCFHeadersMismatch(t *testing.T) {
 				if e != nil {
 					t.Fatalf(
 						"Couldn't resolve cfheader "+
-							"mismatch: %v", err,
+							"mismatch: %v", e,
 					)
 				}
 				if len(badPeers) != len(testCase.badPeers) {

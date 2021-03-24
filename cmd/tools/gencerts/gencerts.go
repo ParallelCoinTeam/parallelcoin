@@ -10,7 +10,7 @@ import (
 	
 	"github.com/jessevdk/go-flags"
 	
-	"github.com/p9c/pod/app/appdata"
+	"github.com/p9c/pod/pkg/appdata"
 	"github.com/p9c/pod/pkg/util"
 )
 
@@ -30,7 +30,7 @@ func main() {
 	parser := flags.NewParser(&cfg, flags.Default)
 	_, e := parser.Parse()
 	if e != nil {
-		if e, ok := err.(*flags.Error); !ok || e.Type != flags.ErrHelp {
+		if e, ok := e.(*flags.Error); !ok || e.Type != flags.ErrHelp {
 			parser.WriteHelp(os.Stderr)
 		}
 		return
@@ -57,23 +57,23 @@ func main() {
 	var cert, key []byte
 	cert, key, e = util.NewTLSCertPair(cfg.Organization, validUntil, cfg.ExtraHosts)
 	if e != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "cannot generate certificate pair: %v\n", err)
+		_, _ = fmt.Fprintf(os.Stderr, "cannot generate certificate pair: %v\n", e)
 		os.Exit(1)
 	}
 	// Write cert and key files.
 	if e = ioutil.WriteFile(certFile, cert, 0666); E.Chk(e) {
-		_, _ = fmt.Fprintf(os.Stderr, "cannot write cert: %v\n", err)
+		_, _ = fmt.Fprintf(os.Stderr, "cannot write cert: %v\n", e)
 		os.Exit(1)
 	}
 	// Write cert and key files.
 	if e = ioutil.WriteFile(caFile, cert, 0666); E.Chk(e) {
-		_, _ = fmt.Fprintf(os.Stderr, "cannot write ca cert: %v\n", err)
+		_, _ = fmt.Fprintf(os.Stderr, "cannot write ca cert: %v\n", e)
 		os.Exit(1)
 	}
 	if e = ioutil.WriteFile(keyFile, key, 0600); E.Chk(e) {
 		if e := os.Remove(certFile); E.Chk(e) {
 		}
-		_, _ = fmt.Fprintf(os.Stderr, "cannot write key: %v\n", err)
+		_, _ = fmt.Fprintf(os.Stderr, "cannot write key: %v\n", e)
 		os.Exit(1)
 	}
 }
@@ -98,6 +98,7 @@ func cleanAndExpandPath(
 func fileExists(
 	name string,
 ) bool {
+	var e error
 	if _, e = os.Stat(name); E.Chk(e) {
 		if os.IsNotExist(e) {
 			return false

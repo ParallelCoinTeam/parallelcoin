@@ -2,10 +2,15 @@ package gui
 
 import (
 	"crypto/rand"
-	"github.com/p9c/pod/pkg/blockchain/wire"
+	"fmt"
+	"github.com/niubaoshu/gotiny"
+	"github.com/p9c/pod/cmd/kopach/control/p2padvt"
 	"github.com/p9c/pod/pkg/logg"
-	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/pod"
+	"github.com/p9c/pod/pkg/podcfg"
+	"github.com/p9c/pod/pkg/transport"
 	"github.com/tyler-smith/go-bip39"
+	"net"
 	"os"
 	"runtime"
 	"strings"
@@ -15,9 +20,8 @@ import (
 	"gioui.org/op/paint"
 	uberatomic "go.uber.org/atomic"
 	
-	"github.com/p9c/pod/app/save"
+	"github.com/p9c/pod/pkg/btcjson"
 	"github.com/p9c/pod/pkg/gui"
-	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/util/qu"
 	
@@ -28,14 +32,13 @@ import (
 	"github.com/p9c/pod/pkg/pipe/consume"
 	"github.com/p9c/pod/pkg/util/rununit"
 	
-	"github.com/p9c/pod/app/apputil"
+	"github.com/p9c/pod/pkg/apputil"
 	
-	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/pkg/gui/cfg"
-	"github.com/p9c/pod/pkg/rpc/rpcclient"
+	"github.com/p9c/pod/pkg/rpcclient"
 )
 
-func Main(cx *conte.Xt, c *cli.Context) (e error) {
+func Main(cx *pod.State, c *cli.Context) (e error) {
 	var size int
 	noWallet := true
 	wg := &WalletGUI{
@@ -45,6 +48,7 @@ func Main(cx *conte.Xt, c *cli.Context) (e error) {
 		quit:       cx.KillAll,
 		Size:       &size,
 		noWallet:   &noWallet,
+		otherNodes: make(map[uint64]*nodeSpec),
 	}
 	return wg.Run()
 }
@@ -59,7 +63,7 @@ type IncDecMap map[string]*gui.IncDec
 
 type WalletGUI struct {
 	wg                        sync.WaitGroup
-	cx                        *conte.Xt
+	cx                        *pod.State
 	c                         *cli.Context
 	quit                      qu.C
 	State                     *State
@@ -95,7 +99,7 @@ type WalletGUI struct {
 	console                                  *Console
 	RecentTxsWidget, TxHistoryWidget         l.Widget
 	recentTxsClickables, txHistoryClickables []*gui.Clickable
-	txRecentList, txHistoryList              []btcjson.ListTransactionsResult
+	txHistoryList                            []btcjson.ListTransactionsResult
 	openTxID, prevOpenTxID                   *uberatomic.String
 	originTxDetail                           string
 	txMx                                     sync.Mutex
@@ -122,17 +126,138 @@ type WalletGUI struct {
 	createVerifying                     bool
 	restoring                           bool
 	lastUpdated                         uberatomic.Int64
+	multiConn                           *transport.Channel
+	otherNodes                          map[uint64]*nodeSpec
+	uuid                                uint64
+	peerCount                           *uberatomic.Int32
 }
 
-type blockUpdate struct {
-	height    int32
-	header    *wire.BlockHeader
-	txs       []*util.Tx
-	timestamp time.Time
+type nodeSpec struct {
+	time.Time
+	addr string
+}
+
+// type blockUpdate struct {
+// 	height    int32
+// 	header    *wire.BlockHeader
+// 	txs       []*util.Tx
+// 	timestamp time.Time
+// }
+
+var handlersMulticast = transport.Handlers{
+	// string(sol.Magic):      processSolMsg,
+	string(p2padvt.Magic): processAdvtMsg,
+	// string(hashrate.Magic): processHashrateMsg,
+}
+
+func processAdvtMsg(ctx interface{}, src net.Addr, dst string, b []byte) (e error) {
+	wg := ctx.(*WalletGUI)
+	if !*wg.cx.Config.Discovery {
+		return
+	}
+	if wg.ChainClient == nil {
+		T.Ln("no chain client to process advertisment")
+		return
+	}
+	var j p2padvt.Advertisment
+	gotiny.Unmarshal(b, &j)
+	// I.S(j)
+	var peerUUID uint64
+	peerUUID = j.UUID
+	// I.Ln("peerUUID of advertisment", peerUUID, wg.otherNodes)
+	if int(peerUUID) == *wg.cx.Config.UUID {
+		D.Ln("ignoring own advertisment message")
+		return
+	}
+	var pi []btcjson.GetPeerInfoResult
+	if pi, e = wg.ChainClient.GetPeerInfo(); E.Chk(e) {
+	}
+	// I.S(pi)
+	for i := range pi {
+		for k := range j.IPs {
+			jpa := net.JoinHostPort(k, fmt.Sprint(j.P2P))
+			// I.Ln(jpa, pi[i].Addr, pi[i].AddrLocal)
+			if jpa == pi[i].Addr {
+				I.Ln("not connecting to node already connected outbound")
+				return
+			}
+			if jpa == pi[i].AddrLocal {
+				I.Ln("not connecting to node already connected inbound")
+				return
+			}
+		}
+		// for addy := range j.IPs {
+		// 	if addy == pi[i].Addr || addy == pi[i].AddrLocal {
+		// 		I.Ln("node already connected", pi[i].Inbound)
+		// 		return
+		// 	}
+		// }
+	}
+	if _, ok := wg.otherNodes[peerUUID]; !ok {
+		// if we haven't already added it to the permanent peer list, we can add it now
+		I.Ln("connecting to lan peer with same PSK", j.IPs, peerUUID)
+		wg.otherNodes[peerUUID] = &nodeSpec{}
+		wg.otherNodes[peerUUID].Time = time.Now()
+		for i := range j.IPs {
+			addy := net.JoinHostPort(i, fmt.Sprint(j.P2P))
+			for j := range pi {
+				if addy == pi[j].Addr || addy == pi[j].AddrLocal {
+					// not connecting to peer we already have connected to
+					return
+				}
+			}
+		}
+		// try all IPs
+		for addr := range j.IPs {
+			peerIP := net.JoinHostPort(addr, fmt.Sprint(j.P2P))
+			if e = wg.ChainClient.AddNode(peerIP, "add"); E.Chk(e) {
+				continue
+			}
+			D.Ln("connected to peer via address", peerIP)
+			wg.otherNodes[peerUUID].addr = peerIP
+			break
+		}
+		I.Ln(peerUUID, "added", "otherNodes", wg.otherNodes)
+	} else {
+		// update last seen time for peerUUID for garbage collection of stale disconnected
+		// nodes
+		D.Ln("other node seen again", peerUUID, wg.otherNodes[peerUUID].addr)
+		wg.otherNodes[peerUUID].Time = time.Now()
+	}
+	// I.S(wg.otherNodes)
+	// If we lose connection for more than 9 seconds we delete and if the node
+	// reappears it can be reconnected
+	for i := range wg.otherNodes {
+		if time.Now().Sub(wg.otherNodes[i].Time) > time.Second*6 {
+			// also remove from connection manager
+			if e = wg.ChainClient.AddNode(wg.otherNodes[i].addr, "remove"); E.Chk(e) {
+			}
+			D.Ln("deleting", wg.otherNodes[i])
+			delete(wg.otherNodes, i)
+		}
+	}
+	// on := int32(len(wg.otherNodes))
+	// wg.otherNodeCount.Store(on)
+	return
 }
 
 func (wg *WalletGUI) Run() (e error) {
 	wg.openTxID = uberatomic.NewString("")
+	var mc *transport.Channel
+	quit := qu.T()
+	if mc, e = transport.NewBroadcastChannel(
+		"controller",
+		wg,
+		*wg.cx.Config.MinerPass,
+		transport.DefaultPort,
+		16384,
+		handlersMulticast,
+		quit,
+	); E.Chk(e) {
+		return
+	}
+	wg.multiConn = mc
+	wg.peerCount = uberatomic.NewInt32(0)
 	wg.prevOpenTxID = uberatomic.NewString("")
 	wg.stateLoaded = uberatomic.NewBool(false)
 	wg.currentReceiveRegenerate = uberatomic.NewBool(true)
@@ -182,7 +307,6 @@ func (wg *WalletGUI) Run() (e error) {
 	wg.State = GetNewState(wg.cx.ActiveNet, wg.MainApp.ActivePageGetAtomic())
 	wg.unlockPage = wg.getWalletUnlockAppWidget()
 	wg.loadingPage = wg.getLoadingPage()
-	// wg.Watcher()
 	if !apputil.FileExists(*wg.cx.Config.WalletFile) {
 		I.Ln("wallet file does not exist", *wg.cx.Config.WalletFile)
 	} else {
@@ -207,9 +331,25 @@ func (wg *WalletGUI) Run() (e error) {
 		},
 	)
 	go func() {
+		ticker := time.NewTicker(time.Second)
 	out:
 		for {
 			select {
+			case <-ticker.C:
+				if e = wg.Advertise(); E.Chk(e) {
+				}
+				if wg.node.Running() {
+					if wg.ChainClient != nil {
+						if !wg.ChainClient.Disconnected() {
+							var pi []btcjson.GetPeerInfoResult
+							if pi, e = wg.ChainClient.GetPeerInfo(); E.Chk(e) {
+								continue
+							}
+							wg.peerCount.Store(int32(len(pi)))
+							wg.Invalidate()
+						}
+					}
+				}
 			case <-wg.invalidate.Wait():
 				T.Ln("invalidating render queue")
 				wg.Window.Window.Invalidate()
@@ -239,10 +379,14 @@ func (wg *WalletGUI) Run() (e error) {
 							wg.CreateWalletPage,
 							func(gtx l.Context) l.Dimensions {
 								switch {
-								case wg.ready.Load() && wg.stateLoaded.Load():
+								case wg.stateLoaded.Load():
 									return wg.MainApp.Fn()(gtx)
-								case wg.ready.Load() || wg.stateLoaded.Load():
-									return wg.loadingPage.Fn()(gtx)
+								// case wg.ready.Load():
+								// 	wg.loadingPage.ActivePage("loading")
+								// 	return wg.loadingPage.Fn()(gtx)
+								// case wg.stateLoaded.Load():
+								// 	wg.loadingPage.ActivePage("unlocking")
+								// 	return wg.loadingPage.Fn()(gtx)
 								default:
 									return wg.unlockPage.Fn()(gtx)
 								}
@@ -288,7 +432,7 @@ func (wg *WalletGUI) GetButtons() {
 	for i := range wg.buttonBarButtons {
 		wg.buttonBarButtons[i] = wg.Clickable()
 	}
-	wg.statusBarButtons = make([]*gui.Clickable, 7)
+	wg.statusBarButtons = make([]*gui.Clickable, 8)
 	for i := range wg.statusBarButtons {
 		wg.statusBarButtons[i] = wg.Clickable()
 	}
@@ -445,7 +589,7 @@ func (wg *WalletGUI) GetIncDecs() IncDecMap {
 							wg.miner.Stop()
 						}
 						*wg.cx.Config.GenThreads = n
-						save.Pod(wg.cx.Config)
+						podcfg.Save(wg.cx.Config)
 						// if wg.miner.Running() {
 						// 	D.Ln("restarting miner")
 						// 	wg.miner.Stop()

@@ -3,8 +3,9 @@ package app
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/p9c/pod/pkg/fork"
 	"github.com/p9c/pod/pkg/logg"
-	"github.com/p9c/pod/pkg/util/routeable"
+	"github.com/p9c/pod/pkg/podcfg"
 	"io/ioutil"
 	prand "math/rand"
 	"os"
@@ -16,22 +17,18 @@ import (
 	
 	"github.com/urfave/cli"
 	
-	"github.com/p9c/pod/app/apputil"
-	"github.com/p9c/pod/app/conte"
-	"github.com/p9c/pod/pkg/blockchain/chaincfg"
-	"github.com/p9c/pod/pkg/blockchain/chaincfg/netparams"
-	"github.com/p9c/pod/pkg/blockchain/fork"
+	"github.com/p9c/pod/pkg/apputil"
+	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/pod"
 )
 
-func beforeFunc(cx *conte.Xt) func(c *cli.Context) (e error) {
+func beforeFunc(cx *pod.State) func(c *cli.Context) (e error) {
 	return func(c *cli.Context) (e error) {
 		D.Ln("running beforeFunc")
 		cx.AppContext = c
 		// if user set datadir this is first thing to configure
 		if c.IsSet("datadir") {
 			*cx.Config.DataDir = c.String("datadir")
-			cx.DataDir = c.String("datadir")
 			D.Ln("datadir", *cx.Config.DataDir)
 		}
 		D.Ln(c.IsSet("D"), c.IsSet("datadir"))
@@ -55,7 +52,7 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) (e error) {
 		if apputil.FileExists(*cx.Config.ConfigFile) {
 			b, e := ioutil.ReadFile(*cx.Config.ConfigFile)
 			if e == nil {
-				cx.Config, cx.ConfigMap = pod.EmptyConfig()
+				cx.Config, cx.ConfigMap = podcfg.EmptyConfig()
 				e = json.Unmarshal(b, cx.Config)
 				if e != nil {
 					E.Ln("error unmarshalling config", e)
@@ -73,7 +70,7 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) (e error) {
 			cx.StateCfg.Save = true
 		}
 		if c.IsSet("loglevel") {
-			F.Ln("set loglevel", c.String("loglevel"))
+			T.Ln("set loglevel", c.String("loglevel"))
 			*cx.Config.LogLevel = c.String("loglevel")
 		}
 		logg.SetLogLevel(*cx.Config.LogLevel)
@@ -86,21 +83,21 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) (e error) {
 			*cx.Config.Network = c.String("network")
 			switch *cx.Config.Network {
 			case "testnet", "testnet3", "t":
-				cx.ActiveNet = &netparams.TestNet3Params
+				cx.ActiveNet = &chaincfg.TestNet3Params
 				fork.IsTestnet = true
 				// fork.HashReps = 3
 			case "regtestnet", "regressiontest", "r":
 				fork.IsTestnet = true
-				cx.ActiveNet = &netparams.RegressionTestParams
+				cx.ActiveNet = &chaincfg.RegressionTestParams
 			case "simnet", "s":
 				fork.IsTestnet = true
-				cx.ActiveNet = &netparams.SimNetParams
+				cx.ActiveNet = &chaincfg.SimNetParams
 			default:
 				if *cx.Config.Network != "mainnet" &&
 					*cx.Config.Network != "m" {
 					D.Ln("using mainnet for node")
 				}
-				cx.ActiveNet = &netparams.MainNetParams
+				cx.ActiveNet = &chaincfg.MainNetParams
 			}
 		}
 		if c.IsSet("username") {
@@ -267,7 +264,7 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) (e error) {
 			// if LAN is turned on we need to remove the seeds from netparams not on mainnet
 			// mainnet is never in lan mode
 			// if LAN is turned on it means by default we are on testnet
-			cx.ActiveNet = &netparams.TestNet3Params
+			cx.ActiveNet = &chaincfg.TestNet3Params
 			if cx.ActiveNet.Name != "mainnet" {
 				D.Ln("set lan", c.Bool("lan"))
 				*cx.Config.LAN = c.Bool("lan")
@@ -382,29 +379,29 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) (e error) {
 		if c.IsSet("notty") {
 			cx.IsGUI = true
 		}
-		if c.IsSet("disablecontroller") {
-			*cx.Config.DisableController = c.Bool("disablecontroller")
+		if c.IsSet("controller") {
+			*cx.Config.Controller = c.Bool("controller")
 		}
 		if c.IsSet("save") {
 			I.Ln("saving configuration")
 			cx.StateCfg.Save = true
 		}
-		// if e = routeable.Discover(); E.Chk(e) {
-		// 	// TODO: this should trigger the display of this lack of internet
-		// }
-		go func() {
-		out:
-			for {
-				select {
-				case <-time.After(time.Second * 10):
-					if e = routeable.Discover(); E.Chk(e) {
-						// TODO: this should trigger the display of this lack of internet
-					}
-				case <-cx.KillAll:
-					break out
-				}
-			}
-		}()
+		// // if e = routeable.Discover(); E.Chk(e) {
+		// // 	// TODO: this should trigger the display of this lack of internet
+		// // }
+		// go func() {
+		// out:
+		// 	for {
+		// 		select {
+		// 		case <-time.After(time.Second * 10):
+		// 			if e = routeable.Discover(); E.Chk(e) {
+		// 				// TODO: this should trigger the display of this lack of internet
+		// 			}
+		// 		case <-cx.KillAll:
+		// 			break out
+		// 		}
+		// 	}
+		// }()
 		return nil
 	}
 }

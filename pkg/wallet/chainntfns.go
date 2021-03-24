@@ -2,14 +2,14 @@ package wallet
 
 import (
 	"bytes"
-	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/btcaddr"
 	"strings"
 	
-	tm "github.com/p9c/pod/pkg/blockchain/tx/wtxmgr"
-	txscript "github.com/p9c/pod/pkg/blockchain/tx/txscript"
-	"github.com/p9c/pod/pkg/database/walletdb"
-	wm "github.com/p9c/pod/pkg/wallet/waddrmgr"
-	"github.com/p9c/pod/pkg/wallet/chain"
+	"github.com/p9c/pod/pkg/chainclient"
+	"github.com/p9c/pod/pkg/txscript"
+	wm "github.com/p9c/pod/pkg/waddrmgr"
+	"github.com/p9c/pod/pkg/walletdb"
+	tm "github.com/p9c/pod/pkg/wtxmgr"
 )
 
 func (w *Wallet) handleChainNotifications() {
@@ -33,7 +33,7 @@ func (w *Wallet) handleChainNotifications() {
 		}
 	}
 	catchUpHashes := func(
-		w *Wallet, client chain.Interface,
+		w *Wallet, client chainclient.Interface,
 		height int32,
 	) (e error) {
 		// TODO(aakselrod): There's a race condition here, which happens when a reorg occurs between the rescanProgress
@@ -88,32 +88,32 @@ func (w *Wallet) handleChainNotifications() {
 			var notificationName string
 			var e error
 			switch n := n.(type) {
-			case chain.ClientConnected:
+			case chainclient.ClientConnected:
 				if w != nil {
 					go sync(w)
 				}
-			case chain.BlockConnected:
+			case chainclient.BlockConnected:
 				e = walletdb.Update(
 					w.db, func(tx walletdb.ReadWriteTx) (e error) {
 						return w.connectBlock(tx, tm.BlockMeta(n))
 					},
 				)
 				notificationName = "blockconnected"
-			case chain.BlockDisconnected:
+			case chainclient.BlockDisconnected:
 				e = walletdb.Update(
 					w.db, func(tx walletdb.ReadWriteTx) (e error) {
 						return w.disconnectBlock(tx, tm.BlockMeta(n))
 					},
 				)
 				notificationName = "blockdisconnected"
-			case chain.RelevantTx:
+			case chainclient.RelevantTx:
 				e = walletdb.Update(
 					w.db, func(tx walletdb.ReadWriteTx) (e error) {
 						return w.addRelevantTx(tx, n.TxRecord, n.Block)
 					},
 				)
 				notificationName = "recvtx/redeemingtx"
-			case chain.FilteredBlockConnected:
+			case chainclient.FilteredBlockConnected:
 				// Atomically update for the whole block.
 				if len(n.RelevantTxs) > 0 {
 					e = walletdb.Update(
@@ -136,7 +136,7 @@ func (w *Wallet) handleChainNotifications() {
 				notificationName = "filteredblockconnected"
 			// The following require some database maintenance, but also need to be reported to the wallet's rescan
 			// goroutine.
-			case *chain.RescanProgress:
+			case *chainclient.RescanProgress:
 				e = catchUpHashes(w, chainClient, n.Height)
 				notificationName = "rescanprogress"
 				select {
@@ -144,7 +144,7 @@ func (w *Wallet) handleChainNotifications() {
 				case <-w.quitChan().Wait():
 					return
 				}
-			case *chain.RescanFinished:
+			case *chainclient.RescanFinished:
 				e = catchUpHashes(w, chainClient, n.Height)
 				notificationName = "rescanprogress"
 				w.SetChainSynced(true)
@@ -250,7 +250,7 @@ func (w *Wallet) addRelevantTx(dbtx walletdb.ReadWriteTx, rec *tm.TxRecord, bloc
 	}
 	// Chk every output to determine whether it is controlled by a wallet key. If so, mark the output as a credit.
 	for i, output := range rec.MsgTx.TxOut {
-		var addrs []util.Address
+		var addrs []btcaddr.Address
 		_, addrs, _, e = txscript.ExtractPkScriptAddrs(
 			output.PkScript,
 			w.chainParams,
