@@ -311,15 +311,12 @@ func (wg *WalletGUI) SideBarButton(title, page string, index int) func(gtx l.Con
 		var color string
 		background := "Transparent"
 		color = "DocText"
-		var font string
-		font = "plan9"
 		var ins float32 = 0.5
 		// var hl = false
 		if wg.MainApp.ActivePageGet() == page || wg.MainApp.PreRendering {
 			background = "PanelBg"
 			scale = gui.Scales["H6"]
 			color = "DocText"
-			font = "plan9"
 			// ins = 0.5
 			// hl = true
 		}
@@ -340,11 +337,9 @@ func (wg *WalletGUI) SideBarButton(title, page string, index int) func(gtx l.Con
 					wg.Inset(
 						ins,
 						func(gtx l.Context) l.Dimensions {
-							return wg.Label().
-								Font(font).
-								Text(title).
-								TextScale(scale).
-								Color(color).Alignment(text.End).
+							return wg.H5(title).
+								Color(color).
+								Alignment(text.End).
 								Fn(gtx)
 						},
 					).Fn,

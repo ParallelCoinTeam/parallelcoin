@@ -77,9 +77,11 @@ func (sp *SendPage) SmallList(gtx l.Context) l.Dimensions {
 	}
 	smallWidgets = append(smallWidgets, sp.GetAddressbookHistoryCards("DocBg")...)
 	le := func(gtx l.Context, index int) l.Dimensions {
-		return wg.Inset(
-			0.25, smallWidgets[index],
-		).Fn(gtx)
+		return	smallWidgets[index](gtx)
+		// wg.Inset(
+		// 	0.25,
+		// ,
+		// ).Fn(gtx)
 	}
 	return wg.lists["send"].
 		Vertical().
@@ -131,8 +133,10 @@ func (sp *SendPage) MediumList(gtx l.Context) l.Dimensions {
 	return wg.Flex().AlignStart().
 		Rigid(
 			func(gtx l.Context) l.Dimensions {
-				gtx.Constraints.Max.X, gtx.Constraints.Min.X = int(wg.TextSize.V*sp.inputWidth),
-					int(wg.TextSize.V*sp.inputWidth)
+				gtx.Constraints.Max.X =
+					int(wg.TextSize.V * sp.inputWidth)
+				// gtx.Constraints.Min.X = int(wg.TextSize.V * sp.inputWidth)
+				
 				return wg.VFlex().AlignStart().
 					Rigid(
 						wg.lists["sendMedium"].
@@ -142,8 +146,8 @@ func (sp *SendPage) MediumList(gtx l.Context) l.Dimensions {
 					).Fn(gtx)
 			},
 		).
-		Rigid(wg.Inset(0.25, gui.EmptySpace(0, 0)).Fn).
-		Rigid(
+		// Rigid(wg.Inset(0.25, gui.EmptySpace(0, 0)).Fn).
+		Flexed(1,
 			wg.VFlex().AlignStart().
 				Rigid(
 					sp.AddressbookHeader(),
@@ -392,7 +396,7 @@ func (sp *SendPage) AddressbookHeader() l.Widget {
 		Rigid(
 			wg.Inset(
 				0.25,
-				wg.H5("Address Book").Alignment(text.Middle).Fn,
+				wg.H5("Send Address Book").Fn,
 			).Fn,
 		).Fn
 }
@@ -457,27 +461,22 @@ func (sp *SendPage) GetAddressbookHistoryCards(bg string) (widgets []l.Widget) {
 											for j := range wg.txHistoryList {
 												if wg.txHistoryList[j].TxID == wg.State.sendAddresses[i].TxID {
 													return wg.Flex().Flexed(
-														1, wg.Fill(
-															"DocBgDim", l.W, wg.TextSize.V, 0,
-															wg.Inset(
-																0.25,
-																wg.VFlex().
-																	Rigid(
-																		wg.Flex().Flexed(
-																			1,
-																			wg.Caption(wg.State.sendAddresses[i].TxID).MaxLines(1).Fn,
-																		).Fn,
-																	).
-																	Rigid(
-																		wg.Body1(
-																			fmt.Sprint(
-																				"Confirmations: ",
-																				wg.txHistoryList[j].Confirmations,
-																			),
-																		).Fn,
-																	).Fn,
+														1,
+														wg.VFlex().
+															Rigid(
+																wg.Flex().Flexed(
+																	1,
+																	wg.Caption(wg.State.sendAddresses[i].TxID).MaxLines(1).Fn,
+																).Fn,
+															).
+															Rigid(
+																wg.Body1(
+																	fmt.Sprint(
+																		"Confirmations: ",
+																		wg.txHistoryList[j].Confirmations,
+																	),
+																).Fn,
 															).Fn,
-														).Fn,
 													).Fn(gtx)
 												}
 											}

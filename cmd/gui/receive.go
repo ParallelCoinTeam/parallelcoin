@@ -249,7 +249,7 @@ func (rp *ReceivePage) AddressbookHeader() l.Widget {
 		Rigid(
 			wg.Inset(
 				0.25,
-				wg.H6("Receive Address History").Alignment(text.Middle).Fn,
+				wg.H5("Receive Address History").Alignment(text.Middle).Fn,
 			).Fn,
 		).Fn
 }
