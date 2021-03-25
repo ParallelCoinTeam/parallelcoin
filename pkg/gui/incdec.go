@@ -29,13 +29,13 @@ func (w *Window) IncDec() (out *IncDec) {
 		// max:        max,
 		// current:    current,
 		// changeHook: changeHook,
-		inc: w.Clickable(),
-		dec: w.Clickable(),
+		inc:        w.Clickable(),
+		dec:        w.Clickable(),
 		color:      "DocText",
 		background: "Transparent",
-		inactive:   "gray",
-		amount: 1,
-		scale:  1,
+		inactive:   "Transparent",
+		amount:     1,
+		scale:      1,
 	}
 	return
 }
@@ -96,54 +96,52 @@ func (in *IncDec) Inactive(color string) *IncDec {
 func (in *IncDec) Fn(gtx l.Context) l.Dimensions {
 	out := in.Theme.Flex().AlignMiddle()
 	incColor, decColor := in.color, in.color
-	if in.current == in.min {
-		decColor = in.inactive
-	}
-	if in.current == in.max {
-		incColor = in.inactive
-	}
-	out.Rigid(
-		in.Inset(
-			0.25,
-			in.ButtonLayout(
-				in.inc.SetClick(
-					func() {
-						ic := in.current
-						ic -= in.amount
-						if ic < in.min {
-							ic = in.min
-						}
-						in.current = ic
-						in.changeHook(ic)
-					},
-				),
-			).Background(in.background).Embed(
-				in.Icon().Color(decColor).Scale(in.scale).Src(&icons.ContentRemove).Fn,
+	if in.current != in.min {
+		out.Rigid(
+			in.Inset(
+				0.25,
+				in.ButtonLayout(
+					in.inc.SetClick(
+						func() {
+							ic := in.current
+							ic -= in.amount
+							if ic < in.min {
+								ic = in.min
+							}
+							in.current = ic
+							in.changeHook(ic)
+						},
+					),
+				).Background(in.background).Embed(
+					in.Icon().Color(decColor).Scale(in.scale).Src(&icons.ContentRemove).Fn,
+				).Fn,
 			).Fn,
-		).Fn,
-	)
+		)
+	}
 	cur := fmt.Sprintf("%"+fmt.Sprint(in.nDigits)+"d", in.current)
 	out.Rigid(in.Caption(cur).Color(in.color).TextScale(in.scale).Font("go regular").Fn)
-	out.Rigid(
-		in.Inset(
-			0.25,
-			in.ButtonLayout(
-				in.dec.SetClick(
-					func() {
-						ic := in.current
-						ic += in.amount
-						if in.current > in.max {
-							in.current = in.max
-						} else {
-							in.current = ic
-							in.changeHook(in.current)
-						}
-					},
-				),
-			).Background(in.background).Embed(
-				in.Icon().Color(incColor).Scale(in.scale).Src(&icons.ContentAdd).Fn,
+	if in.current != in.max {
+		out.Rigid(
+			in.Inset(
+				0.25,
+				in.ButtonLayout(
+					in.dec.SetClick(
+						func() {
+							ic := in.current
+							ic += in.amount
+							if in.current > in.max {
+								in.current = in.max
+							} else {
+								in.current = ic
+								in.changeHook(in.current)
+							}
+						},
+					),
+				).Background(in.background).Embed(
+					in.Icon().Color(incColor).Scale(in.scale).Src(&icons.ContentAdd).Fn,
+				).Fn,
 			).Fn,
-		).Fn,
-	)
+		)
+	}
 	return out.Fn(gtx)
 }
