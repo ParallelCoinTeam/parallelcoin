@@ -102,66 +102,48 @@ func (in *IncDec) Fn(gtx l.Context) l.Dimensions {
 	if in.current == in.max {
 		incColor = in.inactive
 	}
-	if in.current == in.min {
-		out.Rigid(
-			in.Inset(
-				0.25,
-				in.Icon().Color("scrim").Scale(in.scale).Src(&icons.ContentRemove).Fn,
+	out.Rigid(
+		in.Inset(
+			0.25,
+			in.ButtonLayout(
+				in.inc.SetClick(
+					func() {
+						ic := in.current
+						ic -= in.amount
+						if ic < in.min {
+							ic = in.min
+						}
+						in.current = ic
+						in.changeHook(ic)
+					},
+				),
+			).Background(in.background).Embed(
+				in.Icon().Color(decColor).Scale(in.scale).Src(&icons.ContentRemove).Fn,
 			).Fn,
-		)
-	} else {
-		out.Rigid(
-			in.Inset(
-				0.25,
-				in.ButtonLayout(
-					in.inc.SetClick(
-						func() {
-							ic := in.current
-							ic -= in.amount
-							if ic < in.min {
-								ic = in.min
-							}
-							in.current = ic
-							in.changeHook(ic)
-						},
-					),
-				).Background(in.background).Embed(
-					in.Icon().Color(decColor).Scale(in.scale).Src(&icons.ContentRemove).Fn,
-				).Fn,
-			).Fn,
-		)
-	}
+		).Fn,
+	)
 	cur := fmt.Sprintf("%"+fmt.Sprint(in.nDigits)+"d", in.current)
 	out.Rigid(in.Caption(cur).Color(in.color).TextScale(in.scale).Font("go regular").Fn)
-	if in.current == in.max {
-		out.Rigid(
-			in.Inset(
-				0.25,
-				in.Icon().Color("scrim").Scale(in.scale).Src(&icons.ContentAdd).Fn,
+	out.Rigid(
+		in.Inset(
+			0.25,
+			in.ButtonLayout(
+				in.dec.SetClick(
+					func() {
+						ic := in.current
+						ic += in.amount
+						if in.current > in.max {
+							in.current = in.max
+						} else {
+							in.current = ic
+							in.changeHook(in.current)
+						}
+					},
+				),
+			).Background(in.background).Embed(
+				in.Icon().Color(incColor).Scale(in.scale).Src(&icons.ContentAdd).Fn,
 			).Fn,
-		)
-	} else {
-		out.Rigid(
-			in.Inset(
-				0.25,
-				in.ButtonLayout(
-					in.dec.SetClick(
-						func() {
-							ic:=in.current
-							ic+= in.amount
-							if in.current > in.max {
-								in.current = in.max
-							} else {
-								in.current = ic
-								in.changeHook(in.current)
-							}
-						},
-					),
-				).Background(in.background).Embed(
-					in.Icon().Color(incColor).Scale(in.scale).Src(&icons.ContentAdd).Fn,
-				).Fn,
-			).Fn,
-		)
-	}
+		).Fn,
+	)
 	return out.Fn(gtx)
 }
