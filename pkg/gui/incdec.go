@@ -31,9 +31,9 @@ func (w *Window) IncDec() (out *IncDec) {
 		// changeHook: changeHook,
 		inc: w.Clickable(),
 		dec: w.Clickable(),
-		// color:      color,
-		// background: background,
-		// inactive:   inactive,
+		color:      "DocText",
+		background: "Transparent",
+		inactive:   "gray",
 		amount: 1,
 		scale:  1,
 	}

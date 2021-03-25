@@ -5,7 +5,6 @@ import (
 	"github.com/urfave/cli"
 	"io/ioutil"
 	"math/rand"
-	"sync"
 	"time"
 )
 
@@ -13,7 +12,7 @@ const AppName = "pod"
 
 // Config is
 type Config struct {
-	sync.Mutex
+	// sync.Mutex
 	AddCheckpoints    *cli.StringSlice `group:"debug" label:"AddCheckpoints" description:"add custom checkpoints" type:"" widget:"multi" json:"AddCheckpoints,omitempty" hook:"restart"`
 	AddPeers          *cli.StringSlice `group:"node" label:"Add Peers" description:"manually adds addresses to try to connect to" type:"address" widget:"multi" json:"AddPeers,omitempty" hook:"addpeer"`
 	AddrIndex         *bool            `group:"node" label:"Addr Index" description:"maintain a full address-based transaction index which makes the searchrawtransactions RPC available" type:"" widget:"toggle"  json:"AddrIndex,omitempty" hook:"dropaddrindex"`
