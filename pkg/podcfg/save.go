@@ -45,8 +45,6 @@ var emptyhash = hex.EncodeToString(eh[:])
 //
 // todo: maybe to not do this if gui is not the app?
 func Save(c *Config) (success bool) {
-	c.Lock()
-	defer c.Unlock()
 	lockPath := filepath.Join(*c.DataDir, "pod.json.lock")
 	// wait if there is a lock on the file
 	for apputil.FileExists(lockPath) {

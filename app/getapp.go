@@ -11,7 +11,7 @@ import (
 	
 	"github.com/urfave/cli"
 	
-	"github.com/p9c/pod/cmd/kopach/kopach_worker"
+	"github.com/p9c/pod/cmd/kopach_worker"
 	"github.com/p9c/pod/cmd/node"
 	"github.com/p9c/pod/cmd/node/mempool"
 	"github.com/p9c/pod/cmd/walletmain"

@@ -25,14 +25,12 @@ func (wg *WalletGUI) GetAppWidget() (a *gui.App) {
 		func() {
 			D.Ln("theme hook")
 			// D.Ln(wg.bools)
-			// wg.Colors.Lock()
 			*wg.cx.Config.DarkTheme = *wg.Dark
-			// a := wg.configs["config"]["DarkTheme"].Slot.(*bool)
-			// *a = *wg.Dark
-			// if wgb, ok := wg.config.Bools["DarkTheme"]; ok {
-			// 	wgb.Value(*wg.Dark)
-			// }
-			// wg.Colors.Unlock()
+			a := wg.configs["config"]["DarkTheme"].Slot.(*bool)
+			*a = *wg.Dark
+			if wgb, ok := wg.config.Bools["DarkTheme"]; ok {
+				wgb.Value(*wg.Dark)
+			}
 			podcfg.Save(wg.cx.Config)
 			wg.RecentTransactions(10, "recent")
 			wg.RecentTransactions(-1, "history")
@@ -311,15 +309,12 @@ func (wg *WalletGUI) SideBarButton(title, page string, index int) func(gtx l.Con
 		var color string
 		background := "Transparent"
 		color = "DocText"
-		var font string
-		font = "plan9"
 		var ins float32 = 0.5
 		// var hl = false
 		if wg.MainApp.ActivePageGet() == page || wg.MainApp.PreRendering {
 			background = "PanelBg"
 			scale = gui.Scales["H6"]
 			color = "DocText"
-			font = "plan9"
 			// ins = 0.5
 			// hl = true
 		}
@@ -340,11 +335,9 @@ func (wg *WalletGUI) SideBarButton(title, page string, index int) func(gtx l.Con
 					wg.Inset(
 						ins,
 						func(gtx l.Context) l.Dimensions {
-							return wg.Label().
-								Font(font).
-								Text(title).
-								TextScale(scale).
-								Color(color).Alignment(text.End).
+							return wg.H5(title).
+								Color(color).
+								Alignment(text.End).
 								Fn(gtx)
 						},
 					).Fn,
@@ -489,6 +482,21 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 			discoverColor =
 				"scrim"
 		}
+		clr := "scrim"
+		if *wg.cx.Config.Controller {
+			clr = "DocText"
+		}
+		clr2 := "DocText"
+		if *wg.cx.Config.GenThreads == 0 {
+			clr2 = "scrim"
+		}
+		// background := wg.App.StatusBarBackgroundGet()
+		color := wg.MainApp.StatusBarColorGet()
+		ic := wg.Icon().
+			Scale(gui.Scales["H5"]).
+			Color(color).
+			Src(&icons.NavigationRefresh).
+			Fn
 		return wg.Flex().AlignMiddle().
 			Rigid(
 				wg.ButtonLayout(wg.statusBarButtons[0]).
@@ -576,20 +584,14 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 				wg.ButtonLayout(wg.statusBarButtons[7]).
 					CornerRadius(0).
 					Embed(
-						func(gtx l.Context) l.Dimensions {
-							clr := "scrim"
-							if *wg.cx.Config.Controller {
-								clr = "DocText"
-							}
-							return wg.
-								Inset(
-									0.25, wg.
-										Icon().
-										Scale(gui.Scales["H5"]).
-										Color(clr).
-										Src(controllerIcon).Fn,
-								).Fn(gtx)
-						},
+						wg.
+							Inset(
+								0.25, wg.
+									Icon().
+									Scale(gui.Scales["H5"]).
+									Color(clr).
+									Src(controllerIcon).Fn,
+							).Fn,
 					).
 					Background(wg.MainApp.StatusBarBackgroundGet()).
 					SetClick(
@@ -623,20 +625,13 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 				wg.ButtonLayout(wg.statusBarButtons[1]).
 					CornerRadius(0).
 					Embed(
-						func(gtx l.Context) l.Dimensions {
-							clr := "DocText"
-							if *wg.cx.Config.GenThreads == 0 {
-								clr = "scrim"
-							}
-							return wg.
-								Inset(
-									0.25, wg.
-										Icon().
-										Scale(gui.Scales["H5"]).
-										Color(clr).
-										Src(miningIcon).Fn,
-								).Fn(gtx)
-						},
+						wg.Inset(
+							0.25, wg.
+								Icon().
+								Scale(gui.Scales["H5"]).
+								Color(clr2).
+								Src(miningIcon).Fn,
+						).Fn,
 					).
 					Background(wg.MainApp.StatusBarBackgroundGet()).
 					SetClick(
@@ -659,23 +654,19 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 					Fn,
 			).
 			Rigid(
-				wg.incdecs["generatethreads"].
-					Color("DocText").
-					Background(wg.MainApp.StatusBarBackgroundGet()).
-					Fn,
-			).
+				func(gtx l.Context) l.Dimensions {
+					return wg.incdecs["generatethreads"].
+						// Color("DocText").
+						// Background(wg.MainApp.StatusBarBackgroundGet()).
+						Fn(gtx)
+				},
+		).
 			Rigid(
 				func(gtx l.Context) l.Dimensions {
 					if !wg.wallet.Running() {
 						return l.Dimensions{}
 					}
-					// background := wg.App.StatusBarBackgroundGet()
-					color := wg.MainApp.StatusBarColorGet()
-					ic := wg.Icon().
-						Scale(gui.Scales["H5"]).
-						Color(color).
-						Src(&icons.NavigationRefresh).
-						Fn
+					
 					return wg.Flex().
 						Rigid(
 							wg.ButtonLayout(wg.statusBarButtons[2]).

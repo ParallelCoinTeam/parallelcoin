@@ -29,13 +29,13 @@ func (w *Window) IncDec() (out *IncDec) {
 		// max:        max,
 		// current:    current,
 		// changeHook: changeHook,
-		inc: w.Clickable(),
-		dec: w.Clickable(),
-		// color:      color,
-		// background: background,
-		// inactive:   inactive,
-		amount: 1,
-		scale:  1,
+		inc:        w.Clickable(),
+		dec:        w.Clickable(),
+		color:      "DocText",
+		background: "Transparent",
+		inactive:   "Transparent",
+		amount:     1,
+		scale:      1,
 	}
 	return
 }
@@ -96,20 +96,7 @@ func (in *IncDec) Inactive(color string) *IncDec {
 func (in *IncDec) Fn(gtx l.Context) l.Dimensions {
 	out := in.Theme.Flex().AlignMiddle()
 	incColor, decColor := in.color, in.color
-	if in.current == in.min {
-		decColor = in.inactive
-	}
-	if in.current == in.max {
-		incColor = in.inactive
-	}
-	if in.current == in.min {
-		out.Rigid(
-			in.Inset(
-				0.25,
-				in.Icon().Color("scrim").Scale(in.scale).Src(&icons.ContentRemove).Fn,
-			).Fn,
-		)
-	} else {
+	if in.current != in.min {
 		out.Rigid(
 			in.Inset(
 				0.25,
@@ -133,22 +120,15 @@ func (in *IncDec) Fn(gtx l.Context) l.Dimensions {
 	}
 	cur := fmt.Sprintf("%"+fmt.Sprint(in.nDigits)+"d", in.current)
 	out.Rigid(in.Caption(cur).Color(in.color).TextScale(in.scale).Font("go regular").Fn)
-	if in.current == in.max {
-		out.Rigid(
-			in.Inset(
-				0.25,
-				in.Icon().Color("scrim").Scale(in.scale).Src(&icons.ContentAdd).Fn,
-			).Fn,
-		)
-	} else {
+	if in.current != in.max {
 		out.Rigid(
 			in.Inset(
 				0.25,
 				in.ButtonLayout(
 					in.dec.SetClick(
 						func() {
-							ic:=in.current
-							ic+= in.amount
+							ic := in.current
+							ic += in.amount
 							if in.current > in.max {
 								in.current = in.max
 							} else {

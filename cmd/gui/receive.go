@@ -24,7 +24,7 @@ type ReceivePage struct {
 func (wg *WalletGUI) GetReceivePage() (rp *ReceivePage) {
 	rp = &ReceivePage{
 		wg:         wg,
-		inputWidth: 24,
+		inputWidth: 17,
 		break1:     48,
 	}
 	rp.sm = rp.SmallList
@@ -249,7 +249,7 @@ func (rp *ReceivePage) AddressbookHeader() l.Widget {
 		Rigid(
 			wg.Inset(
 				0.25,
-				wg.H6("Receive Address History").Alignment(text.Middle).Fn,
+				wg.H5("Receive Address History").Alignment(text.Middle).Fn,
 			).Fn,
 		).Fn
 }

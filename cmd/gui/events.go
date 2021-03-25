@@ -2,13 +2,12 @@ package gui
 
 import (
 	"encoding/json"
-	"github.com/p9c/pod/cmd/kopach/control/p2padvt"
 	"github.com/p9c/pod/pkg/amt"
+	"github.com/p9c/pod/pkg/control/p2padvt"
 	"github.com/p9c/pod/pkg/podcfg"
 	"github.com/p9c/pod/pkg/transport"
 	"github.com/p9c/pod/pkg/wire"
 	"io/ioutil"
-	"path/filepath"
 	"time"
 	
 	"github.com/p9c/pod/pkg/btcjson"
@@ -202,21 +201,15 @@ func (wg *WalletGUI) updateChainBlock() {
 }
 
 func (wg *WalletGUI) processChainBlockNotification(hash *chainhash.Hash, height int32, t time.Time) {
-	if wg.cx.Syncing.Load() {
-		return
-	}
 	D.Ln("processChainBlockNotification")
 	wg.State.SetBestBlockHeight(height)
 	wg.State.SetBestBlockHash(hash)
-	if wg.WalletAndClientRunning() {
-		wg.processWalletBlockNotification()
-	}
+	// if wg.WalletAndClientRunning() {
+	// 	wg.processWalletBlockNotification()
+	// }
 }
 
 func (wg *WalletGUI) processWalletBlockNotification() bool {
-	if wg.cx.Syncing.Load() {
-		return false
-	}
 	D.Ln("processWalletBlockNotification")
 	if !wg.WalletAndClientRunning() {
 		D.Ln("wallet and client not running")
@@ -308,15 +301,15 @@ func (wg *WalletGUI) ChainNotifications() *rpcclient.NotificationHandlers {
 			wg.lastUpdated.Store(time.Now().Unix())
 			hash := header.BlockHash()
 			D.Ln(
-				"(((NOTIFICATION))) wallet OnFilteredBlockConnected hash", hash, "POW hash:",
+				"(((NOTIFICATION))) OnFilteredBlockConnected hash", hash, "POW hash:",
 				header.BlockHashWithAlgos(height), "height", height,
 			)
 			// D.S(txs)
 			if wg.processWalletBlockNotification() {
 			}
-			filename := filepath.Join(*wg.cx.Config.DataDir, "state.json")
-			if e := wg.State.Save(filename, wg.cx.Config.WalletPass); E.Chk(e) {
-			}
+			// filename := filepath.Join(*wg.cx.Config.DataDir, "state.json")
+			// if e := wg.State.Save(filename, wg.cx.Config.WalletPass); E.Chk(e) {
+			// }
 			// if wg.WalletAndClientRunning() {
 			// 	var e error
 			// 	if _, e = wg.WalletClient.RescanBlocks([]chainhash.Hash{hash}); E.Chk(e) {
@@ -414,7 +407,8 @@ func (wg *WalletGUI) ChainNotifications() *rpcclient.NotificationHandlers {
 		// 	wg.invalidate <- struct{}{}
 		// },
 		OnTxAccepted: func(hash *chainhash.Hash, amount amt.Amount) {
-			// if wg.cx.Syncing.Load() {
+			// if wg.syncing.Load() {
+			// 	D.Ln("OnTxAccepted but we are syncing")
 			// 	return
 			// }
 			D.Ln("(((NOTIFICATION))) OnTxAccepted")
@@ -724,11 +718,11 @@ func (wg *WalletGUI) walletClient() (e error) {
 	} else {
 		// return
 	}
-	if e = wg.WalletClient.NotifyBlocks(); E.Chk(e) {
-		// return
-	} else {
-		D.Ln("subscribed to wallet client notify blocks")
-	}
+	// if e = wg.WalletClient.NotifyBlocks(); E.Chk(e) {
+	// 	// return
+	// } else {
+	// 	D.Ln("subscribed to wallet client notify blocks")
+	// }
 	D.Ln("wallet connected")
 	return
 }

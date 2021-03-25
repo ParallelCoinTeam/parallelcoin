@@ -271,7 +271,7 @@ func (gm GroupsMap) Widget(ng *Config) l.Widget {
 		out = append(
 			out,
 			ng.Fill(
-				"PanelBg", l.Center, ng.TextSize.V*2, 0, ng.Flex().Flexed(
+				"Primary", l.Center, ng.TextSize.V*2, 0, ng.Flex().Flexed(
 					1,
 					ng.Inset(
 						0.75,

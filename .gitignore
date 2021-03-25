@@ -12,7 +12,6 @@ src/.flatpak-builder
 src/build-dir
 src/parallelcoind
 src/openssl-1.0.1u/**
-pod
 test*
 vendor/**
 node_modules/**
@@ -45,15 +44,10 @@ node_modules/
 yarn.lock
 npm.lock
 
-pod_mon*
-go_build*
-pod.exe
-
 pkg/transport/cmd/listenservemulticast/example.exe
 
 app/launcher/launcher.exe
 
-pod.exe*
 *.trace
 
 legacy/src/boost_1_58_0.tar.gz
@@ -64,5 +58,3 @@ legacy/src/OpenSSL_1_0_1u.tar.gz
 legacy/src/boost_1_58_0.tar.gz
 
 docker/legacy/data/
-
-version/version.go

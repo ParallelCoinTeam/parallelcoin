@@ -451,9 +451,9 @@ func (wg *WalletGUI) cwfConfirmation() (out l.Widget) {
 				D.Ln("confirmed read", b)
 				// if the password has been entered, we need to copy it to the variable
 				if wg.createWalletPasswordsMatch() {
-					wg.cx.Config.Lock()
+					// wg.cx.Config.Lock()
 					*wg.cx.Config.WalletPass = wg.passwords["confirmPassEditor"].GetPassword()
-					wg.cx.Config.Unlock()
+					// wg.cx.Config.Unlock()
 				}
 			},
 		),

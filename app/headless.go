@@ -4,6 +4,7 @@ package app
 
 import (
 	"github.com/p9c/pod/pkg/pod"
+	"github.com/p9c/pod/pkg/logg"
 	"os"
 	
 	"github.com/urfave/cli"

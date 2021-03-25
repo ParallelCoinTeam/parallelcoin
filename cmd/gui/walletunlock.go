@@ -23,10 +23,10 @@ import (
 func (wg *WalletGUI) unlockWallet(pass string) {
 	D.Ln("entered password", pass)
 	// unlock wallet
-	wg.cx.Config.Lock()
+	// wg.cx.Config.Lock()
 	*wg.cx.Config.WalletPass = pass
 	*wg.cx.Config.WalletOff = false
-	wg.cx.Config.Unlock()
+	// wg.cx.Config.Unlock()
 	// load config into a fresh variable
 	cfg, _ := podcfg.EmptyConfig()
 	var cfgFile []byte

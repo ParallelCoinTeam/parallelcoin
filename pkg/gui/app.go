@@ -81,7 +81,7 @@ func (w *Window) App(size *int, activePage *uberatomic.String, invalidate chan s
 		sideBarList:         w.List(),
 		Logo:                &p9icons.ParallelCoin,
 		LogoClickable:       w.Clickable(),
-		title:               "parallelcoin",
+		title:               "Parallelcoin Wallet",
 		titleBarBackground:  "Primary",
 		titleBarColor:       "DocBg",
 		titleFont:           "plan9",
