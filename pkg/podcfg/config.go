@@ -1,3 +1,7 @@
+// Package podcfg is a configuration system to fit with the all-in-one
+// philosophy guiding the design of the parallelcoin pod.
+//
+// The configuration is stored by each component of the connected applications
 package podcfg
 
 import (
@@ -27,103 +31,110 @@ const (
 )
 
 type Config struct {
-	AddCheckpoints         *Strings `json:"add-checkpoints,omitempty"`
-	AddPeers               *Strings `json:"add-peers,omitempty"`
-	AddrIndex              *Bool `json:"addr-index,omitempty"`
-	AutoListen             *Bool `json:"auto-listen,omitempty"`
-	AutoPorts              *Bool `json:"auto-ports,omitempty"`
-	BanDuration            *Duration `json:"ban-duration,omitempty"`
-	BanThreshold           *Int `json:"ban-threshold,omitempty"`
-	BlockMaxSize           *Int `json:"block-max-size,omitempty"`
-	BlockMaxWeight         *Int `json:"block-max-weight,omitempty"`
-	BlockMinSize           *Int `json:"block-min-size,omitempty"`
-	BlockMinWeight         *Int `json:"block-min-weight,omitempty"`
-	BlockPrioritySize      *Int `json:"block-priority-size,omitempty"`
-	BlocksOnly             *Bool `json:"blocks-only,omitempty"`
-	CAFile                 *String `json:"cafile,omitempty"`
-	ConfigFile             *String `json:"config-file,omitempty"`
-	ConnectPeers           *Strings `json:"connect-peers,omitempty"`
-	Controller             *Bool `json:"controller,omitempty"`
-	CPUProfile             *String `json:"cpuprofile,omitempty"`
-	DarkTheme              *Bool `json:"dark-theme,omitempty"`
-	DataDir                *String `json:"data-dir,omitempty"`
-	DbType                 *String `json:"db-type,omitempty"`
-	DisableBanning         *Bool `json:"disable-banning,omitempty"`
-	DisableCheckpoints     *Bool `json:"disable-checkpoints,omitempty"`
-	DisableDNSSeed         *Bool `json:"disable-dnsseed,omitempty"`
-	DisableListen          *Bool `json:"disable-listen,omitempty"`
-	DisableRPC             *Bool `json:"disable-rpc,omitempty"`
-	Discovery              *Bool `json:"discovery,omitempty"`
-	ExternalIPs            *Strings `json:"external-ips,omitempty"`
-	FreeTxRelayLimit       *Float `json:"free-tx-relay-limit,omitempty"`
-	Generate               *Bool `json:"generate,omitempty"`
-	GenThreads             *Int `json:"gen-threads,omitempty"`
-	Hilite                 *Strings `json:"hilite,omitempty"`
-	LAN                    *Bool `json:"lan,omitempty"`
-	Language               *String `json:"language,omitempty"`
-	LimitPass              *String `json:"limit-pass,omitempty"`
-	LimitUser              *String `json:"limit-user,omitempty"`
-	LogDir                 *String `json:"log-dir,omitempty"`
-	LogFilter              *Strings `json:"log-filter,omitempty"`
-	LogLevel               *String `json:"log-level,omitempty"`
-	MaxOrphanTxs           *Int `json:"max-orphan-txs,omitempty"`
-	MaxPeers               *Int `json:"max-peers,omitempty"`
-	MulticastPass          *String `json:"multicast-pass,omitempty"`
-	MiningAddrs            *Strings `json:"mining-addrs,omitempty"`
-	MinRelayTxFee          *Float `json:"min-relay-tx-fee,omitempty"`
-	Network                *String `json:"network,omitempty"`
-	NoCFilters             *Bool `json:"no-cfilters,omitempty"`
-	NodeOff                *Bool `json:"node-off,omitempty"`
-	NoInitialLoad          *Bool `json:"no-initial-load,omitempty"`
-	NoPeerBloomFilters     *Bool `json:"no-peer-bloom-filters,omitempty"`
-	NoRelayPriority        *Bool `json:"no-relay-priority,omitempty"`
-	OneTimeTLSKey          *Bool `json:"one-time-tlskey,omitempty"`
-	Onion                  *Bool `json:"onion,omitempty"`
-	OnionProxy             *String `json:"onion-proxy,omitempty"`
-	OnionProxyPass         *String `json:"onion-proxy-pass,omitempty"`
-	OnionProxyUser         *String `json:"onion-proxy-user,omitempty"`
-	P2PConnect             *Strings `json:"p-2-pconnect,omitempty"`
-	P2PListeners           *Strings `json:"p-2-plisteners,omitempty"`
-	Password               *String `json:"password,omitempty"`
-	PipeLog                *Bool `json:"pipe-log,omitempty"`
-	Profile                *String `json:"profile,omitempty"`
-	Proxy                  *String `json:"proxy,omitempty"`
-	ProxyPass              *String `json:"proxy-pass,omitempty"`
-	ProxyUser              *String `json:"proxy-user,omitempty"`
-	RejectNonStd           *Bool `json:"reject-non-std,omitempty"`
-	RelayNonStd            *Bool `json:"relay-non-std,omitempty"`
-	RPCCert                *String `json:"rpccert,omitempty"`
-	RPCConnect             *String `json:"rpcconnect,omitempty"`
-	RPCKey                 *String `json:"rpckey,omitempty"`
-	RPCListeners           *Strings `json:"rpclisteners,omitempty"`
-	RPCMaxClients          *Int `json:"rpcmax-clients,omitempty"`
-	RPCMaxConcurrentReqs   *Int `json:"rpcmax-concurrent-reqs,omitempty"`
-	RPCMaxWebsockets       *Int `json:"rpcmax-websockets,omitempty"`
-	RPCQuirks              *Bool `json:"rpcquirks,omitempty"`
-	RunAsService           *Bool `json:"run-as-service,omitempty"`
-	ServerPass             *String `json:"server-pass,omitempty"`
-	ServerTLS              *Bool `json:"server-tls,omitempty"`
-	ServerUser             *String `json:"server-user,omitempty"`
-	SigCacheMaxSize        *Int `json:"sig-cache-max-size,omitempty"`
-	Solo                   *Bool `json:"solo,omitempty"`
-	TLS                    *Bool `json:"tls,omitempty"`
-	TLSSkipVerify          *Bool `json:"tlsskip-verify,omitempty"`
-	TorIsolation           *Bool `json:"tor-isolation,omitempty"`
-	TrickleInterval        *Duration `json:"trickle-interval,omitempty"`
-	TxIndex                *Bool `json:"tx-index,omitempty"`
-	UPNP                   *Bool `json:"upnp,omitempty"`
-	UserAgentComments      *Strings `json:"user-agent-comments,omitempty"`
-	Username               *String `json:"username,omitempty"`
-	UUID                   *Int `json:"uuid,omitempty"`
-	Wallet                 *Bool `json:"wallet,omitempty"`
-	WalletFile             *String `json:"wallet-file,omitempty"`
-	WalletOff              *Bool `json:"wallet-off,omitempty"`
-	WalletPass             *String `json:"wallet-pass,omitempty"`
-	WalletRPCListeners     *Strings `json:"wallet-rpclisteners,omitempty"`
-	WalletRPCMaxClients    *Int `json:"wallet-rpcmax-clients,omitempty"`
-	WalletRPCMaxWebsockets *Int `json:"wallet-rpcmax-websockets,omitempty"`
-	WalletServer           *String `json:"wallet-server,omitempty"`
-	Whitelists             *Strings `json:"whitelists,omitempty"`
+	// ShowAll is a flag to make the json encoder explicitly define all fields and not just the ones different to the
+	// defaults
+	ShowAll bool
+	// Map is the same data but addressible using its name as found inside the various configuration types, the key is
+	// the same as the .Name field field in the various data types
+	Map map[string]interface{}
+	
+	AddCheckpoints         *Strings
+	AddPeers               *Strings
+	AddrIndex              *Bool
+	AutoListen             *Bool
+	AutoPorts              *Bool
+	BanDuration            *Duration
+	BanThreshold           *Int
+	BlockMaxSize           *Int
+	BlockMaxWeight         *Int
+	BlockMinSize           *Int
+	BlockMinWeight         *Int
+	BlockPrioritySize      *Int
+	BlocksOnly             *Bool
+	CAFile                 *String
+	ConfigFile             *String
+	ConnectPeers           *Strings
+	Controller             *Bool
+	CPUProfile             *String
+	DarkTheme              *Bool
+	DataDir                *String
+	DbType                 *String
+	DisableBanning         *Bool
+	DisableCheckpoints     *Bool
+	DisableDNSSeed         *Bool
+	DisableListen          *Bool
+	DisableRPC             *Bool
+	Discovery              *Bool
+	ExternalIPs            *Strings
+	FreeTxRelayLimit       *Float
+	Generate               *Bool
+	GenThreads             *Int
+	Hilite                 *Strings
+	LAN                    *Bool
+	Language               *String
+	LimitPass              *String
+	LimitUser              *String
+	LogDir                 *String
+	LogFilter              *Strings
+	LogLevel               *String
+	MaxOrphanTxs           *Int
+	MaxPeers               *Int
+	MulticastPass          *String
+	MiningAddrs            *Strings
+	MinRelayTxFee          *Float
+	Network                *String
+	NoCFilters             *Bool
+	NodeOff                *Bool
+	NoInitialLoad          *Bool
+	NoPeerBloomFilters     *Bool
+	NoRelayPriority        *Bool
+	OneTimeTLSKey          *Bool
+	Onion                  *Bool
+	OnionProxy             *String
+	OnionProxyPass         *String
+	OnionProxyUser         *String
+	P2PConnect             *Strings
+	P2PListeners           *Strings
+	Password               *String
+	PipeLog                *Bool
+	Profile                *String
+	Proxy                  *String
+	ProxyPass              *String
+	ProxyUser              *String
+	RejectNonStd           *Bool
+	RelayNonStd            *Bool
+	RPCCert                *String
+	RPCConnect             *String
+	RPCKey                 *String
+	RPCListeners           *Strings
+	RPCMaxClients          *Int
+	RPCMaxConcurrentReqs   *Int
+	RPCMaxWebsockets       *Int
+	RPCQuirks              *Bool
+	RunAsService           *Bool
+	ServerPass             *String
+	ServerTLS              *Bool
+	ServerUser             *String
+	SigCacheMaxSize        *Int
+	Solo                   *Bool
+	TLS                    *Bool
+	TLSSkipVerify          *Bool
+	TorIsolation           *Bool
+	TrickleInterval        *Duration
+	TxIndex                *Bool
+	UPNP                   *Bool
+	UserAgentComments      *Strings
+	Username               *String
+	UUID                   *Int
+	Wallet                 *Bool
+	WalletFile             *String
+	WalletOff              *Bool
+	WalletPass             *String
+	WalletRPCListeners     *Strings
+	WalletRPCMaxClients    *Int
+	WalletRPCMaxWebsockets *Int
+	WalletServer           *String
+	Whitelists             *Strings
 }
 
 // ForEach iterates the configuration items in their defined order, running a
@@ -138,7 +149,138 @@ func (c *Config) ForEach(fn func(ifc interface{}) bool) {
 	}
 }
 
-func EmptyConfig() (c *Config, conf map[string]interface{}) {
+func (c *Config) MarshalJSON() (b []byte, e error) {
+	outMap := make(map[string]interface{})
+	c.ForEach(
+		func(ifc interface{}) bool {
+			switch ii := ifc.(type) {
+			case *Bool:
+				if ii.True() == ii.def && ii.metadata.OmitEmpty && !c.ShowAll {
+					return true
+				}
+				outMap[ii.Name] = ii.True()
+			case *Strings:
+				v := ii.S()
+				if len(v) == len(ii.def) && ii.metadata.OmitEmpty && !c.ShowAll {
+					foundMismatch := false
+					for i := range v {
+						if v[i] != ii.def[i] {
+							foundMismatch = true
+							break
+						}
+					}
+					if !foundMismatch {
+						return true
+					}
+				}
+				outMap[ii.Name] = v
+			case *Float:
+				if ii.value.Load() == ii.def && ii.metadata.OmitEmpty && !c.ShowAll {
+					return true
+				}
+				outMap[ii.Name] = ii.value.Load()
+			case *Int:
+				if ii.value.Load() == ii.def && ii.metadata.OmitEmpty && !c.ShowAll {
+					return true
+				}
+				outMap[ii.Name] = ii.value.Load()
+			case *String:
+				v := string(ii.value.Load().([]byte))
+				// fmt.Printf("def: '%s'", v)
+				// spew.Dump(ii.def)
+				if v == ii.def && ii.metadata.OmitEmpty && !c.ShowAll {
+					return true
+				}
+				outMap[ii.Name] = v
+			case *Duration:
+				if ii.value.Load() == ii.def && ii.metadata.OmitEmpty && !c.ShowAll {
+					return true
+				}
+				outMap[ii.Name] = fmt.Sprint(ii.value.Load())
+			default:
+			}
+			return true
+		},
+	)
+	return json.Marshal(&outMap)
+}
+
+func IfcToStrings(ifc []interface{}) (o []string) {
+	for i := range ifc {
+		o = append(o, ifc[i].(string))
+	}
+	return
+}
+
+// UnmarshalJSON implements the Unmarshaller interface with a specific goal to be well suited to compositing multiple
+// layers on top of the default base from multiple sources
+func (c *Config) UnmarshalJSON(data []byte) (e error) {
+	ifc := make(map[string]interface{})
+	if e = json.Unmarshal(data, &ifc); E.Chk(e) {
+		return
+	}
+	// I.S(ifc)
+	c.ForEach(func(iii interface{}) bool {
+		switch ii := iii.(type) {
+		case *Bool:
+			if i, ok := ifc[ii.Name]; ok {
+				if i.(bool) != ii.def {
+					// I.Ln(ii.Name+":", i.(bool), "default:", ii.def, "prev:", c.Map[ii.Name].(*Bool).True())
+					c.Map[ii.Name].(*Bool).Set(i.(bool))
+				}
+			}
+		case *Strings:
+			matched := true
+			if d, ok := ifc[ii.Name]; ok {
+				if ds, ok2 := d.([]interface{}); ok2 {
+					for i := range ds {
+						if ds[i] != ii.def[i] {
+							matched = false
+							break
+						}
+					}
+					if matched {
+						return true
+					}
+					// I.Ln(ii.Name+":", ds, "default:", ii.def, "prev:", c.Map[ii.Name].(*Strings).S())
+					c.Map[ii.Name].(*Strings).Set(IfcToStrings(ds))
+				}
+			}
+		case *Float:
+			if d, ok := ifc[ii.Name]; ok {
+				// I.Ln(ii.Name+":", d.(float64), "default:", ii.def, "prev:", c.Map[ii.Name].(*Float).V())
+				c.Map[ii.Name].(*Float).Set(d.(float64))
+			}
+		case *Int:
+			if d, ok := ifc[ii.Name]; ok {
+				// I.Ln(ii.Name+":", int64(d.(float64)), "default:", ii.def, "prev:", c.Map[ii.Name].(*Int).V())
+				c.Map[ii.Name].(*Int).Set(int(d.(float64)))
+			}
+		case *String:
+			if d, ok := ifc[ii.Name]; ok {
+				if ds, ok2 := d.(string); ok2 {
+					if ds != ii.def {
+						// I.Ln(ii.Name+":", d.(string), "default:", ii.def, "prev:", c.Map[ii.Name].(*String).V())
+						c.Map[ii.Name].(*String).Set(d.(string))
+					}
+				}
+			}
+		case *Duration:
+			if d, ok := ifc[ii.Name]; ok {
+				var parsed time.Duration
+				parsed, e = time.ParseDuration(d.(string))
+				// I.Ln(ii.Name+":", parsed, "default:", ii.def.String(), "prev:", c.Map[ii.Name].(*Duration).V())
+				c.Map[ii.Name].(*Duration).Set(parsed)
+			}
+		default:
+		}
+		return true
+	},
+	)
+	return
+}
+
+func EmptyConfig() (c *Config) {
 	network := "mainnet"
 	rand.Seed(time.Now().Unix())
 	var datadir = &atomic.Value{}
@@ -152,6 +294,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "add custom checkpoints",
 				Widget:      "multi",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			[]string{},
 		),
@@ -164,8 +307,9 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Type:        "ipaddress",
 				Widget:      "multi",
 				// Hook:        "addpeer",
+				OmitEmpty: true,
 			},
-			[]string{},
+			[]string{"127.0.0.1:12345", "127.0.0.1:12345", "127.0.0.1:12345", "127.0.0.1:12344"},
 		),
 		AddrIndex: NewBool(
 			metadata{
@@ -175,6 +319,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "maintain a full address-based transaction index which makes the searchrawtransactions RPC available",
 				Widget:      "toggle",
 				// Hook:        "dropaddrindex",
+				OmitEmpty: true,
 			},
 			true,
 		),
@@ -186,6 +331,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "RPC and controller ports are randomized, use with controller for automatic peer discovery",
 				Widget:      "toggle",
 				// Hook: "restart",
+				OmitEmpty: true,
 			},
 			false,
 		),
@@ -197,6 +343,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "automatically update inbound addresses dynamically according to discovered network interfaces",
 				Widget:      "toggle",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			true,
 		),
@@ -208,6 +355,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "how long a ban of a misbehaving peer lasts",
 				Widget:      "duration",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			time.Hour*24,
 		),
@@ -219,6 +367,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "ban score that triggers a ban (default 100)",
 				Widget:      "integer",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			DefaultBanThreshold,
 		),
@@ -230,6 +379,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "maximum block size in bytes to be used when creating a block",
 				Widget:      "integer",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			BlockMaxSizeMax,
 		),
@@ -241,6 +391,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "maximum block weight to be used when creating a block",
 				Widget:      "integer",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			BlockMaxWeightMax,
 		),
@@ -252,6 +403,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "minimum block size in bytes to be used when creating a block",
 				Widget:      "integer",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			BlockMaxSizeMin,
 		),
@@ -263,6 +415,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "minimum block weight to be used when creating a block",
 				Widget:      "integer",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			BlockMaxWeightMin,
 		),
@@ -274,6 +427,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "size in bytes for high-priority/low-fee transactions when creating a block",
 				Widget:      "integer",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			DefaultBlockPrioritySize,
 		),
@@ -285,6 +439,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "do not accept transactions from remote peers",
 				Widget:      "toggle",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			false,
 		),
@@ -297,6 +452,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Type:        "path",
 				Widget:      "string",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			filepath.Join(string(datadir.Load().([]byte)), "ca.cert"),
 		),
@@ -308,6 +464,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Type:        "path",
 				Widget:      "string",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			filepath.Join(string(datadir.Load().([]byte)), PodConfigFilename),
 		),
@@ -320,6 +477,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Type:        "address",
 				Widget:      "multi",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			[]string{},
 		),
@@ -331,6 +489,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "delivers mining jobs over multicast",
 				Widget:      "toggle",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			false,
 		),
@@ -343,6 +502,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Type:        "path",
 				Widget:      "string",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			"",
 		),
@@ -354,6 +514,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "sets dark theme for GUI",
 				Widget:      "toggle",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			false,
 		),
@@ -366,6 +527,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "root folder where application data is stored",
 				Type:        "directory",
 				Widget:      "string",
+				OmitEmpty:   true,
 			},
 			def: appdata.Dir(Name, false),
 		},
@@ -377,6 +539,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "type of database storage engine to use (only one right now, ffldb)",
 				Widget:      "string",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			DefaultDbType,
 		),
@@ -388,6 +551,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "disables banning of misbehaving peers",
 				Widget:      "toggle",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			false,
 		),
@@ -399,6 +563,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "disables all checkpoints",
 				Widget:      "toggle",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			false,
 		),
@@ -410,6 +575,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "disable seeding of addresses to peers",
 				Widget:      "toggle",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			false,
 		),
@@ -421,6 +587,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "disables inbound connections for the peer to peer network",
 				Widget:      "toggle",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			false,
 		),
@@ -432,6 +599,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "disable rpc servers, as well as kopach controller",
 				Widget:      "toggle",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			false,
 		),
@@ -443,6 +611,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "enable LAN peer discovery in GUI",
 				Widget:      "toggle",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			false,
 		),
@@ -455,6 +624,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Type:        "address",
 				Widget:      "multi",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			[]string{},
 		),
@@ -466,6 +636,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "limit relay of transactions with no transaction fee to the given amount in thousands of bytes per minute",
 				Widget:      "float",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			DefaultFreeTxRelayLimit,
 		),
@@ -478,6 +649,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "turn on Kopach CPU miner",
 				Widget:      "toggle",
 				// Hook:        "generate",
+				OmitEmpty: true,
 			},
 			false,
 		),
@@ -489,6 +661,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "number of threads to mine with",
 				Widget:      "integer",
 				// Hook:        "genthreads",
+				OmitEmpty: true,
 			},
 			-1,
 		),
@@ -501,17 +674,19 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Type:        "string",
 				Widget:      "multi",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			[]string{},
 		),
 		LAN: NewBool(
 			metadata{
-				Name:        "LAN",
+				Name:        "lan",
 				Group:       "debug",
 				Label:       "LAN Testnet Mode",
 				Description: "run without any connection to nodes on the internet (does not apply on mainnet)",
 				Widget:      "toggle",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			false,
 		),
@@ -523,6 +698,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "user interface language i18 localization",
 				Widget:      "string",
 				// Hook:        "language",
+				OmitEmpty: true,
 			},
 			"en",
 		),
@@ -534,6 +710,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "limited user password",
 				Widget:      "password",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			genPassword(),
 		),
@@ -545,6 +722,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "limited user name",
 				Widget:      "string",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			"limit",
 		),
@@ -557,6 +735,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Type:        "directory",
 				Widget:      "string",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			string(datadir.Load().([]byte)),
 		),
@@ -569,6 +748,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Type:        "string",
 				Widget:      "multi",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			[]string{},
 		),
@@ -580,8 +760,16 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Label:       "Log Level",
 				Description: "maximum log level to output\n(fatal error check warning info debug trace - what is selected includes all items to the left of the one in that list)",
 				Widget:      "radio",
-				Options:     []string{"off", "fatal", "error", "info", "check", "debug", "trace"},
+				Options: []string{"off",
+					"fatal",
+					"error",
+					"info",
+					"check",
+					"debug",
+					"trace",
+				},
 				// Hook:        "loglevel",
+				OmitEmpty: true,
 			},
 			"info",
 		),
@@ -593,6 +781,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "max number of orphan transactions to keep in memory",
 				Widget:      "integer",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			DefaultMaxOrphanTransactions,
 		),
@@ -604,6 +793,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "maximum number of peers to hold connections with",
 				Widget:      "integer",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			DefaultMaxPeers,
 		),
@@ -615,6 +805,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "password that encrypts the connection to the mining controller",
 				Widget:      "password",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			"pa55word",
 		),
@@ -626,6 +817,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Type:        "base58",
 				Widget:      "multi",
 				// Hook:        "miningaddr",
+				OmitEmpty: true,
 			},
 			[]string{},
 		),
@@ -637,6 +829,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "the minimum transaction fee in DUO/kB to be considered a non-zero fee",
 				Widget:      "float",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			DefaultMinRelayTxFee.ToDUO(),
 		),
@@ -647,8 +840,13 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Label:       "Network",
 				Description: "connect to this network: (mainnet, testnet)",
 				Widget:      "radio",
-				Options:     []string{"mainnet", "testnet", "regtestnet", "simnet"},
+				Options: []string{"mainnet",
+					"testnet",
+					"regtestnet",
+					"simnet",
+				},
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			network,
 		),
@@ -660,6 +858,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "disable committed filtering (CF) support",
 				Widget:      "toggle",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			false,
 		),
@@ -671,6 +870,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "turn off the node backend",
 				Widget:      "toggle",
 				// Hook:        "node",
+				OmitEmpty: true,
 			},
 			false,
 		),
@@ -681,6 +881,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "do not load a wallet at startup",
 				Widget:      "toggle",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			false,
 		),
@@ -692,6 +893,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "disable bloom filtering support",
 				Widget:      "toggle",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			false,
 		),
@@ -703,6 +905,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "do not require free or low-fee transactions to have high priority for relaying",
 				Widget:      "toggle",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			false,
 		),
@@ -714,6 +917,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "generate a new TLS certificate pair at startup, but only write the certificate to disk",
 				Widget:      "toggle",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			false,
 		),
@@ -725,6 +929,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "enable tor proxy",
 				Widget:      "toggle",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			false,
 		),
@@ -737,6 +942,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Type:        "address",
 				Widget:      "string",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			"",
 		),
@@ -748,6 +954,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "password for tor proxy",
 				Widget:      "password",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			"",
 		),
@@ -759,6 +966,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "tor proxy username",
 				Widget:      "string",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			"",
 		),
@@ -771,6 +979,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Type:        "address",
 				Widget:      "multi",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			[]string{},
 		),
@@ -783,8 +992,12 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Type:        "address",
 				Widget:      "multi",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
-			[]string{net.JoinHostPort("0.0.0.0", chaincfg.MainNetParams.DefaultPort)},
+			[]string{net.JoinHostPort("0.0.0.0",
+				chaincfg.MainNetParams.DefaultPort,
+			),
+			},
 		),
 		Password: NewString(
 			metadata{
@@ -795,6 +1008,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Type:        "password",
 				Widget:      "password",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			genPassword(),
 		),
@@ -805,6 +1019,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "enable pipe based logger IPC",
 				Widget:      "toggle",
 				// Hook:        "",
+				OmitEmpty: true,
 			},
 			false,
 		),
@@ -817,6 +1032,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				// Type:        "",
 				Widget: "integer",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			"",
 		),
@@ -829,6 +1045,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Type:        "url",
 				Widget:      "string",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			"",
 		),
@@ -841,6 +1058,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Type:        "password",
 				Widget:      "password",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			genPassword(),
 		),
@@ -852,6 +1070,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "proxy username, if required",
 				Widget:      "string",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			"proxyuser",
 		),
@@ -863,6 +1082,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "reject non-standard transactions regardless of the default settings for the active network",
 				Widget:      "toggle",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			false,
 		),
@@ -874,6 +1094,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "relay non-standard transactions regardless of the default settings for the active network",
 				Widget:      "toggle",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			false,
 		),
@@ -886,6 +1107,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Type:        "path",
 				Widget:      "string",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			filepath.Join(string(datadir.Load().([]byte)), "rpc.cert"),
 		),
@@ -898,6 +1120,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Type:        "address",
 				Widget:      "string",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			net.JoinHostPort("127.0.0.1", chaincfg.MainNetParams.DefaultPort),
 		
@@ -911,6 +1134,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Type:        "path",
 				Widget:      "string",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			filepath.Join(string(datadir.Load().([]byte)), "rpc.key"),
 		),
@@ -923,8 +1147,12 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Type:        "address",
 				Widget:      "multi",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
-			[]string{net.JoinHostPort("127.0.0.1", chaincfg.MainNetParams.DefaultPort)},
+			[]string{net.JoinHostPort("127.0.0.1",
+				chaincfg.MainNetParams.DefaultPort,
+			),
+			},
 		),
 		RPCMaxClients: NewInt(
 			metadata{
@@ -934,6 +1162,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "maximum number of clients for regular RPC",
 				Widget:      "integer",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			DefaultMaxRPCClients,
 		),
@@ -945,6 +1174,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "maximum number of requests to process concurrently",
 				Widget:      "integer",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			DefaultMaxRPCConcurrentReqs,
 		),
@@ -956,6 +1186,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "maximum number of websocket clients to allow",
 				Widget:      "integer",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			DefaultMaxRPCWebsockets,
 		),
@@ -967,6 +1198,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "enable bugs that replicate bitcoin core RPC's JSON",
 				Widget:      "toggle",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			false,
 		),
@@ -977,6 +1209,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "shuts down on lock timeout",
 				Widget:      "toggle",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			false,
 		),
@@ -989,6 +1222,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Type:        "password",
 				Widget:      "password",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			genPassword(),
 		),
@@ -1000,6 +1234,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "enable TLS for the wallet connection to node RPC server",
 				Widget:      "toggle",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			true,
 		),
@@ -1011,6 +1246,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "username for chain server connections",
 				Widget:      "string",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			"client",
 		),
@@ -1022,6 +1258,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "the maximum number of entries in the signature verification cache",
 				Widget:      "integer",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			DefaultSigCacheMaxSize,
 		),
@@ -1033,6 +1270,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "mine even if not connected to a network",
 				Widget:      "toggle",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			false,
 		),
@@ -1044,6 +1282,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "enable TLS for RPC client connections",
 				Widget:      "toggle",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			true,
 		),
@@ -1055,6 +1294,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "skip TLS certificate verification (ignore CA errors)",
 				Widget:      "toggle",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			false,
 		),
@@ -1066,6 +1306,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "makes a separate proxy connection for each connection",
 				Widget:      "toggle",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			true,
 		),
@@ -1077,6 +1318,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "minimum time between attempts to send new inventory to a connected peer",
 				Widget:      "duration",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			DefaultTrickleInterval,
 		),
@@ -1088,6 +1330,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "maintain a full hash-based transaction index which makes all transactions available via the getrawtransaction RPC",
 				Widget:      "toggle",
 				// Hook:        "droptxindex",
+				OmitEmpty: true,
 			},
 			true,
 		),
@@ -1099,6 +1342,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "enable UPNP for NAT traversal",
 				Widget:      "toggle",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			true,
 		),
@@ -1110,6 +1354,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "comment to add to the user agent -- See BIP 14 for more information",
 				Widget:      "multi",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			[]string{},
 		),
@@ -1121,16 +1366,18 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "password for client RPC connections",
 				Widget:      "string",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			"username",
 		),
 		UUID: &Int{
-			Int64: uberatomic.NewInt64(rand.Int63()),
+			value: uberatomic.NewInt64(rand.Int63()),
 			metadata: metadata{
 				Name:        "uuid",
 				Label:       "UUID",
 				Description: "instance unique id (64bit random value)",
 				Widget:      "string",
+				OmitEmpty:   true,
 			},
 		},
 		Wallet: NewBool(
@@ -1140,12 +1387,13 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Label:       "Connect to Wallet",
 				Description: "set ctl to connect to wallet instead of chain server",
 				Widget:      "toggle",
+				OmitEmpty:   true,
 			},
 			false,
 		),
 		WalletFile: NewString(
 			metadata{
-				Name:        "wallet-file",
+				Name:        "walletfile",
 				Aliases:     []string{"WF"},
 				Group:       "config",
 				Label:       "Wallet File",
@@ -1153,6 +1401,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Type:        "path",
 				Widget:      "string",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			filepath.Join(string(datadir.Load().([]byte)), "mainnet", DbName),
 		),
@@ -1164,6 +1413,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "turn off the wallet backend",
 				Widget:      "toggle",
 				// Hook:        "wallet",
+				OmitEmpty: true,
 			},
 			false,
 		),
@@ -1175,6 +1425,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Type:        "password",
 				Widget:      "password",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			"",
 		),
@@ -1187,8 +1438,12 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Type:        "address",
 				Widget:      "multi",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
-			[]string{net.JoinHostPort("0.0.0.0", chaincfg.MainNetParams.WalletRPCServerPort)},
+			[]string{net.JoinHostPort("0.0.0.0",
+				chaincfg.MainNetParams.WalletRPCServerPort,
+			),
+			},
 		),
 		WalletRPCMaxClients: NewInt(
 			metadata{
@@ -1198,17 +1453,19 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Description: "maximum number of RPC clients allowed for wallet RPC",
 				Widget:      "integer",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			DefaultRPCMaxClients,
 		),
 		WalletRPCMaxWebsockets: NewInt(
 			metadata{
-				Name:        "wallet-rpc-max-websockets",
+				Name:        "walletrpcmaxwebsockets",
 				Group:       "wallet",
 				Label:       "Legacy RPC Max Websockets",
 				Description: "maximum number of websocket clients allowed for wallet RPC",
 				Widget:      "integer",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			DefaultRPCMaxWebsockets,
 		),
@@ -1222,8 +1479,11 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Type:        "address",
 				Widget:      "string",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
-			net.JoinHostPort("127.0.0.1", chaincfg.MainNetParams.WalletRPCServerPort),
+			net.JoinHostPort("127.0.0.1",
+				chaincfg.MainNetParams.WalletRPCServerPort,
+			),
 		),
 		Whitelists: NewStrings(
 			metadata{
@@ -1234,56 +1494,57 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 				Type:        "address",
 				Widget:      "multi",
 				// Hook:        "restart",
+				OmitEmpty: true,
 			},
 			[]string{},
 		),
 	}
-	conf = make(map[string]interface{})
+	c.Map = make(map[string]interface{})
 	c.ForEach(
 		func(ifc interface{}) bool {
 			switch ii := ifc.(type) {
 			case *Bool:
 				im := ii.metadata
 				// sanity check for programmers
-				if _, ok := conf[im.Name]; ok {
+				if _, ok := c.Map[im.Name]; ok {
 					panic("duplicate configuration item name")
 				}
-				conf[im.Name] = ii
+				c.Map[im.Name] = ii
 			case *Strings:
 				im := ii.metadata
 				// sanity check for programmers
-				if _, ok := conf[im.Name]; ok {
+				if _, ok := c.Map[im.Name]; ok {
 					panic("duplicate configuration item name")
 				}
-				conf[im.Name] = ii
+				c.Map[im.Name] = ii
 			case *Float:
 				im := ii.metadata
 				// sanity check for programmers
-				if _, ok := conf[im.Name]; ok {
+				if _, ok := c.Map[im.Name]; ok {
 					panic("duplicate configuration item name")
 				}
-				conf[im.Name] = ii
+				c.Map[im.Name] = ii
 			case *Int:
 				im := ii.metadata
 				// sanity check for programmers
-				if _, ok := conf[im.Name]; ok {
+				if _, ok := c.Map[im.Name]; ok {
 					panic("duplicate configuration item name")
 				}
-				conf[im.Name] = ii
+				c.Map[im.Name] = ii
 			case *String:
 				im := ii.metadata
 				// sanity check for programmers
-				if _, ok := conf[im.Name]; ok {
+				if _, ok := c.Map[im.Name]; ok {
 					panic("duplicate configuration item name")
 				}
-				conf[im.Name] = ii
+				c.Map[im.Name] = ii
 			case *Duration:
 				im := ii.metadata
 				// sanity check for programmers
-				if _, ok := conf[im.Name]; ok {
+				if _, ok := c.Map[im.Name]; ok {
 					panic("duplicate configuration item name")
 				}
-				conf[im.Name] = ii
+				c.Map[im.Name] = ii
 			default:
 			}
 			return true
@@ -1302,47 +1563,193 @@ type (
 		Type        string
 		Widget      string
 		Options     []string
+		OmitEmpty   bool
 	}
 	Bool struct {
 		metadata
-		hook func(b bool)
+		hook  []func(b bool)
 		value *uberatomic.Bool
-		def bool
+		def   bool
 	}
 	Strings struct {
 		metadata
-		hook func(s []string)
+		hook  []func(s []string)
 		value *atomic.Value
-		def []string
+		def   []string
 	}
 	Float struct {
 		metadata
-		hook func(f float64)
+		hook  []func(f float64)
 		value *uberatomic.Float64
-		def float64
+		def   float64
 	}
 	Int struct {
 		metadata
-		hook func(i int64)
-		*uberatomic.Int64
-		def int64
+		hook  []func(i int64)
+		value *uberatomic.Int64
+		def   int64
 	}
 	String struct {
 		metadata
-		hook func(s string)
+		hook  []func(s Strice)
 		value *atomic.Value
-		def string
+		def   string
 	}
 	Duration struct {
 		metadata
-		hook func(d time.Duration)
+		hook  []func(d time.Duration)
 		value *uberatomic.Duration
-		def time.Duration
+		def   time.Duration
 	}
+	// Strice is a wrapper around byte slices to enable optional security features and possibly better performance for
+	// bulk comparison and editing. There isn't any extensive editing primitives for this purpose,
+	Strice []byte
 )
 
-func NewBool(m metadata, def bool) *Bool {
-	return &Bool{value: uberatomic.NewBool(def), metadata: m, def: def}
+// S returns the underlying bytes converted into string
+func (s *Strice) S() string {
+	return string(*s)
+}
+
+// E returns the byte at the requested index in the string
+func (s *Strice) E(elem int) byte {
+	if s.Len() > elem {
+		return (*s)[elem]
+	}
+	return 0
+}
+
+// Len returns the length of the string in bytes
+func (s *Strice) Len() int {
+	return len(*s)
+}
+
+// Equal returns true if two Strices are equal in both length and content
+func (s *Strice) Equal(sb *Strice) bool {
+	if s.Len() == sb.Len() {
+		for i := range *s {
+			if s.E(i) != sb.E(i) {
+				return false
+			}
+		}
+		return true
+	}
+	return false
+}
+
+// Cat two Strices together
+func (s *Strice) Cat(sb *Strice) *Strice {
+	*s = append(*s, *sb...)
+	return s
+}
+
+// Find returns true if a match of a substring is found and if found, the position in the first string that the second
+// string starts, the number of matching characters from the start of the search Strice, or -1 if not found.
+//
+// You specify a minimum length match and it will trawl through it systematically until it finds the first match of the
+// minimum length.
+func (s *Strice) Find(sb *Strice, minLengthMatch int) (found bool, extent, pos int) {
+	// can't be a substring if it's longer
+	if sb.Len() > s.Len() {
+		return
+	}
+	for pos = range *s {
+		// if we find a match, grab onto it
+		if s.E(pos) == sb.E(pos) {
+			extent++
+			// this exhaustively searches for a match between the two strings, but we do not restrict the match to the
+			// minimum, maximising the ways this function can be used for simple position tests and editing
+			for srchPos := 1; srchPos < sb.Len() || srchPos+pos < s.Len(); srchPos++ {
+				// the first element is skipped
+				if s.E(srchPos+pos) != sb.E(srchPos) {
+					break
+				}
+				extent++
+			}
+			// the above loop ends when the bytes stop matching, then if it is under the minimum length requested, it
+			// continues. Note that we are not mutating `i` so it iterates for a match comprehensively.
+			if extent < minLengthMatch {
+				// reset the extent
+				extent = 0
+			} else {
+				break
+			}
+		}
+	}
+	return
+}
+
+// HasPrefix returns true if the given string forms the beginning of the current string
+func (s *Strice) HasPrefix(sb *Strice) bool {
+	found, _, pos := s.Find(sb, sb.Len())
+	if found {
+		if pos == 0 {
+			return true
+		}
+	}
+	return false
+}
+
+// HasSuffix returns true if the given string forms the ending of the current string
+func (s *Strice) HasSuffix(sb *Strice) bool {
+	found, _, pos := s.Find(sb, sb.Len())
+	if found {
+		if pos == s.Len()-sb.Len()-1 {
+			return true
+		}
+	}
+	return false
+}
+
+// Dup copies a string and returns it
+func (s *Strice) Dup() *Strice {
+	ns := make(Strice, s.Len())
+	copy(ns, *s)
+	return &ns
+}
+
+// Wipe zeroes the bytes of a string
+func (s *Strice) Wipe() {
+	for i := range *s {
+		(*s)[i] = 0
+	}
+}
+
+// Split the string by a given cutset
+func (s *Strice) Split(cutset string) (out []*Strice) {
+	// convert immutable string type to Strice bytes
+	c := Strice(cutset)
+	// need the pointer to call the methods
+	cs := &c
+	// copy the bytes so we can guarantee the original is unmodified
+	cp := s.Dup()
+	for {
+		// locate the next instance of the cutset
+		found, _, pos := s.Find(cp, cp.Len())
+		if found {
+			// add the found section to the return slice
+			before := (*s)[:pos+cp.Len()]
+			out = append(out, &before)
+			// trim off the prefix and cutslice from the working copy
+			*cs = (*cs)[pos+cp.Len():]
+			// continue to search for more instances of the cutset
+			continue
+		} else {
+			// once we get not found, the searching is over and whatever we have, we return
+			break
+		}
+	}
+	return
+}
+
+func NewBool(m metadata, def bool, hook ...func(b bool)) *Bool {
+	return &Bool{value: uberatomic.NewBool(def), metadata: m, def: def, hook: hook}
+}
+func (x *Bool) AddHooks(hook ...func(b bool)) {
+	x.hook = append(x.hook, hook...)
+}
+func (x *Bool) SetHooks(hook ...func(b bool)) {
+	x.hook = hook
 }
 func (x *Bool) True() bool {
 	return x.value.Load()
@@ -1357,6 +1764,9 @@ func (x *Bool) Set(b bool) *Bool {
 	x.value.Store(b)
 	return x
 }
+func (x *Bool) String() string {
+	return fmt.Sprint(x.True())
+}
 func (x *Bool) T() *Bool {
 	x.value.Store(true)
 	return x
@@ -1365,14 +1775,12 @@ func (x *Bool) F() *Bool {
 	x.value.Store(false)
 	return x
 }
-func (x *Bool) String() string {
-	return fmt.Sprint(x.value.Load())
-}
+
+// func (x *Bool) String() string {
+// 	return fmt.Sprint(x.value.Load())
+// }
 func (x *Bool) MarshalJSON() (b []byte, e error) {
 	v := x.value.Load()
-	if v == x.def {
-		return json.Marshal(nil)
-	}
 	return json.Marshal(&v)
 }
 func (x *Bool) UnmarshalJSON(data []byte) (e error) {
@@ -1382,11 +1790,17 @@ func (x *Bool) UnmarshalJSON(data []byte) (e error) {
 	return
 }
 
-func NewStrings(m metadata, def []string) *Strings {
+func NewStrings(m metadata, def []string, hook ...func(s []string)) *Strings {
 	as := &atomic.Value{}
 	v := cli.StringSlice(def)
 	as.Store(&v)
-	return &Strings{value: as, metadata: m, def: def}
+	return &Strings{value: as, metadata: m, def: def, hook: hook}
+}
+func (x *Strings) AddHooks(hook ...func(b []string)) {
+	x.hook = append(x.hook, hook...)
+}
+func (x *Strings) SetHooks(hook ...func(b []string)) {
+	x.hook = hook
 }
 func (x *Strings) V() *cli.StringSlice {
 	return x.value.Load().(*cli.StringSlice)
@@ -1402,6 +1816,9 @@ func (x *Strings) Set(ss []string) *Strings {
 func (x *Strings) S() []string {
 	return *x.value.Load().(*cli.StringSlice)
 }
+func (x *Strings) String() string {
+	return fmt.Sprint(x.S())
+}
 func (x *Strings) MarshalJSON() (b []byte, e error) {
 	xs := x.value.Load().(*cli.StringSlice)
 	return json.Marshal(xs)
@@ -1416,12 +1833,21 @@ func (x *Strings) UnmarshalJSON(data []byte) (e error) {
 func NewFloat(m metadata, def float64) *Float {
 	return &Float{value: uberatomic.NewFloat64(def), metadata: m, def: def}
 }
+func (x *Float) AddHooks(hook ...func(f float64)) {
+	x.hook = append(x.hook, hook...)
+}
+func (x *Float) SetHooks(hook ...func(f float64)) {
+	x.hook = hook
+}
 func (x *Float) V() float64 {
 	return x.value.Load()
 }
 func (x *Float) Set(f float64) *Float {
 	x.value.Store(f)
 	return x
+}
+func (x *Float) String() string {
+	return fmt.Sprintf("%0.8f",x.V())
 }
 func (x *Float) MarshalJSON() (b []byte, e error) {
 	v := x.value.Load()
@@ -1435,30 +1861,45 @@ func (x *Float) UnmarshalJSON(data []byte) (e error) {
 }
 
 func NewInt(m metadata, def int64) *Int {
-	return &Int{Int64: uberatomic.NewInt64(def), metadata: m, def: def}
+	return &Int{value: uberatomic.NewInt64(def), metadata: m, def: def}
+}
+func (x *Int) AddHooks(hook ...func(f int64)) {
+	x.hook = append(x.hook, hook...)
+}
+func (x *Int) SetHooks(hook ...func(f int64)) {
+	x.hook = hook
 }
 func (x *Int) V() int {
-	return int(x.Load())
+	return int(x.value.Load())
 }
 func (x *Int) Set(i int) *Int {
-	x.Store(int64(i))
+	x.value.Store(int64(i))
 	return x
 }
+func (x *Int) String() string {
+	return fmt.Sprintf("%d",x.V())
+}
 func (x *Int) MarshalJSON() (b []byte, e error) {
-	v := x.Load()
+	v := x.value.Load()
 	return json.Marshal(&v)
 }
 func (x *Int) UnmarshalJSON(data []byte) (e error) {
-	v := x.Load()
+	v := x.value.Load()
 	e = json.Unmarshal(data, &v)
-	x.Store(v)
+	x.value.Store(v)
 	return
 }
 
 func NewString(m metadata, def string) *String {
 	v := &atomic.Value{}
-	v.Store([]byte{})
+	v.Store([]byte(def))
 	return &String{value: v, metadata: m, def: def}
+}
+func (x *String) AddHooks(hook ...func(f Strice)) {
+	x.hook = append(x.hook, hook...)
+}
+func (x *String) SetHooks(hook ...func(f Strice)) {
+	x.hook = hook
 }
 func (x *String) V() string {
 	return string(x.value.Load().([]byte))
@@ -1478,10 +1919,10 @@ func (x *String) SetBytes(s []byte) *String {
 	return x
 }
 func (x *String) String() string {
-	return string(x.value.Load().([]byte))
+	return x.V()
 }
 func (x *String) MarshalJSON() (b []byte, e error) {
-	v := x.value.Load().([]byte)
+	v := string(x.value.Load().([]byte))
 	return json.Marshal(&v)
 }
 func (x *String) UnmarshalJSON(data []byte) (e error) {
@@ -1500,6 +1941,9 @@ func (x *Duration) V() time.Duration {
 func (x *Duration) Set(d time.Duration) *Duration {
 	x.value.Store(d)
 	return x
+}
+func (x *Duration) String() string {
+	return fmt.Sprint(x.V())
 }
 func (x *Duration) MarshalJSON() (b []byte, e error) {
 	v := x.value.Load()

@@ -86,7 +86,7 @@ func Save(c *Config) (success bool) {
 	
 	// wallet password needs special handling, if config exists we don't change this value unless we mean to
 	// load config into a fresh variable
-	cfg, _ := EmptyConfig()
+	cfg := EmptyConfig()
 	var cfgFile []byte
 	wp := *c.WalletPass
 	// D.Ln("wp", wp)
