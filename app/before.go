@@ -52,7 +52,7 @@ func beforeFunc(cx *pod.State) func(c *cli.Context) (e error) {
 		if apputil.FileExists(cx.Config.ConfigFile.V()) {
 			b, e := ioutil.ReadFile(cx.Config.ConfigFile.V())
 			if e == nil {
-				cx.Config, cx.ConfigMap = podcfg.EmptyConfig()
+				cx.Config, cx.ConfigMap = podcfg.New()
 				e = json.Unmarshal(b, cx.Config)
 				if e != nil {
 					E.Ln("error unmarshalling config", e)

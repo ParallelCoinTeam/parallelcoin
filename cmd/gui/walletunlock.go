@@ -28,7 +28,7 @@ func (wg *WalletGUI) unlockWallet(pass string) {
 	wg.cx.Config.WalletOff.F()
 	// wg.cx.Config.Unlock()
 	// load config into a fresh variable
-	cfg, _ := podcfg.EmptyConfig()
+	cfg, _ := podcfg.New()
 	var cfgFile []byte
 	var e error
 	if cfgFile, e = ioutil.ReadFile(wg.cx.Config.ConfigFile.V()); E.Chk(e) {

@@ -9,7 +9,7 @@ import (
 )
 
 func TestForEach(t *testing.T) {
-	c := EmptyConfig()
+	c := New()
 	c.ForEach(
 		func(ifc interface{}) bool {
 			switch ii := ifc.(type) {
@@ -40,8 +40,8 @@ func TestForEach(t *testing.T) {
 }
 
 func TestMarshalUnmarshal(t *testing.T) {
-	c := EmptyConfig()
-	d := EmptyConfig()
+	c := New()
+	d := New()
 	// c.ShowAll = true
 	// I.S(c)
 	c.MinRelayTxFee.Set(0.3352)
