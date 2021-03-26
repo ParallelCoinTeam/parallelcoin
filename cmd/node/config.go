@@ -4,15 +4,11 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	"time"
 	
-	"github.com/p9c/pod/pkg/appdata"
-	"github.com/p9c/pod/pkg/blockchain"
 	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/chainhash"
 	"github.com/p9c/pod/pkg/database"
 	
-	"github.com/p9c/pod/pkg/peer"
 	// This ensures the database drivers get registered
 	_ "github.com/p9c/pod/pkg/database/ffldb"
 )
@@ -20,7 +16,7 @@ import (
 //
 // // Config defines the configuration options for pod. See loadConfig for details on the configuration load process.
 // type Config struct {
-// 	ShowVersion          *bool            `short:"V" long:"version" description:"Display version information and exit"`
+// 	ShowVersion          *bool            `short:"True" long:"version" description:"Display version information and exit"`
 // 	ConfigFile           *string          `short:"C" long:"configfile" description:"Path to configuration file"`
 // 	DataDir              *string          `short:"b" long:"datadir" description:"Directory to store data"`
 // 	LogDir               *string          `long:"logdir" description:"Directory to log output."`
@@ -101,35 +97,10 @@ type serviceOptions struct {
 	ServiceCommand string `short:"s" long:"service" description:"Service command {install, remove, start, stop}"`
 }
 
-// A lotta constants that probably aren't being used
-const (
-	defaultConfigFilename        = "conf.json"
-	defaultDataDirname           = "node"
-	DefaultPort                  = "11047"
-	DefaultRPCListener           = "127.0.0.1"
-	DefaultMaxPeers              = 23
-	DefaultBanDuration           = time.Hour * 24
-	DefaultBanThreshold          = 100
-	DefaultMaxRPCClients         = 10
-	DefaultMaxRPCWebsockets      = 25
-	DefaultMaxRPCConcurrentReqs  = 20
-	DefaultDbType                = "ffldb"
-	DefaultFreeTxRelayLimit      = 15.0
-	DefaultTrickleInterval       = peer.DefaultTrickleInterval
-	DefaultBlockMaxSize          = 200000
-	DefaultBlockMaxWeight        = 3000000
-	BlockMaxSizeMin              = 1000
-	BlockMaxSizeMax              = blockchain.MaxBlockBaseSize - 1000
-	BlockMaxWeightMin            = 4000
-	BlockMaxWeightMax            = blockchain.MaxBlockWeight - 4000
-	DefaultMaxOrphanTransactions = 100
-	DefaultSigCacheMaxSize       = 100000
-)
-
 var (
 	// defaultHomeDir is the default home directory location (
 	// this should be centralised)
-	defaultHomeDir = appdata.Dir("pod", false)
+	
 	// KnownDbTypes stores the currently supported database drivers
 	KnownDbTypes = database.SupportedDrivers()
 	// runServiceCommand is only set to a real function on Windows.

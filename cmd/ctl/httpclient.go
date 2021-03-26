@@ -14,8 +14,8 @@ import (
 	
 	"github.com/btcsuite/go-socks/socks"
 	
-	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/btcjson"
+	"github.com/p9c/pod/pkg/pod"
 )
 
 // newHTTPClient returns a new HTTP client that is configured according to the proxy and TLS settings in the associated
@@ -23,11 +23,11 @@ import (
 func newHTTPClient(cfg *podcfg.Config) (client *http.Client, e error) {
 	// Configure proxy if needed.
 	var dial func(network, addr string) (net.Conn, error)
-	if *cfg.Proxy != "" {
+	if cfg.Proxy.V() != "" {
 		proxy := &socks.Proxy{
-			Addr:     *cfg.Proxy,
-			Username: *cfg.ProxyUser,
-			Password: *cfg.ProxyPass,
+			Addr:     cfg.Proxy.V(),
+			Username: cfg.ProxyUser.V(),
+			Password: cfg.ProxyPass.V(),
 		}
 		dial = func(network, addr string) (c net.Conn, e error) {
 			if c, e = proxy.Dial(network, addr); E.Chk(e) {
@@ -38,16 +38,16 @@ func newHTTPClient(cfg *podcfg.Config) (client *http.Client, e error) {
 	}
 	// Configure TLS if needed.
 	var tlsConfig *tls.Config
-	if *cfg.TLS && *cfg.RPCCert != "" {
+	if cfg.TLS.True() && cfg.RPCCert.V() != "" {
 		var pem []byte
-		if pem, e = ioutil.ReadFile(*cfg.RPCCert); E.Chk(e) {
+		if pem, e = ioutil.ReadFile(cfg.RPCCert.V()); E.Chk(e) {
 			return nil, e
 		}
 		pool := x509.NewCertPool()
 		pool.AppendCertsFromPEM(pem)
 		tlsConfig = &tls.Config{
 			RootCAs:            pool,
-			InsecureSkipVerify: *cfg.TLSSkipVerify,
+			InsecureSkipVerify: cfg.TLSSkipVerify.True(),
 		}
 	}
 	// Create and return the new HTTP client potentially configured with a proxy and TLS.
@@ -66,15 +66,15 @@ func newHTTPClient(cfg *podcfg.Config) (client *http.Client, e error) {
 func sendPostRequest(marshalledJSON []byte, cx *pod.State) ([]byte, error) {
 	// Generate a request to the configured RPC server.
 	protocol := "http"
-	if *cx.Config.TLS {
+	if cx.Config.TLS.True() {
 		protocol = "https"
 	}
 	serverAddr := *cx.Config.RPCConnect
-	if *cx.Config.Wallet {
+	if cx.Config.Wallet.True() {
 		serverAddr = *cx.Config.WalletServer
 		_, _ = fmt.Fprintln(os.Stderr, "ctl: using wallet server", serverAddr)
 	}
-	url := protocol + "://" + serverAddr
+	url := protocol + "://" + serverAddr.V()
 	bodyReader := bytes.NewReader(marshalledJSON)
 	var httpRequest *http.Request
 	var e error
@@ -84,7 +84,7 @@ func sendPostRequest(marshalledJSON []byte, cx *pod.State) ([]byte, error) {
 	httpRequest.Close = true
 	httpRequest.Header.Set("Content-Type", "application/json")
 	// Configure basic access authorization.
-	httpRequest.SetBasicAuth(*cx.Config.Username, *cx.Config.Password)
+	httpRequest.SetBasicAuth(cx.Config.Username.V(), cx.Config.Password.V())
 	// Create the new HTTP client that is configured according to the user - specified options and submit the request.
 	var httpClient *http.Client
 	if httpClient, e = newHTTPClient(cx.Config); E.Chk(e) {

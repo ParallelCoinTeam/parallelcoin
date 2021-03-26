@@ -33,8 +33,6 @@ type Loader struct {
 }
 
 const (
-	// DbName is
-	DbName = "wallet.db"
 )
 
 var (

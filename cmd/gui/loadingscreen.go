@@ -15,7 +15,7 @@ func (wg *WalletGUI) getLoadingPage() (a *gui.App) {
 		func() {
 			D.Ln("theme hook")
 			// D.Ln(wg.bools)
-			*wg.cx.Config.DarkTheme = *wg.Dark
+			wg.cx.Config.DarkTheme.Set(*wg.Dark)
 			a := wg.configs["config"]["DarkTheme"].Slot.(*bool)
 			*a = *wg.Dark
 			if wgb, ok := wg.config.Bools["DarkTheme"]; ok {

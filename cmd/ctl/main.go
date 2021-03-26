@@ -59,7 +59,7 @@ func Main(args []string, cx *pod.State) {
 		params = append(params, arg)
 	}
 	var result []byte
-	if result, e = rpcctl.Call(cx, *cx.Config.Wallet, method, params...); E.Chk(e) {
+	if result, e = rpcctl.Call(cx, cx.Config.Wallet.True(), method, params...); E.Chk(e) {
 		return
 	}
 	// // Attempt to create the appropriate command using the arguments provided by the user.

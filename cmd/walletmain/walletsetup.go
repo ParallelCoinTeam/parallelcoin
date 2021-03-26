@@ -8,12 +8,12 @@ import (
 	"path/filepath"
 	"time"
 	
-	"github.com/p9c/pod/pkg/walletdb"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/legacy/keystore"
 	"github.com/p9c/pod/pkg/util/prompt"
-	"github.com/p9c/pod/pkg/wallet"
 	"github.com/p9c/pod/pkg/waddrmgr"
+	"github.com/p9c/pod/pkg/wallet"
+	"github.com/p9c/pod/pkg/walletdb"
 	"github.com/p9c/pod/pkg/wire"
 	
 	// This initializes the bdb driver
@@ -55,11 +55,11 @@ func CreateSimulationWallet(activenet *chaincfg.Params, cfg *Config) (e error) {
 // The new wallet will reside at the provided path.
 func CreateWallet(activenet *chaincfg.Params, config *podcfg.Config) (e error) {
 	dbDir := *config.WalletFile
-	loader := wallet.NewLoader(activenet, dbDir, 250)
+	loader := wallet.NewLoader(activenet, dbDir.V(), 250)
 	D.Ln("WalletPage", loader.ChainParams.Name)
 	// When there is a legacy keystore, open it now to ensure any errors don't end up exiting the process after the user
 	// has spent time entering a bunch of information.
-	netDir := NetworkDir(*config.DataDir, activenet)
+	netDir := NetworkDir(config.DataDir.V(), activenet)
 	keystorePath := filepath.Join(netDir, keystore.Filename)
 	var legacyKeyStore *keystore.Store
 	_, e = os.Stat(keystorePath)
@@ -133,7 +133,7 @@ func CreateWallet(activenet *chaincfg.Params, config *podcfg.Config) (e error) {
 	}
 	// Ascertain the public passphrase. This will either be a value specified by the user or the default hard-coded
 	// public passphrase if the user does not want the additional public data encryption.
-	pubPass, e := prompt.PublicPass(reader, privPass, []byte(""), []byte(*config.WalletPass))
+	pubPass, e := prompt.PublicPass(reader, privPass, []byte(""), config.WalletPass.Bytes())
 	if e != nil {
 		D.Ln(e)
 		time.Sleep(time.Second * 5)

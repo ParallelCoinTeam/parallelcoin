@@ -1388,7 +1388,7 @@ func (s *Server) JSONRPCRead(w http.ResponseWriter, r *http.Request, isAdmin boo
 		// With RPC quirks enabled, such requests will be responded to if the request does not indicate JSON-RPC
 		// version. RPC quirks can be enabled by the user to avoid compatibility issues with software relying on Core's
 		// behavior.
-		if request.ID == nil && !(*s.Config.RPCQuirks && request.Jsonrpc == "") {
+		if request.ID == nil && !(s.Config.RPCQuirks.True() && request.Jsonrpc == "") {
 			return
 		}
 		// The parse was at least successful enough to have an ID so set it for the response.
@@ -1449,7 +1449,7 @@ func (s *Server) JSONRPCRead(w http.ResponseWriter, r *http.Request, isAdmin boo
 //
 // This function is safe for concurrent access.
 func (s *Server) LimitConnections(w http.ResponseWriter, remoteAddr string) bool {
-	if int(atomic.LoadInt32(&s.NumClients)+1) > *s.Config.RPCMaxClients {
+	if int(atomic.LoadInt32(&s.NumClients)+1) > s.Config.RPCMaxClients.V() {
 		I.F(
 			"max RPC clients exceeded [%d] - disconnecting client %s",
 			s.Config.RPCMaxClients, remoteAddr,
@@ -2068,13 +2068,13 @@ func NewRPCServer(
 		RequestProcessShutdown: qu.T(),
 		Quit:                   qu.T(),
 	}
-	if *podcfg.Username != "" && *podcfg.Password != "" {
-		login := *podcfg.Username + ":" + *podcfg.Password
+	if podcfg.Username.V() != "" && podcfg.Password.V() != "" {
+		login := podcfg.Username.V() + ":" + podcfg.Password.V()
 		auth := "Basic " + base64.StdEncoding.EncodeToString([]byte(login))
 		rpc.AuthSHA = sha256.Sum256([]byte(auth))
 	}
-	if *podcfg.LimitUser != "" && *podcfg.LimitPass != "" {
-		login := *podcfg.LimitUser + ":" + *podcfg.LimitPass
+	if podcfg.LimitUser.V() != "" && podcfg.LimitPass.V() != "" {
+		login := podcfg.LimitUser.V() + ":" + podcfg.LimitPass.V()
 		auth := "Basic " + base64.StdEncoding.EncodeToString([]byte(login))
 		rpc.LimitAuthSHA = sha256.Sum256([]byte(auth))
 	}

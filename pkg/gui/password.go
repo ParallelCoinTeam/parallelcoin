@@ -133,10 +133,10 @@ func (w *Window) Password(
 }
 
 func (p *Password) Fn(gtx l.Context) l.Dimensions {
-	// gtx.Constraints.Max.X = int(p.TextSize.Scale(float32(p.size)).V)
+	// gtx.Constraints.Max.X = int(p.TextSize.Scale(float32(p.size)).True)
 	// gtx.Constraints.Min.X = 0
 	// cs := gtx.Constraints
-	// width := int(p.Theme.TextSize.Scale(p.size).V)
+	// width := int(p.Theme.TextSize.Scale(p.size).True)
 	// gtx.Constraints.Max.X, gtx.Constraints.Min.X = width, width
 	return func(gtx l.Context) l.Dimensions {
 		p.passInput.Color(p.borderColor).Font("go regular")

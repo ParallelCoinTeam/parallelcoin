@@ -152,7 +152,7 @@ var handlersMulticast = transport.Handlers{
 
 func processAdvtMsg(ctx interface{}, src net.Addr, dst string, b []byte) (e error) {
 	wg := ctx.(*WalletGUI)
-	if !*wg.cx.Config.Discovery {
+	if wg.cx.Config.Discovery.False() {
 		return
 	}
 	if wg.ChainClient == nil {
@@ -165,7 +165,7 @@ func processAdvtMsg(ctx interface{}, src net.Addr, dst string, b []byte) (e erro
 	var peerUUID uint64
 	peerUUID = j.UUID
 	// I.Ln("peerUUID of advertisment", peerUUID, wg.otherNodes)
-	if int(peerUUID) == *wg.cx.Config.UUID {
+	if int(peerUUID) == wg.cx.Config.UUID.V() {
 		D.Ln("ignoring own advertisment message")
 		return
 	}
@@ -250,7 +250,7 @@ func (wg *WalletGUI) Run() (e error) {
 	if mc, e = transport.NewBroadcastChannel(
 		"controller",
 		wg,
-		*wg.cx.Config.MinerPass,
+		wg.cx.Config.MulticastPass.V(),
 		transport.DefaultPort,
 		16384,
 		handlersMulticast,
@@ -268,7 +268,7 @@ func (wg *WalletGUI) Run() (e error) {
 	// wg.th = gui.NewTheme(p9fonts.Collection(), wg.quit)
 	// wg.Window = gui.NewWindow(wg.th)
 	wg.Window = gui.NewWindowP9(wg.quit)
-	wg.Dark = wg.cx.Config.DarkTheme
+	wg.Dark = wg.cx.Config.DarkTheme.Ptr()
 	wg.Colors.SetTheme(*wg.Dark)
 	*wg.noWallet = true
 	wg.GetButtons()
@@ -279,15 +279,15 @@ func (wg *WalletGUI) Run() (e error) {
 	after := func() { D.Ln("running after") }
 	wg.node = wg.GetRunUnit(
 		"NODE", before, after,
-		os.Args[0], "-D", *wg.cx.Config.DataDir, "--servertls=true", "--clienttls=true", "--pipelog", "node",
+		os.Args[0], "-D", wg.cx.Config.DataDir.V(), "--servertls=true", "--clienttls=true", "--pipelog", "node",
 	)
 	wg.wallet = wg.GetRunUnit(
 		"WLLT", before, after,
-		os.Args[0], "-D", *wg.cx.Config.DataDir, "--servertls=true", "--clienttls=true", "--pipelog", "wallet",
+		os.Args[0], "-D", wg.cx.Config.DataDir.V(), "--servertls=true", "--clienttls=true", "--pipelog", "wallet",
 	)
 	wg.miner = wg.GetRunUnit(
 		"MINE", before, after,
-		os.Args[0], "-D", *wg.cx.Config.DataDir, "--pipelog", "kopach",
+		os.Args[0], "-D", wg.cx.Config.DataDir.V(), "--pipelog", "kopach",
 	)
 	wg.bools = wg.GetBools()
 	wg.inputs = wg.GetInputs()
@@ -309,7 +309,7 @@ func (wg *WalletGUI) Run() (e error) {
 	wg.State = GetNewState(wg.cx.ActiveNet, wg.MainApp.ActivePageGetAtomic())
 	wg.unlockPage = wg.getWalletUnlockAppWidget()
 	wg.loadingPage = wg.getLoadingPage()
-	if !apputil.FileExists(*wg.cx.Config.WalletFile) {
+	if !apputil.FileExists(wg.cx.Config.WalletFile.V()) {
 		I.Ln("wallet file does not exist", *wg.cx.Config.WalletFile)
 	} else {
 		*wg.noWallet = false
@@ -317,7 +317,7 @@ func (wg *WalletGUI) Run() (e error) {
 		// 	// wg.startNode()
 		// 	wg.node.Start()
 		// }
-		if *wg.cx.Config.Generate && *wg.cx.Config.GenThreads != 0 {
+		if wg.cx.Config.Generate.True() && wg.cx.Config.GenThreads.V() != 0 {
 			// wg.startMiner()
 			wg.miner.Start()
 		}
@@ -561,7 +561,7 @@ func (wg *WalletGUI) GetPasswords() (passwords Passwords) {
 		"confirmPassEditor": wg.Password("confirm", &passConfirm, "DocText", "DocBg", "PanelBg", func(pass string) {}),
 		"publicPassEditor": wg.Password(
 			"public password (optional)",
-			wg.cx.Config.WalletPass,
+			wg.cx.Config.WalletPass.Ptr(),
 			"Primary",
 			"DocText",
 			"PanelBg",
@@ -577,7 +577,7 @@ func (wg *WalletGUI) GetIncDecs() IncDecMap {
 			NDigits(2).
 			Min(0).
 			Max(runtime.NumCPU()).
-			SetCurrent(*wg.cx.Config.GenThreads).
+			SetCurrent(wg.cx.Config.GenThreads.V()).
 			ChangeHook(
 				func(n int) {
 					D.Ln("threads value now", n)
@@ -590,7 +590,7 @@ func (wg *WalletGUI) GetIncDecs() IncDecMap {
 						if n == 0 {
 							wg.miner.Stop()
 						}
-						*wg.cx.Config.GenThreads = n
+						wg.cx.Config.GenThreads.Set(n)
 						podcfg.Save(wg.cx.Config)
 						// if wg.miner.Running() {
 						// 	D.Ln("restarting miner")

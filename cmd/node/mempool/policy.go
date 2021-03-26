@@ -38,12 +38,6 @@ const (
 	// extra bytes to provide a little buffer. ( 1 + 15*74 + 3) + (15*34 + 3) + 23 =
 	// 1650
 	maxStandardSigScriptSize = 1650
-	// DefaultMinRelayTxFee is the minimum fee in satoshi that is required for a
-	// transaction to be treated as free for relay and mining purposes. It is also
-	// used to help determine if a transaction is considered dust and as a base for
-	// calculating minimum required fees for larger transactions. This value is in
-	// Satoshi/1000 bytes.
-	DefaultMinRelayTxFee = amt.Amount(1000)
 	// maxStandardMultiSigKeys is the maximum number of public keys allowed in a
 	// multi-signature transaction output script for it to be considered standard.
 	maxStandardMultiSigKeys = 3

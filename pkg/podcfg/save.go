@@ -45,7 +45,7 @@ var emptyhash = hex.EncodeToString(eh[:])
 //
 // todo: maybe to not do this if gui is not the app?
 func Save(c *Config) (success bool) {
-	lockPath := filepath.Join(*c.DataDir, "pod.json.lock")
+	lockPath := filepath.Join(c.DataDir.V(), "pod.json.lock")
 	// wait if there is a lock on the file
 	for apputil.FileExists(lockPath) {
 		time.Sleep(time.Second / 2)
@@ -62,11 +62,11 @@ func Save(c *Config) (success bool) {
 	D.Ln("saving configuration to", *c.ConfigFile)
 	var uac cli.StringSlice
 	// need to remove this before saving
-	if c.UserAgentComments != nil && len(*c.UserAgentComments) > 0 {
+	if c.UserAgentComments != nil && len(c.UserAgentComments.S()) > 0 {
 		// TODO: there is a bug here if the user edits them in configuration
-		uac = make(cli.StringSlice, len(*c.UserAgentComments))
-		copy(uac, *c.UserAgentComments)
-		*c.UserAgentComments = uac[1:]
+		uac = make(cli.StringSlice, len(c.UserAgentComments.S()))
+		copy(uac, c.UserAgentComments.S())
+		c.UserAgentComments.Set(uac[1:])
 	}
 	// we also don't write this one to disk for security reasons, instead we write the hash to validate it.
 	//
@@ -90,34 +90,34 @@ func Save(c *Config) (success bool) {
 	var cfgFile []byte
 	wp := *c.WalletPass
 	// D.Ln("wp", wp)
-	if *c.WalletPass == "" {
-		if cfgFile, e = ioutil.ReadFile(*c.ConfigFile); !E.Chk(e) {
+	if c.WalletPass.V() == "" {
+		if cfgFile, e = ioutil.ReadFile(c.ConfigFile.V()); !E.Chk(e) {
 			D.Ln("loaded config")
 			if e = json.Unmarshal(cfgFile, &cfg); !E.Chk(e) {
 				*c.WalletPass = *cfg.WalletPass
 				D.Ln("unmarshaled config")
 			}
 		} else {
-			*c.WalletPass = emptyhash
+			c.WalletPass.Set(emptyhash)
 		}
 	} else {
-		bh := blake3.Sum256([]byte(*c.WalletPass))
-		*c.WalletPass = hex.EncodeToString(bh[:])
+		bh := blake3.Sum256(c.WalletPass.Bytes())
+		c.WalletPass.Set(hex.EncodeToString(bh[:]))
 	}
 	// D.Ln("'"+wp+"'", *c.WalletPass)
 	// don't save pipe log setting as we want it to only be active from a flag or environment variable
 	pipeLogOn := *c.PipeLog
-	*c.PipeLog = false
+	c.PipeLog.F()
 	var yp []byte
 	if yp, e = json.MarshalIndent(c, "", "  "); !E.Chk(e) {
-		apputil.EnsureDir(*c.ConfigFile)
+		apputil.EnsureDir(c.ConfigFile.V())
 		// D.Ln(string(yp))
-		if e = ioutil.WriteFile(*c.ConfigFile, yp, 0600); !E.Chk(e) {
+		if e = ioutil.WriteFile(c.ConfigFile.V(), yp, 0600); !E.Chk(e) {
 			success = true
 		}
 	}
 	if uac != nil {
-		*c.UserAgentComments = uac
+		c.UserAgentComments.Set(uac)
 	}
 	*c.WalletPass = wp
 	*c.PipeLog = pipeLogOn

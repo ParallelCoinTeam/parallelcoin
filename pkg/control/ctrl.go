@@ -105,7 +105,7 @@ func New(
 	if mc, e = transport.NewBroadcastChannel(
 		"controller",
 		s,
-		*cfg.MinerPass,
+		cfg.MulticastPass.V(),
 		transport.DefaultPort,
 		MaxDatagramSize,
 		handlersMulticast,
@@ -167,11 +167,11 @@ func (s *State) startWallet() (e error) {
 	I.Ln("establishing wallet connection")
 	if s.walletClient, e = rpcclient.New(
 		&rpcclient.ConnConfig{
-			Host:         *s.cfg.WalletServer,
+			Host:         s.cfg.WalletServer.V(),
 			Endpoint:     "ws",
-			User:         *s.cfg.Username,
-			Pass:         *s.cfg.Password,
-			TLS:          *s.cfg.TLS,
+			User:         s.cfg.Username.V(),
+			Pass:         s.cfg.Password.V(),
+			TLS:          s.cfg.TLS.True(),
 			Certificates: certs,
 		}, nil, s.quit,
 	); E.Chk(e) {
@@ -325,7 +325,7 @@ func (s *State) checkConnected() (connected bool) {
 	// 	I.Ln("no need to check connectivity if we aren't mining")
 	// 	return
 	// }
-	if *s.cfg.Solo {
+	if s.cfg.Solo.True() {
 		I.Ln("in solo mode, mining anyway")
 		// s.Start()
 		return true
@@ -345,7 +345,7 @@ func (s *State) checkConnected() (connected bool) {
 				lanPeers++
 			}
 		}
-		if *s.cfg.LAN {
+		if s.cfg.LAN.True() {
 			// if there is no peers on lan and solo was not set, stop mining
 			if lanPeers == 0 {
 				T.Ln("no lan peers while in lan mode, stopping mining")
@@ -471,14 +471,14 @@ func (s *State) GetNewAddressFromMiningAddrs() (addr btcaddr.Address, e error) {
 		I.Ln(e)
 		return
 	}
-	if len(*s.cfg.MiningAddrs) < 1 {
+	if len(s.cfg.MiningAddrs.S()) < 1 {
 		e = errors.New("no mining addresses")
 		I.Ln(e)
 		return
 	}
 	// Choose a payment address at random.
 	rand.Seed(time.Now().UnixNano())
-	p2a := rand.Intn(len(*s.cfg.MiningAddrs))
+	p2a := rand.Intn(len(s.cfg.MiningAddrs.S()))
 	addr = s.stateCfg.ActiveMiningAddrs[p2a]
 	// remove the address from the state
 	if p2a == 0 {
@@ -494,7 +494,7 @@ func (s *State) GetNewAddressFromMiningAddrs() (addr btcaddr.Address, e error) {
 	for i := range s.stateCfg.ActiveMiningAddrs {
 		ma = append(ma, s.stateCfg.ActiveMiningAddrs[i].String())
 	}
-	*s.cfg.MiningAddrs = ma
+	s.cfg.MiningAddrs.Set(ma)
 	podcfg.Save(s.cfg)
 	return
 }
@@ -523,8 +523,8 @@ func processAdvtMsg(ctx interface{}, src net.Addr, dst string, b []byte) (e erro
 		s.otherNodes[uuid] = &nodeSpec{}
 		s.otherNodes[uuid].Time = time.Now()
 		// try all IPs
-		if *s.cfg.AutoListen {
-			s.cfg.P2PConnect = &cli.StringSlice{}
+		if s.cfg.AutoListen.True() {
+			s.cfg.P2PConnect.Set(cli.StringSlice{})
 		}
 		for addr := range j.IPs {
 			peerIP := net.JoinHostPort(addr, fmt.Sprint(j.P2P))
@@ -590,7 +590,7 @@ func processSolMsg(ctx interface{}, src net.Addr, dst string, b []byte,) (e erro
 	}
 	
 	I.Ln("sending pause to workers")
-	if e = s.multiConn.SendMany(pause.Magic, transport.GetShards(p2padvt.Get(s.uuid, (*s.cfg.P2PListeners)[0]))); E.Chk(e) {
+	if e = s.multiConn.SendMany(pause.Magic, transport.GetShards(p2padvt.Get(s.uuid, (s.cfg.P2PListeners.S())[0]))); E.Chk(e) {
 		return
 	}
 	I.Ln("signalling controller to enter pause mode")

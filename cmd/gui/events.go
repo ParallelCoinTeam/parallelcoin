@@ -23,11 +23,11 @@ func (wg *WalletGUI) WalletAndClientRunning() bool {
 }
 
 func (wg *WalletGUI) Advertise() (e error) {
-	if wg.node.Running() && *wg.cx.Config.Discovery {
+	if wg.node.Running() && wg.cx.Config.Discovery.True() {
 		// I.Ln("sending out p2p advertisment")
 		if e = wg.multiConn.SendMany(
 			p2padvt.Magic,
-			transport.GetShards(p2padvt.Get(uint64(*wg.cx.Config.UUID), (*wg.cx.Config.P2PListeners)[0])),
+			transport.GetShards(p2padvt.Get(uint64(wg.cx.Config.UUID.V()), (wg.cx.Config.P2PListeners.S())[0])),
 		); E.Chk(e) {
 		}
 	}
@@ -172,7 +172,7 @@ func (wg *WalletGUI) Advertise() (e error) {
 func (wg *WalletGUI) updateThingies() (e error) {
 	// update the configuration
 	var b []byte
-	if b, e = ioutil.ReadFile(*wg.cx.Config.ConfigFile); !E.Chk(e) {
+	if b, e = ioutil.ReadFile(wg.cx.Config.ConfigFile.V()); !E.Chk(e) {
 		if e = json.Unmarshal(b, wg.cx.Config); !E.Chk(e) {
 			return
 		}
@@ -646,7 +646,7 @@ func (wg *WalletGUI) WalletNotifications() *rpcclient.NotificationHandlers {
 
 func (wg *WalletGUI) chainClient() (e error) {
 	D.Ln("starting up chain client")
-	if *wg.cx.Config.NodeOff {
+	if wg.cx.Config.NodeOff.True() {
 		W.Ln("node is disabled")
 		return nil
 	}
@@ -657,11 +657,11 @@ func (wg *WalletGUI) chainClient() (e error) {
 		// defer wg.ChainMutex.Unlock()
 		if wg.ChainClient, e = rpcclient.New(
 			&rpcclient.ConnConfig{
-				Host:                 *wg.cx.Config.RPCConnect,
+				Host:                 wg.cx.Config.RPCConnect.V(),
 				Endpoint:             "ws",
-				User:                 *wg.cx.Config.Username,
-				Pass:                 *wg.cx.Config.Password,
-				TLS:                  *wg.cx.Config.TLS,
+				User:                 wg.cx.Config.Username.V(),
+				Pass:                 wg.cx.Config.Password.V(),
+				TLS:                  wg.cx.Config.TLS.True(),
 				Certificates:         certs,
 				DisableAutoReconnect: false,
 				DisableConnectOnNew:  false,
@@ -686,7 +686,7 @@ func (wg *WalletGUI) chainClient() (e error) {
 
 func (wg *WalletGUI) walletClient() (e error) {
 	D.Ln("connecting to wallet")
-	if *wg.cx.Config.WalletOff {
+	if wg.cx.Config.WalletOff.True() {
 		W.Ln("wallet is disabled")
 		return nil
 	}
@@ -696,11 +696,11 @@ func (wg *WalletGUI) walletClient() (e error) {
 	wg.WalletMutex.Lock()
 	if wg.WalletClient, e = rpcclient.New(
 		&rpcclient.ConnConfig{
-			Host:                 *wg.cx.Config.WalletServer,
+			Host:                 wg.cx.Config.WalletServer.V(),
 			Endpoint:             "ws",
-			User:                 *wg.cx.Config.Username,
-			Pass:                 *wg.cx.Config.Password,
-			TLS:                  *wg.cx.Config.TLS,
+			User:                 wg.cx.Config.Username.V(),
+			Pass:                 wg.cx.Config.Password.V(),
+			TLS:                  wg.cx.Config.TLS.True(),
 			Certificates:         certs,
 			DisableAutoReconnect: false,
 			DisableConnectOnNew:  false,

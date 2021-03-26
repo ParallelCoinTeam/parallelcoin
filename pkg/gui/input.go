@@ -136,9 +136,9 @@ func (w *Window) Input(
 
 // Fn renders the input widget
 func (in *Input) Fn(gtx l.Context) l.Dimensions {
-	// gtx.Constraints.Max.X = int(in.TextSize.Scale(float32(in.size)).V)
+	// gtx.Constraints.Max.X = int(in.TextSize.Scale(float32(in.size)).True)
 	// gtx.Constraints.Min.X = 0
-	// width := int(in.Theme.TextSize.Scale(in.size).V)
+	// width := int(in.Theme.TextSize.Scale(in.size).True)
 	// gtx.Constraints.Max.X, gtx.Constraints.Min.X = width, width
 	return in.Border().Width(0.125).CornerRadius(0.0).
 		Corners(0).Color(in.borderColor).Embed(

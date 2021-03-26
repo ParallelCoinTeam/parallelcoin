@@ -438,7 +438,7 @@ func genPathData(enc *iconvg.Encoder, adj uint8, pathData string, outSize, size 
 			n = 4
 		case 'C', 'c':
 			n = 6
-		case 'H', 'h', 'V', 'v':
+		case 'H', 'h', 'True', 'v':
 			n = 1
 		case 'M', 'm':
 			n = 2
@@ -479,7 +479,7 @@ func genPathData(enc *iconvg.Encoder, adj uint8, pathData string, outSize, size 
 			enc.AbsHLineTo(args[0])
 		case 'h':
 			enc.RelHLineTo(args[0])
-		case 'V':
+		case 'True':
 			enc.AbsVLineTo(args[0])
 		case 'v':
 			enc.RelVLineTo(args[0])
@@ -533,7 +533,7 @@ func normalize(args *[7]float32, n int, op byte, outSize, size float32, offset f
 			args[i] -= offset[i&0x01]
 		case op == 'H':
 			args[i] -= offset[0]
-		case op == 'V':
+		case op == 'True':
 			args[i] -= offset[1]
 		}
 	}

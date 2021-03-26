@@ -631,7 +631,7 @@ func testMetadataManualTxInterface(tc *testContext) bool {
 		defer rollbackOnPanic(tc.t, tx)
 		metadataBucket := tx.Metadata()
 		if metadataBucket == nil {
-			tc.t.Errorf("Metadata: unexpected nil bucket")
+			tc.t.Errorf("metadata: unexpected nil bucket")
 			_ = tx.Rollback()
 			return false
 		}
@@ -691,7 +691,7 @@ func testMetadataManualTxInterface(tc *testContext) bool {
 		defer rollbackOnPanic(tc.t, tx)
 		metadataBucket := tx.Metadata()
 		if metadataBucket == nil {
-			tc.t.Errorf("Metadata: unexpected nil bucket")
+			tc.t.Errorf("metadata: unexpected nil bucket")
 			_ = tx.Rollback()
 			return false
 		}
@@ -720,7 +720,7 @@ func testMetadataManualTxInterface(tc *testContext) bool {
 		defer rollbackOnPanic(tc.t, tx)
 		metadataBucket := tx.Metadata()
 		if metadataBucket == nil {
-			tc.t.Errorf("Metadata: unexpected nil bucket")
+			tc.t.Errorf("metadata: unexpected nil bucket")
 			_ = tx.Rollback()
 			return false
 		}
@@ -1622,7 +1622,7 @@ func testClosedTxInterface(tc *testContext, tx database.Tx) bool {
 	cursor := tx.Metadata().Cursor()
 	bucketName := []byte("closedtxbucket")
 	keyName := []byte("closedtxkey")
-	// Metadata API
+	// metadata API
 	//
 	// Ensure that attempting to get an existing bucket returns nil when the transaction is closed.
 	if b := bucket.Bucket(bucketName); b != nil {
@@ -1677,7 +1677,7 @@ func testClosedTxInterface(tc *testContext, tx database.Tx) bool {
 	if !checkDbError(tc.t, testName, e, wantErrCode) {
 		return false
 	}
-	// Metadata Cursor API
+	// metadata Cursor API
 	// Ensure attempting to get a bucket from a cursor on a closed tx gives back nil.
 	if b := cursor.Bucket(); b != nil {
 		tc.t.Error("Cursor.Bucket: returned non-nil on closed tx")

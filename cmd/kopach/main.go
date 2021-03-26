@@ -93,15 +93,15 @@ func (w *Worker) Start() {
 	D.Ln("starting up kopach workers")
 	w.workers = []*worker.Worker{}
 	w.clients = []*client.Client{}
-	for i := 0; i < *w.cx.Config.GenThreads; i++ {
+	for i := 0; i < w.cx.Config.GenThreads.V(); i++ {
 		D.Ln("starting worker", i)
-		cmd, _ := worker.Spawn(w.quit, os.Args[0], "worker", w.id, w.cx.ActiveNet.Name, *w.cx.Config.LogLevel)
+		cmd, _ := worker.Spawn(w.quit, os.Args[0], "worker", w.id, w.cx.ActiveNet.Name, w.cx.Config.LogLevel.V())
 		w.workers = append(w.workers, cmd)
 		w.clients = append(w.clients, client.New(cmd.StdConn))
 	}
 	for i := range w.clients {
 		T.Ln("sending pass to worker", i)
-		e := w.clients[i].SendPass(*w.cx.Config.MinerPass)
+		e := w.clients[i].SendPass(w.cx.Config.MulticastPass.V())
 		if e != nil {
 		}
 	}
@@ -153,7 +153,7 @@ func Handle(cx *pod.State) func(c *cli.Context) (e error) {
 		w.active.Store(false)
 		D.Ln("opening broadcast channel listener")
 		w.conn, e = transport.NewBroadcastChannel(
-			"kopachmain", w, *cx.Config.MinerPass,
+			"kopachmain", w, cx.Config.MulticastPass.V(),
 			transport.DefaultPort, control.MaxDatagramSize, handlers,
 			w.quit,
 		)
@@ -161,7 +161,7 @@ func Handle(cx *pod.State) func(c *cli.Context) (e error) {
 			return
 		}
 		// start up the workers
-		if *cx.Config.Generate {
+		if cx.Config.Generate.True() {
 			w.Start()
 			interrupt.AddHandler(
 				func() {
@@ -206,25 +206,25 @@ func Handle(cx *pod.State) func(c *cli.Context) (e error) {
 					}
 				case <-w.StartChan.Wait():
 					D.Ln("received signal on StartChan")
-					*cx.Config.Generate = true
+					cx.Config.Generate.T()
 					podcfg.Save(cx.Config)
 					w.Start()
 				case <-w.StopChan.Wait():
 					D.Ln("received signal on StopChan")
-					*cx.Config.Generate = false
+					cx.Config.Generate.F()
 					podcfg.Save(cx.Config)
 					w.Stop()
 				case s := <-w.PassChan:
 					D.Ln("received signal on PassChan", s)
-					*cx.Config.MinerPass = s
+					cx.Config.MulticastPass.Set(s)
 					podcfg.Save(cx.Config)
 					w.Stop()
 					w.Start()
 				case n := <-w.SetThreads:
 					D.Ln("received signal on SetThreads", n)
-					*cx.Config.GenThreads = n
+					cx.Config.GenThreads.Set(n)
 					podcfg.Save(cx.Config)
-					if *cx.Config.Generate {
+					if cx.Config.Generate.True() {
 						// always sanitise
 						if n < 0 {
 							n = int(maxThreads)

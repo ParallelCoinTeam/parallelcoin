@@ -36,10 +36,10 @@ func Main(cx *pod.State) (e error) {
 	cx.WaitAdd()
 	// show version at startup
 	// enable http profiling server if requested
-	if *cx.Config.Profile != "" {
+	if cx.Config.Profile.V() != "" {
 		D.Ln("profiling requested")
 		go func() {
-			listenAddr := net.JoinHostPort("", *cx.Config.Profile)
+			listenAddr := net.JoinHostPort("", cx.Config.Profile.V())
 			I.Ln("profile server listening on", listenAddr)
 			profileRedirect := http.RedirectHandler("/debug/pprof", http.StatusSeeOther)
 			http.Handle("/", profileRedirect)
@@ -47,10 +47,10 @@ func Main(cx *pod.State) (e error) {
 		}()
 	}
 	// write cpu profile if requested
-	if *cx.Config.CPUProfile != "" && os.Getenv("POD_TRACE") != "on" {
+	if cx.Config.CPUProfile.V() != "" && os.Getenv("POD_TRACE") != "on" {
 		D.Ln("cpu profiling enabled")
 		var f *os.File
-		f, e = os.Create(*cx.Config.CPUProfile)
+		f, e = os.Create(cx.Config.CPUProfile.V())
 		if e != nil {
 			E.Ln("unable to create cpu profile:", e)
 			return
@@ -135,7 +135,7 @@ func Main(cx *pod.State) (e error) {
 	// create server and start it
 	var server *chainrpc.Node
 	server, e = chainrpc.NewNode(
-		*cx.Config.P2PListeners,
+		cx.Config.P2PListeners.S(),
 		db,
 		interrupt.ShutdownRequestChan,
 		pod.GetContext(cx),
@@ -165,7 +165,7 @@ func Main(cx *pod.State) (e error) {
 		cx.RealNode,
 		cx.RPCServer.Cfg.ConnMgr,
 		mempoolUpdateChan,
-		uint64(*cx.Config.UUID),
+		uint64(cx.Config.UUID.V()),
 		cx.KillAll,
 		cx.RealNode.StartController, cx.RealNode.StopController,
 	)
@@ -226,16 +226,16 @@ func loadBlockDB(cx *pod.State) (db database.DB, e error) {
 	// The memdb backend does not have a file path associated with it, so handle it
 	// uniquely. We also don't want to worry about the multiple database type
 	// warnings when running with the memory database.
-	if *cx.Config.DbType == "memdb" {
+	if cx.Config.DbType.V() == "memdb" {
 		I.Ln("creating block database in memory")
-		if db, e = database.Create(*cx.Config.DbType); E.Chk(e) {
+		if db, e = database.Create(cx.Config.DbType.V()); E.Chk(e) {
 			return nil, e
 		}
 		return db, nil
 	}
 	warnMultipleDBs(cx)
 	// The database name is based on the database type.
-	dbPath := path.BlockDb(cx, *cx.Config.DbType, blockdb.NamePrefix)
+	dbPath := path.BlockDb(cx, cx.Config.DbType.V(), blockdb.NamePrefix)
 	// The regression test is special in that it needs a clean database for each
 	// run, so remove it now if it already exists.
 	e = removeRegressionDB(cx, dbPath)
@@ -243,18 +243,18 @@ func loadBlockDB(cx *pod.State) (db database.DB, e error) {
 		D.Ln("failed to remove regression db:", e)
 	}
 	I.F("loading block database from '%s'", dbPath)
-	if db, e = database.Open(*cx.Config.DbType, dbPath, cx.ActiveNet.Net); E.Chk(e) {
+	if db, e = database.Open(cx.Config.DbType.V(), dbPath, cx.ActiveNet.Net); E.Chk(e) {
 		T.Ln(e) // return the error if it's not because the database doesn't exist
 		if dbErr, ok := e.(database.DBError); !ok || dbErr.ErrorCode !=
 			database.ErrDbDoesNotExist {
 			return nil, e
 		}
 		// create the db if it does not exist
-		e = os.MkdirAll(*cx.Config.DataDir, 0700)
+		e = os.MkdirAll(cx.Config.DataDir.V(), 0700)
 		if e != nil {
 			return nil, e
 		}
-		db, e = database.Create(*cx.Config.DbType, dbPath, cx.ActiveNet.Net)
+		db, e = database.Create(cx.Config.DbType.V(), dbPath, cx.ActiveNet.Net)
 		if e != nil {
 			return nil, e
 		}
@@ -267,7 +267,7 @@ func loadBlockDB(cx *pod.State) (db database.DB, e error) {
 // in regression test mode and it already exists.
 func removeRegressionDB(cx *pod.State, dbPath string) (e error) {
 	// don't do anything if not in regression test mode
-	if !((*cx.Config.Network)[0] == 'r') {
+	if !((cx.Config.Network.V())[0] == 'r') {
 		return nil
 	}
 	// remove the old regression test database if it already exists
@@ -297,7 +297,7 @@ func warnMultipleDBs(cx *pod.State) {
 	dbTypes := []string{"ffldb", "leveldb", "sqlite"}
 	duplicateDbPaths := make([]string, 0, len(dbTypes)-1)
 	for _, dbType := range dbTypes {
-		if dbType == *cx.Config.DbType {
+		if dbType == cx.Config.DbType.V() {
 			continue
 		}
 		// store db path as a duplicate db if it exists
@@ -308,7 +308,7 @@ func warnMultipleDBs(cx *pod.State) {
 	}
 	// warn if there are extra databases
 	if len(duplicateDbPaths) > 0 {
-		selectedDbPath := path.BlockDb(cx, *cx.Config.DbType, blockdb.NamePrefix)
+		selectedDbPath := path.BlockDb(cx, cx.Config.DbType.V(), blockdb.NamePrefix)
 		W.F(
 			"\nThere are multiple block chain databases using different"+
 				" database types.\nYou probably don't want to waste disk"+

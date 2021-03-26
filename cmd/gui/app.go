@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"path/filepath"
 	
 	uberatomic "go.uber.org/atomic"
 	"golang.org/x/exp/shiny/materialdesign/icons"
@@ -25,7 +26,7 @@ func (wg *WalletGUI) GetAppWidget() (a *gui.App) {
 		func() {
 			D.Ln("theme hook")
 			// D.Ln(wg.bools)
-			*wg.cx.Config.DarkTheme = *wg.Dark
+			wg.cx.Config.DarkTheme.Set(*wg.Dark)
 			a := wg.configs["config"]["DarkTheme"].Slot.(*bool)
 			*a = *wg.Dark
 			if wgb, ok := wg.config.Bools["DarkTheme"]; ok {
@@ -469,25 +470,25 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 			miningIcon = &p9icons.NoMine
 		}
 		controllerIcon := &icons.NotificationSyncDisabled
-		if *wg.cx.Config.Controller {
+		if wg.cx.Config.Controller.True() {
 			controllerIcon = &icons.NotificationSync
 		}
 		discoverColor :=
 			"DocText"
 		discoverIcon :=
 			&icons.DeviceWiFiTethering
-		if !*wg.cx.Config.Discovery {
+		if wg.cx.Config.Discovery.False() {
 			discoverIcon =
 				&icons.CommunicationPortableWiFiOff
 			discoverColor =
 				"scrim"
 		}
 		clr := "scrim"
-		if *wg.cx.Config.Controller {
+		if wg.cx.Config.Controller.True() {
 			clr = "DocText"
 		}
 		clr2 := "DocText"
-		if *wg.cx.Config.GenThreads == 0 {
+		if wg.cx.Config.GenThreads.V() == 0 {
 			clr2 = "scrim"
 		}
 		// background := wg.App.StatusBarBackgroundGet()
@@ -563,7 +564,7 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 					SetClick(
 						func() {
 							go func() {
-								*wg.cx.Config.Discovery = !*wg.cx.Config.Discovery
+								wg.cx.Config.Discovery.Flip()
 								podcfg.Save(wg.cx.Config)
 								I.Ln("discover enabled:", *wg.cx.Config.Discovery)
 							}()
@@ -597,12 +598,12 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 					SetClick(
 						func() {
 							if wg.ChainClient != nil && !wg.ChainClient.Disconnected() {
-								*wg.cx.Config.Controller = !*wg.cx.Config.Controller
+								wg.cx.Config.Controller.Flip()
 								I.Ln("controller running:", *wg.cx.Config.Controller)
 								var e error
 								if e = wg.ChainClient.SetGenerate(
-									*wg.cx.Config.Controller,
-									*wg.cx.Config.GenThreads,
+									wg.cx.Config.Controller.True(),
+									wg.cx.Config.GenThreads.V(),
 								); !E.Chk(e) {
 								}
 							}
@@ -638,13 +639,13 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 						func() {
 							// wg.toggleMiner()
 							go func() {
-								if *wg.cx.Config.GenThreads != 0 {
+								if wg.cx.Config.GenThreads.V() != 0 {
 									if wg.miner.Running() {
-										*wg.cx.Config.Generate = false
+										wg.cx.Config.Generate.F()
 										wg.miner.Stop()
 									} else {
 										wg.miner.Start()
-										*wg.cx.Config.Generate = true
+										wg.cx.Config.Generate.T()
 									}
 									podcfg.Save(wg.cx.Config)
 								}
@@ -660,7 +661,7 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 						// Background(wg.MainApp.StatusBarBackgroundGet()).
 						Fn(gtx)
 				},
-		).
+			).
 			Rigid(
 				func(gtx l.Context) l.Dimensions {
 					if !wg.wallet.Running() {
@@ -688,10 +689,10 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 											args := []string{
 												os.Args[0],
 												"-D",
-												*wg.cx.Config.DataDir,
+												wg.cx.Config.DataDir.V(),
 												"--pipelog",
 												"--walletpass",
-												*wg.cx.Config.WalletPass,
+												wg.cx.Config.WalletPass.V(),
 												"wallet",
 												"drophistory",
 											}
@@ -718,10 +719,9 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 
 func (wg *WalletGUI) writeWalletCookie() (e error) {
 	// for security with apps launching the wallet, the public password can be set with a file that is deleted after
-	walletPassPath := *wg.cx.Config.DataDir + slash + wg.cx.ActiveNet.Name + slash + "wp.txt"
+	walletPassPath := filepath.Join(wg.cx.Config.DataDir.V(), wg.cx.ActiveNet.Name, "wp.txt")
 	D.Ln("runner", walletPassPath)
-	wp := *wg.cx.Config.WalletPass
-	b := []byte(wp)
+	b := wg.cx.Config.WalletPass.Bytes()
 	if e = ioutil.WriteFile(walletPassPath, b, 0700); E.Chk(e) {
 	}
 	D.Ln("created password cookie")

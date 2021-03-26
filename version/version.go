@@ -9,12 +9,12 @@ var (
 	// GitRef is the gitref, as in refs/heads/branchname
 	GitRef = "refs/heads/l0k1"
 	// GitCommit is the commit hash of the current HEAD
-	GitCommit = "98285a4515f1b9866767ec67e70086afb71de504"
+	GitCommit = "3acbccf0dc96e1be07deb12995396476396acbb3"
 	// BuildTime stores the time when the current binary was built
-	BuildTime = "2021-03-25T16:02:20+01:00"
+	BuildTime = "2021-03-25T19:09:56+01:00"
 	// Tag lists the Tag on the build, adding a + to the newest Tag if the commit is
 	// not that commit
-	Tag = "v1.9.24+"
+	Tag = "v1.9.25"
 	// PathBase is the path base returned from runtime caller
 	PathBase = "/home/loki/src/github.com/p9c/pod/"
 )

@@ -14,7 +14,6 @@ import (
 	l "gioui.org/layout"
 	
 	"github.com/p9c/pod/pkg/gui"
-	"github.com/p9c/pod/pkg/pod"
 )
 
 type Item struct {
@@ -79,7 +78,7 @@ func (l Lists) Swap(i, j int) {
 }
 
 func (c *Config) Config() GroupsMap {
-	schema := pod.GetConfigSchema(c.cx.Config)
+	schema := podcfg.GetConfigSchema(c.cx.Config)
 	tabNames := make(GroupsMap)
 	// tabs := make(p9.WidgetMap)
 	for i := range schema.Groups {
@@ -243,7 +242,7 @@ func (gm GroupsMap) Widget(ng *Config) l.Widget {
 					dims := ng.VFlex().
 						// Rigid(
 						// 	// ng.Inset(0.25,
-						// 	ng.Fill("DocBg", l.Center, ng.TextSize.V, l.S, ng.Inset(0.25,
+						// 	ng.Fill("DocBg", l.Center, ng.TextSize.True, l.S, ng.Inset(0.25,
 						// 		gui.EmptyMaxWidth()).Fn,
 						// 	).Fn,
 						// 	// ).Fn,
@@ -251,7 +250,7 @@ func (gm GroupsMap) Widget(ng *Config) l.Widget {
 						Rigid(ng.Inset(0.25, gui.EmptyMaxWidth()).Fn).
 						// Rigid(
 						// 	// ng.Inset(0.25,
-						// 	ng.Fill("DocBg", l.Center, ng.TextSize.V, l.N, ng.Inset(0.25,
+						// 	ng.Fill("DocBg", l.Center, ng.TextSize.True, l.N, ng.Inset(0.25,
 						// 		gui.EmptyMaxWidth()).Fn,
 						// 	).Fn,
 						// 	// ).Fn,
@@ -325,7 +324,7 @@ func (gm GroupsMap) Widget(ng *Config) l.Widget {
 	return func(gtx l.Context) l.Dimensions {
 		// clip.UniformRRect(f32.Rectangle{
 		// 	Max: f32.Pt(float32(gtx.Constraints.Max.X), float32(gtx.Constraints.Max.Y)),
-		// }, ng.TextSize.V/2).Add(gtx.Ops)
+		// }, ng.TextSize.True/2).Add(gtx.Ops)
 		return ng.Fill(
 			"DocBg", l.Center, ng.TextSize.V, 0, ng.Inset(
 				0.25,

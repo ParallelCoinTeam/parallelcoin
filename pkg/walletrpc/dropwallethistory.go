@@ -25,8 +25,8 @@ func DropWalletHistory(w *wallet.Wallet, cfg *podcfg.Config) func(c *cli.Context
 			recentBlocksName = []byte("recentblocks")
 		)
 		dbPath := filepath.Join(
-			*cfg.DataDir,
-			*cfg.Network, "wallet.db",
+			cfg.DataDir.V(),
+			cfg.Network.V(), "wallet.db",
 		)
 		// I.Ln("dbPath", dbPath)
 		var db walletdb.DB

@@ -15,7 +15,7 @@ func Configure(cx *pod.State, commandName string, initial bool) {
 	D.Ln("running Configure", commandName, *cx.Config.WalletPass)
 	D.Ln("DATADIR", *cx.Config.DataDir)
 	D.Ln("set log level")
-	spv.DisableDNSSeed = *cx.Config.DisableDNSSeed
+	spv.DisableDNSSeed = cx.Config.DisableDNSSeed.True()
 	initDictionary(cx.Config)
 	initParams(cx)
 	initDataDir(cx.Config)
@@ -25,8 +25,8 @@ func Configure(cx *pod.State, commandName string, initial bool) {
 	initWalletFile(cx)
 	initListeners(cx, commandName, initial)
 	// Don't add peers from the config file when in regression test mode.
-	if ((*cx.Config.Network)[0] == 'r') && len(*cx.Config.AddPeers) > 0 {
-		*cx.Config.AddPeers = nil
+	if ((cx.Config.Network.V())[0] == 'r') && cx.Config.AddPeers.Len() > 0 {
+		cx.Config.AddPeers.Set(nil)
 	}
 	normalizeAddresses(cx.Config)
 	setRelayReject(cx.Config)
@@ -43,7 +43,7 @@ func Configure(cx *pod.State, commandName string, initial bool) {
 	validateMiningStuff(cx.Config, cx.StateCfg, cx.ActiveNet)
 	setDiallers(cx.Config, cx.StateCfg)
 	// if the user set the save flag, or file doesn't exist save the file now
-	if cx.StateCfg.Save || !apputil.FileExists(*cx.Config.ConfigFile) {
+	if cx.StateCfg.Save || !apputil.FileExists(cx.Config.ConfigFile.V()) {
 		cx.StateCfg.Save = false
 		if commandName == "kopach" {
 			return

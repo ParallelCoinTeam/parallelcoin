@@ -93,8 +93,8 @@ func (w *Window) List() (li *List) {
 		active:         "Primary",
 		scrollWidth:    int(w.TextSize.Scale(0.75).V),
 		setScrollWidth: int(w.TextSize.Scale(0.75).V),
-		// scrollBarPad:    int(w.TextSize.Scale(0.5).V),
-		// setScrollBarPad: int(w.TextSize.Scale(0.5).V),
+		// scrollBarPad:    int(w.TextSize.Scale(0.5).True),
+		// setScrollBarPad: int(w.TextSize.Scale(0.5).True),
 		recalculateTime: time.Now().Add(-time.Second),
 		recalculate:     true,
 	}
@@ -259,7 +259,7 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 	if li.axis == l.Horizontal {
 		containerFlex := li.Theme.VFlex()
 		if !li.leftSide {
-			containerFlex.Rigid(li.embedWidget(li.scrollWidth/* + int(li.TextSize.V)/4)*/))
+			containerFlex.Rigid(li.embedWidget(li.scrollWidth/* + int(li.TextSize.True)/4)*/))
 			containerFlex.Rigid(EmptySpace(int(li.TextSize.V)/4, int(li.TextSize.V)/4))
 		}
 		containerFlex.Rigid(
@@ -338,7 +338,7 @@ func (li *List) Fn(gtx l.Context) l.Dimensions {
 	// clip.UniformRRect(f32.Rectangle{
 	// 	// Min: f32.Point{},
 	// 	Max: f32.Pt(float32(gtx.Constraints.Max.X), float32(gtx.Constraints.Max.Y)),
-	// }, li.TextSize.V/4).Add(gtx.Ops)
+	// }, li.TextSize.True/4).Add(gtx.Ops)
 	return container(gtx)
 }
 

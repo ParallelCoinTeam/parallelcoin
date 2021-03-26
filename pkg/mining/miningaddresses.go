@@ -2,11 +2,10 @@ package mining
 
 import (
 	"github.com/p9c/pod/pkg/podcfg"
-	"github.com/urfave/cli"
 	
 	"github.com/p9c/pod/cmd/node/state"
-	"github.com/p9c/pod/pkg/wallet"
 	wm "github.com/p9c/pod/pkg/waddrmgr"
+	"github.com/p9c/pod/pkg/wallet"
 )
 
 // RefillMiningAddresses adds new addresses to the mining address pool for the miner
@@ -20,14 +19,7 @@ func RefillMiningAddresses(w *wallet.Wallet, cfg *podcfg.Config, stateCfg *state
 		D.Ln("config is empty")
 		return
 	}
-	var miningAddressLen int
-	if cfg.MiningAddrs != nil {
-		D.Ln("miningAddressLen", len(*cfg.MiningAddrs))
-		miningAddressLen = len(*cfg.MiningAddrs)
-	} else {
-		D.Ln("miningaddrs slice is missing")
-		cfg.MiningAddrs = new(cli.StringSlice)
-	}
+	miningAddressLen := len(cfg.MiningAddrs.S())
 	toMake := 99 - miningAddressLen
 	if miningAddressLen >= 99 {
 		toMake = 0
@@ -51,7 +43,7 @@ func RefillMiningAddresses(w *wallet.Wallet, cfg *podcfg.Config, stateCfg *state
 		)
 		if e == nil {
 			// add them to the configuration to be saved
-			*cfg.MiningAddrs = append(*cfg.MiningAddrs, addr.EncodeAddress())
+			cfg.MiningAddrs.Set(append(cfg.MiningAddrs.S(), addr.EncodeAddress()))
 			// add them to the active mining address list so they
 			// are ready to use
 			stateCfg.ActiveMiningAddrs = append(stateCfg.ActiveMiningAddrs, addr)

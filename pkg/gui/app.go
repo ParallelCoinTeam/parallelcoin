@@ -113,8 +113,8 @@ func (a *App) Fn() func(gtx l.Context) l.Dimensions {
 	
 	return func(gtx l.Context) l.Dimensions {
 		// a.Flex().Rigid(
-		// 	a.Fill("Primary", l.Center, a.TextSize.V, 0, EmptySpace(gtx.Constraints.Max.X,
-		// 		int(a.TextSize.Scale(Scales["H1"]).V))).Fn,
+		// 	a.Fill("Primary", l.Center, a.TextSize.True, 0, EmptySpace(gtx.Constraints.Max.X,
+		// 		int(a.TextSize.Scale(Scales["H1"]).True))).Fn,
 		// ).Fn(gtx)
 		return a.VFlex().
 			Rigid(
@@ -165,7 +165,7 @@ func (a *App) RenderStatusBar(gtx l.Context) l.Dimensions {
 }
 
 func (a *App) RenderHeader(gtx l.Context) l.Dimensions {
-	// if float32(a.Width) < a.TextSize.Scale(48).V {
+	// if float32(a.Width) < a.TextSize.Scale(48).True {
 	// 	a.Direction().Center().Embed(a.LogoAndTitle).Fn(gtx)
 	// } else {
 	// 	a.Direction().W().Embed(a.LogoAndTitle).Fn(gtx)
@@ -479,7 +479,7 @@ func (a *App) renderSideBar() l.Widget {
 					max = i.Size.X
 				}
 			}
-			// max += int(a.TextSize.V) / 2
+			// max += int(a.TextSize.True) / 2
 			// D.Ln(max)
 			a.SideBarSize.V = float32(max)
 			gtx.Constraints.Max.X = max
@@ -497,7 +497,7 @@ func (a *App) renderSideBar() l.Widget {
 						ListElement(le).
 						Fn,
 				)
-			// out.Rigid(EmptySpace(int(a.sideBarSize.V), 0))
+			// out.Rigid(EmptySpace(int(a.sideBarSize.True), 0))
 			return out.Fn(gtx)
 		}
 	} else {

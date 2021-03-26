@@ -693,7 +693,7 @@ var HelpDescsEnUS = map[string]string{
 	"versionresult-minor":         "The minor component of the JSON-RPC API version",
 	"versionresult-patch":         "The patch component of the JSON-RPC API version",
 	"versionresult-prerelease":    "Prerelease info about the current build",
-	"versionresult-buildmetadata": "Metadata about the current build",
+	"versionresult-buildmetadata": "metadata about the current build",
 }
 
 // ResultTypes specifies the result types that each RPC command can return.

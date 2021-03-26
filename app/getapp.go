@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 	"github.com/p9c/pod/pkg/pod"
+	"github.com/p9c/pod/pkg/podcfg"
 	walletrpc2 "github.com/p9c/pod/pkg/walletrpc"
 	"github.com/p9c/pod/version"
 	"os"
@@ -12,7 +13,6 @@ import (
 	"github.com/urfave/cli"
 	
 	"github.com/p9c/pod/cmd/kopach_worker"
-	"github.com/p9c/pod/cmd/node"
 	"github.com/p9c/pod/cmd/node/mempool"
 	"github.com/p9c/pod/cmd/walletmain"
 	au "github.com/p9c/pod/pkg/apputil"
@@ -116,13 +116,13 @@ func getApp(cx *pod.State) (a *cli.App) {
 						"reset the chain",
 						func(c *cli.Context) (e error) {
 							podconfig.Configure(cx, "resetchain", true)
-							dbName := blockdb.NamePrefix + "_" + *cx.Config.DbType
-							if *cx.Config.DbType == "sqlite" {
+							dbName := blockdb.NamePrefix + "_" + cx.Config.DbType.V()
+							if cx.Config.DbType.V() == "sqlite" {
 								dbName += ".db"
 							}
 							dbPath := filepath.Join(
 								filepath.Join(
-									*cx.Config.DataDir,
+									cx.Config.DataDir.V(),
 									cx.ActiveNet.Name,
 								), dbName,
 							)
@@ -189,13 +189,13 @@ func getApp(cx *pod.State) (a *cli.App) {
 						"reset the chain",
 						func(c *cli.Context) (e error) {
 							podconfig.Configure(cx, "resetchain", true)
-							dbName := blockdb.NamePrefix + "_" + *cx.Config.DbType
-							if *cx.Config.DbType == "sqlite" {
+							dbName := blockdb.NamePrefix + "_" + cx.Config.DbType.V()
+							if cx.Config.DbType.V() == "sqlite" {
 								dbName += ".db"
 							}
 							dbPath := filepath.Join(
 								filepath.Join(
-									*cx.Config.DataDir,
+									cx.Config.DataDir.V(),
 									cx.ActiveNet.Name,
 								), dbName,
 							)
@@ -265,10 +265,10 @@ func getApp(cx *pod.State) (a *cli.App) {
 		Flags: []cli.Flag{
 			cli.StringFlag{
 				Name:        "datadir, D",
-				Value:       *cx.Config.DataDir,
+				Value:       cx.Config.DataDir.V(),
 				Usage:       "sets the data directory base for a pod instance",
 				EnvVar:      "POD_DATADIR",
-				Destination: cx.Config.DataDir,
+				Destination: cx.Config.DataDir.Ptr(),
 			},
 			cli.BoolFlag{
 				Name: "pipelog, P",
@@ -276,21 +276,21 @@ func getApp(cx *pod.State) (a *cli.App) {
 					"setting only activates on use of cli flag or environment" +
 					" variable as it alters stdin/out behaviour)",
 				EnvVar:      "POD_PIPELOG",
-				Destination: cx.Config.PipeLog,
+				Destination: cx.Config.PipeLog.Ptr(),
 			},
 			cli.StringFlag{
 				Name:        "lang, L",
-				Value:       *cx.Config.Language,
+				Value:       cx.Config.Language.V(),
 				Usage:       "sets the data directory base for a pod instance",
 				EnvVar:      "POD_LANGUAGE",
-				Destination: cx.Config.Language,
+				Destination: cx.Config.Language.Ptr(),
 			},
 			cli.StringFlag{
 				Name:        "walletfile, WF",
-				Value:       *cx.Config.WalletFile,
+				Value:       cx.Config.WalletFile.V(),
 				Usage:       "sets the data directory base for a pod instance",
 				EnvVar:      "POD_WALLETFILE",
-				Destination: cx.Config.WalletFile,
+				Destination: cx.Config.WalletFile.Ptr(),
 			},
 			au.BoolTrue(
 				"save, i",
@@ -299,149 +299,149 @@ func getApp(cx *pod.State) (a *cli.App) {
 			),
 			cli.StringFlag{
 				Name:        "loglevel, l",
-				Value:       *cx.Config.LogLevel,
+				Value:       cx.Config.LogLevel.V(),
 				Usage:       "sets the base for all subsystem logging",
 				EnvVar:      "POD_LOGLEVEL",
-				Destination: cx.Config.LogLevel,
+				Destination: cx.Config.LogLevel.Ptr(),
 			},
 			au.StringSlice(
 				"highlight",
 				"define the set of packages whose logs will have attention-grabbing keywords to aid scanning logs",
-				cx.Config.Hilite,
+				cx.Config.Hilite.Ptr(),
 			),
 			au.StringSlice(
 				"logfilter",
 				"define the set of packages whose logs will not print",
-				cx.Config.LogFilter,
+				cx.Config.LogFilter.Ptr(),
 			),
 			au.String(
 				"network, n",
 				"connect to mainnet/testnet/regtest/simnet",
 				"mainnet",
-				cx.Config.Network,
+				cx.Config.Network.Ptr(),
 			),
 			au.String(
 				"username",
 				"sets the username for services",
 				"server",
-				cx.Config.Username,
+				cx.Config.Username.Ptr(),
 			),
 			au.String(
 				"password",
 				"sets the password for services",
 				genPassword(),
-				cx.Config.Password,
+				cx.Config.Password.Ptr(),
 			),
 			au.String(
 				"serveruser",
 				"sets the username for clients of services",
 				"client",
-				cx.Config.ServerUser,
+				cx.Config.ServerUser.Ptr(),
 			),
 			au.String(
 				"serverpass",
 				"sets the password for clients of services",
 				genPassword(),
-				cx.Config.ServerPass,
+				cx.Config.ServerPass.Ptr(),
 			),
 			au.String(
 				"limituser",
 				"sets the limited rpc username",
 				"limit",
-				cx.Config.LimitUser,
+				cx.Config.LimitUser.Ptr(),
 			),
 			au.String(
 				"limitpass",
 				"sets the limited rpc password",
 				genPassword(),
-				cx.Config.LimitPass,
+				cx.Config.LimitPass.Ptr(),
 			),
 			au.String(
 				"rpccert",
 				"File containing the certificate file",
 				"",
-				cx.Config.RPCCert,
+				cx.Config.RPCCert.Ptr(),
 			),
 			au.String(
 				"rpckey",
 				"File containing the certificate key",
 				"",
-				cx.Config.RPCKey,
+				cx.Config.RPCKey.Ptr(),
 			),
 			au.String(
 				"cafile",
 				"File containing root certificates to authenticate a TLS"+
 					" connections with pod",
 				"",
-				cx.Config.CAFile,
+				cx.Config.CAFile.Ptr(),
 			),
 			au.BoolTrue(
 				"clienttls",
 				"Enable TLS for client connections",
-				cx.Config.TLS,
+				cx.Config.TLS.Ptr(),
 			),
 			au.BoolTrue(
 				"servertls",
 				"Enable TLS for server connections",
-				cx.Config.ServerTLS,
+				cx.Config.ServerTLS.Ptr(),
 			),
 			au.String(
 				"proxy",
 				"Connect via SOCKS5 proxy",
 				"",
-				cx.Config.Proxy,
+				cx.Config.Proxy.Ptr(),
 			),
 			au.String(
 				"proxyuser",
 				"Username for proxy server",
 				"user",
-				cx.Config.ProxyUser,
+				cx.Config.ProxyUser.Ptr(),
 			),
 			au.String(
 				"proxypass",
 				"Password for proxy server",
 				"pa55word",
-				cx.Config.ProxyPass,
+				cx.Config.ProxyPass.Ptr(),
 			),
 			au.Bool(
 				"onion",
 				"Enable connecting to tor hidden services",
-				cx.Config.Onion,
+				cx.Config.Onion.Ptr(),
 			),
 			au.String(
 				"onionproxy",
 				"Connect to tor hidden services via SOCKS5 proxy (eg. 127.0."+
 					"0.1:9050)",
 				"127.0.0.1:9050",
-				cx.Config.OnionProxy,
+				cx.Config.OnionProxy.Ptr(),
 			),
 			au.String(
 				"onionuser",
 				"Username for onion proxy server",
 				"user",
-				cx.Config.OnionProxyUser,
+				cx.Config.OnionProxyUser.Ptr(),
 			),
 			au.String(
 				"onionpass",
 				"Password for onion proxy server",
 				genPassword(),
-				cx.Config.OnionProxyPass,
+				cx.Config.OnionProxyPass.Ptr(),
 			),
 			au.Bool(
 				"torisolation",
 				"Enable Tor stream isolation by randomizing user credentials"+
 					" for each connection.",
-				cx.Config.TorIsolation,
+				cx.Config.TorIsolation.Ptr(),
 			),
 			au.StringSlice(
 				"addpeer",
 				"Add a peer to connect with at startup",
-				cx.Config.AddPeers,
+				cx.Config.AddPeers.Ptr(),
 			),
 			au.StringSlice(
 				"connect",
 				"Connect only to the specified peers at startup",
-				cx.Config.ConnectPeers,
+				cx.Config.ConnectPeers.Ptr(),
 			),
 			au.Bool(
 				"nolisten",
@@ -449,370 +449,370 @@ func getApp(cx *pod.State) (a *cli.App) {
 					" Listening is automatically disabled if the --connect or"+
 					" --proxy options are used without also specifying listen"+
 					" interfaces via --listen",
-				cx.Config.DisableListen,
+				cx.Config.DisableListen.Ptr(),
 			),
 			au.BoolTrue(
 				"autolisten",
 				"enable automatically populating p2p and controller reachable addresses",
-				cx.Config.AutoListen,
+				cx.Config.AutoListen.Ptr(),
 			),
 			au.StringSlice(
 				"p2pconnect",
 				"Addresses that are configured to receive inbound connections",
-				cx.Config.P2PConnect,
+				cx.Config.P2PConnect.Ptr(),
 			),
 			au.StringSlice(
 				"listen",
 				"Add an interface/port to listen for connections",
-				cx.Config.P2PListeners,
+				cx.Config.P2PListeners.Ptr(),
 			),
 			au.Int(
 				"maxpeers",
 				"Max number of inbound and outbound peers",
-				node.DefaultMaxPeers,
-				cx.Config.MaxPeers,
+				podcfg.DefaultMaxPeers,
+				cx.Config.MaxPeers.Ptr(),
 			),
 			au.Bool(
 				"nobanning",
 				"Disable banning of misbehaving peers",
-				cx.Config.DisableBanning,
+				cx.Config.DisableBanning.Ptr(),
 			),
 			au.Duration(
 				"banduration",
 				"How long to ban misbehaving peers",
 				time.Hour*24,
-				cx.Config.BanDuration,
+				cx.Config.BanDuration.Ptr(),
 			),
 			au.Int(
 				"banthreshold",
 				"Maximum allowed ban score before disconnecting and"+
 					" banning misbehaving peers.",
-				node.DefaultBanThreshold,
-				cx.Config.BanThreshold,
+				podcfg.DefaultBanThreshold,
+				cx.Config.BanThreshold.Ptr(),
 			),
 			au.StringSlice(
 				"whitelist",
 				"Add an IP network or IP that will not be banned. (eg. 192."+
 					"168.1.0/24 or ::1)",
-				cx.Config.Whitelists,
+				cx.Config.Whitelists.Ptr(),
 			),
 			au.String(
 				"rpcconnect",
 				"Hostname/IP and port of pod RPC server to connect to",
 				"",
-				cx.Config.RPCConnect,
+				cx.Config.RPCConnect.Ptr(),
 			),
 			au.StringSlice(
 				"rpclisten",
 				"Add an interface/port to listen for RPC connections",
-				cx.Config.RPCListeners,
+				cx.Config.RPCListeners.Ptr(),
 			),
 			au.Int(
 				"rpcmaxclients",
 				"Max number of RPC clients for standard connections",
-				node.DefaultMaxRPCClients,
-				cx.Config.RPCMaxClients,
+				podcfg.DefaultMaxRPCClients,
+				cx.Config.RPCMaxClients.Ptr(),
 			),
 			au.Int(
 				"rpcmaxwebsockets",
 				"Max number of RPC websocket connections",
-				node.DefaultMaxRPCWebsockets,
-				cx.Config.RPCMaxWebsockets,
+				podcfg.DefaultMaxRPCWebsockets,
+				cx.Config.RPCMaxWebsockets.Ptr(),
 			),
 			au.Int(
 				"rpcmaxconcurrentreqs",
 				"Max number of RPC requests that may be"+
 					" processed concurrently",
-				node.DefaultMaxRPCConcurrentReqs,
-				cx.Config.RPCMaxConcurrentReqs,
+				podcfg.DefaultMaxRPCConcurrentReqs,
+				cx.Config.RPCMaxConcurrentReqs.Ptr(),
 			),
 			au.Bool(
 				"rpcquirks",
 				"Mirror some JSON-RPC quirks of Bitcoin Core -- NOTE:"+
 					" Discouraged unless interoperability issues need to be worked"+
 					" around",
-				cx.Config.RPCQuirks,
+				cx.Config.RPCQuirks.Ptr(),
 			),
 			au.Bool(
 				"norpc",
 				"Disable built-in RPC server -- NOTE: The RPC server"+
 					" is disabled by default if no rpcuser/rpcpass or"+
 					" rpclimituser/rpclimitpass is specified",
-				cx.Config.DisableRPC,
+				cx.Config.DisableRPC.Ptr(),
 			),
 			au.Bool(
 				"nodnsseed",
 				"Disable DNS seeding for peers",
-				cx.Config.DisableDNSSeed,
+				cx.Config.DisableDNSSeed.Ptr(),
 			),
 			au.StringSlice(
 				"externalip",
 				"Add an ip to the list of local addresses we claim to"+
 					" listen on to peers",
-				cx.Config.ExternalIPs,
+				cx.Config.ExternalIPs.Ptr(),
 			),
 			au.StringSlice(
 				"addcheckpoint",
 				"Add a custom checkpoint.  Format: '<height>:<hash>'",
-				cx.Config.AddCheckpoints,
+				cx.Config.AddCheckpoints.Ptr(),
 			),
 			au.Bool(
 				"nocheckpoints",
 				"Disable built-in checkpoints.  Don't do this unless"+
 					" you know what you're doing.",
-				cx.Config.DisableCheckpoints,
+				cx.Config.DisableCheckpoints.Ptr(),
 			),
 			au.String(
 				"dbtype",
 				"Database backend to use for the Block Chain",
-				node.DefaultDbType,
-				cx.Config.DbType,
+				podcfg.DefaultDbType,
+				cx.Config.DbType.Ptr(),
 			),
 			au.String(
 				"profile",
 				"Enable HTTP profiling on given port -- NOTE port"+
 					" must be between 1024 and 65536",
 				"",
-				cx.Config.Profile,
+				cx.Config.Profile.Ptr(),
 			),
 			au.String(
 				"cpuprofile",
 				"Write CPU profile to the specified file",
 				"",
-				cx.Config.CPUProfile,
+				cx.Config.CPUProfile.Ptr(),
 			),
 			au.Bool(
 				"upnp",
 				"Use UPnP to map our listening port outside of NAT",
-				cx.Config.UPNP,
+				cx.Config.UPNP.Ptr(),
 			),
 			au.Float64(
 				"minrelaytxfee",
 				"The minimum transaction fee in DUO/kB to be"+
 					" considered a non-zero fee.",
 				mempool.DefaultMinRelayTxFee.ToDUO(),
-				cx.Config.MinRelayTxFee,
+				cx.Config.MinRelayTxFee.Ptr(),
 			),
 			au.Float64(
 				"limitfreerelay",
 				"Limit relay of transactions with no transaction"+
 					" fee to the given amount in thousands of bytes per minute",
-				node.DefaultFreeTxRelayLimit,
-				cx.Config.FreeTxRelayLimit,
+				podcfg.DefaultFreeTxRelayLimit,
+				cx.Config.FreeTxRelayLimit.Ptr(),
 			),
 			au.Bool(
 				"norelaypriority",
 				"Do not require free or low-fee transactions to have"+
 					" high priority for relaying",
-				cx.Config.NoRelayPriority,
+				cx.Config.NoRelayPriority.Ptr(),
 			),
 			au.Duration(
 				"trickleinterval",
 				"Minimum time between attempts to send new"+
 					" inventory to a connected peer",
-				node.DefaultTrickleInterval,
-				cx.Config.TrickleInterval,
+				podcfg.DefaultTrickleInterval,
+				cx.Config.TrickleInterval.Ptr(),
 			),
 			au.Int(
 				"maxorphantx",
 				"Max number of orphan transactions to keep in memory",
-				node.DefaultMaxOrphanTransactions,
-				cx.Config.MaxOrphanTxs,
+				podcfg.DefaultMaxOrphanTransactions,
+				cx.Config.MaxOrphanTxs.Ptr(),
 			),
 			au.Bool(
 				"generate, g",
 				"Generate (mine) DUO using the CPU",
-				cx.Config.Generate,
+				cx.Config.Generate.Ptr(),
 			),
 			au.Int(
 				"genthreads, G",
 				"Number of CPU threads to use with CPU miner"+
 					" -1 = all cores",
 				1,
-				cx.Config.GenThreads,
+				cx.Config.GenThreads.Ptr(),
 			),
 			au.Bool(
 				"solo",
 				"mine DUO even if not connected to the network",
-				cx.Config.Solo,
+				cx.Config.Solo.Ptr(),
 			),
 			au.Bool(
 				"lan",
 				"mine duo if not connected to nodes on internet",
-				cx.Config.LAN,
+				cx.Config.LAN.Ptr(),
 			),
 			au.Bool(
 				"controller",
 				"enables multicast",
-				cx.Config.Controller,
+				cx.Config.Controller.Ptr(),
 			),
 			au.Bool(
 				"autoports",
 				"uses random automatic ports for p2p & rpc",
-				cx.Config.AutoPorts,
+				cx.Config.AutoPorts.Ptr(),
 			),
 			au.StringSlice(
 				"miningaddr",
 				"Add the specified payment address to the list of"+
 					" addresses to use for generated blocks, at least one is "+
 					"required if generate or minerlistener are set",
-				cx.Config.MiningAddrs,
+				cx.Config.MiningAddrs.Ptr(),
 			),
 			au.String(
 				"minerpass",
 				"password to authorise sending work to a miner",
 				genPassword(),
-				cx.Config.MinerPass,
+				cx.Config.MulticastPass.Ptr(),
 			),
 			au.Int(
 				"blockminsize",
 				"Minimum block size in bytes to be used when"+
 					" creating a block",
-				node.BlockMaxSizeMin,
-				cx.Config.BlockMinSize,
+				podcfg.BlockMaxSizeMin,
+				cx.Config.BlockMinSize.Ptr(),
 			),
 			au.Int(
 				"blockmaxsize",
 				"Maximum block size in bytes to be used when"+
 					" creating a block",
-				node.BlockMaxSizeMax,
-				cx.Config.BlockMaxSize,
+				podcfg.BlockMaxSizeMax,
+				cx.Config.BlockMaxSize.Ptr(),
 			),
 			au.Int(
 				"blockminweight",
 				"Minimum block weight to be used when creating"+
 					" a block",
-				node.BlockMaxWeightMin,
-				cx.Config.BlockMinWeight,
+				podcfg.BlockMaxWeightMin,
+				cx.Config.BlockMinWeight.Ptr(),
 			),
 			au.Int(
 				"blockmaxweight",
 				"Maximum block weight to be used when creating"+
 					" a block",
-				node.BlockMaxWeightMax,
-				cx.Config.BlockMaxWeight,
+				podcfg.BlockMaxWeightMax,
+				cx.Config.BlockMaxWeight.Ptr(),
 			),
 			au.Int(
 				"blockprioritysize",
 				"Size in bytes for high-priority/low-fee"+
 					" transactions when creating a block",
 				mempool.DefaultBlockPrioritySize,
-				cx.Config.BlockPrioritySize,
+				cx.Config.BlockPrioritySize.Ptr(),
 			),
 			au.StringSlice(
 				"uacomment",
 				"Comment to add to the user agent -- See BIP 14 for"+
 					" more information.",
-				cx.Config.UserAgentComments,
+				cx.Config.UserAgentComments.Ptr(),
 			),
 			au.Bool(
 				"nopeerbloomfilters",
 				"Disable bloom filtering support",
-				cx.Config.NoPeerBloomFilters,
+				cx.Config.NoPeerBloomFilters.Ptr(),
 			),
 			au.Bool(
 				"nocfilters",
 				"Disable committed filtering (CF) support",
-				cx.Config.NoCFilters,
+				cx.Config.NoCFilters.Ptr(),
 			),
 			au.Int(
 				"sigcachemaxsize",
 				"The maximum number of entries in the"+
 					" signature verification cache",
-				node.DefaultSigCacheMaxSize,
-				cx.Config.SigCacheMaxSize,
+				podcfg.DefaultSigCacheMaxSize,
+				cx.Config.SigCacheMaxSize.Ptr(),
 			),
 			au.Bool(
 				"blocksonly",
 				"Do not accept transactions from remote peers.",
-				cx.Config.BlocksOnly,
+				cx.Config.BlocksOnly.Ptr(),
 			),
 			au.BoolTrue(
 				"txindex",
 				"Disable the transaction index which makes all transactions available via the getrawtransaction RPC",
-				cx.Config.TxIndex,
+				cx.Config.TxIndex.Ptr(),
 			),
 			au.BoolTrue(
 				"addrindex",
 				"Disable address-based transaction index which makes the searchrawtransactions RPC available",
-				cx.Config.AddrIndex,
+				cx.Config.AddrIndex.Ptr(),
 			),
 			au.Bool(
 				"relaynonstd",
 				"Relay non-standard transactions regardless of the default settings for the active network.",
-				cx.Config.RelayNonStd,
+				cx.Config.RelayNonStd.Ptr(),
 			), au.Bool(
 				"rejectnonstd",
 				"Reject non-standard transactions regardless of the default settings for the active network.",
-				cx.Config.RejectNonStd,
+				cx.Config.RejectNonStd.Ptr(),
 			),
 			au.Bool(
 				"noinitialload",
 				"Defer wallet creation/opening on startup and enable loading wallets over RPC (loading not yet implemented)",
-				cx.Config.NoInitialLoad,
+				cx.Config.NoInitialLoad.Ptr(),
 			),
 			au.Bool(
 				"walletconnect, wc",
 				"connect to wallet instead of full node",
-				cx.Config.Wallet,
+				cx.Config.Wallet.Ptr(),
 			),
 			au.String(
 				"walletserver, ws",
 				"set wallet server to connect to",
 				"127.0.0.1:11046",
-				cx.Config.WalletServer,
+				cx.Config.WalletServer.Ptr(),
 			),
 			cli.StringFlag{
 				Name:        "walletpass",
-				Value:       *cx.Config.WalletPass,
+				Value:       cx.Config.WalletPass.V(),
 				Usage:       "The public wallet password -- Only required if the wallet was created with one",
 				EnvVar:      "POD_WALLETPASS",
-				Destination: cx.Config.WalletPass,
+				Destination: cx.Config.WalletPass.Ptr(),
 			},
 			au.Bool(
 				"onetimetlskey",
 				"Generate a new TLS certificate pair at startup, but only write the certificate to disk",
-				cx.Config.OneTimeTLSKey,
+				cx.Config.OneTimeTLSKey.Ptr(),
 			),
 			au.Bool(
 				"tlsskipverify",
 				"skip verifying tls certificates",
-				cx.Config.TLSSkipVerify,
+				cx.Config.TLSSkipVerify.Ptr(),
 			),
 			au.StringSlice(
 				"walletrpclisten",
 				"Listen for wallet RPC connections on this"+
 					" interface/port (default port: 11046, testnet: 21046,"+
 					" simnet: 41046)",
-				cx.Config.WalletRPCListeners,
+				cx.Config.WalletRPCListeners.Ptr(),
 			),
 			au.Int(
 				"walletrpcmaxclients",
 				"Max number of legacy RPC clients for"+
 					" standard connections",
 				8,
-				cx.Config.WalletRPCMaxClients,
+				cx.Config.WalletRPCMaxClients.Ptr(),
 			),
 			au.Int(
 				"walletrpcmaxwebsockets",
 				"Max number of legacy RPC websocket connections",
 				8,
-				cx.Config.WalletRPCMaxWebsockets,
+				cx.Config.WalletRPCMaxWebsockets.Ptr(),
 			),
 			au.Bool(
 				"nodeoff",
 				"Starts with node turned off",
-				cx.Config.NodeOff,
+				cx.Config.NodeOff.Ptr(),
 			),
 			au.Bool(
 				"walletoff",
 				"Starts with wallet turned off",
-				cx.Config.WalletOff,
+				cx.Config.WalletOff.Ptr(),
 			),
 			au.Bool(
 				"discover",
 				"enable LAN multicast peer discovery in GUI wallet",
-				cx.Config.WalletOff,
+				cx.Config.WalletOff.Ptr(),
 			),
 			au.Bool(
 				"delaystart",
@@ -822,7 +822,7 @@ func getApp(cx *pod.State) (a *cli.App) {
 			au.Bool(
 				"darktheme",
 				"sets the dark theme on the gui interface",
-				cx.Config.DarkTheme,
+				cx.Config.DarkTheme.Ptr(),
 			),
 			au.Bool(
 				"notty",
@@ -832,7 +832,7 @@ func getApp(cx *pod.State) (a *cli.App) {
 			au.Bool(
 				"runasservice",
 				"tells wallet to shut down when the wallet locks",
-				cx.Config.RunAsService,
+				cx.Config.RunAsService.Ptr(),
 			),
 		},
 	}

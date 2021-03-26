@@ -6,11 +6,11 @@ import (
 	"errors"
 	"fmt"
 	"github.com/p9c/pod/pkg/amt"
+	"github.com/p9c/pod/pkg/btcaddr"
 	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/fork"
 	"github.com/p9c/pod/pkg/forkhash"
 	"github.com/p9c/pod/pkg/logg"
-	"github.com/p9c/pod/pkg/btcaddr"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/podcfg"
 	"io/ioutil"
@@ -50,38 +50,36 @@ const (
 var funcName = "loadConfig"
 
 func initDictionary(cfg *podcfg.Config) {
-	if cfg.Language == nil || *cfg.Language == "" {
-		*cfg.Language = Lang("en")
+	if cfg.Language == nil || cfg.Language.V() == "" {
+		cfg.Language.Set(Lang("en"))
 	}
 	T.Ln("lang set to", *cfg.Language)
 }
 
 func initDataDir(cfg *podcfg.Config) {
-	if cfg.DataDir == nil || *cfg.DataDir == "" {
+	if cfg.DataDir == nil || cfg.DataDir.V() == "" {
 		D.Ln("setting default data dir")
-		*cfg.DataDir = appdata.Dir("pod", false)
+		cfg.DataDir.Set(appdata.Dir("pod", false))
 	}
 	T.Ln("datadir set to", *cfg.DataDir)
 }
 
 func initWalletFile(cx *pod.State) {
-	if cx.Config.WalletFile == nil || *cx.Config.WalletFile == "" {
-		*cx.Config.WalletFile = *cx.Config.DataDir + string(os.PathSeparator) +
-			cx.ActiveNet.Name + string(os.PathSeparator) + wallet.DbName
+	if cx.Config.WalletFile == nil || cx.Config.WalletFile.V() == "" {
+		cx.Config.WalletFile.Set(filepath.Join(cx.Config.DataDir.V(), cx.ActiveNet.Name, wallet.DbName))
 	}
 	T.Ln("wallet file set to", *cx.Config.WalletFile, *cx.Config.Network)
 }
 
 func initConfigFile(cfg *podcfg.Config) {
-	if *cfg.ConfigFile == "" {
-		*cfg.ConfigFile =
-			*cfg.DataDir + string(os.PathSeparator) + podConfigFilename
+	if cfg.ConfigFile.V() == "" {
+		cfg.ConfigFile.Set(filepath.Join(cfg.DataDir.V(), podConfigFilename))
 	}
 	T.Ln("using config file:", *cfg.ConfigFile)
 }
 
 func initLogDir(cfg *podcfg.Config) {
-	if *cfg.LogDir != "" {
+	if cfg.LogDir.V() != "" {
 		// logi.L.SetLogPaths(*cfg.LogDir, "pod")
 		interrupt.AddHandler(
 			func() {
@@ -95,7 +93,7 @@ func initLogDir(cfg *podcfg.Config) {
 func initParams(cx *pod.State) {
 	network := "mainnet"
 	if cx.Config.Network != nil {
-		network = *cx.Config.Network
+		network = cx.Config.Network.V()
 	}
 	switch network {
 	case "testnet", "testnet3", "t":
@@ -135,31 +133,31 @@ func initListeners(cx *pod.State, commandName string, initial bool) {
 	var fP int
 	if fP, e = GetFreePort(); E.Chk(e) {
 	}
-	if *cfg.AutoListen {
+	if cfg.AutoListen.True() {
 		_, allAddresses := routeable.GetAddressesAndInterfaces()
 		p2pAddresses := cli.StringSlice{}
 		for addr := range allAddresses {
 			p2pAddresses = append(p2pAddresses, net.JoinHostPort(addr, cx.ActiveNet.DefaultPort))
 		}
-		*cfg.P2PConnect = p2pAddresses
+		cfg.P2PConnect.Set(p2pAddresses)
 	}
-	if len(*cfg.P2PListeners) < 1 && !*cfg.DisableListen && len(*cfg.ConnectPeers) < 1 {
-		cfg.P2PListeners = &cli.StringSlice{fmt.Sprintf("0.0.0.0:" + cx.ActiveNet.DefaultPort)}
+	if cfg.P2PListeners.Len() < 1 && !cfg.DisableListen.True() && cfg.ConnectPeers.Len() < 1 {
+		cfg.P2PListeners.Set([]string{fmt.Sprintf("0.0.0.0:" + cx.ActiveNet.DefaultPort)})
 		cx.StateCfg.Save = true
 		D.Ln("P2PListeners")
 	}
-	if len(*cfg.RPCListeners) < 1 {
+	if cfg.RPCListeners.Len() < 1 {
 		address := fmt.Sprintf("127.0.0.1:%s", cx.ActiveNet.RPCClientPort)
-		*cfg.RPCListeners = cli.StringSlice{address}
-		*cfg.RPCConnect = fmt.Sprintf("127.0.0.1:%s", cx.ActiveNet.RPCClientPort)
+		cfg.RPCListeners.Set([]string{address})
+		cfg.RPCConnect.Set(fmt.Sprintf("127.0.0.1:%s", cx.ActiveNet.RPCClientPort))
 		D.Ln("setting save flag because rpc listeners is empty and rpc is not disabled")
 		cx.StateCfg.Save = true
 		D.Ln("RPCListeners")
 	}
-	if len(*cfg.WalletRPCListeners) < 1 && !*cfg.DisableRPC {
+	if cfg.WalletRPCListeners.Len() < 1 && !cfg.DisableRPC.True() {
 		address := fmt.Sprintf("127.0.0.1:" + cx.ActiveNet.WalletRPCServerPort)
-		*cfg.WalletRPCListeners = cli.StringSlice{address}
-		*cfg.WalletServer = address
+		cfg.WalletRPCListeners.Set([]string{address})
+		cfg.WalletServer.Set(address)
 		D.Ln(
 			"setting save flag because wallet rpc listeners is empty and" +
 				" rpc is not disabled",
@@ -167,62 +165,62 @@ func initListeners(cx *pod.State, commandName string, initial bool) {
 		cx.StateCfg.Save = true
 		D.Ln("WalletRPCListeners")
 	}
-	if *cx.Config.AutoPorts || !initial {
+	if cx.Config.AutoPorts.True() || !initial {
 		if fP, e = GetFreePort(); E.Chk(e) {
 		}
-		*cfg.P2PListeners = cli.StringSlice{"0.0.0.0:" + fmt.Sprint(fP)}
+		cfg.P2PListeners.Set([]string{"0.0.0.0:" + fmt.Sprint(fP)})
 		if fP, e = GetFreePort(); E.Chk(e) {
 		}
-		*cfg.RPCListeners = cli.StringSlice{"127.0.0.1:" + fmt.Sprint(fP)}
+		cfg.RPCListeners.Set([]string{"127.0.0.1:" + fmt.Sprint(fP)})
 		if fP, e = GetFreePort(); E.Chk(e) {
 		}
-		*cfg.WalletRPCListeners = cli.StringSlice{"127.0.0.1:" + fmt.Sprint(fP)}
+		cfg.WalletRPCListeners.Set([]string{"127.0.0.1:" + fmt.Sprint(fP)})
 		cx.StateCfg.Save = true
 		D.Ln("autoports")
 	} else {
 		// sanitize user input and set auto on any that fail
-		l := cfg.P2PListeners
-		r := cfg.RPCListeners
-		w := cfg.WalletRPCListeners
-		for i := range *l {
-			if _, p, e := net.SplitHostPort((*l)[i]); !E.Chk(e) {
+		l := cfg.P2PListeners.S()
+		r := cfg.RPCListeners.S()
+		w := cfg.WalletRPCListeners.S()
+		for i := range l {
+			if _, p, e := net.SplitHostPort((l)[i]); !E.Chk(e) {
 				if !validatePort(p) {
 					if fP, e = GetFreePort(); E.Chk(e) {
 					}
-					(*l)[i] = "0.0.0.0:" + fmt.Sprint(fP)
+					l[i] = "0.0.0.0:" + fmt.Sprint(fP)
 					cx.StateCfg.Save = true
 					D.Ln("port not validate P2PListeners")
 				}
 			}
 		}
-		for i := range *r {
-			if _, p, e := net.SplitHostPort((*r)[i]); !E.Chk(e) {
+		for i := range r {
+			if _, p, e := net.SplitHostPort((r)[i]); !E.Chk(e) {
 				if !validatePort(p) {
 					if fP, e = GetFreePort(); E.Chk(e) {
 					}
-					(*r)[i] = "127.0.0.1:" + fmt.Sprint(fP)
+					r[i] = "127.0.0.1:" + fmt.Sprint(fP)
 					cx.StateCfg.Save = true
 					D.Ln("port not validate RPCListeners")
 				}
 			}
 		}
-		for i := range *w {
-			if _, p, e := net.SplitHostPort((*w)[i]); !E.Chk(e) {
+		for i := range w {
+			if _, p, e := net.SplitHostPort((w)[i]); !E.Chk(e) {
 				if !validatePort(p) {
 					if fP, e = GetFreePort(); E.Chk(e) {
 					}
-					(*w)[i] = "127.0.0.1:" + fmt.Sprint(fP)
+					w[i] = "127.0.0.1:" + fmt.Sprint(fP)
 					cx.StateCfg.Save = true
 					D.Ln("port not validate WalletRPCListeners")
 				}
 			}
 		}
 	}
-	if *cfg.LAN && cx.ActiveNet.Name != "mainnet" {
-		*cfg.DisableDNSSeed = true
+	if cfg.LAN.True() && cx.ActiveNet.Name != "mainnet" {
+		cfg.DisableDNSSeed.T()
 	}
-	if len(*cfg.WalletRPCListeners) > 0 {
-		*cfg.WalletServer = (*cfg.WalletRPCListeners)[0]
+	if cfg.WalletRPCListeners.Len() > 0 {
+		cfg.WalletServer.Set(cfg.WalletRPCListeners.S()[0])
 	}
 }
 
@@ -248,23 +246,20 @@ func GetFreePort() (int, error) {
 
 func initTLSStuffs(cfg *podcfg.Config, st *state.Config) {
 	isNew := false
-	if *cfg.RPCCert == "" {
-		*cfg.RPCCert =
-			*cfg.DataDir + string(os.PathSeparator) + "rpc.cert"
+	if cfg.RPCCert.V() == "" {
+		cfg.RPCCert.Set(filepath.Join(cfg.DataDir.V(), "rpc.cert"))
 		D.Ln("setting save flag because rpc cert path was not set")
 		st.Save = true
 		isNew = true
 	}
-	if *cfg.RPCKey == "" {
-		*cfg.RPCKey =
-			*cfg.DataDir + string(os.PathSeparator) + "rpc.key"
+	if cfg.RPCKey.V() == "" {
+		cfg.RPCKey.Set(filepath.Join(cfg.DataDir.V(), "rpc.key"))
 		D.Ln("setting save flag because rpc key path was not set")
 		st.Save = true
 		isNew = true
 	}
-	if *cfg.CAFile == "" {
-		*cfg.CAFile =
-			*cfg.DataDir + string(os.PathSeparator) + "ca.cert"
+	if cfg.CAFile.V() == "" {
+		cfg.CAFile.Set(filepath.Join(cfg.DataDir.V(), "ca.cert"))
 		D.Ln("setting save flag because CA cert path was not set")
 		st.Save = true
 		isNew = true
@@ -274,8 +269,8 @@ func initTLSStuffs(cfg *podcfg.Config, st *state.Config) {
 		I.Ln("generating TLS certificates")
 		// Create directories for cert and key files if they do not yet exist.
 		D.Ln("rpc tls ", *cfg.RPCCert, " ", *cfg.RPCKey)
-		certDir, _ := filepath.Split(*cfg.RPCCert)
-		keyDir, _ := filepath.Split(*cfg.RPCKey)
+		certDir, _ := filepath.Split(cfg.RPCCert.V())
+		keyDir, _ := filepath.Split(cfg.RPCKey.V())
 		var e error
 		e = os.MkdirAll(certDir, 0700)
 		if e != nil {
@@ -301,30 +296,30 @@ func initTLSStuffs(cfg *podcfg.Config, st *state.Config) {
 			return
 		}
 		// Write cert and (potentially) the key files.
-		e = ioutil.WriteFile(*cfg.RPCCert, cert, 0600)
+		e = ioutil.WriteFile(cfg.RPCCert.V(), cert, 0600)
 		if e != nil {
-			rmErr := os.Remove(*cfg.RPCCert)
+			rmErr := os.Remove(cfg.RPCCert.V())
 			if rmErr != nil {
 				E.Ln("cannot remove written certificates:", rmErr)
 			}
 			return
 		}
-		e = ioutil.WriteFile(*cfg.CAFile, cert, 0600)
+		e = ioutil.WriteFile(cfg.CAFile.V(), cert, 0600)
 		if e != nil {
-			rmErr := os.Remove(*cfg.RPCCert)
+			rmErr := os.Remove(cfg.RPCCert.V())
 			if rmErr != nil {
 				E.Ln("cannot remove written certificates:", rmErr)
 			}
 			return
 		}
-		e = ioutil.WriteFile(*cfg.RPCKey, key, 0600)
+		e = ioutil.WriteFile(cfg.RPCKey.V(), key, 0600)
 		if e != nil {
 			E.Ln(e)
-			rmErr := os.Remove(*cfg.RPCCert)
+			rmErr := os.Remove(cfg.RPCCert.V())
 			if rmErr != nil {
 				E.Ln("cannot remove written certificates:", rmErr)
 			}
-			rmErr = os.Remove(*cfg.CAFile)
+			rmErr = os.Remove(cfg.CAFile.V())
 			if rmErr != nil {
 				E.Ln("cannot remove written certificates:", rmErr)
 			}
@@ -336,42 +331,42 @@ func initTLSStuffs(cfg *podcfg.Config, st *state.Config) {
 }
 
 func initLogLevel(cfg *podcfg.Config) {
-	loglevel := *cfg.LogLevel
+	loglevel := cfg.LogLevel.V()
 	switch loglevel {
 	case "trace", "debug", "info", "warn", "error", "fatal", "off":
 		D.Ln("log level", loglevel)
 	default:
 		E.Ln("unrecognised loglevel", loglevel, "setting default info")
-		*cfg.LogLevel = "info"
+		cfg.LogLevel.Set("info")
 	}
-	logg.SetLogLevel(*cfg.LogLevel)
+	logg.SetLogLevel(cfg.LogLevel.V())
 }
 
 func normalizeAddresses(cfg *podcfg.Config) {
 	T.Ln("normalising addresses")
-	port := node.DefaultPort
+	port := podcfg.DefaultPort
 	nrm := normalize.StringSliceAddresses
-	nrm(cfg.AddPeers, port)
-	nrm(cfg.ConnectPeers, port)
-	nrm(cfg.P2PListeners, port)
-	nrm(cfg.Whitelists, port)
+	nrm(cfg.AddPeers.V(), port)
+	nrm(cfg.ConnectPeers.V(), port)
+	nrm(cfg.P2PListeners.V(), port)
+	nrm(cfg.Whitelists.V(), port)
 	// nrm(cfg.RPCListeners, port)
 }
 
 func setRelayReject(cfg *podcfg.Config) {
 	relayNonStd := *cfg.RelayNonStd
 	switch {
-	case *cfg.RelayNonStd && *cfg.RejectNonStd:
+	case cfg.RelayNonStd.True() && cfg.RejectNonStd.True():
 		errf := "%s: rejectnonstd and relaynonstd cannot be used together" +
 			" -- choose only one, leaving neither activated"
 		E.Ln(errf, funcName)
 		// just leave both false
-		*cfg.RelayNonStd = false
-		*cfg.RejectNonStd = false
-	case *cfg.RejectNonStd:
-		relayNonStd = false
-	case *cfg.RelayNonStd:
-		relayNonStd = true
+		cfg.RelayNonStd.F()
+		cfg.RejectNonStd.F()
+	case cfg.RejectNonStd.True():
+		relayNonStd.F()
+	case cfg.RelayNonStd.True():
+		relayNonStd.F()
 	}
 	*cfg.RelayNonStd = relayNonStd
 }
@@ -379,49 +374,49 @@ func setRelayReject(cfg *podcfg.Config) {
 func validateDBtype(cfg *podcfg.Config) {
 	// Validate database type.
 	T.Ln("validating database type")
-	if !node.ValidDbType(*cfg.DbType) {
+	if !node.ValidDbType(cfg.DbType.V()) {
 		str := "%s: The specified database type [%v] is invalid -- " +
 			"supported types %v"
 		e := fmt.Errorf(str, funcName, *cfg.DbType, node.KnownDbTypes)
 		E.Ln(funcName, e)
 		// set to default
-		*cfg.DbType = node.KnownDbTypes[0]
+		cfg.DbType.Set(node.KnownDbTypes[0])
 	}
 }
 
 func validateProfilePort(cfg *podcfg.Config) {
 	// Validate profile port number
 	T.Ln("validating profile port number")
-	if *cfg.Profile != "" {
-		profilePort, e := strconv.Atoi(*cfg.Profile)
+	if cfg.Profile.V() != "" {
+		profilePort, e := strconv.Atoi(cfg.Profile.V())
 		if e != nil || profilePort < 1024 || profilePort > 65535 {
 			str := "%s: The profile port must be between 1024 and 65535"
 			e = fmt.Errorf(str, funcName)
 			E.Ln(funcName, e)
-			*cfg.Profile = ""
+			cfg.Profile.Set("")
 		}
 	}
 }
 func validateBanDuration(cfg *podcfg.Config) {
 	// Don't allow ban durations that are too short.
 	T.Ln("validating ban duration")
-	if *cfg.BanDuration < time.Second {
+	if cfg.BanDuration.V() < time.Second {
 		e := fmt.Errorf(
 			"%s: The banduration option may not be less than 1s -- parsed [%v]",
 			funcName, *cfg.BanDuration,
 		)
 		I.Ln(funcName, e)
-		*cfg.BanDuration = node.DefaultBanDuration
+		cfg.BanDuration.Set(podcfg.DefaultBanDuration)
 	}
 }
 
 func validateWhitelists(cfg *podcfg.Config, st *state.Config) {
 	// Validate any given whitelisted IP addresses and networks.
 	T.Ln("validating whitelists")
-	if len(*cfg.Whitelists) > 0 {
+	if cfg.Whitelists.Len() > 0 {
 		var ip net.IP
-		st.ActiveWhitelists = make([]*net.IPNet, 0, len(*cfg.Whitelists))
-		for _, addr := range *cfg.Whitelists {
+		st.ActiveWhitelists = make([]*net.IPNet, 0, cfg.Whitelists.Len())
+		for _, addr := range cfg.Whitelists.S() {
 			_, ipnet, e := net.ParseCIDR(addr)
 			if e != nil {
 				E.Ln(e)
@@ -454,7 +449,7 @@ func validateWhitelists(cfg *podcfg.Config, st *state.Config) {
 
 func validatePeerLists(cfg *podcfg.Config) {
 	T.Ln("checking addpeer and connectpeer lists")
-	if len(*cfg.AddPeers) > 0 && len(*cfg.ConnectPeers) > 0 {
+	if cfg.AddPeers.Len() > 0 && cfg.ConnectPeers.Len() > 0 {
 		e := fmt.Errorf(
 			"%s: the --addpeer and --connect options can not be mixed",
 			funcName,
@@ -466,23 +461,23 @@ func validatePeerLists(cfg *podcfg.Config) {
 func configListener(cfg *podcfg.Config, params *chaincfg.Params) {
 	// --proxy or --connect without --listen disables listening.
 	T.Ln("checking proxy/connect for disabling listening")
-	if (*cfg.Proxy != "" ||
-		len(*cfg.ConnectPeers) > 0) &&
-		len(*cfg.P2PListeners) == 0 {
-		*cfg.DisableListen = true
+	if (cfg.Proxy.V() != "" ||
+		cfg.ConnectPeers.Len() > 0) &&
+		cfg.P2PListeners.Len() == 0 {
+		cfg.DisableListen.T()
 	}
 	// Add the default listener if none were specified. The default listener is all
 	// addresses on the listen port for the network we are to connect to.
 	T.Ln("checking if listener was set")
-	if len(*cfg.P2PListeners) == 0 {
-		*cfg.P2PListeners = []string{"0.0.0.0:" + params.DefaultPort}
+	if cfg.P2PListeners.Len() == 0 {
+		cfg.P2PListeners.Set([]string{"0.0.0.0:" + params.DefaultPort})
 	}
 }
 
 func validateUsers(cfg *podcfg.Config) {
 	// Chk to make sure limited and admin users don't have the same username
 	T.Ln("checking admin and limited username is different")
-	if *cfg.Username != "" &&
+	if !cfg.Username.Empty() &&
 		*cfg.Username == *cfg.LimitUser {
 		str := "%s: --username and --limituser must not specify the same username"
 		e := fmt.Errorf(str, funcName)
@@ -490,8 +485,8 @@ func validateUsers(cfg *podcfg.Config) {
 	}
 	// Chk to make sure limited and admin users don't have the same password
 	T.Ln("checking limited and admin passwords are not the same")
-	if *cfg.Password != "" &&
-		*cfg.Password == *cfg.LimitPass {
+	if !cfg.Password.Empty() &&
+		cfg.Password.V() == cfg.LimitPass.V() {
 		str := "%s: --password and --limitpass must not specify the same password"
 		e := fmt.Errorf(str, funcName)
 		_, _ = fmt.Fprintln(os.Stderr, e)
@@ -502,30 +497,31 @@ func validateUsers(cfg *podcfg.Config) {
 func configRPC(cfg *podcfg.Config, params *chaincfg.Params) {
 	// The RPC server is disabled if no username or password is provided.
 	T.Ln("checking rpc server has a login enabled")
-	if (*cfg.Username == "" || *cfg.Password == "") &&
-		(*cfg.LimitUser == "" || *cfg.LimitPass == "") {
-		*cfg.DisableRPC = true
+	if (cfg.Username.Empty() || cfg.Password.Empty()) &&
+		(cfg.LimitUser.Empty() || cfg.LimitPass.Empty()) {
+		cfg.DisableRPC.T()
 	}
-	if *cfg.DisableRPC {
+	if cfg.DisableRPC.True() {
 		T.Ln("RPC service is disabled")
 	}
 	T.Ln("checking rpc server has listeners set")
-	if !*cfg.DisableRPC && len(*cfg.RPCListeners) == 0 {
+	if cfg.DisableRPC.False() && cfg.RPCListeners.Len() == 0 {
 		D.Ln("looking up default listener")
-		addrs, e := net.LookupHost(node.DefaultRPCListener)
+		addrs, e := net.LookupHost(podcfg.DefaultRPCListener)
 		if e != nil {
 			E.Ln(e)
 			// os.Exit(1)
 		}
-		*cfg.RPCListeners = make([]string, 0, len(addrs))
+		tmp := make([]string, 0, len(addrs))
 		D.Ln("setting listeners")
 		for _, addr := range addrs {
-			*cfg.RPCListeners = append(*cfg.RPCListeners, addr)
+			tmp = append(tmp, addr)
 			addr = net.JoinHostPort(addr, params.RPCClientPort)
 		}
+		cfg.RPCListeners.Set(tmp)
 	}
 	T.Ln("checking rpc max concurrent requests")
-	if *cfg.RPCMaxConcurrentReqs < 0 {
+	if cfg.RPCMaxConcurrentReqs.V() < 0 {
 		str := "%s: The rpcmaxwebsocketconcurrentrequests option may not be" +
 			" less than 0 -- parsed [%d]"
 		e := fmt.Errorf(str, funcName, *cfg.RPCMaxConcurrentReqs)
@@ -535,15 +531,15 @@ func configRPC(cfg *podcfg.Config, params *chaincfg.Params) {
 	T.Ln("checking rpc listener addresses")
 	nrms := normalize.Addresses
 	// Add default port to all added peer addresses if needed and remove duplicate addresses.
-	*cfg.AddPeers = nrms(*cfg.AddPeers, params.DefaultPort)
-	*cfg.ConnectPeers = nrms(*cfg.ConnectPeers, params.DefaultPort)
+	cfg.AddPeers.Set(nrms(cfg.AddPeers.S(), params.DefaultPort))
+	cfg.ConnectPeers.Set(nrms(cfg.ConnectPeers.S(), params.DefaultPort))
 }
 
 func validatePolicies(cfg *podcfg.Config, stateConfig *state.Config) {
 	var e error
 	// Validate the the minrelaytxfee.
 	T.Ln("checking min relay tx fee")
-	stateConfig.ActiveMinRelayTxFee, e = amt.NewAmount(*cfg.MinRelayTxFee)
+	stateConfig.ActiveMinRelayTxFee, e = amt.NewAmount(cfg.MinRelayTxFee.V())
 	if e != nil {
 		E.Ln(e)
 		str := "%s: invalid minrelaytxfee: %v"
@@ -552,68 +548,74 @@ func validatePolicies(cfg *podcfg.Config, stateConfig *state.Config) {
 	}
 	// Limit the max block size to a sane value.
 	T.Ln("checking max block size")
-	if *cfg.BlockMaxSize < node.BlockMaxSizeMin ||
-		*cfg.BlockMaxSize > node.BlockMaxSizeMax {
+	if cfg.BlockMaxSize.V() < podcfg.BlockMaxSizeMin ||
+		cfg.BlockMaxSize.V() > podcfg.BlockMaxSizeMax {
 		str := "%s: The blockmaxsize option must be in between %d and %d -- parsed [%d]"
 		e := fmt.Errorf(
-			str, funcName, node.BlockMaxSizeMin,
-			node.BlockMaxSizeMax, *cfg.BlockMaxSize,
+			str, funcName, podcfg.BlockMaxSizeMin,
+			podcfg.BlockMaxSizeMax, *cfg.BlockMaxSize,
 		)
 		_, _ = fmt.Fprintln(os.Stderr, e)
 	}
 	// Limit the max block weight to a sane value.
 	T.Ln("checking max block weight")
-	if *cfg.BlockMaxWeight < node.BlockMaxWeightMin ||
-		*cfg.BlockMaxWeight > node.BlockMaxWeightMax {
+	if cfg.BlockMaxWeight.V() < podcfg.BlockMaxWeightMin ||
+		cfg.BlockMaxWeight.V() > podcfg.BlockMaxWeightMax {
 		str := "%s: The blockmaxweight option must be in between %d and %d -- parsed [%d]"
 		e := fmt.Errorf(
-			str, funcName, node.BlockMaxWeightMin,
-			node.BlockMaxWeightMax, *cfg.BlockMaxWeight,
+			str, funcName, podcfg.BlockMaxWeightMin,
+			podcfg.BlockMaxWeightMax, *cfg.BlockMaxWeight,
 		)
 		_, _ = fmt.Fprintln(os.Stderr, e)
 	}
 	// Limit the max orphan count to a sane vlue.
 	T.Ln("checking max orphan limit")
-	if *cfg.MaxOrphanTxs < 0 {
+	if cfg.MaxOrphanTxs.V() < 0 {
 		str := "%s: The maxorphantx option may not be less than 0 -- parsed [%d]"
 		e := fmt.Errorf(str, funcName, *cfg.MaxOrphanTxs)
 		_, _ = fmt.Fprintln(os.Stderr, e)
 	}
 	// Limit the block priority and minimum block txsizes to max block size.
 	T.Ln("validating block priority and minimum size/weight")
-	*cfg.BlockPrioritySize = int(
-		apputil.MinUint32(
-			uint32(*cfg.BlockPrioritySize),
-			uint32(*cfg.BlockMaxSize),
+	cfg.BlockPrioritySize.Set(
+		int(
+			apputil.MinUint32(
+				uint32(cfg.BlockPrioritySize.V()),
+				uint32(cfg.BlockMaxSize.V()),
+			),
 		),
 	)
-	*cfg.BlockMinSize = int(
-		apputil.MinUint32(
-			uint32(*cfg.BlockMinSize),
-			uint32(*cfg.BlockMaxSize),
+	cfg.BlockMinSize.Set(
+		int(
+			apputil.MinUint32(
+				uint32(cfg.BlockMinSize.V()),
+				uint32(cfg.BlockMaxSize.V()),
+			),
 		),
 	)
-	*cfg.BlockMinWeight = int(
-		apputil.MinUint32(
-			uint32(*cfg.BlockMinWeight),
-			uint32(*cfg.BlockMaxWeight),
+	cfg.BlockMinWeight.Set(
+		int(
+			apputil.MinUint32(
+				uint32(cfg.BlockMinWeight.V()),
+				uint32(cfg.BlockMaxWeight.V()),
+			),
 		),
 	)
 	switch {
 	// If the max block size isn't set, but the max weight is, then we'll set the
 	// limit for the max block size to a safe limit so weight takes precedence.
-	case *cfg.BlockMaxSize == node.DefaultBlockMaxSize &&
-		*cfg.BlockMaxWeight != node.DefaultBlockMaxWeight:
-		*cfg.BlockMaxSize = blockchain.MaxBlockBaseSize - 1000
+	case cfg.BlockMaxSize.V() == podcfg.DefaultBlockMaxSize &&
+		cfg.BlockMaxWeight.V() != podcfg.DefaultBlockMaxWeight:
+		cfg.BlockMaxSize.Set(blockchain.MaxBlockBaseSize - 1000)
 		// If the max block weight isn't set, but the block size is, then we'll scale
 		// the set weight accordingly based on the max block size value.
-	case *cfg.BlockMaxSize != node.DefaultBlockMaxSize &&
-		*cfg.BlockMaxWeight == node.DefaultBlockMaxWeight:
-		*cfg.BlockMaxWeight = *cfg.BlockMaxSize * blockchain.WitnessScaleFactor
+	case cfg.BlockMaxSize.V() != podcfg.DefaultBlockMaxSize &&
+		cfg.BlockMaxWeight.V() == podcfg.DefaultBlockMaxWeight:
+		cfg.BlockMaxWeight.Set(cfg.BlockMaxSize.V() * blockchain.WitnessScaleFactor)
 	}
 	// Look for illegal characters in the user agent comments.
 	T.Ln("checking user agent comments", cfg.UserAgentComments)
-	for _, uaComment := range *cfg.UserAgentComments {
+	for _, uaComment := range cfg.UserAgentComments.S() {
 		if strings.ContainsAny(uaComment, "/:()") {
 			e := fmt.Errorf(
 				"%s: The following characters must not "+
@@ -626,8 +628,7 @@ func validatePolicies(cfg *podcfg.Config, stateConfig *state.Config) {
 	// Chk the checkpoints for syntax errors.
 	T.Ln("checking the checkpoints")
 	stateConfig.AddedCheckpoints, e = node.ParseCheckpoints(
-		*cfg.
-			AddCheckpoints,
+		cfg.AddCheckpoints.S(),
 	)
 	if e != nil {
 		E.Ln(e)
@@ -639,21 +640,21 @@ func validatePolicies(cfg *podcfg.Config, stateConfig *state.Config) {
 func validateOnions(cfg *podcfg.Config) {
 	// --onionproxy and not --onion are contradictory
 	// TODO: this is kinda stupid hm? switch *and* toggle by presence of flag value, one should be enough
-	if *cfg.Onion && *cfg.OnionProxy != "" {
+	if cfg.Onion.True() && !cfg.OnionProxy.Empty() {
 		E.Ln("onion enabled but no onionproxy has been configured")
 		T.Ln("halting to avoid exposing IP address")
 	}
 	// Tor stream isolation requires either proxy or onion proxy to be set.
-	if *cfg.TorIsolation &&
-		*cfg.Proxy == "" &&
-		*cfg.OnionProxy == "" {
+	if cfg.TorIsolation.True() &&
+		cfg.Proxy.Empty() &&
+		cfg.OnionProxy.Empty() {
 		str := "%s: Tor stream isolation requires either proxy or onionproxy to be set"
 		e := fmt.Errorf(str, funcName)
 		_, _ = fmt.Fprintln(os.Stderr, e)
 		// os.Exit(1)
 	}
-	if !*cfg.Onion {
-		*cfg.OnionProxy = ""
+	if cfg.Onion.False() {
+		cfg.OnionProxy.Set("")
 	}
 	
 }
@@ -669,13 +670,13 @@ func validateMiningStuff(
 	T.Ln("checking mining addresses")
 	aml := 99
 	if cfg.MiningAddrs != nil {
-		aml = len(*cfg.MiningAddrs)
+		aml = cfg.MiningAddrs.Len()
 	} else {
 		D.Ln("MiningAddrs is nil")
 		return
 	}
 	state.ActiveMiningAddrs = make([]btcaddr.Address, 0, aml)
-	for _, strAddr := range *cfg.MiningAddrs {
+	for _, strAddr := range cfg.MiningAddrs.S() {
 		addr, e := btcaddr.Decode(strAddr, params)
 		if e != nil {
 			E.Ln(e)
@@ -694,10 +695,10 @@ func validateMiningStuff(
 		}
 		state.ActiveMiningAddrs = append(state.ActiveMiningAddrs, addr)
 	}
-	if *cfg.MinerPass == "" {
+	if cfg.MulticastPass.Empty() {
 		D.Ln("--------------- generating new miner key")
-		*cfg.MinerPass = hex.EncodeToString(forkhash.Argon2i([]byte(*cfg.MinerPass)))
-		state.ActiveMinerKey = []byte(*cfg.MinerPass)
+		cfg.MulticastPass.Set(hex.EncodeToString(forkhash.Argon2i(cfg.MulticastPass.Bytes())))
+		state.ActiveMinerKey = cfg.MulticastPass.Bytes()
 	}
 }
 
@@ -712,9 +713,9 @@ func setDiallers(cfg *podcfg.Config, stateConfig *state.Config) {
 	stateConfig.Dial = net.DialTimeout
 	stateConfig.Lookup = net.LookupIP
 	var e error
-	if *cfg.Proxy != "" {
+	if !cfg.Proxy.Empty() {
 		T.Ln("we are loading a proxy!")
-		_, _, e = net.SplitHostPort(*cfg.Proxy)
+		_, _, e = net.SplitHostPort(cfg.Proxy.V())
 		if e != nil {
 			E.Ln(e)
 			str := "%s: Proxy address '%s' is invalid: %v"
@@ -725,10 +726,8 @@ func setDiallers(cfg *podcfg.Config, stateConfig *state.Config) {
 		// Tor isolation flag means proxy credentials will be overridden unless there is
 		// also an onion proxy configured in which case that one will be overridden.
 		torIsolation := false
-		if *cfg.TorIsolation &&
-			*cfg.OnionProxy == "" &&
-			(*cfg.ProxyUser != "" ||
-				*cfg.ProxyPass != "") {
+		if cfg.TorIsolation.True() && cfg.OnionProxy.Empty() &&
+			(!cfg.ProxyUser.Empty() || !cfg.ProxyPass.Empty()) {
 			torIsolation = true
 			W.Ln(
 				"Tor isolation set -- overriding specified" +
@@ -736,18 +735,18 @@ func setDiallers(cfg *podcfg.Config, stateConfig *state.Config) {
 			)
 		}
 		proxy := &socks.Proxy{
-			Addr:         *cfg.Proxy,
-			Username:     *cfg.ProxyUser,
-			Password:     *cfg.ProxyPass,
+			Addr:         cfg.Proxy.V(),
+			Username:     cfg.ProxyUser.V(),
+			Password:     cfg.ProxyPass.V(),
 			TorIsolation: torIsolation,
 		}
 		stateConfig.Dial = proxy.DialTimeout
 		// Treat the proxy as tor and perform DNS resolution through it unless the
 		// --noonion flag is set or there is an onion-specific proxy configured.
-		if *cfg.Onion &&
-			*cfg.OnionProxy == "" {
+		if cfg.Onion.True() &&
+			cfg.OnionProxy.Empty() {
 			stateConfig.Lookup = func(host string) ([]net.IP, error) {
-				return connmgr.TorLookupIP(host, *cfg.Proxy)
+				return connmgr.TorLookupIP(host, cfg.Proxy.V())
 			}
 		}
 	}
@@ -758,8 +757,8 @@ func setDiallers(cfg *podcfg.Config, stateConfig *state.Config) {
 	// selected above. This allows .onion address traffic to be routed through a
 	// different proxy than normal traffic.
 	T.Ln("setting up tor proxy if enabled")
-	if *cfg.OnionProxy != "" {
-		_, _, e = net.SplitHostPort(*cfg.OnionProxy)
+	if !cfg.OnionProxy.Empty() {
+		_, _, e = net.SplitHostPort(cfg.OnionProxy.V())
 		if e != nil {
 			E.Ln(e)
 			str := "%s: Onion proxy address '%s' is invalid: %v"
@@ -767,8 +766,8 @@ func setDiallers(cfg *podcfg.Config, stateConfig *state.Config) {
 			_, _ = fmt.Fprintln(os.Stderr, e)
 		}
 		// Tor isolation flag means onion proxy credentials will be overridden.
-		if *cfg.TorIsolation &&
-			(*cfg.OnionProxyUser != "" || *cfg.OnionProxyPass != "") {
+		if cfg.TorIsolation.True() &&
+			(!cfg.OnionProxyUser.Empty() || !cfg.OnionProxyPass.Empty()) {
 			W.Ln(
 				"Tor isolation set - overriding specified onionproxy user" +
 					" credentials",
@@ -779,10 +778,10 @@ func setDiallers(cfg *podcfg.Config, stateConfig *state.Config) {
 	stateConfig.Oniondial =
 		func(network, addr string, timeout time.Duration) (net.Conn, error) {
 			proxy := &socks.Proxy{
-				Addr:         *cfg.OnionProxy,
-				Username:     *cfg.OnionProxyUser,
-				Password:     *cfg.OnionProxyPass,
-				TorIsolation: *cfg.TorIsolation,
+				Addr:         cfg.OnionProxy.V(),
+				Username:     cfg.OnionProxyUser.V(),
+				Password:     cfg.OnionProxyPass.V(),
+				TorIsolation: cfg.TorIsolation.True(),
 			}
 			return proxy.DialTimeout(network, addr, timeout)
 		}
@@ -791,15 +790,15 @@ func setDiallers(cfg *podcfg.Config, stateConfig *state.Config) {
 	// means that the proxy configured by --proxy is not a tor proxy, so override
 	// the DNS resolution to use the onion-specific proxy.
 	T.Ln("setting proxy lookup")
-	if *cfg.Proxy != "" {
+	if !cfg.Proxy.Empty() {
 		stateConfig.Lookup = func(host string) ([]net.IP, error) {
-			return connmgr.TorLookupIP(host, *cfg.OnionProxy)
+			return connmgr.TorLookupIP(host, cfg.OnionProxy.V())
 		}
 	} else {
 		stateConfig.Oniondial = stateConfig.Dial
 	}
 	// Specifying --noonion means the onion address dial function results in an error.
-	if !*cfg.Onion {
+	if cfg.Onion.False() {
 		stateConfig.Oniondial = func(a, b string, t time.Duration) (net.Conn, error) {
 			return nil, errors.New("tor has been disabled")
 		}

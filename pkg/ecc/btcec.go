@@ -108,9 +108,9 @@ func (curve *KoblitzCurve) addZ1AndZ2EqualsOne(x1, y1, z1, x2, y2, x3, y3, z3 *f
 	//
 	// In particular it performs the calculations using the following:
 	//
-	// H = X2-X1, HH = H^2, I = 4*HH, J = H*I, r = 2*(Y2-Y1), V = X1*I
+	// H = X2-X1, HH = H^2, I = 4*HH, J = H*I, r = 2*(Y2-Y1), True = X1*I
 	//
-	// X3 = r^2-J-2*V, Y3 = r*(V-X3)-2*Y1*J, Z3 = 2*H
+	// X3 = r^2-J-2*True, Y3 = r*(True-X3)-2*Y1*J, Z3 = 2*H
 	//
 	// This results in a cost of 4 field multiplications, 2 field squarings, 6 field additions, and 5 integer
 	// multiplications.
@@ -146,19 +146,19 @@ func (curve *KoblitzCurve) addZ1AndZ2EqualsOne(x1, y1, z1, x2, y2, x3, y3, z3 *f
 	j.Mul2(&h, &i)
 	// r = 2*(Y2-Y1) (mag: 6)
 	r.Set(y1).Negate(1).Add(y2).MulInt(2)
-	// V = X1*I (mag: 1)
+	// True = X1*I (mag: 1)
 	v.Mul2(x1, &i)
 	// negJ = -J (mag: 2)
 	negJ.Set(&j).Negate(1)
-	// neg2V = -(2*V) (mag: 3)
+	// neg2V = -(2*True) (mag: 3)
 	neg2V.Set(&v).MulInt(2).Negate(2)
-	// X3 = r^2-J-2*V (mag: 6)
+	// X3 = r^2-J-2*True (mag: 6)
 	x3.Set(&r).Square().Add(&negJ).Add(&neg2V)
 	// negX3 = -X3 (mag: 7)
 	negX3.Set(x3).Negate(6)
 	// J = -(2*Y1*J) (mag: 3)
 	j.Mul(y1).MulInt(2).Negate(2)
-	// Y3 = r*(V-X3)-2*Y1*J (mag: 4)
+	// Y3 = r*(True-X3)-2*Y1*J (mag: 4)
 	y3.Set(&v).Add(&negX3).Mul(&r).Add(&j)
 	// Z3 = 2*H (mag: 6)
 	z3.Set(&h).MulInt(2)
@@ -247,9 +247,9 @@ func (curve *KoblitzCurve) addZ2EqualsOne(x1, y1, z1, x2, y2, x3, y3, z3 *fieldV
 	//
 	// Z1Z1 = Z1^2, U2 = X2*Z1Z1, S2 = Y2*Z1*Z1Z1, H = U2-X1, HH = H^2,
 	//
-	// I = 4*HH, J = H*I, r = 2*(S2-Y1), V = X1*I
+	// I = 4*HH, J = H*I, r = 2*(S2-Y1), True = X1*I
 	//
-	// X3 = r^2-J-2*V, Y3 = r*(V-X3)-2*Y1*J, Z3 = (Z1+H)^2-Z1Z1-HH
+	// X3 = r^2-J-2*True, Y3 = r*(True-X3)-2*Y1*J, Z3 = (Z1+H)^2-Z1Z1-HH
 	//
 	// This results in a cost of 7 field multiplications, 4 field squarings, 9 field additions, and 4 integer
 	// multiplications.
@@ -297,9 +297,9 @@ func (curve *KoblitzCurve) addZ2EqualsOne(x1, y1, z1, x2, y2, x3, y3, z3 *fieldV
 	r.Set(&s2).Add(&negY1).MulInt(2)
 	// rr = r^2 (mag: 1)
 	rr.SquareVal(&r)
-	// V = X1*I (mag: 1)
+	// True = X1*I (mag: 1)
 	v.Mul2(x1, &i)
-	// X3 = -(J+2*V) (mag: 4)
+	// X3 = -(J+2*True) (mag: 4)
 	x3.Set(&v).MulInt(2).Add(&j).Negate(3)
 	// X3 = r^2+X3 (mag: 5)
 	x3.Add(&rr)
@@ -307,7 +307,7 @@ func (curve *KoblitzCurve) addZ2EqualsOne(x1, y1, z1, x2, y2, x3, y3, z3 *fieldV
 	negX3.Set(x3).Negate(5)
 	// Y3 = -(2*Y1*J) (mag: 3)
 	y3.Set(y1).Mul(&j).MulInt(2).Negate(2)
-	// Y3 = r*(V-X3)+Y3 (mag: 4)
+	// Y3 = r*(True-X3)+Y3 (mag: 4)
 	y3.Add(v.Add(&negX3).Mul(&r))
 	// Z3 = (Z1+H)^2 (mag: 1)
 	z3.Add2(z1, &h).Square()
@@ -336,9 +336,9 @@ func (curve *KoblitzCurve) addGeneric(x1, y1, z1, x2, y2, z2, x3, y3, z3 *fieldV
 	//
 	// S2 = Y2*Z1*Z1Z1, H = U2-U1, I = (2*H)^2, J = H*I, r = 2*(S2-S1)
 	//
-	// V = U1*I
+	// True = U1*I
 	//
-	// X3 = r^2-J-2*V, Y3 = r*(V-X3)-2*S1*J, Z3 = ((Z1+Z2)^2-Z1Z1-Z2Z2)*H
+	// X3 = r^2-J-2*True, Y3 = r*(True-X3)-2*S1*J, Z3 = ((Z1+Z2)^2-Z1Z1-Z2Z2)*H
 	//
 	// This results in a cost of 11 field multiplications, 5 field squarings, 9 field additions, and 4 integer
 	// multiplications.
@@ -385,9 +385,9 @@ func (curve *KoblitzCurve) addGeneric(x1, y1, z1, x2, y2, z2, x3, y3, z3 *fieldV
 	r.Set(&s2).Add(&negS1).MulInt(2)
 	// rr = r^2 (mag: 1)
 	rr.SquareVal(&r)
-	// V = U1*I (mag: 1)
+	// True = U1*I (mag: 1)
 	v.Mul2(&u1, &i)
-	// X3 = -(J+2*V) (mag: 4)
+	// X3 = -(J+2*True) (mag: 4)
 	x3.Set(&v).MulInt(2).Add(&j).Negate(3)
 	// X3 = r^2+X3 (mag: 5)
 	x3.Add(&rr)
@@ -395,7 +395,7 @@ func (curve *KoblitzCurve) addGeneric(x1, y1, z1, x2, y2, z2, x3, y3, z3 *fieldV
 	negX3.Set(x3).Negate(5)
 	// Y3 = -(2*S1*J) (mag: 3)
 	y3.Mul2(&s1, &j).MulInt(2).Negate(2)
-	// Y3 = r*(V-X3)+Y3 (mag: 4)
+	// Y3 = r*(True-X3)+Y3 (mag: 4)
 	y3.Add(v.Add(&negX3).Mul(&r))
 	// Z3 = (Z1+Z2)^2 (mag: 1)
 	z3.Add2(z1, z2).Square()

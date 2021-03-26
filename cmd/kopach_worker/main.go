@@ -27,7 +27,7 @@ func KopachWorkerHandle(cx *pod.State) func(c *cli.Context) (e error) {
 			logg.SetLogLevel(os.Args[4])
 		}
 		D.Ln("miner worker starting")
-		w, conn := worker.New(os.Args[2], cx.KillAll, uint64(*cx.Config.UUID))
+		w, conn := worker.New(os.Args[2], cx.KillAll, uint64(cx.Config.UUID.V()))
 		// interrupt.AddHandler(
 		// 	func() {
 		// 		D.Ln("KopachWorkerHandle interrupt")

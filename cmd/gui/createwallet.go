@@ -10,6 +10,7 @@ import (
 	"github.com/p9c/pod/pkg/util/qu"
 	"golang.org/x/exp/shiny/materialdesign/icons"
 	"os"
+	"path/filepath"
 	"time"
 	
 	l "gioui.org/layout"
@@ -197,20 +198,18 @@ func (wg *WalletGUI) createWalletInputsAreValid() bool {
 func (wg *WalletGUI) createWalletAction() {
 	// wg.NodeRunCommandChan <- "stop"
 	D.Ln("clicked submit wallet")
-	*wg.cx.Config.WalletFile = *wg.cx.Config.DataDir +
-		string(os.PathSeparator) + wg.cx.ActiveNet.Name +
-		string(os.PathSeparator) + wallet.DbName
-	dbDir := *wg.cx.Config.WalletFile
+	wg.cx.Config.WalletFile.Set(filepath.Join(wg.cx.Config.DataDir.V(), wg.cx.ActiveNet.Name, wallet.DbName))
+	dbDir := wg.cx.Config.WalletFile.V()
 	loader := wallet.NewLoader(wg.cx.ActiveNet, dbDir, 250)
 	// seed, _ := hex.DecodeString(wg.inputs["walletSeed"].GetText())
 	seed := wg.createSeed
-	pass := []byte(wg.passwords["passEditor"].GetPassword())
-	*wg.cx.Config.WalletPass = string(pass)
+	pass := wg.passwords["passEditor"].GetPassword()
+	wg.cx.Config.WalletPass.Set(pass)
 	D.Ln("password", string(pass))
 	podcfg.Save(wg.cx.Config)
 	w, e := loader.CreateNewWallet(
-		pass,
-		pass,
+		[]byte(pass),
+		[]byte(pass),
 		seed,
 		time.Now(),
 		false,
@@ -225,10 +224,10 @@ func (wg *WalletGUI) createWalletAction() {
 	D.Ln("shutting down wallet", w.ShuttingDown())
 	w.WaitForShutdown()
 	D.Ln("starting main app")
-	*wg.cx.Config.Generate = true
-	*wg.cx.Config.GenThreads = 1
-	*wg.cx.Config.NodeOff = false
-	*wg.cx.Config.WalletOff = false
+	wg.cx.Config.Generate.T()
+	wg.cx.Config.GenThreads.Set(1)
+	wg.cx.Config.NodeOff.F()
+	wg.cx.Config.WalletOff.F()
 	podcfg.Save(wg.cx.Config)
 	// // we are going to assume the config is not manually misedited
 	// if apputil.FileExists(*wg.cx.Config.ConfigFile) {
@@ -254,8 +253,8 @@ func (wg *WalletGUI) createWalletAction() {
 	// wg.wallet.Start()
 	// wg.node.Start()
 	// wg.miner.Start()
-	wg.unlockPassword.Editor().SetText(string(pass))
-	wg.unlockWallet(string(pass))
+	wg.unlockPassword.Editor().SetText(pass)
+	wg.unlockWallet(pass)
 	interrupt.RequestRestart()
 }
 
@@ -267,7 +266,7 @@ func (wg *WalletGUI) createWalletTestnetToggle(b bool) {
 		len(wg.passwords["passEditor"].GetPassword()) >= 8 ||
 		wg.passwords["passEditor"].GetPassword() ==
 			wg.passwords["confirmPassEditor"].GetPassword() {
-		*wg.cx.Config.WalletPass = wg.passwords["confirmPassEditor"].GetPassword()
+		wg.cx.Config.WalletPass.Set(wg.passwords["confirmPassEditor"].GetPassword())
 		D.Ln("wallet pass", *wg.cx.Config.WalletPass)
 	}
 	if b {
@@ -279,21 +278,19 @@ func (wg *WalletGUI) createWalletTestnetToggle(b bool) {
 	}
 	I.Ln("activenet:", wg.cx.ActiveNet.Name)
 	D.Ln("setting ports to match network")
-	*wg.cx.Config.Network = wg.cx.ActiveNet.Name
-	*wg.cx.Config.P2PListeners = cli.StringSlice{
-		fmt.Sprintf(
-			"0.0.0.0:" + wg.cx.ActiveNet.DefaultPort,
-		),
-	}
+	wg.cx.Config.Network.Set(wg.cx.ActiveNet.Name)
+	wg.cx.Config.P2PListeners.Set(
+		cli.StringSlice{"0.0.0.0:" + wg.cx.ActiveNet.DefaultPort},
+	)
 	address := fmt.Sprintf(
 		"127.0.0.1:%s",
 		wg.cx.ActiveNet.RPCClientPort,
 	)
-	*wg.cx.Config.RPCListeners = cli.StringSlice{address}
-	*wg.cx.Config.RPCConnect = address
+	wg.cx.Config.RPCListeners.Set(cli.StringSlice{address})
+	wg.cx.Config.RPCConnect.Set(address)
 	address = fmt.Sprintf("127.0.0.1:" + wg.cx.ActiveNet.WalletRPCServerPort)
-	*wg.cx.Config.WalletRPCListeners = cli.StringSlice{address}
-	*wg.cx.Config.WalletServer = address
-	*wg.cx.Config.NodeOff = false
+	wg.cx.Config.WalletRPCListeners.Set(cli.StringSlice{address})
+	wg.cx.Config.WalletServer.Set(address)
+	wg.cx.Config.NodeOff.F()
 	podcfg.Save(wg.cx.Config)
 }

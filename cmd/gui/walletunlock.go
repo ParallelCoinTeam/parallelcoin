@@ -24,14 +24,14 @@ func (wg *WalletGUI) unlockWallet(pass string) {
 	D.Ln("entered password", pass)
 	// unlock wallet
 	// wg.cx.Config.Lock()
-	*wg.cx.Config.WalletPass = pass
-	*wg.cx.Config.WalletOff = false
+	wg.cx.Config.WalletPass.Set( pass)
+	wg.cx.Config.WalletOff.F()
 	// wg.cx.Config.Unlock()
 	// load config into a fresh variable
 	cfg, _ := podcfg.EmptyConfig()
 	var cfgFile []byte
 	var e error
-	if cfgFile, e = ioutil.ReadFile(*wg.cx.Config.ConfigFile); E.Chk(e) {
+	if cfgFile, e = ioutil.ReadFile(wg.cx.Config.ConfigFile.V()); E.Chk(e) {
 		// this should not happen
 		// TODO: panic-type conditions - for gui should have a notification maybe?
 		panic("config file does not exist")
@@ -42,19 +42,19 @@ func (wg *WalletGUI) unlockWallet(pass string) {
 		bhb := blake3.Sum256([]byte(pass))
 		bh := hex.EncodeToString(bhb[:])
 		D.Ln(pass, bh, *cfg.WalletPass)
-		if *cfg.WalletPass == bh {
+		if cfg.WalletPass.V() == bh {
 			D.Ln("loading previously saved state")
-			filename := filepath.Join(*wg.cx.Config.DataDir, "state.json")
+			filename := filepath.Join(wg.cx.Config.DataDir.V(), "state.json")
 			// if logg.FileExists(filename) {
 			I.Ln("#### loading state data...")
-			if e = wg.State.Load(filename, wg.cx.Config.WalletPass); !E.Chk(e) {
+			if e = wg.State.Load(filename, wg.cx.Config.WalletPass.Ptr()); !E.Chk(e) {
 				D.Ln("#### loaded state data")
 			}
 			// it is as though it is loaded if it didn't exist
 			wg.stateLoaded.Store(true)
 			// the entered password matches the stored hash
-			*wg.cx.Config.NodeOff = false
-			*wg.cx.Config.WalletOff = false
+			wg.cx.Config.NodeOff.F()
+			wg.cx.Config.WalletOff.F()
 			podcfg.Save(wg.cx.Config)
 			wg.WalletWatcher = wg.Watcher()
 			// }
@@ -105,7 +105,7 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
 		func() {
 			D.Ln("theme hook")
 			// D.Ln(wg.bools)
-			*wg.cx.Config.DarkTheme = *wg.Dark
+			wg.cx.Config.DarkTheme.Set(*wg.Dark)
 			a := wg.configs["config"]["DarkTheme"].Slot.(*bool)
 			*a = *wg.Dark
 			if wgb, ok := wg.config.Bools["DarkTheme"]; ok {
@@ -269,7 +269,7 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
 																										Fn,
 																								).Fn,
 																								// l.Center,
-																								// wg.TextSize.V/2).Fn,
+																								// wg.TextSize.True/2).Fn,
 																							).Fn,
 																					).Fn,
 																				).

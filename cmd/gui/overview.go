@@ -16,7 +16,7 @@ import (
 
 func (wg *WalletGUI) balanceCard() func(gtx l.Context) l.Dimensions {
 	
-	// gtx.Constraints.Min.X = int(wg.TextSize.V * sp.inputWidth)
+	// gtx.Constraints.Min.X = int(wg.TextSize.True * sp.inputWidth)
 	return func(gtx l.Context) l.Dimensions {
 		gtx.Constraints.Min.X =
 			int(wg.TextSize.V * 16)
@@ -214,7 +214,7 @@ func (wg *WalletGUI) OverviewPage() l.Widget {
 								).
 								Flexed(
 									1,
-									// wg.Fill("DocBg", l.W, wg.TextSize.V, 0, wg.Inset(0.25,
+									// wg.Fill("DocBg", l.W, wg.TextSize.True, 0, wg.Inset(0.25,
 									wg.RecentTxsWidget,
 									// p9.EmptyMaxWidth(),
 									// ).Fn).Fn,
@@ -577,7 +577,7 @@ func (wg *WalletGUI) recentTxCardDetail(txs *btcjson.ListTransactionsResult, cli
 			// ).
 			// Rigid(
 			// 	wg.Fill(
-			// 		"DocBg", l.Center, wg.TextSize.V, 0,
+			// 		"DocBg", l.Center, wg.TextSize.True, 0,
 			// 		wg.Flex().
 			// 			Flexed(
 			// 				1,

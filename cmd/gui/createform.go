@@ -354,8 +354,9 @@ func (wg *WalletGUI) cwfTestnetSettings() (out l.Widget) {
 							if !b {
 								wg.bools["solo"].Value(false)
 								wg.bools["lan"].Value(false)
-								*wg.cx.Config.MinerPass = "pa55word"
-								*wg.cx.Config.Solo, *wg.cx.Config.LAN = false, false
+								wg.cx.Config.MulticastPass.Set("pa55word")
+								wg.cx.Config.Solo.F()
+								wg.cx.Config.LAN.F()
 								wg.ShuffleSeed()
 								wg.createVerifying = false
 								wg.inputs["walletWords"].SetText("")
@@ -382,19 +383,19 @@ func (wg *WalletGUI) cwfTestnetSettings() (out l.Widget) {
 					wg.bools["lan"].SetOnChange(
 						func(b bool) {
 							D.Ln("lan now set to", b)
-							*wg.cx.Config.LAN = b
-							if b && *wg.cx.Config.Solo {
-								*wg.cx.Config.Solo = false
-								*wg.cx.Config.DisableDNSSeed = true
-								*wg.cx.Config.AutoListen = false
+							wg.cx.Config.LAN.Set(b)
+							if b && wg.cx.Config.Solo.True() {
+								wg.cx.Config.Solo.F()
+								wg.cx.Config.DisableDNSSeed.T()
+								wg.cx.Config.AutoListen.F()
 								wg.bools["solo"].Value(false)
-								*wg.cx.Config.MinerPass = "pa55word"
+								wg.cx.Config.MulticastPass.Set("pa55word")
 								wg.Invalidate()
 							} else {
-								*wg.cx.Config.Solo = false
-								*wg.cx.Config.DisableDNSSeed = false
-								*wg.cx.Config.MinerPass = "pa55word"
-								*wg.cx.Config.AutoListen = true
+								wg.cx.Config.Solo.F()
+								wg.cx.Config.DisableDNSSeed.F()
+								wg.cx.Config.MulticastPass.Set("pa55word")
+								wg.cx.Config.AutoListen.T()
 							}
 							podcfg.Save(wg.cx.Config)
 						},
@@ -417,19 +418,19 @@ func (wg *WalletGUI) cwfTestnetSettings() (out l.Widget) {
 					wg.bools["solo"].SetOnChange(
 						func(b bool) {
 							D.Ln("solo now set to", b)
-							*wg.cx.Config.Solo = b
-							if b && *wg.cx.Config.LAN {
-								*wg.cx.Config.LAN = false
-								*wg.cx.Config.DisableDNSSeed = true
-								*wg.cx.Config.AutoListen = false
-								*wg.cx.Config.MinerPass = "pa55word"
+							wg.cx.Config.Solo.Set(b)
+							if b && wg.cx.Config.LAN.True() {
+								wg.cx.Config.LAN.F()
+								wg.cx.Config.DisableDNSSeed.T()
+								wg.cx.Config.AutoListen.F()
+								wg.cx.Config.MulticastPass.Set("pa55word")
 								wg.bools["lan"].Value(false)
 								wg.Invalidate()
 							} else {
-								*wg.cx.Config.LAN = false
-								*wg.cx.Config.DisableDNSSeed = false
-								*wg.cx.Config.MinerPass = "pa55word"
-								*wg.cx.Config.AutoListen = true
+								wg.cx.Config.LAN.F()
+								wg.cx.Config.DisableDNSSeed.F()
+								wg.cx.Config.MulticastPass.Set("pa55word")
+								wg.cx.Config.AutoListen.T()
 							}
 							podcfg.Save(wg.cx.Config)
 						},
@@ -452,7 +453,7 @@ func (wg *WalletGUI) cwfConfirmation() (out l.Widget) {
 				// if the password has been entered, we need to copy it to the variable
 				if wg.createWalletPasswordsMatch() {
 					// wg.cx.Config.Lock()
-					*wg.cx.Config.WalletPass = wg.passwords["confirmPassEditor"].GetPassword()
+					wg.cx.Config.WalletPass.Set(wg.passwords["confirmPassEditor"].GetPassword())
 					// wg.cx.Config.Unlock()
 				}
 			},

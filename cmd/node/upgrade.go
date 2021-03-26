@@ -2,6 +2,7 @@ package node
 
 import (
 	"github.com/p9c/pod/pkg/pod"
+	"github.com/p9c/pod/pkg/podcfg"
 	"io"
 	"os"
 	"path/filepath"
@@ -68,7 +69,7 @@ func upgradeDBPathNet(cx *pod.State, oldDbPath, netName string) (e error) {
 			oldDbType = "leveldb"
 		}
 		// The new database name is based on the database type and resides in a directory named after the network type.
-		newDbRoot := filepath.Join(filepath.Dir(*cx.Config.DataDir), netName)
+		newDbRoot := filepath.Join(filepath.Dir(cx.Config.DataDir.V()), netName)
 		newDbName := blockdb.NamePrefix + "_" + oldDbType
 		if oldDbType == "sqlite" {
 			newDbName = newDbName + ".db"
@@ -122,7 +123,7 @@ func upgradeDBPaths(cx *pod.State) (e error) {
 func upgradeDataPaths() (e error) {
 	// No need to migrate if the old and new home paths are the same.
 	oldHomePath := oldPodHomeDir()
-	newHomePath := defaultHomeDir
+	newHomePath := podcfg.defaultHomeDir
 	if oldHomePath == newHomePath {
 		return nil
 	}
@@ -138,8 +139,8 @@ func upgradeDataPaths() (e error) {
 			return e
 		}
 		// Move old pod.conf into new location if needed
-		oldConfPath := filepath.Join(oldHomePath, defaultConfigFilename)
-		newConfPath := filepath.Join(newHomePath, defaultConfigFilename)
+		oldConfPath := filepath.Join(oldHomePath, podcfg.defaultConfigFilename)
+		newConfPath := filepath.Join(newHomePath, podcfg.defaultConfigFilename)
 		if apputil.FileExists(oldConfPath) && !apputil.FileExists(newConfPath) {
 			e := os.Rename(oldConfPath, newConfPath)
 			if e != nil {
@@ -147,8 +148,8 @@ func upgradeDataPaths() (e error) {
 			}
 		}
 		// Move old data directory into new location if needed
-		oldDataPath := filepath.Join(oldHomePath, defaultDataDirname)
-		newDataPath := filepath.Join(newHomePath, defaultDataDirname)
+		oldDataPath := filepath.Join(oldHomePath, podcfg.defaultDataDirname)
+		newDataPath := filepath.Join(newHomePath, podcfg.defaultDataDirname)
 		if apputil.FileExists(oldDataPath) && !apputil.FileExists(newDataPath) {
 			e := os.Rename(oldDataPath, newDataPath)
 			if e != nil {

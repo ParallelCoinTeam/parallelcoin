@@ -14,7 +14,7 @@ func BlockDb(cx *pod.State, dbType string, namePrefix string) string {
 	}
 	dbPath := filepath.Join(
 		filepath.Join(
-			*cx.Config.DataDir,
+			cx.Config.DataDir.V(),
 			cx.ActiveNet.Name,
 		), dbName,
 	)

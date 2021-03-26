@@ -1,8 +1,7 @@
-package pod
+package podcfg
 
 import (
 	"github.com/p9c/pod/pkg/logg"
-	"github.com/p9c/pod/pkg/podcfg"
 	"reflect"
 	"sort"
 )
@@ -47,7 +46,7 @@ type Field struct {
 }
 
 // GetConfigSchema returns a schema for a given config
-func GetConfigSchema(cfg *podcfg.Config) Schema {
+func GetConfigSchema(cfg *Config) Schema {
 	t := reflect.TypeOf(cfg)
 	t = t.Elem()
 	var levelOptions, network []string

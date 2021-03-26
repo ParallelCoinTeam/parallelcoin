@@ -431,7 +431,7 @@ func (n *Node) Start() {
 		n.WG.Add(1)
 		go n.UPNPUpdateThread()
 	}
-	if !*n.Config.DisableRPC {
+	if !n.Config.DisableRPC.True() {
 		n.WG.Add(1)
 		// Start the rebroadcastHandler, which ensures user tx received by the RPC server are rebroadcast until being
 		// included in a block.
@@ -476,7 +476,7 @@ func (n *Node) Stop() (e error) {
 	T.Ln("node shutting down")
 	
 	// Shutdown the RPC server if it'n not disabled.
-	if !*n.Config.DisableRPC {
+	if !n.Config.DisableRPC.True() {
 		for i := range n.RPCServers {
 			e = n.RPCServers[i].Stop()
 			if e != nil {
@@ -570,7 +570,7 @@ func (n *Node) HandleAddPeerMsg(state *PeerState, sp *NodePeer) bool {
 	// TODO: Chk for max peers from a single IP.
 	
 	// Limit max number of total peers.
-	if state.Count() >= *n.Config.MaxPeers {
+	if state.Count() >= n.Config.MaxPeers.V() {
 		I.F(
 			"max peers reached [%d] - disconnecting peer %n",
 			n.Config.MaxPeers, sp.Addr(),
@@ -646,7 +646,7 @@ func (n *Node) HandleBanPeerMsg(state *PeerState, sp *NodePeer) {
 	}
 	direction := logg.DirectionString(sp.Inbound())
 	I.F("banned peer %n (%n) for %v", host, direction, *n.Config.BanDuration)
-	state.Banned[host] = time.Now().Add(*n.Config.BanDuration)
+	state.Banned[host] = time.Now().Add(n.Config.BanDuration.V())
 }
 
 // HandleBroadcastMsg deals with broadcasting messages to peers. It is invoked from the peerHandler goroutine.
@@ -748,7 +748,7 @@ func (n *Node) HandleQuery(state *PeerState, querymsg interface{}) {
 		msg.Reply <- peers
 	case ConnectNodeMsg:
 		// TODO: duplicate oneshots? Limit max number of total peers.
-		if state.Count() >= *n.Config.MaxPeers {
+		if state.Count() >= n.Config.MaxPeers.V() {
 			msg.Reply <- errors.New("max peers reached")
 			return
 		}
@@ -1054,7 +1054,7 @@ func (n *Node) PeerHandler() {
 		Banned:          make(map[string]time.Time),
 		OutboundGroups:  make(map[string]int),
 	}
-	if !*n.Config.DisableDNSSeed || len(*n.Config.ConnectPeers) < 0 {
+	if !n.Config.DisableDNSSeed.True() || len(n.Config.ConnectPeers.S()) < 0 {
 		// Add peers discovered through DNS to the address manager.
 		connmgr.SeedFromDNS(
 			n.ActiveNet, DefaultRequiredServices,
@@ -1430,7 +1430,7 @@ func (np *NodePeer) OnAddr(
 	// Ignore addresses when running on the simulation test network. This helps prevent the network from becoming
 	// another public test network since it will not be able to learn about other peers that have not specifically been
 	// provided.
-	if (*np.Server.Config.Network)[0] == 's' {
+	if (np.Server.Config.Network.V())[0] == 's' {
 		return
 	}
 	// Ignore old style addresses which don't include a timestamp.
@@ -1572,7 +1572,7 @@ func (np *NodePeer) OnGetAddr(
 	// Don't return any addresses when running on the simulation test network. This helps prevent the network from
 	// becoming another public test network since it will not be able to learn about other peers that have not
 	// specifically been provided.
-	if (*np.Server.Config.Network)[0] == 's' {
+	if (np.Server.Config.Network.V())[0] == 's' {
 		return
 	}
 	// Do not accept getaddr requests from outbound peers. This reduces fingerprinting attacks.
@@ -2031,7 +2031,7 @@ func (np *NodePeer) OnInv(
 	_ *peer.Peer,
 	msg *wire.MsgInv,
 ) {
-	if !*np.Server.Config.BlocksOnly {
+	if !np.Server.Config.BlocksOnly.True() {
 		if len(msg.InvList) > 0 {
 			np.Server.SyncManager.QueueInv(msg, np.Peer)
 		}
@@ -2120,7 +2120,7 @@ func (np *NodePeer) OnTx(
 	_ *peer.Peer,
 	msg *wire.MsgTx,
 ) {
-	if *np.Server.Config.BlocksOnly {
+	if np.Server.Config.BlocksOnly.True() {
 		T.F("ignoring tx %v from %v - blocksonly enabled", msg.TxHash(), np)
 		return
 	}
@@ -2154,7 +2154,7 @@ func (np *NodePeer) OnVersion(
 	isInbound := np.Inbound()
 	remoteAddr := np.NA()
 	addrManager := np.Server.AddrManager
-	if !((*np.Server.Config.Network)[0] == 's') && !isInbound {
+	if !((np.Server.Config.Network.V())[0] == 's') && !isInbound {
 		addrManager.SetServices(remoteAddr, msg.Services)
 	}
 	// Ignore peers that have a protocol version that is too old. The peer negotiation logic will disconnect it after
@@ -2182,7 +2182,7 @@ func (np *NodePeer) OnVersion(
 	// This is skipped when running on the simulation test network since it is only
 	// intended to connect to specified peers and actively avoids advertising and
 	// connecting to discovered peers.
-	if !((*np.Server.Config.Network)[0] == 's') && !isInbound {
+	if !((np.Server.Config.Network.V())[0] == 's') && !isInbound {
 		// After soft-fork activation, only make outbound connection to peers if they
 		// flag that they're segwit enabled.
 		// chain := np.Server.Chain
@@ -2201,7 +2201,7 @@ func (np *NodePeer) OnVersion(
 		// }
 		// Advertise the local address when the server accepts incoming connections and it believes itself to be close
 		// to the best known tip.
-		if !*np.Server.Config.DisableListen && np.Server.SyncManager.IsCurrent() {
+		if !np.Server.Config.DisableListen.True() && np.Server.SyncManager.IsCurrent() {
 			// Get address that best matches.
 			lna := addrManager.GetBestLocalAddress(remoteAddr)
 			if addrmgr.IsRoutable(lna) {
@@ -2248,14 +2248,14 @@ func (np *NodePeer) OnWrite(
 // score is above the ban threshold, the peer will be banned and disconnected.
 func (np *NodePeer) AddBanScore(persistent, transient uint32, reason string) bool {
 	// No warning is logged and no score is calculated if banning is disabled.
-	if *np.Server.Config.DisableBanning {
+	if np.Server.Config.DisableBanning.True() {
 		return false
 	}
 	if np.IsWhitelisted {
 		D.F("misbehaving whitelisted peer %s: %s %s", np, reason)
 		return false
 	}
-	warnThreshold := *np.Server.Config.BanThreshold >> 1
+	warnThreshold := np.Server.Config.BanThreshold.V() >> 1
 	if transient == 0 && persistent == 0 {
 		// The score is not being increased, but a warning message is still logged if the score is above the warn
 		// threshold.
@@ -2268,7 +2268,7 @@ func (np *NodePeer) AddBanScore(persistent, transient uint32, reason string) boo
 	score := np.BanScore.Increase(persistent, transient)
 	if int(score) > warnThreshold {
 		W.F("misbehaving peer %s: %s -- ban score increased to %d", np, reason, score)
-		if int(score) > *np.Server.Config.BanThreshold {
+		if int(score) > np.Server.Config.BanThreshold.V() {
 			W.F("misbehaving peer %s -- banning and disconnecting", np)
 			np.Server.BanPeer(np)
 			np.Disconnect()
@@ -2303,7 +2303,7 @@ func (np *NodePeer) EnforceNodeBloomFlag(cmd string) bool {
 		// NOTE: Even though the addBanScore function already examines whether or not banning is enabled, it is checked
 		// here as well to ensure the violation is logged and the peer is disconnected regardless.
 		if np.ProtocolVersion() >= wire.BIP0111Version &&
-			!*np.Server.Config.DisableBanning {
+			!np.Server.Config.DisableBanning.True() {
 			// Disconnect the peer regardless of whether it was banned.
 			np.AddBanScore(100, 0, cmd)
 			np.Disconnect()
@@ -2459,7 +2459,7 @@ func AddrStringToNetAddr(config *podcfg.Config, stateCfg *state.Config, addr str
 	}
 	// Tor addresses cannot be resolved to an IP, so just return an onion address instead.
 	if strings.HasSuffix(host, ".onion") {
-		if !*config.Onion {
+		if !config.Onion.True() {
 			return nil, errors.New("tor has been disabled")
 		}
 		return &OnionAddr{Addr: addr}, nil
@@ -2554,13 +2554,13 @@ func InitListeners(
 		listeners = append(listeners, listener)
 	}
 	var nat upnp.NAT
-	if len(*config.ExternalIPs) != 0 {
+	if len(config.ExternalIPs.S()) != 0 {
 		defaultPort, e := strconv.ParseUint(activeNet.DefaultPort, 10, 16)
 		if e != nil {
 			E.F("can not parse default port %s for active chain: %v", activeNet.DefaultPort, e)
 			return nil, nil, e
 		}
-		for _, sip := range *config.ExternalIPs {
+		for _, sip := range config.ExternalIPs.S() {
 			eport := uint16(defaultPort)
 			host, portstr, e := net.SplitHostPort(sip)
 			if e != nil {
@@ -2588,7 +2588,7 @@ func InitListeners(
 			}
 		}
 	} else {
-		if *config.UPNP {
+		if config.UPNP.True() {
 			var e error
 			nat, e = upnp.Discover()
 			if e != nil {
@@ -2697,15 +2697,15 @@ func NewPeerConfig(sp *NodePeer) *peer.Config {
 		},
 		NewestBlock:       sp.GetNewestBlock,
 		HostToNetAddress:  sp.Server.AddrManager.HostToNetAddress,
-		Proxy:             *sp.Server.Config.Proxy,
+		Proxy:             sp.Server.Config.Proxy.V(),
 		UserAgentName:     UserAgentName,
 		UserAgentVersion:  UserAgentVersion,
-		UserAgentComments: *sp.Server.Config.UserAgentComments,
+		UserAgentComments: sp.Server.Config.UserAgentComments.S(),
 		ChainParams:       sp.Server.ChainParams,
 		Services:          sp.Server.Services,
-		DisableRelayTx:    *sp.Server.Config.BlocksOnly,
+		DisableRelayTx:    sp.Server.Config.BlocksOnly.True(),
 		ProtocolVersion:   peer.MaxProtocolVersion,
-		TrickleInterval:   *sp.Server.Config.TrickleInterval,
+		TrickleInterval:   sp.Server.Config.TrickleInterval.V(),
 		IP:                sp.IP,
 		Port:              sp.Port,
 	}
@@ -2732,16 +2732,16 @@ func NewNode(listenAddrs []string, db database.DB, interruptChan qu.C, cx *Conte
 ) {
 	D.Ln("listenAddrs ", listenAddrs)
 	services := DefaultServices
-	if *cx.Config.NoPeerBloomFilters {
+	if cx.Config.NoPeerBloomFilters.True() {
 		services &^= wire.SFNodeBloom
 	}
-	if *cx.Config.NoCFilters {
+	if cx.Config.NoCFilters.True() {
 		services &^= wire.SFNodeCF
 	}
-	aMgr := addrmgr.New(*cx.Config.DataDir+string(os.PathSeparator)+cx.ActiveNet.Name, Lookup(cx.StateCfg))
+	aMgr := addrmgr.New(cx.Config.DataDir.V()+string(os.PathSeparator)+cx.ActiveNet.Name, Lookup(cx.StateCfg))
 	var listeners []net.Listener
 	var nat upnp.NAT
-	if !*cx.Config.DisableListen {
+	if !cx.Config.DisableListen.True() {
 		var e error
 		listeners, nat, e = InitListeners(cx.Config, cx.ActiveNet, aMgr, listenAddrs, services)
 		if e != nil {
@@ -2753,22 +2753,22 @@ func NewNode(listenAddrs []string, db database.DB, interruptChan qu.C, cx *Conte
 	}
 	nThreads := runtime.NumCPU()
 	var thr int
-	if *cx.Config.GenThreads == -1 || thr > nThreads {
+	if cx.Config.GenThreads.V() == -1 || thr > nThreads {
 		thr = nThreads
 	} else {
-		thr = *cx.Config.GenThreads
+		thr = cx.Config.GenThreads.V()
 	}
 	T.Ln("set genthreads to ", thr)
 	s := Node{
 		ChainParams:          cx.ActiveNet,
 		AddrManager:          aMgr,
-		NewPeers:             make(chan *NodePeer, *cx.Config.MaxPeers),
-		DonePeers:            make(chan *NodePeer, *cx.Config.MaxPeers),
-		BanPeers:             make(chan *NodePeer, *cx.Config.MaxPeers),
+		NewPeers:             make(chan *NodePeer, cx.Config.MaxPeers.V()),
+		DonePeers:            make(chan *NodePeer, cx.Config.MaxPeers.V()),
+		BanPeers:             make(chan *NodePeer, cx.Config.MaxPeers.V()),
 		PeerState:            make(chan chan peersummary.PeerSummaries, 1),
 		Query:                make(chan interface{}),
-		RelayInv:             make(chan RelayMsg, *cx.Config.MaxPeers),
-		Broadcast:            make(chan BroadcastMsg, *cx.Config.MaxPeers),
+		RelayInv:             make(chan RelayMsg, cx.Config.MaxPeers.V()),
+		Broadcast:            make(chan BroadcastMsg, cx.Config.MaxPeers.V()),
 		Quit:                 qu.T(),
 		ModifyRebroadcastInv: make(chan interface{}),
 		PeerHeightsUpdate:    make(chan UpdatePeerHeightsMsg),
@@ -2776,8 +2776,8 @@ func NewNode(listenAddrs []string, db database.DB, interruptChan qu.C, cx *Conte
 		DB:                   db,
 		TimeSource:           blockchain.NewMedianTime(),
 		Services:             services,
-		SigCache:             txscript.NewSigCache(uint(*cx.Config.SigCacheMaxSize)),
-		HashCache:            txscript.NewHashCache(uint(*cx.Config.SigCacheMaxSize)),
+		SigCache:             txscript.NewSigCache(uint(cx.Config.SigCacheMaxSize.V())),
+		HashCache:            txscript.NewHashCache(uint(cx.Config.SigCacheMaxSize.V())),
 		CFCheckptCaches:      make(map[wire.FilterType][]CFHeaderKV),
 		GenThreads:           uint32(thr),
 		Config:               cx.Config,
@@ -2794,23 +2794,23 @@ func NewNode(listenAddrs []string, db database.DB, interruptChan qu.C, cx *Conte
 	// If the addrindex is run first, it may not have the transactions from the current block indexed.
 	var indexes []indexers.Indexer
 	D.Ln("txindex", *cx.Config.TxIndex, "addrindex", *cx.Config.AddrIndex)
-	if *cx.Config.TxIndex || *cx.Config.AddrIndex {
+	if cx.Config.TxIndex.True() || cx.Config.AddrIndex.True() {
 		// Enable transaction index if address index is enabled since it requires it.
-		if !*cx.Config.TxIndex {
+		if !cx.Config.TxIndex.True() {
 			I.Ln("transaction index enabled because it is required by the address index")
-			*cx.Config.TxIndex = true
+			cx.Config.TxIndex.T()
 		} else {
 			I.Ln("transaction index is enabled")
 		}
 		s.TxIndex = indexers.NewTxIndex(db)
 		indexes = append(indexes, s.TxIndex)
 	}
-	if *cx.Config.AddrIndex {
+	if cx.Config.AddrIndex.True() {
 		I.Ln("address index is enabled")
 		s.AddrIndex = indexers.NewAddrIndex(db, cx.ActiveNet)
 		indexes = append(indexes, s.AddrIndex)
 	}
-	if !*cx.Config.NoCFilters {
+	if !cx.Config.NoCFilters.True() {
 		T.Ln("committed filter index is enabled")
 		s.CFIndex = indexers.NewCfIndex(db, cx.ActiveNet)
 		indexes = append(indexes, s.CFIndex)
@@ -2822,7 +2822,7 @@ func NewNode(listenAddrs []string, db database.DB, interruptChan qu.C, cx *Conte
 	}
 	// Merge given checkpoints with the default ones unless they are disabled.
 	var checkpoints []chaincfg.Checkpoint
-	if !*cx.Config.DisableCheckpoints {
+	if !cx.Config.DisableCheckpoints.True() {
 		checkpoints = MergeCheckpoints(
 			s.ChainParams.Checkpoints, cx.StateCfg.AddedCheckpoints,
 		)
@@ -2882,10 +2882,10 @@ func NewNode(listenAddrs []string, db database.DB, interruptChan qu.C, cx *Conte
 	}
 	txC := mempool.Config{
 		Policy: mempool.Policy{
-			DisableRelayPriority: *cx.Config.NoRelayPriority,
-			AcceptNonStd:         *cx.Config.RelayNonStd,
-			FreeTxRelayLimit:     *cx.Config.FreeTxRelayLimit,
-			MaxOrphanTxs:         *cx.Config.MaxOrphanTxs,
+			DisableRelayPriority: cx.Config.NoRelayPriority.True(),
+			AcceptNonStd:         cx.Config.RelayNonStd.True(),
+			FreeTxRelayLimit:     cx.Config.FreeTxRelayLimit.V(),
+			MaxOrphanTxs:         cx.Config.MaxOrphanTxs.V(),
 			MaxOrphanTxSize:      DefaultMaxOrphanTxSize,
 			MaxSigOpCostPerTx:    blockchain.MaxBlockSigOpsCost / 4,
 			MinRelayTxFee:        cx.StateCfg.ActiveMinRelayTxFee,
@@ -2919,8 +2919,8 @@ func NewNode(listenAddrs []string, db database.DB, interruptChan qu.C, cx *Conte
 				Chain:              s.Chain,
 				TxMemPool:          s.TxMemPool,
 				ChainParams:        s.ChainParams,
-				DisableCheckpoints: *cx.Config.DisableCheckpoints,
-				MaxPeers:           *cx.Config.MaxPeers,
+				DisableCheckpoints: cx.Config.DisableCheckpoints.True(),
+				MaxPeers:           cx.Config.MaxPeers.V(),
 				FeeEstimator:       s.FeeEstimator,
 			},
 		)
@@ -2961,7 +2961,7 @@ func NewNode(listenAddrs []string, db database.DB, interruptChan qu.C, cx *Conte
 	// discovered peers in order to prevent it from becoming a public test
 	// network.
 	var newAddressFunc func() (net.Addr, error)
-	if !((*cx.Config.Network)[0] == 's') && len(*cx.Config.ConnectPeers) == 0 {
+	if !((cx.Config.Network.V())[0] == 's') && len(cx.Config.ConnectPeers.S()) == 0 {
 		newAddressFunc = func() (net.Addr, error) {
 			for tries := 0; tries < 100; tries++ {
 				addr := s.AddrManager.GetAddress()
@@ -2993,8 +2993,8 @@ func NewNode(listenAddrs []string, db database.DB, interruptChan qu.C, cx *Conte
 	}
 	// Create a connection manager.
 	targetOutbound := DefaultTargetOutbound
-	if *cx.Config.MaxPeers < targetOutbound {
-		targetOutbound = *cx.Config.MaxPeers
+	if cx.Config.MaxPeers.V() < targetOutbound {
+		targetOutbound = cx.Config.MaxPeers.V()
 	}
 	cMgr, e :=
 		connmgr.New(
@@ -3013,9 +3013,9 @@ func NewNode(listenAddrs []string, db database.DB, interruptChan qu.C, cx *Conte
 	}
 	s.ConnManager = cMgr
 	// Start up persistent peers.
-	permanentPeers := *cx.Config.ConnectPeers
+	permanentPeers := cx.Config.ConnectPeers.S()
 	if len(permanentPeers) == 0 {
-		permanentPeers = *cx.Config.AddPeers
+		permanentPeers = cx.Config.AddPeers.S()
 	}
 	for _, addr := range permanentPeers {
 		netAddr, e := AddrStringToNetAddr(cx.Config, cx.StateCfg, addr)
@@ -3029,10 +3029,10 @@ func NewNode(listenAddrs []string, db database.DB, interruptChan qu.C, cx *Conte
 			},
 		)
 	}
-	if !*cx.Config.DisableRPC {
+	if !cx.Config.DisableRPC.True() {
 		// Setup listeners for the configured RPC listen addresses and TLS settings.
 		listeners := map[string][]string{
-			fork.SHA256d: *cx.Config.RPCListeners,
+			fork.SHA256d: cx.Config.RPCListeners.S(),
 		}
 		for l := range listeners {
 			rpcListeners, e := SetupRPCListeners(cx.Config, listeners[l])
@@ -3103,19 +3103,22 @@ func NewServerPeer(s *Node, localIP net.IP, isPersistent bool) *NodePeer {
 	var host, port string
 	var ipa net.IP
 	var p uint64
-	if s.Config.P2PConnect != nil || len(*s.Config.P2PConnect) < 1 || *s.Config.DisableListen || *s.Config.Proxy != "" ||
-		*s.Config.OnionProxy != "" {
+	if s.Config.P2PConnect.V() != nil ||
+		len(s.Config.P2PConnect.S()) < 1 ||
+		s.Config.DisableListen.True() ||
+		s.Config.Proxy.V() != "" ||
+		s.Config.OnionProxy.V() != "" {
 		// return an empty IP address if we are not listening (this also is done on
 		// proxy connections to not leak info)
 	} else {
-		myAddress := (*s.Config.P2PConnect)[0]
+		myAddress := (s.Config.P2PConnect.S())[0]
 		if host, port, e = net.SplitHostPort(myAddress); E.Chk(e) {
 		}
 		if p, e = strconv.ParseUint(port, 10, 16); E.Chk(e) {
 		}
 		// use the given UPNP external address if in use so version message matches
 		// sender
-		if *s.Config.UPNP {
+		if s.Config.UPNP.True() {
 			var exip net.IP
 			if exip, e = s.NAT.GetExternalAddress(); E.Chk(e) {
 			} else {
@@ -3208,22 +3211,22 @@ func RandomUint16Number(max uint16) uint16 {
 func SetupRPCListeners(config *podcfg.Config, urls []string) ([]net.Listener, error) {
 	// Setup TLS if not disabled.
 	listenFunc := net.Listen
-	if *config.TLS {
+	if config.TLS.True() {
 		// Generate the TLS cert and key file if both don't already exist.
-		if !FileExists(*config.RPCKey) && !FileExists(*config.RPCCert) {
-			e := GenCertPair(*config.RPCCert, *config.RPCKey)
+		if !FileExists(config.RPCKey.V()) && !FileExists(config.RPCCert.V()) {
+			e := GenCertPair(config.RPCCert.V(), config.RPCKey.V())
 			if e != nil {
 				return nil, e
 			}
 		}
-		keyPair, e := tls.LoadX509KeyPair(*config.RPCCert, *config.RPCKey)
+		keyPair, e := tls.LoadX509KeyPair(config.RPCCert.V(), config.RPCKey.V())
 		if e != nil {
 			return nil, e
 		}
 		tlsConfig := tls.Config{
 			Certificates:       []tls.Certificate{keyPair},
 			MinVersion:         tls.VersionTLS12,
-			InsecureSkipVerify: *config.TLSSkipVerify,
+			InsecureSkipVerify: config.TLSSkipVerify.True(),
 		}
 		// Change the standard net.Listen function to the tls one.
 		listenFunc = func(net string, laddr string) (net.Listener, error) {
@@ -3260,11 +3263,11 @@ func GetBlkTemplateGenerator(node *Node, cfg *podcfg.Config, stateCfg *state.Con
 	D.Ln("getting a block template generator")
 	return mining.NewBlkTmplGenerator(
 		&mining.Policy{
-			BlockMinWeight:    uint32(*cfg.BlockMinWeight),
-			BlockMaxWeight:    uint32(*cfg.BlockMaxWeight),
-			BlockMinSize:      uint32(*cfg.BlockMinSize),
-			BlockMaxSize:      uint32(*cfg.BlockMaxSize),
-			BlockPrioritySize: uint32(*cfg.BlockPrioritySize),
+			BlockMinWeight:    uint32(cfg.BlockMinWeight.V()),
+			BlockMaxWeight:    uint32(cfg.BlockMaxWeight.V()),
+			BlockMinSize:      uint32(cfg.BlockMinSize.V()),
+			BlockMaxSize:      uint32(cfg.BlockMaxSize.V()),
+			BlockPrioritySize: uint32(cfg.BlockPrioritySize.V()),
 			TxMinFreeFee:      stateCfg.ActiveMinRelayTxFee,
 		},
 		node.ChainParams,

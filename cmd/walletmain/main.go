@@ -13,10 +13,10 @@ import (
 	
 	"github.com/p9c/pod/pkg/util/qu"
 	
+	"github.com/p9c/pod/pkg/chainclient"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/wallet"
-	"github.com/p9c/pod/pkg/chainclient"
 )
 
 // Main is a work-around main function that is required since deferred functions
@@ -37,7 +37,7 @@ func Main(cx *pod.State) (e error) {
 	//		fmt.Println(http.ListenAndServe(listenAddr, nil))
 	//	}()
 	// }
-	loader := wallet.NewLoader(cx.ActiveNet, *cx.Config.WalletFile, 250)
+	loader := wallet.NewLoader(cx.ActiveNet, cx.Config.WalletFile.V(), 250)
 	// Create and start HTTP server to serve wallet client connections. This will be updated with the wallet and chain
 	// server RPC client created below after each is created.
 	D.Ln("starting RPC servers")
@@ -53,7 +53,7 @@ func Main(cx *pod.State) (e error) {
 			// cx.WalletChan <- w
 		},
 	)
-	if !*cx.Config.NoInitialLoad {
+	if !cx.Config.NoInitialLoad.True() {
 		go func() {
 			D.Ln("loading wallet", *cx.Config.WalletPass)
 			if e = LoadWallet(loader, cx, legacyServer); E.Chk(e) {
@@ -97,7 +97,7 @@ func LoadWallet(loader *wallet.Loader, cx *pod.State, legacyServer *walletrpc2.S
 	// this will return an appropriate error.
 	var w *wallet.Wallet
 	T.Ln("opening existing wallet")
-	if w, e = loader.OpenExistingWallet([]byte(*cx.Config.WalletPass), true, cx.Config, nil); E.Chk(e) {
+	if w, e = loader.OpenExistingWallet(cx.Config.WalletPass.Bytes(), true, cx.Config, nil); E.Chk(e) {
 		T.Ln("failed to open existing wallet")
 		return
 	}
@@ -265,17 +265,20 @@ func rpcClientConnectLoop(
 // services. This function uses the RPC options from the global config and there
 // is no recovery in case the server is not available or if there is an
 // authentication error. Instead, all requests to the client will simply error.
-func StartChainRPC(config *podcfg.Config, activeNet *chaincfg.Params, certs []byte, quit qu.C) (*chainclient.RPCClient, error) {
+func StartChainRPC(config *podcfg.Config, activeNet *chaincfg.Params, certs []byte, quit qu.C) (
+	*chainclient.RPCClient,
+	error,
+) {
 	D.Ln(
 		">>>>>>>>>>>>>>> attempting RPC client connection to %v, TLS: %s", *config.RPCConnect, fmt.Sprint(*config.TLS),
 	)
 	rpcC, e := chainclient.NewRPCClient(
 		activeNet,
-		*config.RPCConnect,
-		*config.Username,
-		*config.Password,
+		config.RPCConnect.V(),
+		config.Username.V(),
+		config.Password.V(),
 		certs,
-		*config.TLS,
+		config.TLS.True(),
 		0,
 		quit,
 	)

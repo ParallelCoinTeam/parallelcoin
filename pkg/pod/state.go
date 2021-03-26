@@ -156,7 +156,7 @@ func (cx *State) IsCurrent() (is bool) {
 	rn := cx.RealNode
 	cc := rn.ConnectedCount()
 	othernodes := cx.OtherNodesCounter.Load()
-	if !*cx.Config.LAN {
+	if !cx.Config.LAN.True() {
 		cc -= othernodes
 	}
 	D.Ln(cc, "nodes connected")
@@ -164,7 +164,7 @@ func (cx *State) IsCurrent() (is bool) {
 	is = rn.Chain.IsCurrent() &&
 		rn.SyncManager.IsCurrent() &&
 		connected &&
-		rn.Chain.BestChain.Height() >= rn.HighestKnown.Load() || *cx.Config.Solo
+		rn.Chain.BestChain.Height() >= rn.HighestKnown.Load() || cx.Config.Solo.True()
 	D.Ln(
 		"is current:", is, "-", rn.Chain.IsCurrent(), rn.SyncManager.IsCurrent(),
 		*cx.Config.Solo, "connected", rn.HighestKnown.Load(), rn.Chain.BestChain.Height(),

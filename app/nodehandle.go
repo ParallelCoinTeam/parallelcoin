@@ -46,24 +46,24 @@ func nodeHandle(cx *pod.State) func(c *cli.Context) (e error) {
 		}
 		// config.Configure(cx, c.Command.Name, true)
 		// D.Ln("starting shell")
-		if *cx.Config.TLS || *cx.Config.ServerTLS {
+		if cx.Config.TLS.True() || cx.Config.ServerTLS.True() {
 			// generate the tls certificate if configured
-			if apputil.FileExists(*cx.Config.RPCCert) &&
-				apputil.FileExists(*cx.Config.RPCKey) &&
-				apputil.FileExists(*cx.Config.CAFile) {
+			if apputil.FileExists(cx.Config.RPCCert.V()) &&
+				apputil.FileExists(cx.Config.RPCKey.V()) &&
+				apputil.FileExists(cx.Config.CAFile.V()) {
 			} else {
 				if _, e = walletmain.GenerateRPCKeyPair(cx.Config, true); E.Chk(e) {
 				}
 			}
 		}
-		if !*cx.Config.NodeOff {
+		if cx.Config.NodeOff.False() {
 			go func() {
 				if e := node.Main(cx); E.Chk(e) {
 					E.Ln("error starting node ", e)
 				}
 			}()
 			I.Ln("starting node")
-			if !*cx.Config.DisableRPC {
+			if cx.Config.DisableRPC.False() {
 				cx.RPCServer = <-cx.NodeChan
 				cx.NodeReady.Q()
 				cx.Node.Store(true)

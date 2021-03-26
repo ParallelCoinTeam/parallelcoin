@@ -27,8 +27,8 @@ func GenerateRPCKeyPair(config *podcfg.Config, writeKey bool) (tls.Certificate, 
 	D.Ln("generating TLS certificates")
 	// Create directories for cert and key files if they do not yet exist.
 	D.Ln("rpc tls ", *config.RPCCert, " ", *config.RPCKey)
-	certDir, _ := filepath.Split(*config.RPCCert)
-	keyDir, _ := filepath.Split(*config.RPCKey)
+	certDir, _ := filepath.Split(config.RPCCert.V())
+	keyDir, _ := filepath.Split(config.RPCKey.V())
 	e := os.MkdirAll(certDir, 0700)
 	if e != nil {
 		return tls.Certificate{}, e
@@ -49,30 +49,30 @@ func GenerateRPCKeyPair(config *podcfg.Config, writeKey bool) (tls.Certificate, 
 		return tls.Certificate{}, e
 	}
 	// Write cert and (potentially) the key files.
-	e = ioutil.WriteFile(*config.RPCCert, cert, 0600)
+	e = ioutil.WriteFile(config.RPCCert.V(), cert, 0600)
 	if e != nil {
-		rmErr := os.Remove(*config.RPCCert)
+		rmErr := os.Remove(config.RPCCert.V())
 		if rmErr != nil {
 			E.Ln("cannot remove written certificates:", rmErr)
 		}
 		return tls.Certificate{}, e
 	}
-	e = ioutil.WriteFile(*config.CAFile, cert, 0600)
+	e = ioutil.WriteFile(config.CAFile.V(), cert, 0600)
 	if e != nil {
-		rmErr := os.Remove(*config.RPCCert)
+		rmErr := os.Remove(config.RPCCert.V())
 		if rmErr != nil {
 			E.Ln("cannot remove written certificates:", rmErr)
 		}
 		return tls.Certificate{}, e
 	}
 	if writeKey {
-		e = ioutil.WriteFile(*config.RPCKey, key, 0600)
+		e = ioutil.WriteFile(config.RPCKey.V(), key, 0600)
 		if e != nil {
-			rmErr := os.Remove(*config.RPCCert)
+			rmErr := os.Remove(config.RPCCert.V())
 			if rmErr != nil {
 				E.Ln("cannot remove written certificates:", rmErr)
 			}
-			rmErr = os.Remove(*config.CAFile)
+			rmErr = os.Remove(config.CAFile.V())
 			if rmErr != nil {
 				E.Ln("cannot remove written certificates:", rmErr)
 			}
@@ -161,21 +161,21 @@ func OpenRPCKeyPair(config *podcfg.Config) (tls.Certificate, error) {
 	// overwriting an existing cert is acceptable if the previous execution used a
 	// one time TLS key. Otherwise, both the cert and key should be read from disk.
 	// If the cert is missing, the read error will occur in LoadX509KeyPair.
-	_, e := os.Stat(*config.RPCKey)
+	_, e := os.Stat(config.RPCKey.V())
 	keyExists := !os.IsNotExist(e)
 	switch {
-	case *config.OneTimeTLSKey && keyExists:
+	case config.OneTimeTLSKey.True() && keyExists:
 		e := fmt.Errorf(
 			"one time TLS keys are enabled, "+
 				"but TLS key `%s` already exists", *config.RPCKey,
 		)
 		return tls.Certificate{}, e
-	case *config.OneTimeTLSKey:
+	case config.OneTimeTLSKey.True():
 		return GenerateRPCKeyPair(config, false)
 	case !keyExists:
 		return GenerateRPCKeyPair(config, true)
 	default:
-		return tls.LoadX509KeyPair(*config.RPCCert, *config.RPCKey)
+		return tls.LoadX509KeyPair(config.RPCCert.V(), config.RPCKey.V())
 	}
 }
 func startRPCServers(cx *pod.State, walletLoader *wallet.Loader) (*walletrpc2.Server, error) {
@@ -186,7 +186,7 @@ func startRPCServers(cx *pod.State, walletLoader *wallet.Loader) (*walletrpc2.Se
 		keyPair      tls.Certificate
 		e            error
 	)
-	if !*cx.Config.TLS {
+	if !cx.Config.TLS.True() {
 		I.Ln("server TLS is disabled - only legacy RPC may be used")
 	} else {
 		keyPair, e = OpenRPCKeyPair(cx.Config)
@@ -198,25 +198,25 @@ func startRPCServers(cx *pod.State, walletLoader *wallet.Loader) (*walletrpc2.Se
 			Certificates:       []tls.Certificate{keyPair},
 			MinVersion:         tls.VersionTLS12,
 			NextProtos:         []string{"h2"}, // HTTP/2 over TLS
-			InsecureSkipVerify: *cx.Config.TLSSkipVerify,
+			InsecureSkipVerify: cx.Config.TLSSkipVerify.True(),
 		}
 		walletListen = func(net string, laddr string) (net.Listener, error) {
 			return tls.Listen(net, laddr, tlsConfig)
 		}
 	}
-	if *cx.Config.Username == "" || *cx.Config.Password == "" {
+	if cx.Config.Username.V() == "" || cx.Config.Password.V() == "" {
 		I.Ln("legacy RPC server disabled (requires username and password)")
-	} else if len(*cx.Config.WalletRPCListeners) != 0 {
-		listeners := makeListeners(*cx.Config.WalletRPCListeners, walletListen)
+	} else if len(cx.Config.WalletRPCListeners.S()) != 0 {
+		listeners := makeListeners(cx.Config.WalletRPCListeners.S(), walletListen)
 		if len(listeners) == 0 {
 			e := errors.New("failed to create listeners for legacy RPC server")
 			return nil, e
 		}
 		opts := walletrpc2.Options{
-			Username:            *cx.Config.Username,
-			Password:            *cx.Config.Password,
-			MaxPOSTClients:      int64(*cx.Config.WalletRPCMaxClients),
-			MaxWebsocketClients: int64(*cx.Config.WalletRPCMaxWebsockets),
+			Username:            cx.Config.Username.V(),
+			Password:            cx.Config.Password.V(),
+			MaxPOSTClients:      int64(cx.Config.WalletRPCMaxClients.V()),
+			MaxWebsocketClients: int64(cx.Config.WalletRPCMaxWebsockets.V()),
 		}
 		legacyServer = walletrpc2.NewServer(&opts, walletLoader, listeners, nil)
 	}

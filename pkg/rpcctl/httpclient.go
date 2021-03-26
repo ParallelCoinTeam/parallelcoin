@@ -25,11 +25,11 @@ func newHTTPClient(cfg *podcfg.Config) (*http.Client, func(), error) {
 	var dial func(ctx context.Context, network string, addr string) (net.Conn, error)
 	ctx, cancel := context.WithCancel(context.Background())
 	// Configure proxy if needed.
-	if *cfg.Proxy != "" {
+	if cfg.Proxy.V() != "" {
 		proxy := &socks.Proxy{
-			Addr:     *cfg.Proxy,
-			Username: *cfg.ProxyUser,
-			Password: *cfg.ProxyPass,
+			Addr:     cfg.Proxy.V(),
+			Username: cfg.ProxyUser.V(),
+			Password: cfg.ProxyPass.V(),
 		}
 		dial = func(_ context.Context, network string, addr string) (net.Conn, error) {
 			c, e := proxy.Dial(network, addr)
@@ -52,8 +52,8 @@ func newHTTPClient(cfg *podcfg.Config) (*http.Client, func(), error) {
 	}
 	// Configure TLS if needed.
 	var tlsConfig *tls.Config
-	if *cfg.TLS && *cfg.RPCCert != "" {
-		pem, e := ioutil.ReadFile(*cfg.RPCCert)
+	if cfg.TLS.True() && cfg.RPCCert.V() != "" {
+		pem, e := ioutil.ReadFile(cfg.RPCCert.V())
 		if e != nil  {
 						cancel()
 			return nil, nil, e
@@ -62,7 +62,7 @@ func newHTTPClient(cfg *podcfg.Config) (*http.Client, func(), error) {
 		pool.AppendCertsFromPEM(pem)
 		tlsConfig = &tls.Config{
 			RootCAs:            pool,
-			InsecureSkipVerify: *cfg.TLSSkipVerify,
+			InsecureSkipVerify: cfg.TLSSkipVerify.True(),
 		}
 	}
 	// Create and return the new HTTP client potentially configured with a proxy and TLS.
@@ -97,12 +97,12 @@ func newHTTPClient(cfg *podcfg.Config) (*http.Client, func(), error) {
 func sendPostRequest(marshalledJSON []byte, cx *pod.State, wallet bool) ([]byte, error) {
 	// Generate a request to the configured RPC server.
 	protocol := "http"
-	if *cx.Config.TLS {
+	if cx.Config.TLS.True() {
 		protocol = "https"
 	}
-	serverAddr := *cx.Config.RPCConnect
+	serverAddr := cx.Config.RPCConnect.V()
 	if wallet {
-		serverAddr = *cx.Config.WalletServer
+		serverAddr = cx.Config.WalletServer.V()
 		_, _ = fmt.Fprintln(os.Stderr, "using wallet server", serverAddr)
 	}
 	url := protocol + "://" + serverAddr
@@ -114,7 +114,7 @@ func sendPostRequest(marshalledJSON []byte, cx *pod.State, wallet bool) ([]byte,
 	httpRequest.Close = true
 	httpRequest.Header.Set("Content-Type", "application/json")
 	// Configure basic access authorization.
-	httpRequest.SetBasicAuth(*cx.Config.Username, *cx.Config.Password)
+	httpRequest.SetBasicAuth(cx.Config.Username.V(), cx.Config.Password.V())
 	// Create the new HTTP client that is configured according to the user - specified options and submit the request.
 	var httpClient *http.Client
 	var cancel func()

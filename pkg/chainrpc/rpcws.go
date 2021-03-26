@@ -12,8 +12,8 @@ import (
 	"fmt"
 	amount2 "github.com/p9c/pod/pkg/amt"
 	"github.com/p9c/pod/pkg/block"
-	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/btcaddr"
+	"github.com/p9c/pod/pkg/chaincfg"
 	"io"
 	"math"
 	"sync"
@@ -248,7 +248,7 @@ func (s *Server) WebsocketHandler(
 	}
 	// Limit max number of websocket clients.
 	T.Ln("new websocket client", remoteAddr)
-	if s.NtfnMgr.GetNumClients()+1 > *s.Config.RPCMaxWebsockets {
+	if s.NtfnMgr.GetNumClients()+1 > s.Config.RPCMaxWebsockets.V() {
 		I.F(
 			"max websocket clients exceeded [%d] - disconnecting client"+
 				" %s",
@@ -404,8 +404,7 @@ out:
 		// reqeust does not indicate JSON-RPC version.
 		//
 		// RPC quirks can be enabled by the user to avoid compatibility issues with software relying on Core's behavior.
-		if request.ID == nil && !(*c.Server.Config.RPCQuirks && request.
-			Jsonrpc == "") {
+		if request.ID == nil && !(c.Server.Config.RPCQuirks.True() && request.Jsonrpc == "") {
 			if !c.Authenticated {
 				break out
 			}
@@ -2170,7 +2169,7 @@ func NewWebsocketClient(
 		Server:            server,
 		AddrRequests:      make(map[string]struct{}),
 		SpentRequests:     make(map[wire.OutPoint]struct{}),
-		ServiceRequestSem: MakeSemaphore(*server.Config.RPCMaxConcurrentReqs),
+		ServiceRequestSem: MakeSemaphore(server.Config.RPCMaxConcurrentReqs.V()),
 		NtfnChan:          make(chan []byte, 1), // nonblocking sync
 		SendChan:          make(chan WSResponse, WebsocketSendBufferSize),
 		Quit:              qu.T(),

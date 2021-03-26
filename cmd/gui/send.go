@@ -134,7 +134,7 @@ func (sp *SendPage) MediumList(gtx l.Context) l.Dimensions {
 			func(gtx l.Context) l.Dimensions {
 				gtx.Constraints.Max.X =
 					int(wg.TextSize.V * sp.inputWidth)
-				// gtx.Constraints.Min.X = int(wg.TextSize.V * sp.inputWidth)
+				// gtx.Constraints.Min.X = int(wg.TextSize.True * sp.inputWidth)
 				
 				return wg.VFlex().AlignStart().
 					Rigid(
@@ -222,7 +222,7 @@ func (sp *SendPage) SendButton() l.Widget {
 									// TODO: indicate this to the user somehow
 									return
 								}
-								if e = wg.WalletClient.WalletPassphrase(*wg.cx.Config.WalletPass, 5); E.Chk(e) {
+								if e = wg.WalletClient.WalletPassphrase(wg.cx.Config.WalletPass.V(), 5); E.Chk(e) {
 									D.Ln(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", e)
 									return
 								}

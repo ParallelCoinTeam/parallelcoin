@@ -7,6 +7,7 @@ import (
 	"github.com/p9c/pod/pkg/amt"
 	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/logg"
+	"github.com/p9c/pod/pkg/podcfg"
 	"math"
 	"sync"
 	"sync/atomic"
@@ -125,10 +126,6 @@ type orphanTx struct {
 }
 
 const (
-	// DefaultBlockPrioritySize is the default size in bytes for high - priority / low-fee transactions. It is used to
-	// help determine which are allowed into the mempool and consequently affects their relay and inclusion when
-	// generating block templates.
-	DefaultBlockPrioritySize = 50000
 	// orphanTTL is the maximum amount of time an orphan is allowed to stay in the orphan pool before it expires and is
 	// evicted during the next scan.
 	orphanTTL = time.Minute * 15
@@ -795,7 +792,7 @@ func (mp *TxPool) maybeAcceptTransaction(
 		serializedSize,
 		mp.cfg.Policy.MinRelayTxFee,
 	)
-	if serializedSize >= (DefaultBlockPrioritySize-1000) && txFee < minFee {
+	if serializedSize >= (podcfg.DefaultBlockPrioritySize-1000) && txFee < minFee {
 		str := fmt.Sprintf(
 			"transaction %v has %d fees which is under the required amount of %d",
 			txHash, txFee, minFee,

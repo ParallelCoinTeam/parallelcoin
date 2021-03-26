@@ -118,11 +118,11 @@ func (wg *WalletGUI) Watcher() qu.C {
 					break totalOut
 				}
 			}
-			if *wg.cx.Config.Controller {
+			if wg.cx.Config.Controller.True() {
 				if wg.ChainClient != nil {
 					if e = wg.ChainClient.SetGenerate(
-						*wg.cx.Config.Controller,
-						*wg.cx.Config.GenThreads,
+						wg.cx.Config.Controller.True(),
+						wg.cx.Config.GenThreads.V(),
 					); !E.Chk(e) {
 					}
 				}

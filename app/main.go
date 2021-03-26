@@ -15,7 +15,7 @@ const (
 	Name              = "pod"
 	confExt           = ".json"
 	appLanguage       = "en"
-	podConfigFilename = Name + confExt
+	PodConfigFilename = Name + confExt
 	PARSER            = "json"
 )
 

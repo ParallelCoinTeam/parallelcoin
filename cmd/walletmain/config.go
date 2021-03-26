@@ -10,7 +10,7 @@ import (
 type Config struct {
 	// General application behavior
 	ConfigFile    *string `short:"C" long:"configfile" description:"Path to configuration file"`
-	ShowVersion   *bool   `short:"V" long:"version" description:"Display version information and exit"`
+	ShowVersion   *bool   `short:"True" long:"version" description:"Display version information and exit"`
 	LogLevel      *string
 	Create        *bool   `long:"create" description:"Create the wallet if it does not exist"`
 	CreateTemp    *bool   `long:"createtemp" description:"Create a temporary simulation wallet (pass=password) in the data directory indicated; must call with --datadir"`
@@ -64,15 +64,6 @@ type Config struct {
 
 // A bunch of constants
 const (
-	DefaultAppDataDirname   = "wallet"
-	DefaultCAFilename       = "wallet.cert"
-	DefaultConfigFilename   = "conf.json"
-	DefaultLogLevel         = "info"
-	DefaultLogDirname       = ""
-	DefaultLogFilename      = "wallet/log"
-	DefaultRPCMaxClients    = 10
-	DefaultRPCMaxWebsockets = 25
-	WalletDbName            = "wallet.db"
 )
 
 /*

@@ -59,11 +59,11 @@ The Get, Put, and Delete functions work with key/value pairs, while the Bucket, 
 and DeleteBucket functions work with buckets. The ForEach function allows the caller to provide a function to be called
 with each key/value pair and nested bucket in the current bucket.
 
-Metadata Bucket
+metadata Bucket
 
 As discussed above, all of the functions which are used to manipulate key/value pairs and nested buckets exist on the
 Bucket interface. The root metadata bucket is the upper-most bucket in which data is stored and is created at the same
-time as the database. Use the Metadata function on the Tx interface to retrieve it.
+time as the database. Use the metadata function on the Tx interface to retrieve it.
 
 Nested Buckets
 

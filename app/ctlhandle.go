@@ -26,7 +26,7 @@ func ctlHandle(cx *pod.State) func(c *cli.Context) (e error) {
 	return func(c *cli.Context) (e error) {
 		logg.AppColorizer = color.Bit24(128, 128, 255, false).Sprint
 		logg.App = "   ctl"
-		*cx.Config.LogLevel = "off"
+		cx.Config.LogLevel.Set("off")
 		podconfig.Configure(cx, "ctl", true)
 		args := c.Args()
 		if len(args) < 1 {

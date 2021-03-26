@@ -73,7 +73,7 @@ func HandleGetWork(s *Server, cmd interface{}, closeChan qu.C) (interface{}, err
 			Message: "No payment addresses specified via --miningaddr",
 		}
 	}
-	netwk := (*s.Config.Network)[0]
+	netwk := (s.Config.Network.V())[0]
 	if !((netwk == 'r') || (netwk == 's')) &&
 		s.Cfg.ConnMgr.ConnectedCount() == 0 {
 		return nil, &btcjson.RPCError{

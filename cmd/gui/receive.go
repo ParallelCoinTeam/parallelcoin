@@ -257,7 +257,7 @@ func (rp *ReceivePage) AddressbookHeader() l.Widget {
 func (rp *ReceivePage) AmountInput() l.Widget {
 	return func(gtx l.Context) l.Dimensions {
 		wg := rp.wg
-		// gtx.Constraints.Max.X, gtx.Constraints.Min.X = int(wg.TextSize.V*rp.inputWidth), int(wg.TextSize.V*rp.inputWidth)
+		// gtx.Constraints.Max.X, gtx.Constraints.Min.X = int(wg.TextSize.True*rp.inputWidth), int(wg.TextSize.True*rp.inputWidth)
 		return wg.inputs["receiveAmount"].Fn(gtx)
 	}
 }
@@ -265,7 +265,7 @@ func (rp *ReceivePage) AmountInput() l.Widget {
 func (rp *ReceivePage) MessageInput() l.Widget {
 	return func(gtx l.Context) l.Dimensions {
 		wg := rp.wg
-		// gtx.Constraints.Max.X, gtx.Constraints.Min.X = int(wg.TextSize.V*rp.inputWidth), int(wg.TextSize.V*rp.inputWidth)
+		// gtx.Constraints.Max.X, gtx.Constraints.Min.X = int(wg.TextSize.True*rp.inputWidth), int(wg.TextSize.True*rp.inputWidth)
 		return wg.inputs["receiveMessage"].Fn(gtx)
 	}
 }
@@ -276,7 +276,7 @@ func (rp *ReceivePage) RegenerateButton() l.Widget {
 		if wg.inputs["receiveAmount"].GetText() == "" || wg.inputs["receiveMessage"].GetText() == "" {
 			gtx.Queue = nil
 		}
-		// gtx.Constraints.Max.X, gtx.Constraints.Min.X = int(wg.TextSize.V*rp.inputWidth), int(wg.TextSize.V*rp.inputWidth)
+		// gtx.Constraints.Max.X, gtx.Constraints.Min.X = int(wg.TextSize.True*rp.inputWidth), int(wg.TextSize.True*rp.inputWidth)
 		return wg.ButtonLayout(
 			wg.currentReceiveRegenClickable.
 				SetClick(
