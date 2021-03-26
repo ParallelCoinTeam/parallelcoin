@@ -1,7 +1,15 @@
-// Package podcfg is a configuration system to fit with the all-in-one
-// philosophy guiding the design of the parallelcoin pod.
+// Package podcfg is a configuration system to fit with the all-in-one philosophy guiding the design of the parallelcoin
+// pod.
 //
-// The configuration is stored by each component of the connected applications
+// The configuration is stored by each component of the connected applications, so all data is stored in concurrent-safe
+// atomics, and there is a facility to invoke a function in response to a new value written into a field by other
+// threads.
+//
+// There is a custom JSON marshal/unmarshal for each field type and for the whole configuration that only saves values
+// that differ from the defaults, similar to 'omitempty' in struct tags but where 'empty' is the default value instead
+// of the default zero created by Go's memory allocator.
+//
+//
 package podcfg
 
 import (
@@ -37,7 +45,7 @@ type Config struct {
 	// Map is the same data but addressible using its name as found inside the various configuration types, the key is
 	// the same as the .Name field field in the various data types
 	Map map[string]interface{}
-	
+	// These are just the definitions, the things put in them are more useful than doc comments
 	AddCheckpoints         *Strings
 	AddPeers               *Strings
 	AddrIndex              *Bool
@@ -149,6 +157,9 @@ func (c *Config) ForEach(fn func(ifc interface{}) bool) {
 	}
 }
 
+// MarshalJSON implements the json marshaller for the config. This marshaller only saves what is different from the
+// defaults, and when it is unmarshalled, only the fields stored are altered, thus allowing stacking several sources
+// such as environment variables, command line flags and the config file itself.
 func (c *Config) MarshalJSON() (b []byte, e error) {
 	outMap := make(map[string]interface{})
 	c.ForEach(
@@ -205,7 +216,7 @@ func (c *Config) MarshalJSON() (b []byte, e error) {
 	return json.Marshal(&outMap)
 }
 
-func IfcToStrings(ifc []interface{}) (o []string) {
+func ifcToStrings(ifc []interface{}) (o []string) {
 	for i := range ifc {
 		o = append(o, ifc[i].(string))
 	}
@@ -243,7 +254,7 @@ func (c *Config) UnmarshalJSON(data []byte) (e error) {
 						return true
 					}
 					// I.Ln(ii.Name+":", ds, "default:", ii.def, "prev:", c.Map[ii.Name].(*Strings).S())
-					c.Map[ii.Name].(*Strings).Set(IfcToStrings(ds))
+					c.Map[ii.Name].(*Strings).Set(ifcToStrings(ds))
 				}
 			}
 		case *Float:
@@ -280,6 +291,7 @@ func (c *Config) UnmarshalJSON(data []byte) (e error) {
 	return
 }
 
+// EmptyConfig creates a fresh Config with default values stored in its fields
 func EmptyConfig() (c *Config) {
 	network := "mainnet"
 	rand.Seed(time.Now().Unix())
@@ -1742,47 +1754,66 @@ func (s *Strice) Split(cutset string) (out []*Strice) {
 	return
 }
 
+// NewBool creates a new podcfg.Bool with default values set
 func NewBool(m metadata, def bool, hook ...func(b bool)) *Bool {
 	return &Bool{value: uberatomic.NewBool(def), metadata: m, def: def, hook: hook}
 }
+
+// AddHooks appends callback hooks to be run when the value is changed
 func (x *Bool) AddHooks(hook ...func(b bool)) {
 	x.hook = append(x.hook, hook...)
 }
+
+// SetHooks sets a new slice of hooks
 func (x *Bool) SetHooks(hook ...func(b bool)) {
 	x.hook = hook
 }
+
+// True returns whether the value is set to true (it returns the value)
 func (x *Bool) True() bool {
 	return x.value.Load()
 }
+
+// False returns whether the value is false (it returns the inverse of the value)
 func (x *Bool) False() bool {
 	return !x.value.Load()
 }
+
+// Flip changes the value to its opposite
 func (x *Bool) Flip() {
 	x.value.Toggle()
 }
+
+// Set changes the value currently stored
 func (x *Bool) Set(b bool) *Bool {
 	x.value.Store(b)
 	return x
 }
+
+// String returns a string form of the value
 func (x *Bool) String() string {
 	return fmt.Sprint(x.True())
 }
+
+// T sets the value to true
 func (x *Bool) T() *Bool {
 	x.value.Store(true)
 	return x
 }
+
+// F sets the value to false
 func (x *Bool) F() *Bool {
 	x.value.Store(false)
 	return x
 }
 
-// func (x *Bool) String() string {
-// 	return fmt.Sprint(x.value.Load())
-// }
+// MarshalJSON returns the json representation of a Bool
 func (x *Bool) MarshalJSON() (b []byte, e error) {
 	v := x.value.Load()
 	return json.Marshal(&v)
 }
+
+// UnmarshalJSON decodes a JSON representation of a Bool
 func (x *Bool) UnmarshalJSON(data []byte) (e error) {
 	v := x.value.Load()
 	e = json.Unmarshal(data, &v)
@@ -1790,39 +1821,58 @@ func (x *Bool) UnmarshalJSON(data []byte) (e error) {
 	return
 }
 
+// NewStrings  creates a new podcfg.Strings with default values set
 func NewStrings(m metadata, def []string, hook ...func(s []string)) *Strings {
 	as := &atomic.Value{}
 	v := cli.StringSlice(def)
 	as.Store(&v)
 	return &Strings{value: as, metadata: m, def: def, hook: hook}
 }
+
+// AddHooks appends callback hooks to be run when the value is changed
 func (x *Strings) AddHooks(hook ...func(b []string)) {
 	x.hook = append(x.hook, hook...)
 }
+
+// SetHooks sets a new slice of hooks
 func (x *Strings) SetHooks(hook ...func(b []string)) {
 	x.hook = hook
 }
+
+// V returns the stored value
 func (x *Strings) V() *cli.StringSlice {
 	return x.value.Load().(*cli.StringSlice)
 }
+
+// Len returns the length of the slice of strings
 func (x *Strings) Len() int {
 	return len(x.S())
 }
+
+// Set the slice of strings stored
 func (x *Strings) Set(ss []string) *Strings {
 	sss := cli.StringSlice(ss)
 	x.value.Store(&sss)
 	return x
 }
+
+// S returns the value as a slice of string
 func (x *Strings) S() []string {
 	return *x.value.Load().(*cli.StringSlice)
 }
+
+// String returns a string representation of the value
 func (x *Strings) String() string {
 	return fmt.Sprint(x.S())
 }
+
+// MarshalJSON returns the json representation of
 func (x *Strings) MarshalJSON() (b []byte, e error) {
 	xs := x.value.Load().(*cli.StringSlice)
 	return json.Marshal(xs)
 }
+
+// UnmarshalJSON decodes a JSON representation of
 func (x *Strings) UnmarshalJSON(data []byte) (e error) {
 	v := &cli.StringSlice{}
 	e = json.Unmarshal(data, &v)
@@ -1830,29 +1880,44 @@ func (x *Strings) UnmarshalJSON(data []byte) (e error) {
 	return
 }
 
+// NewFloat returns a new Float value set to a default value
 func NewFloat(m metadata, def float64) *Float {
 	return &Float{value: uberatomic.NewFloat64(def), metadata: m, def: def}
 }
+
+// AddHooks appends callback hooks to be run when the value is changed
 func (x *Float) AddHooks(hook ...func(f float64)) {
 	x.hook = append(x.hook, hook...)
 }
+
+// SetHooks sets a new slice of hooks
 func (x *Float) SetHooks(hook ...func(f float64)) {
 	x.hook = hook
 }
+
+// V returns the value stored
 func (x *Float) V() float64 {
 	return x.value.Load()
 }
+
+// Set the value stored
 func (x *Float) Set(f float64) *Float {
 	x.value.Store(f)
 	return x
 }
+
+// String returns a string representation of the value
 func (x *Float) String() string {
-	return fmt.Sprintf("%0.8f",x.V())
+	return fmt.Sprintf("%0.8f", x.V())
 }
+
+// MarshalJSON returns the json representation of
 func (x *Float) MarshalJSON() (b []byte, e error) {
 	v := x.value.Load()
 	return json.Marshal(&v)
 }
+
+// UnmarshalJSON decodes a JSON representation of
 func (x *Float) UnmarshalJSON(data []byte) (e error) {
 	v := x.value.Load()
 	e = json.Unmarshal(data, &v)
@@ -1860,29 +1925,44 @@ func (x *Float) UnmarshalJSON(data []byte) (e error) {
 	return
 }
 
+// NewInt creates a new Int with a given default value
 func NewInt(m metadata, def int64) *Int {
 	return &Int{value: uberatomic.NewInt64(def), metadata: m, def: def}
 }
+
+// AddHooks appends callback hooks to be run when the value is changed
 func (x *Int) AddHooks(hook ...func(f int64)) {
 	x.hook = append(x.hook, hook...)
 }
+
+// SetHooks sets a new slice of hooks
 func (x *Int) SetHooks(hook ...func(f int64)) {
 	x.hook = hook
 }
+
+// V returns the stored int
 func (x *Int) V() int {
 	return int(x.value.Load())
 }
+
+// Set the value stored
 func (x *Int) Set(i int) *Int {
 	x.value.Store(int64(i))
 	return x
 }
+
+// String returns the string stored
 func (x *Int) String() string {
-	return fmt.Sprintf("%d",x.V())
+	return fmt.Sprintf("%d", x.V())
 }
+
+// MarshalJSON returns the json representation of
 func (x *Int) MarshalJSON() (b []byte, e error) {
 	v := x.value.Load()
 	return json.Marshal(&v)
 }
+
+// UnmarshalJSON decodes a JSON representation of
 func (x *Int) UnmarshalJSON(data []byte) (e error) {
 	v := x.value.Load()
 	e = json.Unmarshal(data, &v)
@@ -1890,41 +1970,61 @@ func (x *Int) UnmarshalJSON(data []byte) (e error) {
 	return
 }
 
+// NewString creates a new String with a given default value set
 func NewString(m metadata, def string) *String {
 	v := &atomic.Value{}
 	v.Store([]byte(def))
 	return &String{value: v, metadata: m, def: def}
 }
+
+// AddHooks appends callback hooks to be run when the value is changed
 func (x *String) AddHooks(hook ...func(f Strice)) {
 	x.hook = append(x.hook, hook...)
 }
+
+// SetHooks sets a new slice of hooks
 func (x *String) SetHooks(hook ...func(f Strice)) {
 	x.hook = hook
 }
+
+// V returns the stored string
 func (x *String) V() string {
 	return string(x.value.Load().([]byte))
 }
+
+// Empty returns true if the string is empty
 func (x *String) Empty() bool {
 	return len(x.value.Load().([]byte)) == 0
 }
+
+// Bytes returns the raw bytes in the underlying storage
 func (x *String) Bytes() []byte {
 	return x.value.Load().([]byte)
 }
+
+// Set the value stored
 func (x *String) Set(s string) *String {
 	x.value.Store([]byte(s))
 	return x
 }
+
 func (x *String) SetBytes(s []byte) *String {
 	x.value.Store(s)
 	return x
 }
+
+// String returns a string representation of the value
 func (x *String) String() string {
 	return x.V()
 }
+
+// MarshalJSON returns the json representation
 func (x *String) MarshalJSON() (b []byte, e error) {
 	v := string(x.value.Load().([]byte))
 	return json.Marshal(&v)
 }
+
+// UnmarshalJSON decodes a JSON representation
 func (x *String) UnmarshalJSON(data []byte) (e error) {
 	v := x.value.Load().([]byte)
 	e = json.Unmarshal(data, &v)
@@ -1932,23 +2032,44 @@ func (x *String) UnmarshalJSON(data []byte) (e error) {
 	return
 }
 
+// NewDuration creates a new Duration with a given default value set
 func NewDuration(m metadata, def time.Duration) *Duration {
 	return &Duration{value: uberatomic.NewDuration(def), metadata: m, def: def}
 }
+
+// AddHooks appends callback hooks to be run when the value is changed
+func (x *Duration) AddHooks(hook ...func(d time.Duration)) {
+	x.hook = append(x.hook, hook...)
+}
+
+// SetHooks sets a new slice of hooks
+func (x *Duration) SetHooks(hook ...func(d time.Duration)) {
+	x.hook = hook
+}
+
+// V returns the value stored
 func (x *Duration) V() time.Duration {
 	return x.value.Load()
 }
+
+// Set the value stored
 func (x *Duration) Set(d time.Duration) *Duration {
 	x.value.Store(d)
 	return x
 }
+
+// String returns a string representation of the value
 func (x *Duration) String() string {
 	return fmt.Sprint(x.V())
 }
+
+// MarshalJSON returns the json representation
 func (x *Duration) MarshalJSON() (b []byte, e error) {
 	v := x.value.Load()
 	return json.Marshal(&v)
 }
+
+// UnmarshalJSON decodes a JSON representation
 func (x *Duration) UnmarshalJSON(data []byte) (e error) {
 	v := x.value.Load()
 	e = json.Unmarshal(data, &v)
@@ -1956,6 +2077,7 @@ func (x *Duration) UnmarshalJSON(data []byte) (e error) {
 	return
 }
 
+// ReadCAFile reads in the configured Certificate Authority for TLS connections
 func ReadCAFile(config *Config) []byte {
 	// Read certificate file if TLS is not disabled.
 	var certs []byte
