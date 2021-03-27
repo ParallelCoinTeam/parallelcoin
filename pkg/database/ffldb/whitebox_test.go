@@ -170,9 +170,9 @@ func TestCornerCases(t *testing.T) {
 	if idb, e = openDB(dbPath, blockDataNet, true); E.Chk(e) {
 	}
 	if !checkDbError(t, testName, e, wantErrCode) {
-		if e := idb.Close(); E.Chk(e) {
+		if e = idb.Close(); E.Chk(e) {
 		}
-		if e := os.RemoveAll(dbPath); E.Chk(e) {
+		if e = os.RemoveAll(dbPath); E.Chk(e) {
 		}
 		return
 	}
@@ -184,15 +184,15 @@ func TestCornerCases(t *testing.T) {
 		return
 	}
 	defer func() {
-		if e := os.RemoveAll(dbPath); E.Chk(e) {
+		if e = os.RemoveAll(dbPath); E.Chk(e) {
 		}
-		if e := idb.Close(); E.Chk(e) {
+		if e = idb.Close(); E.Chk(e) {
 		}
 	}()
 	// Ensure attempting to write to a file that can't be created returns the expected error.
 	testName = "writeBlock: open file failure"
 	filePath := blockFilePath(dbPath, 0)
-	if e := os.Mkdir(filePath, 0755); E.Chk(e) {
+	if e = os.Mkdir(filePath, 0755); E.Chk(e) {
 		t.Errorf("os.Mkdir: unexpected error: %v", e)
 		return
 	}
@@ -204,7 +204,7 @@ func TestCornerCases(t *testing.T) {
 	_ = os.RemoveAll(filePath)
 	// Close the underlying leveldb database out from under the database.
 	ldb := idb.(*db).cache.ldb
-	if e := ldb.Close(); E.Chk(e) {
+	if e = ldb.Close(); E.Chk(e) {
 	}
 	// Ensure initilization errors in the underlying database work as expected.
 	testName = "initDB: reinitialization"
@@ -246,7 +246,7 @@ func resetDatabase(tc *testContext) bool {
 			cursor := tx.Metadata().Cursor()
 			for ok := cursor.First(); ok; ok = cursor.Next() {
 				if cursor.Value() != nil {
-					if e := cursor.Delete(); E.Chk(e) {
+					if e = cursor.Delete(); E.Chk(e) {
 						return e
 					}
 				} else {
@@ -255,7 +255,7 @@ func resetDatabase(tc *testContext) bool {
 			}
 			// Remove the buckets.
 			for _, k := range bucketNames {
-				if e := tx.Metadata().DeleteBucket(k); E.Chk(e) {
+				if e = tx.Metadata().DeleteBucket(k); E.Chk(e) {
 					return e
 				}
 			}
@@ -432,7 +432,7 @@ func testBlockFileErrors(tc *testContext) bool {
 	}
 	// Close the block file out from under the database.
 	store.writeCursor.curFile.Lock()
-	if e := store.writeCursor.curFile.file.Close(); E.Chk(e) {
+	if e = store.writeCursor.curFile.file.Close(); E.Chk(e) {
 	}
 	store.writeCursor.curFile.Unlock()
 	// Ensure failures in FetchBlock and FetchBlockRegion(s) since the underlying file they need to read from has been closed.

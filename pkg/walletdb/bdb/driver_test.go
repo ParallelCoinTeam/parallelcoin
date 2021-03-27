@@ -66,10 +66,10 @@ func TestCreateOpenFail(t *testing.T) {
 		return
 	}
 	defer func() {
-		if e := os.Remove(dbPath); bdb.E.Chk(e) {
+		if e = os.Remove(dbPath); bdb.E.Chk(e) {
 		}
 	}()
-	if e := db.Close(); bdb.E.Chk(e) {
+	if e = db.Close(); bdb.E.Chk(e) {
 	}
 	wantErr = walletdb.ErrDbNotOpen
 	if _, e = db.BeginReadTx(); e != wantErr {
@@ -89,11 +89,11 @@ func TestPersistence(t *testing.T) {
 		return
 	}
 	defer func() {
-		if e := os.Remove(dbPath); bdb.E.Chk(e) {
+		if e = os.Remove(dbPath); bdb.E.Chk(e) {
 		}
 	}()
 	defer func() {
-		if e := db.Close(); bdb.E.Chk(e) {
+		if e = db.Close(); bdb.E.Chk(e) {
 		}
 	}()
 	// Create a namespace and put some values into it so they can be tested for existence on re-open.
@@ -120,7 +120,7 @@ func TestPersistence(t *testing.T) {
 		return
 	}
 	// Close and reopen the database to ensure the values persist.
-	if e := db.Close(); bdb.E.Chk(e) {
+	if e = db.Close(); bdb.E.Chk(e) {
 	}
 	db, e = walletdb.Open(dbType, dbPath)
 	if e != nil  {
@@ -128,7 +128,7 @@ func TestPersistence(t *testing.T) {
 		return
 	}
 	defer func() {
-		if e := db.Close(); bdb.E.Chk(e) {
+		if e = db.Close(); bdb.E.Chk(e) {
 		}
 	}()
 	// Ensure the values previously stored in the 3rd namespace still exist and are correct.

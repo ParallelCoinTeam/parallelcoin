@@ -196,7 +196,8 @@ func PublicPass(
 		return pubPass, nil
 	}
 	if !bytes.Equal(configPubPassphrase, pubPass) {
-		useExisting, e := promptListBool(
+		var useExisting bool
+		useExisting, e = promptListBool(
 			reader, "Use the "+
 				"existing configured public passphrase for encryption "+
 				"of public data?", "no",

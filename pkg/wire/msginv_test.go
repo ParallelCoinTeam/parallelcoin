@@ -35,7 +35,7 @@ func TestInv(t *testing.T) {
 	iv := NewInvVect(InvTypeBlock, &hash)
 	e := msg.AddInvVect(iv)
 	if e != nil  {
-		t.Errorf("AddInvVect: %v", err)
+		t.Errorf("AddInvVect: %v", e)
 	}
 	if msg.InvList[0] != iv {
 		t.Errorf("AddInvVect: wrong invvect added - got %v, want %v",
@@ -64,13 +64,13 @@ func TestInvWire(t *testing.T) {
 	hashStr := "3264bc2ac36a60840790ba1d475d01367e7c723da941069e9dc"
 	blockHash, e := chainhash.NewHashFromStr(hashStr)
 	if e != nil  {
-		t.Errorf("NewHashFromStr: %v", err)
+		t.Errorf("NewHashFromStr: %v", e)
 	}
 	// Transaction 1 of Block 203707 hash.
 	hashStr = "d28a3dc7392bf00a9855ee93dd9a81eff82a2c4fe57fbd42cfe71b487accfaf0"
 	txHash, e := chainhash.NewHashFromStr(hashStr)
 	if e != nil  {
-		t.Errorf("NewHashFromStr: %v", err)
+		t.Errorf("NewHashFromStr: %v", e)
 	}
 	iv := NewInvVect(InvTypeBlock, blockHash)
 	iv2 := NewInvVect(InvTypeTx, txHash)
@@ -83,11 +83,11 @@ func TestInvWire(t *testing.T) {
 	MultiInv := NewMsgInv()
 	e = MultiInv.AddInvVect(iv)
 	if e != nil  {
-		t.Log(err)
+		t.Log(e)
 	}
 	e = MultiInv.AddInvVect(iv2)
 	if e != nil  {
-		t.Log(err)
+		t.Log(e)
 	}
 	MultiInvEncoded := []byte{
 		0x02,                   // Varint for number of inv vectors
@@ -196,7 +196,7 @@ func TestInvWire(t *testing.T) {
 		var buf bytes.Buffer
 		e := test.in.BtcEncode(&buf, test.pver, test.enc)
 		if e != nil  {
-			t.Errorf("BtcEncode #%d error %v", i, err)
+			t.Errorf("BtcEncode #%d error %v", i, e)
 			continue
 		}
 		if !bytes.Equal(buf.Bytes(), test.buf) {
@@ -209,7 +209,7 @@ func TestInvWire(t *testing.T) {
 		rbuf := bytes.NewReader(test.buf)
 		e = msg.BtcDecode(rbuf, test.pver, test.enc)
 		if e != nil  {
-			t.Errorf("BtcDecode #%d error %v", i, err)
+			t.Errorf("BtcDecode #%d error %v", i, e)
 			continue
 		}
 		if !reflect.DeepEqual(&msg, test.out) {
@@ -229,7 +229,7 @@ func TestInvWireErrors(t *testing.T) {
 	hashStr := "3264bc2ac36a60840790ba1d475d01367e7c723da941069e9dc"
 	blockHash, e := chainhash.NewHashFromStr(hashStr)
 	if e != nil  {
-		t.Errorf("NewHashFromStr: %v", err)
+		t.Errorf("NewHashFromStr: %v", e)
 	}
 	iv := NewInvVect(InvTypeBlock, blockHash)
 	// Base inv message used to induce errors.
@@ -277,14 +277,14 @@ func TestInvWireErrors(t *testing.T) {
 		// Encode to wire format.
 		w := newFixedWriter(test.max)
 		e := test.in.BtcEncode(w, test.pver, test.enc)
-		if reflect.TypeOf(err) != reflect.TypeOf(test.writeErr) {
+		if reflect.TypeOf(e) != reflect.TypeOf(test.writeErr) {
 			t.Errorf("BtcEncode #%d wrong error got: %v, want: %v",
 				i, e, test.writeErr)
 			continue
 		}
 		// For errors which are not of type MessageError, check them for equality.
-		if _, ok := err.(*MessageError); !ok {
-			if err != test.writeErr {
+		if _, ok := e.(*MessageError); !ok {
+			if e != test.writeErr {
 				t.Errorf("BtcEncode #%d wrong error got: %v, "+
 					"want: %v", i, e, test.writeErr)
 				continue
@@ -294,14 +294,14 @@ func TestInvWireErrors(t *testing.T) {
 		var msg MsgInv
 		r := newFixedReader(test.max, test.buf)
 		e = msg.BtcDecode(r, test.pver, test.enc)
-		if reflect.TypeOf(err) != reflect.TypeOf(test.readErr) {
+		if reflect.TypeOf(e) != reflect.TypeOf(test.readErr) {
 			t.Errorf("BtcDecode #%d wrong error got: %v, want: %v",
 				i, e, test.readErr)
 			continue
 		}
 		// For errors which are not of type MessageError, check them for equality.
-		if _, ok := err.(*MessageError); !ok {
-			if err != test.readErr {
+		if _, ok := e.(*MessageError); !ok {
+			if e != test.readErr {
 				t.Errorf("BtcDecode #%d wrong error got: %v, "+
 					"want: %v", i, e, test.readErr)
 				continue

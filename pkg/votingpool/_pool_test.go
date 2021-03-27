@@ -759,7 +759,7 @@ var testLoadAllSeriesTests = []testLoadAllSeriesTest{
 }
 
 func setUpLoadAllSeries(t *testing.T, dbtx walletdb.ReadWriteTx, mgr *waddrmgr.Manager,
-	test testLoadAllSeriesTest
+	test testLoadAllSeriesTest,
 ) *vp.Pool {
 	ns, addrmgrNs := vp.TstRWNamespaces(dbtx)
 	pool, e := vp.Create(ns, mgr, []byte{byte(test.id + 1)})

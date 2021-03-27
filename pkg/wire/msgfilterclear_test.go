@@ -40,7 +40,7 @@ func TestFilterClearCrossProtocol(t *testing.T) {
 	var buf bytes.Buffer
 	e := msg.BtcEncode(&buf, ProtocolVersion, LatestEncoding)
 	if e != nil {
-		t.Errorf("encode of MsgFilterClear failed %v err <%v>", msg, err)
+		t.Errorf("encode of MsgFilterClear failed %v e <%v>", msg, e)
 	}
 	// Decode with old protocol version.
 	var readmsg MsgFilterClear
@@ -95,7 +95,7 @@ func TestFilterClearWire(t *testing.T) {
 		var buf bytes.Buffer
 		e := test.in.BtcEncode(&buf, test.pver, test.enc)
 		if e != nil {
-			t.Errorf("BtcEncode #%d error %v", i, err)
+			t.Errorf("BtcEncode #%d error %v", i, e)
 			continue
 		}
 		if !bytes.Equal(buf.Bytes(), test.buf) {
@@ -110,7 +110,7 @@ func TestFilterClearWire(t *testing.T) {
 		rbuf := bytes.NewReader(test.buf)
 		e = msg.BtcDecode(rbuf, test.pver, test.enc)
 		if e != nil {
-			t.Errorf("BtcDecode #%d error %v", i, err)
+			t.Errorf("BtcDecode #%d error %v", i, e)
 			continue
 		}
 		if !reflect.DeepEqual(&msg, test.out) {
@@ -152,10 +152,10 @@ func TestFilterClearWireErrors(t *testing.T) {
 		w := newFixedWriter(test.max)
 		if e = test.in.BtcEncode(w, test.pver, test.enc); E.Chk(e) {
 		}
-		if reflect.TypeOf(err) != reflect.TypeOf(test.writeErr) {
+		if reflect.TypeOf(e) != reflect.TypeOf(test.writeErr) {
 			t.Errorf(
 				"BtcEncode #%d wrong error got: %v, want: %v",
-				i, err, test.writeErr,
+				i, e, test.writeErr,
 			)
 			continue
 		}
@@ -163,7 +163,7 @@ func TestFilterClearWireErrors(t *testing.T) {
 		if _, ok := e.(*MessageError); !ok {
 			if e != test.writeErr {
 				t.Errorf(
-					"BtcEncode #%d wrong error got: %v, want: %v", i, err, test.writeErr,
+					"BtcEncode #%d wrong error got: %v, want: %v", i, e, test.writeErr,
 				)
 				continue
 			}
@@ -172,10 +172,10 @@ func TestFilterClearWireErrors(t *testing.T) {
 		var msg MsgFilterClear
 		r := newFixedReader(test.max, test.buf)
 		e = msg.BtcDecode(r, test.pver, test.enc)
-		if reflect.TypeOf(err) != reflect.TypeOf(test.readErr) {
+		if reflect.TypeOf(e) != reflect.TypeOf(test.readErr) {
 			t.Errorf(
 				"BtcDecode #%d wrong error got: %v, want: %v",
-				i, err, test.readErr,
+				i, e, test.readErr,
 			)
 			continue
 		}
@@ -183,7 +183,7 @@ func TestFilterClearWireErrors(t *testing.T) {
 		if _, ok := e.(*MessageError); !ok {
 			if e != test.readErr {
 				t.Errorf(
-					"BtcDecode #%d wrong error got: %v, want: %v", i, err, test.readErr,
+					"BtcDecode #%d wrong error got: %v, want: %v", i, e, test.readErr,
 				)
 				continue
 			}

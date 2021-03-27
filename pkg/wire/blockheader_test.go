@@ -13,7 +13,7 @@ import (
 func TestBlockHeader(t *testing.T) {
 	nonce64, e := RandomUint64()
 	if e != nil  {
-		t.Errorf("RandomUint64: Error generating nonce: %v", err)
+		t.Errorf("RandomUint64: Error generating nonce: %v", e)
 	}
 	nonce := uint32(nonce64)
 	hash := mainNetGenesisHash
@@ -122,7 +122,7 @@ func TestBlockHeaderWire(t *testing.T) {
 		var buf bytes.Buffer
 		e := writeBlockHeader(&buf, test.pver, test.in)
 		if e != nil  {
-			t.Errorf("writeBlockHeader #%d error %v", i, err)
+			t.Errorf("writeBlockHeader #%d error %v", i, e)
 			continue
 		}
 		if !bytes.Equal(buf.Bytes(), test.buf) {
@@ -133,7 +133,7 @@ func TestBlockHeaderWire(t *testing.T) {
 		buf.Reset()
 		e = test.in.BtcEncode(&buf, pver, 0)
 		if e != nil  {
-			t.Errorf("BtcEncode #%d error %v", i, err)
+			t.Errorf("BtcEncode #%d error %v", i, e)
 			continue
 		}
 		if !bytes.Equal(buf.Bytes(), test.buf) {
@@ -146,7 +146,7 @@ func TestBlockHeaderWire(t *testing.T) {
 		rbuf := bytes.NewReader(test.buf)
 		e = readBlockHeader(rbuf, test.pver, &bh)
 		if e != nil  {
-			t.Errorf("readBlockHeader #%d error %v", i, err)
+			t.Errorf("readBlockHeader #%d error %v", i, e)
 			continue
 		}
 		if !reflect.DeepEqual(&bh, test.out) {
@@ -157,7 +157,7 @@ func TestBlockHeaderWire(t *testing.T) {
 		rbuf = bytes.NewReader(test.buf)
 		e = bh.BtcDecode(rbuf, pver, test.enc)
 		if e != nil  {
-			t.Errorf("BtcDecode #%d error %v", i, err)
+			t.Errorf("BtcDecode #%d error %v", i, e)
 			continue
 		}
 		if !reflect.DeepEqual(&bh, test.out) {
@@ -213,7 +213,7 @@ func TestBlockHeaderSerialize(t *testing.T) {
 		var buf bytes.Buffer
 		e := test.in.Serialize(&buf)
 		if e != nil  {
-			t.Errorf("Serialize #%d error %v", i, err)
+			t.Errorf("Serialize #%d error %v", i, e)
 			continue
 		}
 		if !bytes.Equal(buf.Bytes(), test.buf) {
@@ -226,7 +226,7 @@ func TestBlockHeaderSerialize(t *testing.T) {
 		rbuf := bytes.NewReader(test.buf)
 		e = bh.Deserialize(rbuf)
 		if e != nil  {
-			t.Errorf("Deserialize #%d error %v", i, err)
+			t.Errorf("Deserialize #%d error %v", i, e)
 			continue
 		}
 		if !reflect.DeepEqual(&bh, test.out) {

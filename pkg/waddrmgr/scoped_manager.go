@@ -1123,7 +1123,7 @@ func (s *ScopedKeyManager) newAccount(
 	account uint32, name string,
 ) (e error) {
 	// Validate the account name.
-	if e := ValidateAccountName(name); E.Chk(e) {
+	if e = ValidateAccountName(name); E.Chk(e) {
 		return e
 	}
 	// Chk that account with the same name does not exist
@@ -1203,7 +1203,7 @@ func (s *ScopedKeyManager) RenameAccount(
 		return managerError(ErrDuplicateAccount, str, e)
 	}
 	// Validate account name
-	if e := ValidateAccountName(name); E.Chk(e) {
+	if e = ValidateAccountName(name); E.Chk(e) {
 		return e
 	}
 	var rowInterface interface{}

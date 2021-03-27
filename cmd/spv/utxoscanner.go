@@ -284,7 +284,8 @@ scanToEnd:
 			return reporter.FailRemaining(ErrShuttingDown)
 		default:
 		}
-		hash, e := s.cfg.GetBlockHash(int64(height))
+		var hash *chainhash.Hash
+		hash, e = s.cfg.GetBlockHash(int64(height))
 		if e != nil {
 			E.Ln(e)
 			return reporter.FailRemaining(e)
@@ -300,7 +301,8 @@ scanToEnd:
 			options := rescanOptions{
 				watchList: reporter.filterEntries,
 			}
-			match, e := s.cfg.BlockFilterMatches(&options, hash)
+			var match bool
+			match, e = s.cfg.BlockFilterMatches(&options, hash)
 			if e != nil {
 				E.Ln(e)
 				return reporter.FailRemaining(e)
@@ -323,7 +325,8 @@ scanToEnd:
 		default:
 		}
 		T.F("fetching block height=%d hash=%s %s", height, hash)
-		block, e := s.cfg.GetBlock(*hash)
+		var blk *block.Block
+		blk, e = s.cfg.GetBlock(*hash)
 		if e != nil {
 			E.Ln(e)
 			return reporter.FailRemaining(e)
@@ -335,7 +338,7 @@ scanToEnd:
 		default:
 		}
 		D.F("processing block height=%d hash=%s %s", height, hash)
-		reporter.ProcessBlock(block.WireBlock(), newReqs, height)
+		reporter.ProcessBlock(blk.WireBlock(), newReqs, height)
 	}
 	// We've scanned up to the end height, now perform a check to see if we still
 	// have any new blocks to process. If this is the first time through, we

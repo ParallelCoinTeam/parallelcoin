@@ -85,8 +85,8 @@ testLoop:
 	for i, test := range tests {
 		// Insert a bunch of keys.
 		testTreap := NewMutable()
-		for i := 0; i < test.numKeys; i += test.step {
-			key := serializeUint32(uint32(i))
+		for j := 0; j < test.numKeys; j += test.step {
+			key := serializeUint32(uint32(j))
 			testTreap.Put(key, key)
 		}
 		// Create new iterator limited by the test chaincfg.
@@ -114,7 +114,7 @@ testLoop:
 		for iter.Next() {
 			curNum += uint32(test.step)
 			// Ensure key is as expected.
-			gotKey := iter.Key()
+			gotKey = iter.Key()
 			expectedKey := serializeUint32(curNum)
 			if !bytes.Equal(gotKey, expectedKey) {
 				t.Errorf("iter.Key #%d (%d): unexpected key - "+
@@ -123,7 +123,7 @@ testLoop:
 				continue testLoop
 			}
 			// Ensure value is as expected.
-			gotVal := iter.Value()
+			gotVal = iter.Value()
 			if !bytes.Equal(gotVal, expectedKey) {
 				t.Errorf("iter.value #%d (%d): unexpected "+
 					"value - got %x, want %x", i, curNum,
@@ -160,7 +160,7 @@ testLoop:
 		for iter.Prev() {
 			curNum -= uint32(test.step)
 			// Ensure key is as expected.
-			gotKey := iter.Key()
+			gotKey = iter.Key()
 			expectedKey := serializeUint32(curNum)
 			if !bytes.Equal(gotKey, expectedKey) {
 				t.Errorf("iter.Key #%d (%d): unexpected key - "+
@@ -169,7 +169,7 @@ testLoop:
 				continue testLoop
 			}
 			// Ensure value is as expected.
-			gotVal := iter.Value()
+			gotVal = iter.Value()
 			if !bytes.Equal(gotVal, expectedKey) {
 				t.Errorf("iter.value #%d (%d): unexpected "+
 					"value - got %x, want %x", i, curNum,
@@ -438,8 +438,8 @@ testLoop:
 	for i, test := range tests {
 		// Insert a bunch of keys.
 		testTreap := NewImmutable()
-		for i := 0; i < test.numKeys; i += test.step {
-			key := serializeUint32(uint32(i))
+		for j := 0; j < test.numKeys; j += test.step {
+			key := serializeUint32(uint32(j))
 			testTreap = testTreap.Put(key, key)
 		}
 		// Create new iterator limited by the test chaincfg.
@@ -467,7 +467,7 @@ testLoop:
 		for iter.Next() {
 			curNum += uint32(test.step)
 			// Ensure key is as expected.
-			gotKey := iter.Key()
+			gotKey = iter.Key()
 			expectedKey := serializeUint32(curNum)
 			if !bytes.Equal(gotKey, expectedKey) {
 				t.Errorf("iter.Key #%d (%d): unexpected key - "+
@@ -476,7 +476,7 @@ testLoop:
 				continue testLoop
 			}
 			// Ensure value is as expected.
-			gotVal := iter.Value()
+			gotVal = iter.Value()
 			if !bytes.Equal(gotVal, expectedKey) {
 				t.Errorf("iter.value #%d (%d): unexpected "+
 					"value - got %x, want %x", i, curNum,
@@ -513,7 +513,7 @@ testLoop:
 		for iter.Prev() {
 			curNum -= uint32(test.step)
 			// Ensure key is as expected.
-			gotKey := iter.Key()
+			gotKey = iter.Key()
 			expectedKey := serializeUint32(curNum)
 			if !bytes.Equal(gotKey, expectedKey) {
 				t.Errorf("iter.Key #%d (%d): unexpected key - "+
@@ -522,7 +522,7 @@ testLoop:
 				continue testLoop
 			}
 			// Ensure value is as expected.
-			gotVal := iter.Value()
+			gotVal = iter.Value()
 			if !bytes.Equal(gotVal, expectedKey) {
 				t.Errorf("iter.value #%d (%d): unexpected "+
 					"value - got %x, want %x", i, curNum,

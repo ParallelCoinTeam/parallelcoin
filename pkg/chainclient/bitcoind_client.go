@@ -699,7 +699,8 @@ func (c *BitcoindClient) reorg(
 	blocksToNotify.PushFront(reorgBlock)
 	previousBlock := reorgBlock.Header.PrevBlock
 	for i := bestHeight - 1; i >= currentBlock.Height; i-- {
-		block, e := c.GetBlock(&previousBlock)
+		var block *wire.Block
+		block, e = c.GetBlock(&previousBlock)
 		if e != nil {
 			return e
 		}
@@ -854,7 +855,8 @@ func (c *BitcoindClient) rescan(start chainhash.Hash) (e error) {
 	)
 	// Cycle through all of the blocks known to bitcoind, being mindful of reorgs.
 	for i := previousHeader.Height + 1; i <= bestBlock.Height; i++ {
-		hash, e := c.GetBlockHash(int64(i))
+		var hash *chainhash.Hash
+		hash, e = c.GetBlockHash(int64(i))
 		if e != nil {
 			return e
 		}
@@ -864,7 +866,8 @@ func (c *BitcoindClient) rescan(start chainhash.Hash) (e error) {
 		var block *wire.Block
 		afterBirthday := previousHeader.Time >= c.birthday.Unix()
 		if !afterBirthday {
-			header, e := c.GetBlockHeader(hash)
+			var header *wire.BlockHeader
+			header, e = c.GetBlockHeader(hash)
 			if e != nil {
 				return e
 			}
@@ -895,7 +898,7 @@ func (c *BitcoindClient) rescan(start chainhash.Hash) (e error) {
 				time.Unix(previousHeader.Time, 0),
 			)
 			// Get the previous block of the best chain.
-			hash, e := c.GetBlockHash(int64(i - 1))
+			hash, e = c.GetBlockHash(int64(i - 1))
 			if e != nil {
 				return e
 			}

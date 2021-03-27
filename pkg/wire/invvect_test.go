@@ -54,7 +54,7 @@ func TestInvVectWire(t *testing.T) {
 	hashStr := "3264bc2ac36a60840790ba1d475d01367e7c723da941069e9dc"
 	baseHash, e := chainhash.NewHashFromStr(hashStr)
 	if e != nil  {
-		t.Errorf("NewHashFromStr: %v", err)
+		t.Errorf("NewHashFromStr: %v", e)
 	}
 	// errInvVect is an inventory vector with an error.
 	errInvVect := InvVect{
@@ -213,7 +213,7 @@ func TestInvVectWire(t *testing.T) {
 		var buf bytes.Buffer
 		e := writeInvVect(&buf, test.pver, &test.in)
 		if e != nil  {
-			t.Errorf("writeInvVect #%d error %v", i, err)
+			t.Errorf("writeInvVect #%d error %v", i, e)
 			continue
 		}
 		if !bytes.Equal(buf.Bytes(), test.buf) {
@@ -226,7 +226,7 @@ func TestInvVectWire(t *testing.T) {
 		rbuf := bytes.NewReader(test.buf)
 		e = readInvVect(rbuf, test.pver, &iv)
 		if e != nil  {
-			t.Errorf("readInvVect #%d error %v", i, err)
+			t.Errorf("readInvVect #%d error %v", i, e)
 			continue
 		}
 		if !reflect.DeepEqual(iv, test.out) {

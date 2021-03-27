@@ -348,7 +348,7 @@ func (idx *TxIndex) ConnectBlock(dbTx database.Tx, block *block.Block, stxos []b
 	// Increment the internal block ID to use for the block being connected and add all of the transactions in the block
 	// to the index.
 	newBlockID := idx.curBlockID + 1
-	if e := dbAddTxIndexEntries(dbTx, block, newBlockID); E.Chk(e) {
+	if e = dbAddTxIndexEntries(dbTx, block, newBlockID); E.Chk(e) {
 		return e
 	}
 	// Add the new block ID index entry for the block being connected and update the current internal block ID

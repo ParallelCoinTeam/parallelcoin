@@ -15,7 +15,8 @@ func tstCheckScriptError(gotErr, wantErr error) (e error) {
 	// instance.
 	if reflect.TypeOf(gotErr) != reflect.TypeOf(wantErr) {
 		return fmt.Errorf("wrong error - got %T (%[1]v), want %T",
-			gotErr, wantErr)
+			gotErr, wantErr,
+		)
 	}
 	if gotErr == nil {
 		return nil
@@ -30,7 +31,8 @@ func tstCheckScriptError(gotErr, wantErr error) (e error) {
 	gotErrorCode := gotErr.(ScriptError).ErrorCode
 	if gotErrorCode != werr.ErrorCode {
 		return fmt.Errorf("mismatched error code - got %v (%v), want %v",
-			gotErrorCode, gotErr, werr.ErrorCode)
+			gotErrorCode, gotErr, werr.ErrorCode,
+		)
 	}
 	return nil
 }
@@ -89,7 +91,7 @@ func TestStack(t *testing.T) {
 			[][]byte{{1}, {2}, {3}, {4}, {5}},
 			func(s *stack) (e error) {
 				val, e := s.PopByteArray()
-				if e != nil  {
+				if e != nil {
 					return e
 				}
 				if !bytes.Equal(val, []byte{5}) {
@@ -106,7 +108,7 @@ func TestStack(t *testing.T) {
 			func(s *stack) (e error) {
 				for i := 0; i < 5; i++ {
 					_, e := s.PopByteArray()
-					if e != nil  {
+					if e != nil {
 						return e
 					}
 				}
@@ -121,7 +123,7 @@ func TestStack(t *testing.T) {
 			func(s *stack) (e error) {
 				for i := 0; i < 6; i++ {
 					_, e := s.PopByteArray()
-					if e != nil  {
+					if e != nil {
 						return e
 					}
 				}
@@ -135,7 +137,7 @@ func TestStack(t *testing.T) {
 			[][]byte{nil},
 			func(s *stack) (e error) {
 				val, e := s.PopBool()
-				if e != nil  {
+				if e != nil {
 					return e
 				}
 				if val {
@@ -151,7 +153,7 @@ func TestStack(t *testing.T) {
 			[][]byte{{1}},
 			func(s *stack) (e error) {
 				val, e := s.PopBool()
-				if e != nil  {
+				if e != nil {
 					return e
 				}
 				if !val {
@@ -177,7 +179,7 @@ func TestStack(t *testing.T) {
 			[][]byte{{0x0}},
 			func(s *stack) (e error) {
 				v, e := s.PopInt()
-				if e != nil  {
+				if e != nil {
 					return e
 				}
 				if v != 0 {
@@ -193,7 +195,7 @@ func TestStack(t *testing.T) {
 			[][]byte{{0x80}},
 			func(s *stack) (e error) {
 				v, e := s.PopInt()
-				if e != nil  {
+				if e != nil {
 					return e
 				}
 				if v != 0 {
@@ -209,7 +211,7 @@ func TestStack(t *testing.T) {
 			[][]byte{{0x01}},
 			func(s *stack) (e error) {
 				v, e := s.PopInt()
-				if e != nil  {
+				if e != nil {
 					return e
 				}
 				if v != 1 {
@@ -225,7 +227,7 @@ func TestStack(t *testing.T) {
 			[][]byte{{0x01, 0x00, 0x00, 0x00}},
 			func(s *stack) (e error) {
 				v, e := s.PopInt()
-				if e != nil  {
+				if e != nil {
 					return e
 				}
 				if v != 1 {
@@ -242,7 +244,7 @@ func TestStack(t *testing.T) {
 			[][]byte{{0x81}},
 			func(s *stack) (e error) {
 				v, e := s.PopInt()
-				if e != nil  {
+				if e != nil {
 					return e
 				}
 				if v != -1 {
@@ -258,7 +260,7 @@ func TestStack(t *testing.T) {
 			[][]byte{{0x01, 0x00, 0x00, 0x80}},
 			func(s *stack) (e error) {
 				v, e := s.PopInt()
-				if e != nil  {
+				if e != nil {
 					return e
 				}
 				if v != -1 {
@@ -276,7 +278,7 @@ func TestStack(t *testing.T) {
 			[][]byte{{0x1, 0x82}},
 			func(s *stack) (e error) {
 				v, e := s.PopInt()
-				if e != nil  {
+				if e != nil {
 					return e
 				}
 				if v != -513 {
@@ -294,7 +296,7 @@ func TestStack(t *testing.T) {
 			[][]byte{{0x01, 0x00, 0x00, 0x80}},
 			func(s *stack) (e error) {
 				v, e := s.PeekInt(0)
-				if e != nil  {
+				if e != nil {
 					return e
 				}
 				if v != -1 {
@@ -438,7 +440,7 @@ func TestStack(t *testing.T) {
 			func(s *stack) (e error) {
 				s.PushBool(true)
 				val, e := s.PopBool()
-				if e != nil  {
+				if e != nil {
 					return e
 				}
 				if !val {
@@ -455,7 +457,7 @@ func TestStack(t *testing.T) {
 			func(s *stack) (e error) {
 				s.PushBool(false)
 				val, e := s.PopBool()
-				if e != nil  {
+				if e != nil {
 					return e
 				}
 				if val {
@@ -472,7 +474,7 @@ func TestStack(t *testing.T) {
 			func(s *stack) (e error) {
 				s.PushInt(scriptNum(1))
 				val, e := s.PopBool()
-				if e != nil  {
+				if e != nil {
 					return e
 				}
 				if !val {
@@ -489,7 +491,7 @@ func TestStack(t *testing.T) {
 			func(s *stack) (e error) {
 				s.PushInt(scriptNum(0))
 				val, e := s.PopBool()
-				if e != nil  {
+				if e != nil {
 					return e
 				}
 				if val {
@@ -786,7 +788,7 @@ func TestStack(t *testing.T) {
 			func(s *stack) (e error) {
 				// Peek bool is otherwise pretty well tested, just check it works.
 				val, e := s.PeekBool(0)
-				if e != nil  {
+				if e != nil {
 					return e
 				}
 				if !val {
@@ -803,7 +805,7 @@ func TestStack(t *testing.T) {
 			func(s *stack) (e error) {
 				// Peek bool is otherwise pretty well tested, just check it works.
 				val, e := s.PeekBool(0)
-				if e != nil  {
+				if e != nil {
 					return e
 				}
 				if val {
@@ -820,7 +822,7 @@ func TestStack(t *testing.T) {
 			func(s *stack) (e error) {
 				// Peek int is otherwise pretty well tested, just check it works.
 				val, e := s.PeekInt(0)
-				if e != nil  {
+				if e != nil {
 					return e
 				}
 				if val != 1 {
@@ -837,7 +839,7 @@ func TestStack(t *testing.T) {
 			func(s *stack) (e error) {
 				// Peek int is otherwise pretty well tested, just check it works.
 				val, e := s.PeekInt(0)
-				if e != nil  {
+				if e != nil {
 					return e
 				}
 				if val != 0 {
@@ -855,7 +857,7 @@ func TestStack(t *testing.T) {
 				s.PushInt(scriptNum(1))
 				// Peek int is otherwise pretty well tested, just check it works.
 				val, e := s.PopInt()
-				if e != nil  {
+				if e != nil {
 					return e
 				}
 				if val != 1 {
@@ -878,40 +880,42 @@ func TestStack(t *testing.T) {
 			nil,
 		},
 	}
+	var e error
 	for _, test := range tests {
 		// Setup the initial stack state and perform the test operation.
 		s := stack{}
 		for i := range test.before {
 			s.PushByteArray(test.before[i])
 		}
-		e := test.operation(&s)
+		e = test.operation(&s)
 		// Ensure the error code is of the expected type and the error code matches the value specified in the test instance.
-		if e := tstCheckScriptError(e, test.err); e != nil {
+		if e = tstCheckScriptError(e, test.err); e != nil {
 			t.Errorf("%s: %v", test.name, e)
-			continue
-		}
-		if e != nil  {
 			continue
 		}
 		// Ensure the resulting stack is the expected length.
 		if int32(len(test.after)) != s.Depth() {
 			t.Errorf("%s: stack depth doesn't match expected: %v "+
 				"vs %v", test.name, len(test.after),
-				s.Depth())
+				s.Depth(),
+			)
 			continue
 		}
 		// Ensure all items of the resulting stack are the expected values.
 		for i := range test.after {
-			val, e := s.PeekByteArray(s.Depth() - int32(i) - 1)
-			if e != nil  {
+			var val []byte
+			val, e = s.PeekByteArray(s.Depth() - int32(i) - 1)
+			if e != nil {
 				t.Errorf("%s: can't peek %dth stack entry: %v",
-					test.name, i, e)
+					test.name, i, e,
+				)
 				break
 			}
 			if !bytes.Equal(val, test.after[i]) {
 				t.Errorf("%s: %dth stack entry doesn't match "+
 					"expected: %v vs %v", test.name, i, val,
-					test.after[i])
+					test.after[i],
+				)
 				break
 			}
 		}

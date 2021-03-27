@@ -777,16 +777,15 @@ func TestNAF(t *testing.T) {
 		"a2e79d200f27f2360fba57619936159b",
 	}
 	negOne := big.NewInt(-1)
-	one := big.NewInt(1)
 	two := big.NewInt(2)
 	for i, test := range tests {
 		want, _ := new(big.Int).SetString(test, 16)
 		nafPos, nafNeg := NAF(want.Bytes())
 		got := big.NewInt(0)
 		// Chk that the NAF representation comes up with the right number
-		for i := 0; i < len(nafPos); i++ {
-			bytePos := nafPos[i]
-			byteNeg := nafNeg[i]
+		for j := 0; j < len(nafPos); j++ {
+			bytePos := nafPos[j]
+			byteNeg := nafNeg[j]
 			for j := 7; j >= 0; j-- {
 				got.Mul(got, two)
 				if bytePos&0x80 == 0x80 {
@@ -805,7 +804,7 @@ func TestNAF(t *testing.T) {
 }
 func TestNAFRand(t *testing.T) {
 	negOne := big.NewInt(-1)
-	one := big.NewInt(1)
+	one = big.NewInt(1)
 	two := big.NewInt(2)
 	for i := 0; i < 1024; i++ {
 		data := make([]byte, 32)
@@ -817,9 +816,9 @@ func TestNAFRand(t *testing.T) {
 		want := new(big.Int).SetBytes(data)
 		got := big.NewInt(0)
 		// Chk that the NAF representation comes up with the right number
-		for i := 0; i < len(nafPos); i++ {
-			bytePos := nafPos[i]
-			byteNeg := nafNeg[i]
+		for j := 0; j < len(nafPos); j++ {
+			bytePos := nafPos[j]
+			byteNeg := nafNeg[j]
 			for j := 7; j >= 0; j-- {
 				got.Mul(got, two)
 				if bytePos&0x80 == 0x80 {

@@ -45,7 +45,7 @@ func TestBlock(t *testing.T) {
 	tx := blockOne.Transactions[0].Copy()
 	e := msg.AddTransaction(tx)
 	if e != nil  {
-		t.Log(err)
+		t.Log(e)
 	}
 	if !reflect.DeepEqual(msg.Transactions, blockOne.Transactions) {
 		t.Errorf("AddTransaction: wrong transactions - got %v, want %v",
@@ -66,13 +66,13 @@ func TestBlockTxHashes(t *testing.T) {
 	hashStr := "0e3e2357e806b6cdb1f70b54c3a3a17b6714ee1f0e68bebb44a74b1efd512098"
 	wantHash, e := chainhash.NewHashFromStr(hashStr)
 	if e != nil  {
-		t.Errorf("NewHashFromStr: %v", err)
+		t.Errorf("NewHashFromStr: %v", e)
 		return
 	}
 	wantHashes := []chainhash.Hash{*wantHash}
 	hashes, e := blockOne.TxHashes()
 	if e != nil  {
-		t.Errorf("TxHashes: %v", err)
+		t.Errorf("TxHashes: %v", e)
 	}
 	if !reflect.DeepEqual(hashes, wantHashes) {
 		t.Errorf("TxHashes: wrong transaction hashes - got %v, want %v",
@@ -86,7 +86,7 @@ func TestBlockHash(t *testing.T) {
 	hashStr := "839a8e6886ab5951d76f411475428afc90947ee320161bbf18eb6048"
 	wantHash, e := chainhash.NewHashFromStr(hashStr)
 	if e != nil  {
-		t.Errorf("NewHashFromStr: %v", err)
+		t.Errorf("NewHashFromStr: %v", e)
 	}
 	// Ensure the hash produced is expected.
 	blockHash := blockOne.BlockHash()
@@ -160,7 +160,7 @@ func TestBlockWire(t *testing.T) {
 		var buf bytes.Buffer
 		e := test.in.BtcEncode(&buf, test.pver, test.enc)
 		if e != nil  {
-			t.Errorf("BtcEncode #%d error %v", i, err)
+			t.Errorf("BtcEncode #%d error %v", i, e)
 			continue
 		}
 		if !bytes.Equal(buf.Bytes(), test.buf) {
@@ -173,7 +173,7 @@ func TestBlockWire(t *testing.T) {
 		rbuf := bytes.NewReader(test.buf)
 		e = msg.BtcDecode(rbuf, test.pver, test.enc)
 		if e != nil  {
-			t.Errorf("BtcDecode #%d error %v", i, err)
+			t.Errorf("BtcDecode #%d error %v", i, e)
 			continue
 		}
 		if !reflect.DeepEqual(&msg, test.out) {
@@ -221,7 +221,7 @@ func TestBlockWireErrors(t *testing.T) {
 		// Encode to wire format.
 		w := newFixedWriter(test.max)
 		e := test.in.BtcEncode(w, test.pver, test.enc)
-		if err != test.writeErr {
+		if e != test.writeErr {
 			t.Errorf("BtcEncode #%d wrong error got: %v, want: %v",
 				i, e, test.writeErr)
 			continue
@@ -230,7 +230,7 @@ func TestBlockWireErrors(t *testing.T) {
 		var msg Block
 		r := newFixedReader(test.max, test.buf)
 		e = msg.BtcDecode(r, test.pver, test.enc)
-		if err != test.readErr {
+		if e != test.readErr {
 			t.Errorf("BtcDecode #%d wrong error got: %v, want: %v",
 				i, e, test.readErr)
 			continue
@@ -259,7 +259,7 @@ func TestBlockSerialize(t *testing.T) {
 		var buf bytes.Buffer
 		e := test.in.Serialize(&buf)
 		if e != nil  {
-			t.Errorf("Serialize #%d error %v", i, err)
+			t.Errorf("Serialize #%d error %v", i, e)
 			continue
 		}
 		if !bytes.Equal(buf.Bytes(), test.buf) {
@@ -272,7 +272,7 @@ func TestBlockSerialize(t *testing.T) {
 		rbuf := bytes.NewReader(test.buf)
 		e = block.Deserialize(rbuf)
 		if e != nil  {
-			t.Errorf("Deserialize #%d error %v", i, err)
+			t.Errorf("Deserialize #%d error %v", i, e)
 			continue
 		}
 		if !reflect.DeepEqual(&block, test.out) {
@@ -285,7 +285,7 @@ func TestBlockSerialize(t *testing.T) {
 		br := bytes.NewBuffer(test.buf)
 		txLocs, e := txLocBlock.DeserializeTxLoc(br)
 		if e != nil  {
-			t.Errorf("DeserializeTxLoc #%d error %v", i, err)
+			t.Errorf("DeserializeTxLoc #%d error %v", i, e)
 			continue
 		}
 		if !reflect.DeepEqual(&txLocBlock, test.out) {
@@ -333,7 +333,7 @@ func TestBlockSerializeErrors(t *testing.T) {
 		// Serialize the block.
 		w := newFixedWriter(test.max)
 		e := test.in.Serialize(w)
-		if err != test.writeErr {
+		if e != test.writeErr {
 			t.Errorf("Serialize #%d wrong error got: %v, want: %v",
 				i, e, test.writeErr)
 			continue
@@ -342,7 +342,7 @@ func TestBlockSerializeErrors(t *testing.T) {
 		var block Block
 		r := newFixedReader(test.max, test.buf)
 		e = block.Deserialize(r)
-		if err != test.readErr {
+		if e != test.readErr {
 			t.Errorf("Deserialize #%d wrong error got: %v, want: %v",
 				i, e, test.readErr)
 			continue
@@ -350,7 +350,7 @@ func TestBlockSerializeErrors(t *testing.T) {
 		var txLocBlock Block
 		br := bytes.NewBuffer(test.buf[0:test.max])
 		_, e = txLocBlock.DeserializeTxLoc(br)
-		if err != test.readErr {
+		if e != test.readErr {
 			t.Errorf("DeserializeTxLoc #%d wrong error got: %v, want: %v",
 				i, e, test.readErr)
 			continue
@@ -369,7 +369,7 @@ func TestBlockOverflowErrors(t *testing.T) {
 		buf  []byte          // Wire encoding
 		pver uint32          // Protocol version for wire encoding
 		enc  MessageEncoding // Message encoding format
-		err  error           // Expected error
+		e  error           // Expected error
 	}{
 		// Block that claims to have ~uint64(0) transactions.
 		{
@@ -397,25 +397,25 @@ func TestBlockOverflowErrors(t *testing.T) {
 		var msg Block
 		r := bytes.NewReader(test.buf)
 		e := msg.BtcDecode(r, test.pver, test.enc)
-		if reflect.TypeOf(err) != reflect.TypeOf(test.err) {
+		if reflect.TypeOf(e) != reflect.TypeOf(test.e) {
 			t.Errorf("BtcDecode #%d wrong error got: %v, want: %v",
-				i, e, reflect.TypeOf(test.err))
+				i, e, reflect.TypeOf(test.e))
 			continue
 		}
 		// Deserialize from wire format.
 		r = bytes.NewReader(test.buf)
 		e = msg.Deserialize(r)
-		if reflect.TypeOf(err) != reflect.TypeOf(test.err) {
+		if reflect.TypeOf(e) != reflect.TypeOf(test.e) {
 			t.Errorf("Deserialize #%d wrong error got: %v, want: %v",
-				i, e, reflect.TypeOf(test.err))
+				i, e, reflect.TypeOf(test.e))
 			continue
 		}
 		// Deserialize with transaction location info from wire format.
 		br := bytes.NewBuffer(test.buf)
 		_, e = msg.DeserializeTxLoc(br)
-		if reflect.TypeOf(err) != reflect.TypeOf(test.err) {
+		if reflect.TypeOf(e) != reflect.TypeOf(test.e) {
 			t.Errorf("DeserializeTxLoc #%d wrong error got: %v, "+
-				"want: %v", i, e, reflect.TypeOf(test.err))
+				"want: %v", i, e, reflect.TypeOf(test.e))
 			continue
 		}
 	}

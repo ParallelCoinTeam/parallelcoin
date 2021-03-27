@@ -1068,7 +1068,7 @@ func (tx *transaction) hasBlock(hash *chainhash.Hash) bool {
 // This function is part of the database.Tx interface implementation.
 func (tx *transaction) StoreBlock(block *block.Block) (e error) {
 	// Ensure transaction state is valid.
-	if e := tx.checkClosed(); E.Chk(e) {
+	if e = tx.checkClosed(); E.Chk(e) {
 		return e
 	}
 	// Ensure the transaction is writable.

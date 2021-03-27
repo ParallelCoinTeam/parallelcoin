@@ -135,7 +135,7 @@ func TestSplitLastOutputNoOutputs(t *testing.T) {
 		t.Fatal(e)
 	}
 	defer func() {
-		e := dbtx.Commit()
+		e = dbtx.Commit()
 		if e != nil  {
 			t.Log(e)
 		}
@@ -218,7 +218,7 @@ func TestFulfillRequestsNoSatisfiableOutputs(t *testing.T) {
 	status := w.status.outputs[request.outBailmentID()].status
 	if status != statusPartial {
 		t.Fatalf("Unexpected status for requested outputs; got '%s', want '%s'",
-			status, statusPartial
+			status, statusPartial,
 		)
 	}
 }
@@ -268,7 +268,7 @@ func TestFulfillRequestsNotEnoughCreditsForAllRequests(t *testing.T) {
 	expectedStatuses := map[OutBailmentID]outputStatus{
 		out1.outBailmentID(): statusSuccess,
 		out2.outBailmentID(): statusSuccess,
-		out3.outBailmentID(): statusPartial
+		out3.outBailmentID(): statusPartial,
 	}
 	for _, wOutput := range w.status.outputs {
 		if wOutput.status != expectedStatuses[wOutput.request.outBailmentID()] {
@@ -288,7 +288,7 @@ func TestRollbackLastOutput(t *testing.T) {
 		t.Fatal(e)
 	}
 	defer func() {
-		e := dbtx.Commit()
+		e = dbtx.Commit()
 		if e != nil  {
 			t.Log(e)
 		}
@@ -325,7 +325,7 @@ func TestRollbackLastOutputMultipleInputsRolledBack(t *testing.T) {
 		t.Fatal(e)
 	}
 	defer func() {
-		e := dbtx.Commit()
+		e = dbtx.Commit()
 		if e != nil  {
 			t.Log(e)
 		}
@@ -364,7 +364,7 @@ func TestRollbackLastOutputNoInputsRolledBack(t *testing.T) {
 		t.Fatal(e)
 	}
 	defer func() {
-		e := dbtx.Commit()
+		e = dbtx.Commit()
 		if e != nil  {
 			t.Log(e)
 		}
@@ -827,7 +827,7 @@ func TestGetWithdrawalStatus(t *testing.T) {
 		t.Fatal(e)
 	}
 	defer func() {
-		e := dbtx.Commit()
+		e = dbtx.Commit()
 		if e != nil  {
 			t.Log(e)
 		}
@@ -876,7 +876,7 @@ func TestSignMultiSigUTXO(t *testing.T) {
 		t.Fatal(e)
 	}
 	defer func() {
-		e := dbtx.Commit()
+		e = dbtx.Commit()
 		if e != nil  {
 			t.Log(e)
 		}
@@ -907,7 +907,7 @@ func TestSignMultiSigUTXOUnparseablePkScript(t *testing.T) {
 		t.Fatal(e)
 	}
 	defer func() {
-		e := dbtx.Commit()
+		e = dbtx.Commit()
 		if e != nil  {
 			t.Log(e)
 		}
@@ -928,7 +928,7 @@ func TestSignMultiSigUTXOPkScriptNotP2SH(t *testing.T) {
 		t.Fatal(e)
 	}
 	defer func() {
-		e := dbtx.Commit()
+		e = dbtx.Commit()
 		if e != nil  {
 			t.Log(e)
 		}
@@ -950,7 +950,7 @@ func TestSignMultiSigUTXORedeemScriptNotFound(t *testing.T) {
 		t.Fatal(e)
 	}
 	defer func() {
-		e := dbtx.Commit()
+		e = dbtx.Commit()
 		if e != nil  {
 			t.Log(e)
 		}
@@ -976,7 +976,7 @@ func TestSignMultiSigUTXONotEnoughSigs(t *testing.T) {
 		t.Fatal(e)
 	}
 	defer func() {
-		e := dbtx.Commit()
+		e = dbtx.Commit()
 		if e != nil  {
 			t.Log(e)
 		}
@@ -1008,7 +1008,7 @@ func TestSignMultiSigUTXOWrongRawSigs(t *testing.T) {
 		t.Fatal(e)
 	}
 	defer func() {
-		e := dbtx.Commit()
+		e = dbtx.Commit()
 		if e != nil  {
 			t.Log(e)
 		}
@@ -1032,7 +1032,7 @@ func TestGetRawSigs(t *testing.T) {
 		t.Fatal(e)
 	}
 	defer func() {
-		e := dbtx.Commit()
+		e = dbtx.Commit()
 		if e != nil  {
 			t.Log(e)
 		}
@@ -1061,7 +1061,7 @@ func TestGetRawSigsOnlyOnePrivKeyAvailable(t *testing.T) {
 		t.Fatal(e)
 	}
 	defer func() {
-		e := dbtx.Commit()
+		e = dbtx.Commit()
 		if e != nil  {
 			t.Log(e)
 		}
@@ -1090,7 +1090,7 @@ func TestGetRawSigsUnparseableRedeemScript(t *testing.T) {
 		t.Fatal(e)
 	}
 	defer func() {
-		e := dbtx.Commit()
+		e = dbtx.Commit()
 		if e != nil  {
 			t.Log(e)
 		}
@@ -1109,7 +1109,7 @@ func TestGetRawSigsInvalidAddrBranch(t *testing.T) {
 		t.Fatal(e)
 	}
 	defer func() {
-		e := dbtx.Commit()
+		e = dbtx.Commit()
 		if e != nil  {
 			t.Log(e)
 		}
@@ -1151,20 +1151,20 @@ func TestTxTooBig(t *testing.T) {
 	tx.calculateSize = func() int { return txMaxSize - 1 }
 	if tx.isTooBig() {
 		t.Fatalf("Tx is smaller than max size (%d < %d) but was considered too big",
-			tx.calculateSize(), txMaxSize
+			tx.calculateSize(), txMaxSize,
 		)
 	}
 	// A tx whose size is equal to txMaxSize should be considered too big.
 	tx.calculateSize = func() int { return txMaxSize }
 	if !tx.isTooBig() {
 		t.Fatalf("Tx size is equal to the max size (%d == %d) but was not considered too big",
-			tx.calculateSize(), txMaxSize
+			tx.calculateSize(), txMaxSize,
 		)
 	}
 	tx.calculateSize = func() int { return txMaxSize + 1 }
 	if !tx.isTooBig() {
 		t.Fatalf("Tx size is bigger than max size (%d > %d) but was not considered too big",
-			tx.calculateSize(), txMaxSize
+			tx.calculateSize(), txMaxSize,
 		)
 	}
 }
@@ -1176,7 +1176,7 @@ func TestTxSizeCalculation(t *testing.T) {
 		t.Fatal(e)
 	}
 	defer func() {
-		e := dbtx.Commit()
+		e = dbtx.Commit()
 		if e != nil  {
 			t.Log(e)
 		}
@@ -1240,7 +1240,7 @@ func TestStoreTransactionsWithoutChangeOutput(t *testing.T) {
 		t.Fatal(e)
 	}
 	defer func() {
-		e := dbtx.Commit()
+		e = dbtx.Commit()
 		if e != nil  {
 			t.Log(e)
 		}
@@ -1248,7 +1248,7 @@ func TestStoreTransactionsWithoutChangeOutput(t *testing.T) {
 	txmgrNs := dbtx.ReadWriteBucket(txmgrNamespaceKey)
 	wtx := createWithdrawalTxWithStoreCredits(t, dbtx, store, pool, []int64{4e6}, []int64{3e6})
 	tx := &changeAwareTx{MsgTx: wtx.toMsgTx(), changeIdx: int32(-1)}
-	if e := storeTransactions(store, txmgrNs, []*changeAwareTx{tx}); E.Chk(e) {
+	if e = storeTransactions(store, txmgrNs, []*changeAwareTx{tx}); E.Chk(e) {
 		t.Fatal(e)
 	}
 	credits, e := store.UnspentOutputs(txmgrNs)
@@ -1267,7 +1267,7 @@ func TestStoreTransactionsWithChangeOutput(t *testing.T) {
 		t.Fatal(e)
 	}
 	defer func() {
-		e := dbtx.Commit()
+		e = dbtx.Commit()
 		if e != nil  {
 			t.Log(e)
 		}
@@ -1277,7 +1277,7 @@ func TestStoreTransactionsWithChangeOutput(t *testing.T) {
 	wtx.changeOutput = wire.NewTxOut(int64(3e6), []byte{})
 	msgtx := wtx.toMsgTx()
 	tx := &changeAwareTx{MsgTx: msgtx, changeIdx: int32(len(msgtx.TxOut) - 1)}
-	if e := storeTransactions(store, txmgrNs, []*changeAwareTx{tx}); E.Chk(e) {
+	if e = storeTransactions(store, txmgrNs, []*changeAwareTx{tx}); E.Chk(e) {
 		t.Fatal(e)
 	}
 	hash := msgtx.TxHash()
@@ -1337,7 +1337,7 @@ func createWithdrawalTxWithStoreCredits(t *testing.T, dbtx walletdb.ReadWriteTx,
 	}
 	for i, amount := range outputAmounts {
 		request := TstNewOutputRequest(
-			t, uint32(i), "34eVkREKgvvGASZW7hkgE2uNc1yycntMK6", amount.Amount(amount), net)
+			t, uint32(i), "34eVkREKgvvGASZW7hkgE2uNc1yycntMK6", amt.Amount(amount), net)
 		tx.addOutput(request)
 	}
 	return tx
@@ -1414,7 +1414,7 @@ func checkTxInputs(t *testing.T, tx *withdrawalTx, inputs []Credit) {
 // signTxAndValidate will construct the signature script for each input of the given transaction (using the given raw
 // signatures and the pkScripts from credits) and execute those scripts to validate them.
 func signTxAndValidate(t *testing.T, mgr *waddrmgr.Manager, addrmgrNs walletdb.ReadBucket, tx *wire.MsgTx, txSigs TxSigs,
-	credits []Credit
+	credits []Credit,
 ) {
 	for i := range tx.TxIn {
 		pkScript := credits[i].PkScript
@@ -1481,7 +1481,7 @@ func checkTxChangeAmount(t *testing.T, tx *withdrawalTx, amount amt.Amount) {
 // splitRequest amount is equal to origAmount - newAmount. It also checks that splitRequest is identical (except for its
 // amount) to the request of the last output in the tx.
 func checkLastOutputWasSplit(t *testing.T, w *withdrawal, tx *withdrawalTx,
-	origAmount, newAmount amt.Amount
+	origAmount, newAmount amt.Amount,
 ) {
 	splitRequest := w.pendingRequests[0]
 	lastOutput := tx.outputs[len(tx.outputs)-1]

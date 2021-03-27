@@ -167,7 +167,7 @@ func main() {
 		merkleHash,
 		merkleHashSwapped,
 	)
-	unixtime := uint32(time.Now().Unix())
+	unixtime = uint32(time.Now().Unix())
 	var blockversion uint32 = 4
 	blockHeader := joinBytes(
 		uint32tobytes(blockversion), make([]byte, 32), tx.merkleHash,

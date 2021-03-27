@@ -1705,7 +1705,7 @@ func (np *NodePeer) OnGetCFCheckpt(
 	// Now that we know the how much of the cache is relevant for this query, we'll populate our check point message
 	// with the cache as is. Shortly below, we'll populate the new elements of the cache.
 	for i := 0; i < forkIdx; i++ {
-		e := checkptMsg.AddCFHeader(&checkptCache[i].FilterHeader)
+		e = checkptMsg.AddCFHeader(&checkptCache[i].FilterHeader)
 		if e != nil {
 		}
 	}
@@ -2535,15 +2535,16 @@ func GetHasServices(advertised, desired wire.ServiceFlag) bool {
 func InitListeners(
 	config *podcfg.Config, activeNet *chaincfg.Params,
 	aMgr *addrmgr.AddrManager, listenAddrs []string, services wire.ServiceFlag,
-) ([]net.Listener, upnp.NAT, error) {
+) (listeners []net.Listener, nat upnp.NAT,e  error) {
 	// Listen for TCP connections at the configured addresses
 	T.Ln("listenAddrs ", listenAddrs)
-	netAddrs, e := ParseListeners(listenAddrs)
+	var netAddrs []net.Addr
+	netAddrs, e = ParseListeners(listenAddrs)
 	if e != nil {
 		return nil, nil, e
 	}
 	T.Ln("netAddrs ", netAddrs)
-	listeners := make([]net.Listener, 0, len(netAddrs))
+	listeners = make([]net.Listener, 0, len(netAddrs))
 	for _, addr := range netAddrs {
 		T.Ln("addr ", addr, " ", addr.Network(), " ", addr.String())
 		listener, e := net.Listen(addr.Network(), addr.String())
@@ -2553,7 +2554,6 @@ func InitListeners(
 		}
 		listeners = append(listeners, listener)
 	}
-	var nat upnp.NAT
 	if len(config.ExternalIPs.S()) != 0 {
 		defaultPort, e := strconv.ParseUint(activeNet.DefaultPort, 10, 16)
 		if e != nil {
@@ -2567,7 +2567,8 @@ func InitListeners(
 				// no port, use default.
 				host = sip
 			} else {
-				port, e := strconv.ParseUint(portstr, 10, 16)
+				var port uint64
+				port, e = strconv.ParseUint(portstr, 10, 16)
 				if e != nil {
 					E.F(
 						"can not parse port from %s for externalip: %v",
@@ -2577,7 +2578,8 @@ func InitListeners(
 				}
 				eport = uint16(port)
 			}
-			na, e := aMgr.HostToNetAddress(host, eport, services)
+			var na *wire.NetAddress
+			na, e = aMgr.HostToNetAddress(host, eport, services)
 			if e != nil {
 				E.F("not adding %s as externalip: %v", sip, e)
 				continue

@@ -31,7 +31,7 @@ func CreateSimulationWallet(activenet *chaincfg.Params, cfg *Config) (e error) {
 	pubPass := []byte(wallet.InsecurePubPassphrase)
 	netDir := NetworkDir(*cfg.AppDataDir, activenet)
 	// Create the wallet.
-	dbPath := filepath.Join(netDir, WalletDbName)
+	dbPath := filepath.Join(netDir, podcfg.WalletDbName)
 	I.Ln("Creating the wallet...")
 	// Create the wallet database backed by bolt db.
 	db, e := walletdb.Create("bdb", dbPath)
@@ -39,7 +39,7 @@ func CreateSimulationWallet(activenet *chaincfg.Params, cfg *Config) (e error) {
 		return e
 	}
 	defer func() {
-		if e := db.Close(); E.Chk(e) {
+		if e = db.Close(); E.Chk(e) {
 		}
 	}()
 	// Create the wallet.
@@ -94,7 +94,7 @@ func CreateWallet(activenet *chaincfg.Params, config *podcfg.Config) (e error) {
 		loader.RunAfterLoad(
 			func(w *wallet.Wallet) {
 				defer func() {
-					e := legacyKeyStore.Lock()
+					e = legacyKeyStore.Lock()
 					if e != nil {
 						D.Ln(e)
 					}
@@ -104,7 +104,7 @@ func CreateWallet(activenet *chaincfg.Params, config *podcfg.Config) (e error) {
 				defer func() {
 					lockChan <- time.Time{}
 				}()
-				e := w.Unlock(privPass, lockChan)
+				e = w.Unlock(privPass, lockChan)
 				if e != nil {
 					E.F(
 						"ERR: Failed to unlock new wallet "+

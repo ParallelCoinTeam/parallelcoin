@@ -40,7 +40,7 @@ func TestRPCMethodHelpGeneration(t *testing.T) {
 			helpText, e := btcjson.GenerateHelp(m.Method, rpchelp.HelpDescs[i].Descs, m.ResultTypes...)
 			if e != nil  {
 				t.Errorf("Cannot generate '%s' help for method '%s': missing description for '%s'",
-					locale, m.Method, err)
+					locale, m.Method, e)
 				continue
 			}
 			if !needsGenerate && helpText != generatedDescs[m.Method] {
@@ -73,7 +73,7 @@ func TestRPCMethodUsageGeneration(t *testing.T) {
 		usage, e := btcjson.MethodUsageText(m.Method)
 		if e != nil  {
 			t.Errorf("Cannot generate single line usage for method '%s': %v",
-				m.Method, err)
+				m.Method, e)
 		}
 		if !t.Failed() {
 			usageStrs = append(usageStrs, usage)

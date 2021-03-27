@@ -1,6 +1,7 @@
 package mining
 
 import (
+	"github.com/p9c/pod/pkg/btcaddr"
 	"github.com/p9c/pod/pkg/podcfg"
 	
 	"github.com/p9c/pod/cmd/node/state"
@@ -37,7 +38,8 @@ func RefillMiningAddresses(w *wallet.Wallet, cfg *podcfg.Config, stateCfg *state
 		E.Ln("error getting account number ", e)
 	}
 	for i := 0; i < toMake; i++ {
-		addr, e := w.NewAddress(
+		var addr btcaddr.Address
+		addr, e = w.NewAddress(
 			account, wm.KeyScopeBIP0044,
 			true,
 		)

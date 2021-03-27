@@ -2009,7 +2009,7 @@ func SignRawTransaction(
 	var tx wire.MsgTx
 	e = tx.Deserialize(bytes.NewBuffer(serializedTx))
 	if e != nil {
-		e := errors.New("TX decode failed")
+		e = errors.New("TX decode failed")
 		return nil, DeserializationError{e}
 	}
 	var hashType txscript.SigHashType
@@ -2027,7 +2027,7 @@ func SignRawTransaction(
 	case "SINGLE|ANYONECANPAY":
 		hashType = txscript.SigHashSingle | txscript.SigHashAnyOneCanPay
 	default:
-		e := errors.New("invalid sighash parameter")
+		e = errors.New("invalid sighash parameter")
 		return nil, InvalidParameterError{e}
 	}
 	// TODO: really we probably should look these up with pod anyway to
@@ -2039,11 +2039,13 @@ func SignRawTransaction(
 		cmdInputs = *cmd.Inputs
 	}
 	for _, rti := range cmdInputs {
-		inputHash, e := chainhash.NewHashFromStr(rti.Txid)
+		var inputHash *chainhash.Hash
+		inputHash, e = chainhash.NewHashFromStr(rti.Txid)
 		if e != nil {
 			return nil, DeserializationError{e}
 		}
-		script, e := DecodeHexStr(rti.ScriptPubKey)
+		var script []byte
+		script, e = DecodeHexStr(rti.ScriptPubKey)
 		if e != nil {
 			return nil, e
 		}
@@ -2052,11 +2054,13 @@ func SignRawTransaction(
 		//
 		// Empty strings are ok for this one and hex.DecodeString will DTRT.
 		if cmd.PrivKeys != nil && len(*cmd.PrivKeys) != 0 {
-			redeemScript, e := DecodeHexStr(rti.RedeemScript)
+			var redeemScript  []byte
+			redeemScript, e = DecodeHexStr(rti.RedeemScript)
 			if e != nil {
 				return nil, e
 			}
-			addr, e := btcaddr.NewScriptHash(
+			var addr *btcaddr.ScriptHash
+			addr, e = btcaddr.NewScriptHash(
 				redeemScript,
 				w.ChainParams(),
 			)
@@ -2090,7 +2094,8 @@ func SignRawTransaction(
 	if cmd.PrivKeys != nil {
 		keys = make(map[string]*util.WIF)
 		for _, key := range *cmd.PrivKeys {
-			wif, e := util.DecodeWIF(key)
+			var wif *util.WIF
+			wif, e = util.DecodeWIF(key)
 			if e != nil {
 				return nil, DeserializationError{e}
 			}
@@ -2098,7 +2103,8 @@ func SignRawTransaction(
 				s := "key network doesn't match wallet's"
 				return nil, DeserializationError{errors.New(s)}
 			}
-			addr, e := btcaddr.NewPubKey(
+			var addr *btcaddr.PubKey
+			addr, e = btcaddr.NewPubKey(
 				wif.SerializePubKey(),
 				w.ChainParams(),
 			)
@@ -2113,12 +2119,13 @@ func SignRawTransaction(
 	// TODO: If we don't mind the possibility of wasting work we could move waiting to the following loop and be
 	//  slightly more asynchronous.
 	for outPoint, resp := range requested {
-		result, e := resp.Receive()
+		var result *btcjson.GetTxOutResult
+		result, e = resp.Receive()
 		if e != nil {
 			return nil, e
 		}
-		script, e := hex.DecodeString(result.ScriptPubKey.Hex)
-		if e != nil {
+		var script []byte
+		if script, e = hex.DecodeString(result.ScriptPubKey.Hex); E.Chk(e){
 			return nil, e
 		}
 		inputs[outPoint] = script

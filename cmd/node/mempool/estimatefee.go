@@ -619,7 +619,8 @@ func RestoreFeeEstimator(data FeeEstimatorState) (*FeeEstimator, error) {
 		F.Ln("failed to read", e)
 	}
 	for i := uint32(0); i < numObserved; i++ {
-		ot, e := deserializeObservedTransaction(r)
+		var ot *observedTransaction
+		ot, e = deserializeObservedTransaction(r)
 		if e != nil {
 			return nil, e
 		}

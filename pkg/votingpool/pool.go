@@ -3,10 +3,10 @@ package votingpool
 import (
 	"fmt"
 	"github.com/p9c/pod/pkg/btcaddr"
+	ec "github.com/p9c/pod/pkg/ecc"
 	"sort"
 	
 	"github.com/p9c/pod/pkg/txscript"
-	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/hdkeychain"
 	"github.com/p9c/pod/pkg/util/zero"
 	"github.com/p9c/pod/pkg/waddrmgr"
@@ -553,14 +553,16 @@ func (p *Pool) DepositScript(seriesID uint32, branch Branch, index Index) ([]byt
 	}
 	pks := make([]*btcaddr.PubKey, len(pubKeys))
 	for i, key := range pubKeys {
-		child, e := key.Child(uint32(index))
+		var child *hdkeychain.ExtendedKey
+		child, e = key.Child(uint32(index))
 		// TODO: implement getting the next index until we find a valid one, in case there is a
 		//  hdkeychain.ErrInvalidChild.
 		if e != nil {
 			str := fmt.Sprintf("child #%d for this pubkey %d does not exist", index, i)
 			return nil, newError(ErrKeyChain, str, e)
 		}
-		pubkey, e := child.ECPubKey()
+		var pubkey *ec.PublicKey
+		pubkey, e = child.ECPubKey()
 		if e != nil {
 			str := fmt.Sprintf("child #%d for this pubkey %d does not exist", index, i)
 			return nil, newError(ErrKeyChain, str, e)

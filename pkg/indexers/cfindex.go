@@ -161,7 +161,8 @@ func storeFilter(
 	if ph.IsEqual(&zeroHash) {
 		prevHeader = &zeroHash
 	} else {
-		pfh, e := dbFetchFilterIdxEntry(dbTx, hkey, ph)
+		var pfh []byte
+		pfh, e = dbFetchFilterIdxEntry(dbTx, hkey, ph)
 		if e != nil {
 			return e
 		}

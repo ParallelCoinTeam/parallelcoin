@@ -50,11 +50,11 @@ func ExampleNewAmount() {
 }
 func ExampleAmount_unitConversions() {
 	amount := amt.Amount(44433322211100)
-	fmt.Println("Satoshi to kDUO:", amount.Format(amount.AmountKiloDUO))
+	fmt.Println("Satoshi to kDUO:", amount.Format(amt.KiloDUO))
 	fmt.Println("Satoshi to DUO:", amount)
-	fmt.Println("Satoshi to MilliDUO:", amount.Format(amount.AmountMilliDUO))
-	fmt.Println("Satoshi to MicroDUO:", amount.Format(amount.AmountMicroDUO))
-	fmt.Println("Satoshi to Satoshi:", amount.Format(amount.AmountSatoshi))
+	fmt.Println("Satoshi to MilliDUO:", amount.Format(amt.MilliDUO))
+	fmt.Println("Satoshi to MicroDUO:", amount.Format(amt.MicroDUO))
+	fmt.Println("Satoshi to Satoshi:", amount.Format(amt.Satoshi))
 	// Output:
 	// Satoshi to kDUO: 444.333222111 kDUO
 	// Satoshi to DUO: 444333.222111 DUO

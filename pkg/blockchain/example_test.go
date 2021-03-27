@@ -30,11 +30,11 @@ func ExampleBlockChain_ProcessBlock() {
 		return
 	}
 	defer func() {
-		if e := os.RemoveAll(dbPath); blockchain.E.Chk(e) {
+		if e = os.RemoveAll(dbPath); E.Chk(e) {
 		}
 	}()
 	defer func() {
-		if e := db.Close(); blockchain.E.Chk(e) {
+		if e = db.Close(); E.Chk(e) {
 		}
 	}()
 	// Create a new BlockChain instance using the underlying database for the main bitcoin network. This example does
@@ -55,7 +55,9 @@ func ExampleBlockChain_ProcessBlock() {
 	// Process a block. For this example, we are going to intentionally cause an error by trying to process the genesis
 	// block which already exists.
 	genesisBlock := block.NewBlock(chaincfg.MainNetParams.GenesisBlock)
-	isMainChain, isOrphan, e := chain.ProcessBlock(
+	var isMainChain bool
+	var isOrphan bool
+	isMainChain, isOrphan, e = chain.ProcessBlock(
 		0, genesisBlock,
 		blockchain.BFNone, 0,
 	)

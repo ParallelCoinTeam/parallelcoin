@@ -360,7 +360,7 @@ func newDummyCredit(t *testing.T, dbtx walletdb.ReadWriteTx, pool *Pool, series 
 // 	return pkScripts
 // }
 func checkWithdrawalAddressMatches(t *testing.T, addr *WithdrawalAddress, seriesID uint32,
-	branch Branch, index Index
+	branch Branch, index Index,
 ) {
 	if addr.SeriesID() != seriesID {
 		t.Fatalf("Wrong seriesID; got %d, want %d", addr.SeriesID(), seriesID)

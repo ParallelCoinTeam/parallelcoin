@@ -117,7 +117,8 @@ func TestCheckErrorCondition(t *testing.T) {
 		t.Errorf("failed to create script: %v", e)
 	}
 	for i := 0; i < len(pkScript)-1; i++ {
-		done, e := vm.Step()
+		var done bool
+		done, e = vm.Step()
 		if e != nil {
 			t.Fatalf("failed to step %dth time: %v", i, e)
 		}

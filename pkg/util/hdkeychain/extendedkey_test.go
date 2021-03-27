@@ -1012,7 +1012,8 @@ func TestMaximumDepth(t *testing.T) {
 				extKey.Depth(), i,
 			)
 		}
-		newKey, e := extKey.Child(1)
+		var newKey *ExtendedKey
+		newKey, e = extKey.Child(1)
 		if e != nil {
 			t.Fatalf("Child: unexpected error: %v", e)
 		}

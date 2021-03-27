@@ -86,7 +86,7 @@ func (q *queryState) compare(
 				)
 			}
 			for i := range got {
-				e := equalTxDetails(&got[i], &exp[i])
+				e = equalTxDetails(&got[i], &exp[i])
 				if e != nil {
 					return false, fmt.Errorf(
 						"failed "+
@@ -417,7 +417,7 @@ func TestStoreQueries(t *testing.T) {
 		},
 	)
 	for _, tst := range tests {
-		e := walletdb.Update(
+		e = walletdb.Update(
 			db, func(tx walletdb.ReadWriteTx) (e error) {
 				ns := tx.ReadWriteBucket(namespaceKey)
 				if e := tst.updates(ns); E.Chk(e) {
@@ -498,7 +498,7 @@ func TestStoreQueries(t *testing.T) {
 				t.Errorf("RangeTransactions (reverse) ran func %d times", iterations)
 			}
 			// Make sure it also breaks early after one iteration through unmined transactions.
-			if e := s.Rollback(ns, b101.Height); E.Chk(e) {
+			if e = s.Rollback(ns, b101.Height); E.Chk(e) {
 				return e
 			}
 			iterations = 0
@@ -611,7 +611,8 @@ func TestPreviousPkScripts(t *testing.T) {
 		}
 	}
 	newTxRecordFromMsgTx := func(tx *wire.MsgTx) *TxRecord {
-		rec, e := NewTxRecordFromMsgTx(tx, timeNow())
+		var rec *TxRecord
+		rec, e = NewTxRecordFromMsgTx(tx, timeNow())
 		if e != nil {
 			t.Fatal(e)
 		}
@@ -629,13 +630,13 @@ func TestPreviousPkScripts(t *testing.T) {
 		recD = newTxRecordFromMsgTx(txD)
 	)
 	insertTx := func(ns walletdb.ReadWriteBucket, rec *TxRecord, block *BlockMeta) {
-		e := s.InsertTx(ns, rec, block)
+		e = s.InsertTx(ns, rec, block)
 		if e != nil {
 			t.Fatal(e)
 		}
 	}
 	addCredit := func(ns walletdb.ReadWriteBucket, rec *TxRecord, block *BlockMeta, index uint32) {
-		e := s.AddCredit(ns, rec, block, index, false)
+		e = s.AddCredit(ns, rec, block, index, false)
 		if e != nil {
 			t.Fatal(e)
 		}
@@ -646,7 +647,8 @@ func TestPreviousPkScripts(t *testing.T) {
 		scripts [][]byte
 	}
 	runTest := func(ns walletdb.ReadWriteBucket, tst *scriptTest) {
-		scripts, e := s.PreviousPkScripts(ns, tst.rec, tst.block)
+		var scripts [][]byte
+		scripts, e = s.PreviousPkScripts(ns, tst.rec, tst.block)
 		if e != nil {
 			t.Fatal(e)
 		}

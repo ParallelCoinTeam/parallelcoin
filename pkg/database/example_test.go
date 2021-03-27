@@ -53,16 +53,18 @@ func Example_basicUsage() {
 	// database right away like this, nor put it in the temp directory, but it's done here to ensure the example cleans
 	// up after itself.
 	dbPath := filepath.Join(os.TempDir(), "exampleusage")
-	db, e := database.Create("ffldb", dbPath, wire.MainNet)
+	var e error
+	var db database.DB
+	db, e = database.Create("ffldb", dbPath, wire.MainNet)
 	if e != nil {
 		return
 	}
 	defer func() {
-		if e := os.RemoveAll(dbPath); database.E.Chk(e) {
+		if e = os.RemoveAll(dbPath); database.E.Chk(e) {
 		}
 	}()
 	defer func() {
-		if e := db.Close(); database.E.Chk(e) {
+		if e = db.Close(); database.E.Chk(e) {
 		}
 	}()
 	// Use the Update function of the database to perform a managed read-write transaction. The transaction will
@@ -73,7 +75,7 @@ func Example_basicUsage() {
 			// feature, but this example is using the metadata bucket directly for simplicity.
 			key := []byte("mykey")
 			value := []byte("myvalue")
-			if e := tx.Metadata().Put(key, value); E.Chk(e) {
+			if e = tx.Metadata().Put(key, value); E.Chk(e) {
 				return e
 			}
 			// Read the key back and ensure it matches.
@@ -82,7 +84,8 @@ func Example_basicUsage() {
 			}
 			// Create a new nested bucket under the metadata bucket.
 			nestedBucketKey := []byte("mybucket")
-			nestedBucket, e := tx.Metadata().CreateBucket(nestedBucketKey)
+			var nestedBucket database.Bucket
+			nestedBucket, e = tx.Metadata().CreateBucket(nestedBucketKey)
 			if e != nil {
 				return e
 			}

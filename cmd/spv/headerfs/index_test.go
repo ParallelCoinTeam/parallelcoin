@@ -21,9 +21,9 @@ func createTestIndex() (func(), *headerIndex, error) {
 		return nil, nil, e
 	}
 	cleanUp := func() {
-		if e := os.RemoveAll(tempDir); E.Chk(e) {
+		if e = os.RemoveAll(tempDir); E.Chk(e) {
 		}
-		if e := db.Close(); E.Chk(e) {
+		if e = db.Close(); E.Chk(e) {
 		}
 	}
 	filterDB, e := newHeaderIndex(db, Block)
@@ -56,7 +56,7 @@ func TestAddHeadersIndexRetrieve(t *testing.T) {
 		headerIndex[i] = header
 	}
 	// With the headers constructed, we'll write them to disk in a single batch.
-	if e := hIndex.addHeaders(headerEntries); E.Chk(e) {
+	if e = hIndex.addHeaders(headerEntries); E.Chk(e) {
 		t.Fatalf("unable to add headers: %v", e)
 	}
 	// Next, verify that the database tip matches the _final_ header inserted.
@@ -78,21 +78,22 @@ func TestAddHeadersIndexRetrieve(t *testing.T) {
 		)
 	}
 	// For each header written, check that we're able to retrieve the entry both by hash and height.
-	for i, headerEntry := range headerEntries {
-		height, e := hIndex.heightFromHash(&headerEntry.hash)
+	for i, he := range headerEntries {
+		var height uint32
+		height, e = hIndex.heightFromHash(&he.hash)
 		if e != nil {
 			t.Fatalf("unable to retreive height(%v): %v", i, e)
 		}
-		if height != headerEntry.height {
+		if height != he.height {
 			t.Fatalf(
 				"height doesn't match: expected %v, got %v",
-				headerEntry.height, height,
+				he.height, height,
 			)
 		}
 	}
 	// Next if we truncate the index by one, then we should end up at the second to last entry for the tip.
 	newTip := headerIndex[numHeaders-2]
-	if e := hIndex.truncateIndex(&newTip.hash, true); E.Chk(e) {
+	if e = hIndex.truncateIndex(&newTip.hash, true); E.Chk(e) {
 		t.Fatalf("unable to truncate index: %v", e)
 	}
 	// This time the database tip should be the _second_ to last entry inserted.

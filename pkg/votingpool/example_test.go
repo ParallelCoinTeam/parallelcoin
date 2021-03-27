@@ -49,7 +49,7 @@ func ExampleCreate() {
 		return
 	}
 	defer func() {
-		e := dbtx.Commit()
+		e = dbtx.Commit()
 		if E.Chk(e) {
 		}
 	}()
@@ -178,7 +178,7 @@ func Example_startWithdrawal() {
 				return e
 			}
 			defer func() {
-				e := mgr.Lock()
+				e = mgr.Lock()
 				if E.Chk(e) {
 				}
 			}()

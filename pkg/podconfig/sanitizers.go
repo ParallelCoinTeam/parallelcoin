@@ -30,7 +30,6 @@ import (
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/util/normalize"
-	"github.com/p9c/pod/pkg/wallet"
 	
 	"github.com/btcsuite/go-socks/socks"
 	"github.com/urfave/cli"
@@ -66,7 +65,7 @@ func initDataDir(cfg *podcfg.Config) {
 
 func initWalletFile(cx *pod.State) {
 	if cx.Config.WalletFile == nil || cx.Config.WalletFile.V() == "" {
-		cx.Config.WalletFile.Set(filepath.Join(cx.Config.DataDir.V(), cx.ActiveNet.Name, wallet.DbName))
+		cx.Config.WalletFile.Set(filepath.Join(cx.Config.DataDir.V(), cx.ActiveNet.Name, podcfg.DbName))
 	}
 	T.Ln("wallet file set to", *cx.Config.WalletFile, *cx.Config.Network)
 }
@@ -478,7 +477,7 @@ func validateUsers(cfg *podcfg.Config) {
 	// Chk to make sure limited and admin users don't have the same username
 	T.Ln("checking admin and limited username is different")
 	if !cfg.Username.Empty() &&
-		*cfg.Username == *cfg.LimitUser {
+		cfg.Username.V() == cfg.LimitUser.V() {
 		str := "%s: --username and --limituser must not specify the same username"
 		e := fmt.Errorf(str, funcName)
 		_, _ = fmt.Fprintln(os.Stderr, e)
@@ -543,7 +542,7 @@ func validatePolicies(cfg *podcfg.Config, stateConfig *state.Config) {
 	if e != nil {
 		E.Ln(e)
 		str := "%s: invalid minrelaytxfee: %v"
-		e := fmt.Errorf(str, funcName, e)
+		e = fmt.Errorf(str, funcName, e)
 		_, _ = fmt.Fprintln(os.Stderr, e)
 	}
 	// Limit the max block size to a sane value.
@@ -551,7 +550,7 @@ func validatePolicies(cfg *podcfg.Config, stateConfig *state.Config) {
 	if cfg.BlockMaxSize.V() < podcfg.BlockMaxSizeMin ||
 		cfg.BlockMaxSize.V() > podcfg.BlockMaxSizeMax {
 		str := "%s: The blockmaxsize option must be in between %d and %d -- parsed [%d]"
-		e := fmt.Errorf(
+		e = fmt.Errorf(
 			str, funcName, podcfg.BlockMaxSizeMin,
 			podcfg.BlockMaxSizeMax, *cfg.BlockMaxSize,
 		)
@@ -562,7 +561,7 @@ func validatePolicies(cfg *podcfg.Config, stateConfig *state.Config) {
 	if cfg.BlockMaxWeight.V() < podcfg.BlockMaxWeightMin ||
 		cfg.BlockMaxWeight.V() > podcfg.BlockMaxWeightMax {
 		str := "%s: The blockmaxweight option must be in between %d and %d -- parsed [%d]"
-		e := fmt.Errorf(
+		e = fmt.Errorf(
 			str, funcName, podcfg.BlockMaxWeightMin,
 			podcfg.BlockMaxWeightMax, *cfg.BlockMaxWeight,
 		)
@@ -572,7 +571,7 @@ func validatePolicies(cfg *podcfg.Config, stateConfig *state.Config) {
 	T.Ln("checking max orphan limit")
 	if cfg.MaxOrphanTxs.V() < 0 {
 		str := "%s: The maxorphantx option may not be less than 0 -- parsed [%d]"
-		e := fmt.Errorf(str, funcName, *cfg.MaxOrphanTxs)
+		e = fmt.Errorf(str, funcName, *cfg.MaxOrphanTxs)
 		_, _ = fmt.Fprintln(os.Stderr, e)
 	}
 	// Limit the block priority and minimum block txsizes to max block size.
@@ -617,7 +616,7 @@ func validatePolicies(cfg *podcfg.Config, stateConfig *state.Config) {
 	T.Ln("checking user agent comments", cfg.UserAgentComments)
 	for _, uaComment := range cfg.UserAgentComments.S() {
 		if strings.ContainsAny(uaComment, "/:()") {
-			e := fmt.Errorf(
+			e = fmt.Errorf(
 				"%s: The following characters must not "+
 					"appear in user agent comments: '/', ':', '(', ')'",
 				funcName,
@@ -633,7 +632,7 @@ func validatePolicies(cfg *podcfg.Config, stateConfig *state.Config) {
 	if e != nil {
 		E.Ln(e)
 		str := "%s: err parsing checkpoints: %v"
-		e := fmt.Errorf(str, funcName, e)
+		e = fmt.Errorf(str, funcName, e)
 		_, _ = fmt.Fprintln(os.Stderr, e)
 	}
 }
@@ -681,7 +680,7 @@ func validateMiningStuff(
 		if e != nil {
 			E.Ln(e)
 			str := "%s: mining address '%s' failed to decode: %v"
-			e := fmt.Errorf(str, funcName, strAddr, e)
+			e = fmt.Errorf(str, funcName, strAddr, e)
 			_, _ = fmt.Fprintln(os.Stderr, e)
 			// os.Exit(1)
 			continue
@@ -719,7 +718,7 @@ func setDiallers(cfg *podcfg.Config, stateConfig *state.Config) {
 		if e != nil {
 			E.Ln(e)
 			str := "%s: Proxy address '%s' is invalid: %v"
-			e = fmt.Errorf(str, funcName, *cfg.Proxy, e)
+			e = fmt.Errorf(str, funcName, cfg.Proxy.V(), e)
 			fmt.Fprintln(os.Stderr, e)
 			// os.Exit(1)
 		}
@@ -762,7 +761,7 @@ func setDiallers(cfg *podcfg.Config, stateConfig *state.Config) {
 		if e != nil {
 			E.Ln(e)
 			str := "%s: Onion proxy address '%s' is invalid: %v"
-			e = fmt.Errorf(str, funcName, *cfg.OnionProxy, e)
+			e = fmt.Errorf(str, funcName, cfg.OnionProxy.V(), e)
 			_, _ = fmt.Fprintln(os.Stderr, e)
 		}
 		// Tor isolation flag means onion proxy credentials will be overridden.

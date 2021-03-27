@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/gcs"
 	"os"
 	"path/filepath"
 	"sync"
@@ -135,7 +136,7 @@ func NewBlockHeaderStore(
 			BlockHeader: &netParams.GenesisBlock.Header,
 			Height:      0,
 		}
-		if e := bhs.WriteHeaders(genesisHeader); E.Chk(e) {
+		if e = bhs.WriteHeaders(genesisHeader); E.Chk(e) {
 			return nil, e
 		}
 		return bhs, nil
@@ -509,7 +510,8 @@ func NewFilterHeaderStore(
 		var genesisFilterHash chainhash.Hash
 		switch filterType {
 		case RegularFilter:
-			basicFilter, e := builder.BuildBasicFilter(
+			var basicFilter *gcs.Filter
+			basicFilter, e = builder.BuildBasicFilter(
 				netParams.GenesisBlock, nil,
 			)
 			if e != nil {
@@ -530,7 +532,7 @@ func NewFilterHeaderStore(
 			FilterHash: genesisFilterHash,
 			Height:     0,
 		}
-		if e := fhs.WriteHeaders(genesisHeader); E.Chk(e) {
+		if e = fhs.WriteHeaders(genesisHeader); E.Chk(e) {
 			return nil, e
 		}
 		return fhs, nil

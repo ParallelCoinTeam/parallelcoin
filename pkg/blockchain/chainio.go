@@ -985,7 +985,7 @@ func (b *BlockChain) initChainState() (e error) {
 		return b.createChainState()
 	}
 	if !hasBlockIndex {
-		e := migrateBlockIndex(b.db)
+		e = migrateBlockIndex(b.db)
 		if e != nil {
 			return nil
 		}
@@ -1018,7 +1018,9 @@ func (b *BlockChain) initChainState() (e error) {
 			var lastNode *BlockNode
 			cursor = blockIndexBucket.Cursor()
 			for ok := cursor.First(); ok; ok = cursor.Next() {
-				header, status, e := deserializeBlockRow(cursor.Value())
+				var header *wire.BlockHeader
+				var status blockStatus
+				header, status, e = deserializeBlockRow(cursor.Value())
 				if e != nil {
 					return e
 				}

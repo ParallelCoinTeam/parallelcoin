@@ -176,7 +176,7 @@ func TestMakeScriptNum(t *testing.T) {
 		// instance.
 		gotNum, e := makeScriptNum(test.serialized, test.minimalEncoding,
 			test.numLen)
-		if e := tstCheckScriptError(e, test.err); e != nil {
+		if e = tstCheckScriptError(e, test.err); e != nil {
 			t.Errorf("makeScriptNum(%#x): %v", test.serialized, e)
 			continue
 		}

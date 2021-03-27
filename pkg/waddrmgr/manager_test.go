@@ -351,8 +351,7 @@ func testExternalAddresses(tc *testContext) bool {
 	prefix := testNamePrefix(tc) + " testExternalAddresses"
 	var addrs []waddrmgr.ManagedAddress
 	if tc.create {
-		prefix := prefix + " NextExternalAddresses"
-		var addrs []waddrmgr.ManagedAddress
+		prefix = prefix + " NextExternalAddresses"
 		e := walletdb.Update(
 			tc.db, func(tx walletdb.ReadWriteTx) (e error) {
 				ns := tx.ReadWriteBucket(waddrmgrNamespaceKey)
@@ -380,7 +379,7 @@ func testExternalAddresses(tc *testContext) bool {
 		// phase, there will be no addresses in the addrs slice, so this really only
 		// runs during the first phase of the tests.
 		for i := 0; i < len(addrs); i++ {
-			prefix := fmt.Sprintf("%s ExternalAddress #%d", prefix, i)
+			prefix = fmt.Sprintf("%s ExternalAddress #%d", prefix, i)
 			if !testAddress(tc, prefix, addrs[i], &expectedExternalAddrs[i]) {
 				return false
 			}
@@ -417,7 +416,7 @@ func testExternalAddresses(tc *testContext) bool {
 				)
 				return false
 			}
-			prefix := fmt.Sprintf("%s Address #%d", prefix, i)
+			prefix = fmt.Sprintf("%s Address #%d", prefix, i)
 			var addr waddrmgr.ManagedAddress
 			e = walletdb.View(
 				tc.db, func(tx walletdb.ReadTx) (e error) {
@@ -503,7 +502,7 @@ func testInternalAddresses(tc *testContext) bool {
 	prefix := testNamePrefix(tc) + " testInternalAddresses"
 	var addrs []waddrmgr.ManagedAddress
 	if tc.create {
-		prefix := prefix + " NextInternalAddress"
+		prefix = prefix + " NextInternalAddress"
 		e := walletdb.Update(
 			tc.db, func(tx walletdb.ReadWriteTx) (e error) {
 				ns := tx.ReadWriteBucket(waddrmgrNamespaceKey)
@@ -531,7 +530,7 @@ func testInternalAddresses(tc *testContext) bool {
 		// phase, there will be no addresses in the addrs slice, so this really only
 		// runs during the first phase of the tests.
 		for i := 0; i < len(addrs); i++ {
-			prefix := fmt.Sprintf("%s InternalAddress #%d", prefix, i)
+			prefix = fmt.Sprintf("%s InternalAddress #%d", prefix, i)
 			if !testAddress(tc, prefix, addrs[i], &expectedInternalAddrs[i]) {
 				return false
 			}
@@ -568,7 +567,7 @@ func testInternalAddresses(tc *testContext) bool {
 				)
 				return false
 			}
-			prefix := fmt.Sprintf("%s Address #%d", prefix, i)
+			prefix = fmt.Sprintf("%s Address #%d", prefix, i)
 			var addr waddrmgr.ManagedAddress
 			e = walletdb.View(
 				tc.db, func(tx walletdb.ReadTx) (e error) {
@@ -959,7 +958,7 @@ func testImportScript(tc *testContext) bool {
 	if tc.create {
 		for i, test := range tests {
 			test.expected.script = test.in
-			prefix := fmt.Sprintf(
+			prefix = fmt.Sprintf(
 				"%s ImportScript #%d (%s)", prefix,
 				i, test.name,
 			)
@@ -1645,7 +1644,7 @@ func testForEachAccountAddress(tc *testContext) bool {
 		return false
 	}
 	for i := 0; i < len(addrs); i++ {
-		prefix := fmt.Sprintf("%s: #%d", prefix, i)
+		prefix = fmt.Sprintf("%s: #%d", prefix, i)
 		gotAddr := addrs[i]
 		wantAddr := expectedAddrMap[gotAddr.Address().String()]
 		if !testAddress(tc, prefix, gotAddr, wantAddr) {
@@ -1697,16 +1696,16 @@ func testWatchingOnly(tc *testContext) bool {
 		tc.t.Errorf("%v", e)
 		return false
 	}
-	if e := tc.db.Copy(fi); E.Chk(e) {
-		if e := fi.Close(); waddrmgr.E.Chk(e) {
+	if e = tc.db.Copy(fi); E.Chk(e) {
+		if e = fi.Close(); waddrmgr.E.Chk(e) {
 		}
 		tc.t.Errorf("%v", e)
 		return false
 	}
-	if e := fi.Close(); waddrmgr.E.Chk(e) {
+	if e = fi.Close(); waddrmgr.E.Chk(e) {
 	}
 	defer func() {
-		if e := os.Remove(woMgrName); waddrmgr.E.Chk(e) {
+		if e = os.Remove(woMgrName); waddrmgr.E.Chk(e) {
 		}
 	}()
 	// Open the new database copy and get the address manager namespace.
@@ -1717,7 +1716,7 @@ func testWatchingOnly(tc *testContext) bool {
 	}
 	
 	defer func() {
-		if e := db.Close(); waddrmgr.E.Chk(e) {
+		if e = db.Close(); waddrmgr.E.Chk(e) {
 		}
 	}()
 	// Open the manager using the namespace and convert it to watching-only.

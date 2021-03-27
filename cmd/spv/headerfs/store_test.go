@@ -76,7 +76,7 @@ func TestBlockHeaderStoreOperations(t *testing.T) {
 	const numHeaders = 100
 	blockHeaders := createTestBlockHeaderChain(numHeaders)
 	// With all the headers inserted, we'll now insert them into the database in a single batch.
-	if e := bhs.WriteHeaders(blockHeaders...); E.Chk(e) {
+	if e = bhs.WriteHeaders(blockHeaders...); E.Chk(e) {
 		t.Fatalf("unable to write block headers: %v", e)
 	}
 	// At this point, the _tip_ of the chain from the PoV of the database should be the very last header we inserted.
@@ -99,12 +99,13 @@ func TestBlockHeaderStoreOperations(t *testing.T) {
 		)
 	}
 	// Ensure that from the PoV of the database, the headers perfectly connect.
-	if e := bhs.CheckConnectivity(); E.Chk(e) {
+	if e = bhs.CheckConnectivity(); E.Chk(e) {
 		t.Fatalf("bhs detects that headers don't connect: %v", e)
 	}
 	// With all the headers written, we should be able to retrieve each header according to its hash _and_ height.
 	for _, header := range blockHeaders {
-		dbHeader, e := bhs.FetchHeaderByHeight(header.Height)
+		var dbHeader *wire.BlockHeader
+		dbHeader, e = bhs.FetchHeaderByHeight(header.Height)
 		if e != nil {
 			t.Fatalf("unable to fetch header by height: %v", e)
 		}
@@ -179,13 +180,13 @@ func TestBlockHeaderStoreRecovery(t *testing.T) {
 	}
 	// First we'll generate a test header chain of length 10, inserting it into the header store.
 	blockHeaders := createTestBlockHeaderChain(10)
-	if e := bhs.WriteHeaders(blockHeaders...); E.Chk(e) {
+	if e = bhs.WriteHeaders(blockHeaders...); E.Chk(e) {
 		t.Fatalf("unable to write block headers: %v", e)
 	}
 	// Next, in order to simulate a partial write, we'll roll back the internal index by 5 blocks.
 	for i := 0; i < 5; i++ {
 		newTip := blockHeaders[len(blockHeaders)-i-1].PrevBlock
-		if e := bhs.truncateIndex(&newTip, true); E.Chk(e) {
+		if e = bhs.truncateIndex(&newTip, true); E.Chk(e) {
 			t.Fatalf("unable to truncate index: %v", e)
 		}
 	}
@@ -264,7 +265,7 @@ func TestFilterHeaderStoreOperations(t *testing.T) {
 	const numHeaders = 100
 	blockHeaders := createTestFilterHeaderChain(numHeaders)
 	// We simulate the expected behavior of the block headers being written to disk before the filter headers are.
-	if e := walletdb.Update(
+	if e = walletdb.Update(
 		fhs.db, func(tx walletdb.ReadWriteTx) (e error) {
 			rootBucket := tx.ReadWriteBucket(indexBucket)
 			for _, header := range blockHeaders {
@@ -281,7 +282,7 @@ func TestFilterHeaderStoreOperations(t *testing.T) {
 		t.Fatalf("unable to pre-load block index: %v", e)
 	}
 	// With all the headers inserted, we'll now insert them into the database in a single batch.
-	if e := fhs.WriteHeaders(blockHeaders...); E.Chk(e) {
+	if e = fhs.WriteHeaders(blockHeaders...); E.Chk(e) {
 		t.Fatalf("unable to write block headers: %v", e)
 	}
 	// At this point, the _tip_ of the chain from the PoV of the database should be the very last header we inserted.
@@ -304,7 +305,8 @@ func TestFilterHeaderStoreOperations(t *testing.T) {
 	}
 	// With all the headers written, we should be able to retrieve each header according to its hash _and_ height.
 	for _, header := range blockHeaders {
-		dbHeader, e := fhs.FetchHeaderByHeight(header.Height)
+		var dbHeader *chainhash.Hash
+		dbHeader, e = fhs.FetchHeaderByHeight(header.Height)
 		if e != nil {
 			t.Fatalf("unable to fetch header by height: %v", e)
 		}
@@ -378,7 +380,7 @@ func TestFilterHeaderStoreRecovery(t *testing.T) {
 	}
 	blockHeaders := createTestFilterHeaderChain(10)
 	// We simulate the expected behavior of the block headers being written to disk before the filter headers are.
-	if e := walletdb.Update(
+	if e = walletdb.Update(
 		fhs.db, func(tx walletdb.ReadWriteTx) (e error) {
 			rootBucket := tx.ReadWriteBucket(indexBucket)
 			for _, header := range blockHeaders {
@@ -395,13 +397,13 @@ func TestFilterHeaderStoreRecovery(t *testing.T) {
 		t.Fatalf("unable to pre-load block index: %v", e)
 	}
 	// Next, we'll insert the filter header chain itself in to the database.
-	if e := fhs.WriteHeaders(blockHeaders...); E.Chk(e) {
+	if e = fhs.WriteHeaders(blockHeaders...); E.Chk(e) {
 		t.Fatalf("unable to write block headers: %v", e)
 	}
 	// Next, in order to simulate a partial write, we'll roll back the internal index by 5 blocks.
 	for i := 0; i < 5; i++ {
 		newTip := blockHeaders[len(blockHeaders)-i-2].HeaderHash
-		if e := fhs.truncateIndex(&newTip, true); E.Chk(e) {
+		if e = fhs.truncateIndex(&newTip, true); E.Chk(e) {
 			t.Fatalf("unable to truncate index: %v", e)
 		}
 	}
@@ -446,7 +448,7 @@ func TestBlockHeadersFetchHeaderAncestors(t *testing.T) {
 	const numHeaders = 100
 	blockHeaders := createTestBlockHeaderChain(numHeaders)
 	// With all the headers inserted, we'll now insert them into the database in a single batch.
-	if e := bhs.WriteHeaders(blockHeaders...); E.Chk(e) {
+	if e = bhs.WriteHeaders(blockHeaders...); E.Chk(e) {
 		t.Fatalf("unable to write block headers: %v", e)
 	}
 	// Now that the headers have been written to disk, we'll attempt to query for all the ancestors of the final header

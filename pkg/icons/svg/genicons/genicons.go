@@ -114,7 +114,7 @@ func genDir(dirName string) (e error) {
 		return e
 	}
 	defer func() {
-		if e := f.Close(); E.Chk(e) {
+		if e = f.Close(); E.Chk(e) {
 		}
 	}()
 	
@@ -207,13 +207,14 @@ func genFile(svgData []byte, baseName string, outSize float32) (e error) {
 	varNames = append(varNames, varName)
 	
 	g := &SVG{}
-	if e := xml.Unmarshal(svgData, g); E.Chk(e) {
+	if e = xml.Unmarshal(svgData, g); E.Chk(e) {
 		return e
 	}
 	
 	var vbx, vby, vbx2, vby2 float32
 	for i, v := range strings.Split(g.ViewBox, " ") {
-		f, e := strconv.ParseFloat(v, 32)
+		var f float64
+		f, e = strconv.ParseFloat(v, 32)
 		if e != nil {
 			return fmt.Errorf(
 				"genFile: failed to parse ViewBox (%q): %v",
@@ -246,7 +247,8 @@ func genFile(svgData []byte, baseName string, outSize float32) (e error) {
 		if p.Fill == "" {
 			p.Fill = g.Fill
 		}
-		c, e := parseColor(p.Fill)
+		var c color.RGBA
+		c, e = parseColor(p.Fill)
 		if e != nil {
 			return e
 		}
@@ -280,14 +282,14 @@ func genFile(svgData []byte, baseName string, outSize float32) (e error) {
 	adjs := map[float32]uint8{}
 	
 	for _, p := range g.Paths {
-		if e := genPath(&enc, p, adjs, outSize, size, offset, g.Circles); E.Chk(e) {
+		if e = genPath(&enc, p, adjs, outSize, size, offset, g.Circles); E.Chk(e) {
 			return e
 		}
 		g.Circles = nil
 	}
 	
 	if len(g.Circles) != 0 {
-		if e := genPath(&enc, &Path{}, adjs, outSize, size, offset, g.Circles); E.Chk(e) {
+		if e = genPath(&enc, &Path{}, adjs, outSize, size, offset, g.Circles); E.Chk(e) {
 			return e
 		}
 		g.Circles = nil
@@ -438,7 +440,7 @@ func genPathData(enc *iconvg.Encoder, adj uint8, pathData string, outSize, size 
 			n = 4
 		case 'C', 'c':
 			n = 6
-		case 'H', 'h', 'True', 'v':
+		case 'H', 'h', 'V', 'v':
 			n = 1
 		case 'M', 'm':
 			n = 2
@@ -479,7 +481,7 @@ func genPathData(enc *iconvg.Encoder, adj uint8, pathData string, outSize, size 
 			enc.AbsHLineTo(args[0])
 		case 'h':
 			enc.RelHLineTo(args[0])
-		case 'True':
+		case 'V':
 			enc.AbsVLineTo(args[0])
 		case 'v':
 			enc.RelVLineTo(args[0])
@@ -533,7 +535,7 @@ func normalize(args *[7]float32, n int, op byte, outSize, size float32, offset f
 			args[i] -= offset[i&0x01]
 		case op == 'H':
 			args[i] -= offset[0]
-		case op == 'True':
+		case op == 'V':
 			args[i] -= offset[1]
 		}
 	}

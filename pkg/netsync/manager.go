@@ -582,7 +582,8 @@ func (sm *SyncManager) handleBlockMsg(workerNumber uint32, bmsg *blockMsg) {
 		header := &bmsg.block.WireBlock().Header
 		if blockchain.ShouldHaveSerializedBlockHeight(header) {
 			coinbaseTx := bmsg.block.Transactions()[0]
-			cbHeight, e := blockchain.ExtractCoinbaseHeight(coinbaseTx)
+			var cbHeight int32
+			cbHeight, e = blockchain.ExtractCoinbaseHeight(coinbaseTx)
 			if e != nil {
 				E.F("unable to extract height from coinbase tx: %v", e)
 			} else {
@@ -595,14 +596,15 @@ func (sm *SyncManager) handleBlockMsg(workerNumber uint32, bmsg *blockMsg) {
 			}
 		}
 		orphanRoot := sm.chain.GetOrphanRoot(blockHash)
-		locator, e := sm.chain.LatestBlockLocator()
+		var locator blockchain.BlockLocator
+		locator, e = sm.chain.LatestBlockLocator()
 		if e != nil {
 			E.F(
 				"failed to get block locator for the latest block: %v",
 				e,
 			)
 		} else {
-			e := pp.PushGetBlocksMsg(locator, orphanRoot)
+			e = pp.PushGetBlocksMsg(locator, orphanRoot)
 			if e != nil {
 			}
 		}
@@ -652,7 +654,7 @@ func (sm *SyncManager) handleBlockMsg(workerNumber uint32, bmsg *blockMsg) {
 	sm.nextCheckpoint = sm.findNextHeaderCheckpoint(prevHeight)
 	if sm.nextCheckpoint != nil {
 		locator := blockchain.BlockLocator([]*chainhash.Hash{prevHash})
-		e := pp.PushGetHeadersMsg(locator, sm.nextCheckpoint.Hash)
+		e = pp.PushGetHeadersMsg(locator, sm.nextCheckpoint.Hash)
 		if e != nil {
 			E.F(
 				"failed to send getheaders message to peer %s: %v",

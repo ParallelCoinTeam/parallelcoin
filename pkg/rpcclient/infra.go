@@ -636,7 +636,7 @@ func (c *Client) handleSendPostMessage(details *sendPostDetails) {
 	var respBytes []byte
 	if respBytes, e = ioutil.ReadAll(httpResponse.Body); E.Chk(e) {
 	}
-	if e := httpResponse.Body.Close(); E.Chk(e) {
+	if e = httpResponse.Body.Close(); E.Chk(e) {
 		e = fmt.Errorf("error reading json reply: %v", e)
 		jReq.responseChan <- &response{err: e}
 		return

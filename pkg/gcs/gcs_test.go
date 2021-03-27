@@ -77,7 +77,8 @@ func TestGCSFilterBuild(t *testing.T) {
 
 // TestGCSFilterCopy deserializes and serializes a filter to create a copy.
 func TestGCSFilterCopy(t *testing.T) {
-	serialized2, e := filter.Bytes()
+	var serialized2 []byte
+	serialized2, e = filter.Bytes()
 	if e != nil  {
 		t.Fatalf("Filter Hash() failed: %v", e)
 	}
@@ -85,7 +86,8 @@ func TestGCSFilterCopy(t *testing.T) {
 	if e != nil  {
 		t.Fatalf("Filter copy failed: %s", e.Error())
 	}
-	serialized3, e := filter.NBytes()
+	var serialized3 []byte
+	serialized3, e = filter.NBytes()
 	if e != nil  {
 		t.Fatalf("Filter NBytes() failed: %v", e)
 	}
@@ -115,25 +117,29 @@ func TestGCSFilterMetadata(t *testing.T) {
 	if filter.N() != filter3.N() {
 		t.Fatal("N doesn't match between copied filters")
 	}
-	serialized, e := filter.Bytes()
+	var serialized []byte
+	serialized, e = filter.Bytes()
 	if e != nil  {
 		t.Fatalf("Filter Hash() failed: %v", e)
 	}
-	serialized2, e := filter2.Bytes()
+	var serialized2 []byte
+	serialized2, e = filter2.Bytes()
 	if e != nil  {
 		t.Fatalf("Filter Hash() failed: %v", e)
 	}
 	if !bytes.Equal(serialized, serialized2) {
 		t.Fatal("Hash don't match between copied filters")
 	}
-	serialized3, e := filter3.Bytes()
+	var serialized3 []byte
+	serialized3, e = filter3.Bytes()
 	if e != nil  {
 		t.Fatalf("Filter Hash() failed: %v", e)
 	}
 	if !bytes.Equal(serialized, serialized3) {
 		t.Fatal("Hash don't match between copied filters")
 	}
-	serialized4, e := filter3.Bytes()
+	var serialized4 []byte
+	serialized4, e = filter3.Bytes()
 	if e != nil  {
 		t.Fatalf("Filter Hash() failed: %v", e)
 	}
@@ -145,7 +151,7 @@ func TestGCSFilterMetadata(t *testing.T) {
 // TestGCSFilterMatch checks that both the built and copied filters match correctly, logging any false positives without
 // failing on them.
 func TestGCSFilterMatch(t *testing.T) {
-	match, e := filter.Match(key, []byte("Nate"))
+	match, e = filter.Match(key, []byte("Nate"))
 	if e != nil  {
 		t.Fatalf("Filter match failed: %s", e.Error())
 	}
@@ -206,7 +212,7 @@ func TestGCSFilterMatch(t *testing.T) {
 // TestGCSFilterMatchAny checks that both the built and copied filters match a list correctly, logging any false
 // positives without failing on them.
 func TestGCSFilterMatchAny(t *testing.T) {
-	match, e := filter.MatchAny(key, contents2)
+	match, e = filter.MatchAny(key, contents2)
 	if e != nil  {
 		t.Fatalf("Filter match any failed: %s", e.Error())
 	}

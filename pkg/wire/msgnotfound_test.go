@@ -39,7 +39,7 @@ func TestNotFound(t *testing.T) {
 	iv := NewInvVect(InvTypeBlock, &hash)
 	var e error
 	if e = msg.AddInvVect(iv); E.Chk(e) {
-		t.Errorf("AddInvVect: %v", err)
+		t.Errorf("AddInvVect: %v", e)
 	}
 	if msg.InvList[0] != iv {
 		t.Errorf(
@@ -66,13 +66,13 @@ func TestNotFoundWire(t *testing.T) {
 	hashStr := "3264bc2ac36a60840790ba1d475d01367e7c723da941069e9dc"
 	blockHash, e := chainhash.NewHashFromStr(hashStr)
 	if e != nil {
-		t.Errorf("NewHashFromStr: %v", err)
+		t.Errorf("NewHashFromStr: %v", e)
 	}
 	// Transaction 1 of Block 203707 hash.
 	hashStr = "d28a3dc7392bf00a9855ee93dd9a81eff82a2c4fe57fbd42cfe71b487accfaf0"
 	txHash, e := chainhash.NewHashFromStr(hashStr)
 	if e != nil {
-		t.Errorf("NewHashFromStr: %v", err)
+		t.Errorf("NewHashFromStr: %v", e)
 	}
 	iv := NewInvVect(InvTypeBlock, blockHash)
 	iv2 := NewInvVect(InvTypeTx, txHash)
@@ -85,11 +85,11 @@ func TestNotFoundWire(t *testing.T) {
 	MultiInv := NewMsgNotFound()
 	e = MultiInv.AddInvVect(iv)
 	if e != nil {
-		t.Log(err)
+		t.Log(e)
 	}
 	e = MultiInv.AddInvVect(iv2)
 	if e != nil {
-		t.Log(err)
+		t.Log(e)
 	}
 	MultiInvEncoded := []byte{
 		0x02,                   // Varint for number of inv vectors
@@ -198,7 +198,7 @@ func TestNotFoundWire(t *testing.T) {
 		var buf bytes.Buffer
 		e := test.in.BtcEncode(&buf, test.pver, test.enc)
 		if e != nil {
-			t.Errorf("BtcEncode #%d error %v", i, err)
+			t.Errorf("BtcEncode #%d error %v", i, e)
 			continue
 		}
 		if !bytes.Equal(buf.Bytes(), test.buf) {
@@ -213,7 +213,7 @@ func TestNotFoundWire(t *testing.T) {
 		rbuf := bytes.NewReader(test.buf)
 		e = msg.BtcDecode(rbuf, test.pver, test.enc)
 		if e != nil {
-			t.Errorf("BtcDecode #%d error %v", i, err)
+			t.Errorf("BtcDecode #%d error %v", i, e)
 			continue
 		}
 		if !reflect.DeepEqual(&msg, test.out) {
@@ -235,14 +235,14 @@ func TestNotFoundWireErrors(t *testing.T) {
 	hashStr := "3264bc2ac36a60840790ba1d475d01367e7c723da941069e9dc"
 	blockHash, e := chainhash.NewHashFromStr(hashStr)
 	if e != nil {
-		t.Errorf("NewHashFromStr: %v", err)
+		t.Errorf("NewHashFromStr: %v", e)
 	}
 	iv := NewInvVect(InvTypeBlock, blockHash)
 	// Base message used to induce errors.
 	baseNotFound := NewMsgNotFound()
 	e = baseNotFound.AddInvVect(iv)
 	if e != nil {
-		t.Log(err)
+		t.Log(e)
 	}
 	baseNotFoundEncoded := []byte{
 		0x02,                   // Varint for number of inv vectors
@@ -257,7 +257,7 @@ func TestNotFoundWireErrors(t *testing.T) {
 	for i := 0; i < MaxInvPerMsg; i++ {
 		e = maxNotFound.AddInvVect(iv)
 		if e != nil {
-			t.Log(err)
+			t.Log(e)
 		}
 	}
 	maxNotFound.InvList = append(maxNotFound.InvList, iv)
@@ -286,10 +286,10 @@ func TestNotFoundWireErrors(t *testing.T) {
 		w := newFixedWriter(test.max)
 		if e = test.in.BtcEncode(w, test.pver, test.enc); E.Chk(e) {
 		}
-		if reflect.TypeOf(err) != reflect.TypeOf(test.writeErr) {
+		if reflect.TypeOf(e) != reflect.TypeOf(test.writeErr) {
 			t.Errorf(
 				"BtcEncode #%d wrong error got: %v, want: %v",
-				i, err, test.writeErr,
+				i, e, test.writeErr,
 			)
 			continue
 		}
@@ -298,7 +298,7 @@ func TestNotFoundWireErrors(t *testing.T) {
 			if e != test.writeErr {
 				t.Errorf(
 					"BtcEncode #%d wrong error got: %v, want: %v",
-					i, err, test.writeErr,
+					i, e, test.writeErr,
 				)
 				continue
 			}
@@ -307,10 +307,10 @@ func TestNotFoundWireErrors(t *testing.T) {
 		var msg MsgNotFound
 		r := newFixedReader(test.max, test.buf)
 		e = msg.BtcDecode(r, test.pver, test.enc)
-		if reflect.TypeOf(err) != reflect.TypeOf(test.readErr) {
+		if reflect.TypeOf(e) != reflect.TypeOf(test.readErr) {
 			t.Errorf(
 				"BtcDecode #%d wrong error got: %v, want: %v",
-				i, err, test.readErr,
+				i, e, test.readErr,
 			)
 			continue
 		}
@@ -319,7 +319,7 @@ func TestNotFoundWireErrors(t *testing.T) {
 			if e != test.readErr {
 				t.Errorf(
 					"BtcDecode #%d wrong error got: %v, "+
-						"want: %v", i, err, test.readErr,
+						"want: %v", i, e, test.readErr,
 				)
 				continue
 			}

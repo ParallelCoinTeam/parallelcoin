@@ -294,10 +294,11 @@ func BenchmarkDeserializeTxLarge(b *testing.B) {
 		b.Fatalf("Failed to read transaction data: %v", e)
 	}
 	defer func() {
-		if e := fi.Close(); E.Chk(e) {
+		if e = fi.Close(); E.Chk(e) {
 		}
 	}()
-	buf, e := ioutil.ReadAll(bzip2.NewReader(fi))
+	var buf []byte
+	buf, e = ioutil.ReadAll(bzip2.NewReader(fi))
 	if e != nil  {
 		b.Fatalf("Failed to read transaction data: %v", e)
 	}

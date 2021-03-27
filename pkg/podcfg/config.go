@@ -30,13 +30,65 @@ const (
 	PARSER            = "json"
 )
 
+// Commands are a slice of podcfg.Command entries
+type Commands []Command
+
+// Command is a specification for a command and can include any number of subcommands
+type Command struct {
+	Name        string
+	Description string
+	Entrypoint  func(c *Config) error
+	Commands    Commands
+}
+
+var tabs = "\t\t\t\t\t"
+
+// Find the Command you are looking for. Note that the namespace is assumed to be flat, no duplicated names on different
+// levels, as it returns on the first one it finds, which goes depth-first recursive
+func (c Commands) Find(name string, hereDepth, hereDist int) (found bool, depth, dist int, cm *Command, e error) {
+	// I.S(c)
+	depth = hereDepth + 1
+	dist = hereDist + 1
+	if c == nil {
+		depth--
+		// I.Ln(tabs[:depth]+"end of the line", depth, dist)
+		// e = errors.New("end of the branch")
+		return
+	}
+	// I.Ln("depth", depth)
+	for i := range c {
+		if found, depth, dist, cm, e = c[i].Commands.Find(name, depth, dist); E.Chk(e) {
+			depth--
+			return
+		}
+		cm = &c[i]
+		if found {
+			depth--
+			return
+		}
+		if c[i].Name == name {
+			I.Ln(tabs[:depth-1]+"found", name, "at depth", depth, "distance", dist)
+			found = true
+			cm = &c[i]
+			e = nil
+			return
+		}
+		I.Ln(tabs[:depth-1]+"walking", c[i].Name)
+	}
+	depth--
+	// I.Ln(tabs[:depth-1]+"end of the line", depth, dist)
+	return
+}
+
+// Config defines the configuration items used by pod along with the various components included in the suite
 type Config struct {
 	// ShowAll is a flag to make the json encoder explicitly define all fields and not just the ones different to the
 	// defaults
 	ShowAll bool
 	// Map is the same data but addressible using its name as found inside the various configuration types, the key is
 	// the same as the .Name field field in the various data types
-	Map map[string]interface{}
+	Map      map[string]interface{}
+	Commands Commands
 	// These are just the definitions, the things put in them are more useful than doc comments
 	AddCheckpoints         *Strings
 	AddPeers               *Strings
@@ -137,8 +189,8 @@ type Config struct {
 	Whitelists             *Strings
 }
 
-// ForEach iterates the configuration items in their defined order, running a
-// function with the configuration item in the field
+// ForEach iterates the configuration items in their defined order, running a function with the configuration item in
+// the field
 func (c *Config) ForEach(fn func(ifc interface{}) bool) {
 	t := reflect.ValueOf(c)
 	t = t.Elem()
@@ -148,6 +200,24 @@ func (c *Config) ForEach(fn func(ifc interface{}) bool) {
 		}
 	}
 }
+
+//
+// func (c *Config) processCommandlineArgs() {
+// 	// first we will locate all the commands specified
+// 	var cm *Command
+// 	var e error
+// 	for i := range os.Args {
+// 		if i == 0 {
+// 			continue
+// 		}
+// 		var depth, dist int
+// 		if depth, dist, cm, e = c.Commands.Find(os.Args[i], depth, dist); E.Chk(e) {
+// 		}
+// 		_ = depth
+// 		_ = dist
+// 	}
+// 	_ = cm
+// }
 
 // MarshalJSON implements the json marshaller for the config. This marshaller only saves what is different from the
 // defaults, and when it is unmarshalled, only the fields stored are altered, thus allowing stacking several sources

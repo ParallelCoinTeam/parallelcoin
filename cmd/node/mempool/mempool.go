@@ -745,7 +745,7 @@ func (mp *TxPool) maybeAcceptTransaction(
 	}
 	// Don't allow transactions with non-standard inputs if the network parameters forbid their acceptance.
 	if !mp.cfg.Policy.AcceptNonStd {
-		e := checkInputsStandard(tx, utxoView)
+		e = checkInputsStandard(tx, utxoView)
 		if e != nil {
 			// Attempt to extract a reject code from the error so it can be retained. When not possible, fall back to a
 			// non standard error.

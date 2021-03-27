@@ -5,6 +5,7 @@ import (
 	"github.com/gookit/color"
 	"github.com/p9c/pod/pkg/logg"
 	"github.com/p9c/pod/pkg/pod"
+	"github.com/p9c/pod/pkg/podcfg"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -16,7 +17,6 @@ import (
 	"github.com/p9c/pod/cmd/walletmain"
 	"github.com/p9c/pod/pkg/apputil"
 	"github.com/p9c/pod/pkg/podconfig"
-	"github.com/p9c/pod/pkg/wallet"
 )
 
 func WalletHandle(cx *pod.State) func(c *cli.Context) (e error) {
@@ -24,7 +24,7 @@ func WalletHandle(cx *pod.State) func(c *cli.Context) (e error) {
 		logg.AppColorizer = color.Bit24(255, 255, 128, false).Sprint
 		logg.App = "wallet"
 		podconfig.Configure(cx, c.Command.Name, true)
-		cx.Config.WalletFile.Set(filepath.Join(cx.Config.DataDir.V(), cx.ActiveNet.Name, wallet.DbName))
+		cx.Config.WalletFile.Set(filepath.Join(cx.Config.DataDir.V(), cx.ActiveNet.Name, podcfg.DbName))
 		// dbFilename := *cx.Config.DataDir + slash + cx.ActiveNet.
 		// 	Params.Name + slash + wallet.WalletDbName
 		if !apputil.FileExists(cx.Config.WalletFile.V()) && !cx.IsGUI {

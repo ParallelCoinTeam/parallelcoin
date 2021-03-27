@@ -18,7 +18,7 @@ func dirEmpty(dirPath string) (bool, error) {
 		return false, e
 	}
 	defer func() {
-		if e := f.Close(); E.Chk(e) {
+		if e = f.Close(); E.Chk(e) {
 		}
 	}()
 	// Read the names of a max of one entry from the directory. When the directory is empty, an io.EOF error will be
@@ -123,7 +123,7 @@ func upgradeDBPaths(cx *pod.State) (e error) {
 func upgradeDataPaths() (e error) {
 	// No need to migrate if the old and new home paths are the same.
 	oldHomePath := oldPodHomeDir()
-	newHomePath := podcfg.defaultHomeDir
+	newHomePath := podcfg.DefaultHomeDir
 	if oldHomePath == newHomePath {
 		return nil
 	}
@@ -139,19 +139,19 @@ func upgradeDataPaths() (e error) {
 			return e
 		}
 		// Move old pod.conf into new location if needed
-		oldConfPath := filepath.Join(oldHomePath, podcfg.defaultConfigFilename)
-		newConfPath := filepath.Join(newHomePath, podcfg.defaultConfigFilename)
+		oldConfPath := filepath.Join(oldHomePath, podcfg.DefaultConfigFilename)
+		newConfPath := filepath.Join(newHomePath, podcfg.DefaultConfigFilename)
 		if apputil.FileExists(oldConfPath) && !apputil.FileExists(newConfPath) {
-			e := os.Rename(oldConfPath, newConfPath)
+			e = os.Rename(oldConfPath, newConfPath)
 			if e != nil {
 				return e
 			}
 		}
 		// Move old data directory into new location if needed
-		oldDataPath := filepath.Join(oldHomePath, podcfg.defaultDataDirname)
-		newDataPath := filepath.Join(newHomePath, podcfg.defaultDataDirname)
+		oldDataPath := filepath.Join(oldHomePath, podcfg.DefaultDataDirname)
+		newDataPath := filepath.Join(newHomePath, podcfg.DefaultDataDirname)
 		if apputil.FileExists(oldDataPath) && !apputil.FileExists(newDataPath) {
-			e := os.Rename(oldDataPath, newDataPath)
+			e = os.Rename(oldDataPath, newDataPath)
 			if e != nil {
 				return e
 			}

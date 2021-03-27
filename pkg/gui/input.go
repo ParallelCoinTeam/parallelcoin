@@ -75,7 +75,7 @@ func (w *Window) Input(
 				return
 			}
 		}
-		txt := p.editor.Text()
+		txt = p.editor.Text()
 		var e error
 		var cb string
 		if cb, e = clipboard.ReadAll(); E.Chk(e) {

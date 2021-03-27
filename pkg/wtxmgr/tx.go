@@ -2,7 +2,7 @@ package wtxmgr
 
 import (
 	"bytes"
-	amount2 "github.com/p9c/pod/pkg/amt"
+	"github.com/p9c/pod/pkg/amt"
 	"github.com/p9c/pod/pkg/chaincfg"
 	"time"
 	
@@ -46,7 +46,7 @@ type (
 	debit struct {
 		txHash chainhash.Hash
 		index  uint32
-		amount amount2.Amount
+		amount amt.Amount
 		spends indexedIncidence
 	}
 	// credit describes a transaction output which was or is spendable by
@@ -54,7 +54,7 @@ type (
 	credit struct {
 		outPoint wire.OutPoint
 		block    Block
-		amount   amount2.Amount
+		amount   amt.Amount
 		change   bool
 		spentBy  indexedIncidence // Index == ^uint32(0) if unspent
 	}
@@ -70,7 +70,7 @@ type (
 	Credit struct {
 		wire.OutPoint
 		BlockMeta
-		Amount       amount2.Amount
+		Amount       amt.Amount
 		PkScript     []byte
 		Received     time.Time
 		FromCoinBase bool
@@ -177,20 +177,21 @@ func (s *Store) updateMinedBalance(
 		}
 		// If this output is relevant to us, we'll mark the it as spent and remove its amount from the store.
 		spender.index = uint32(i)
-		amt, e := spendCredit(ns, credKey, &spender)
+		var amount amt.Amount
+		amount, e = spendCredit(ns, credKey, &spender)
 		if e != nil {
 			return e
 		}
 		e = putDebit(
-			ns, &rec.Hash, uint32(i), amt, &block.Block, credKey,
+			ns, &rec.Hash, uint32(i), amount, &block.Block, credKey,
 		)
 		if e != nil {
 			return e
 		}
-		if e := deleteRawUnspent(ns, unspentKey); E.Chk(e) {
+		if e = deleteRawUnspent(ns, unspentKey); E.Chk(e) {
 			return e
 		}
-		newMinedBalance -= amt
+		newMinedBalance -= amount
 	}
 	// For each output of the record that is marked as a credit, if the output is marked as a credit by the unconfirmed
 	// store, remove the marker and mark the output as a credit in the db.
@@ -205,7 +206,8 @@ func (s *Store) updateMinedBalance(
 	for it.next() {
 		// TODO: This should use the raw apis. The credit value (it.cv) can be moved from unmined directly to the
 		//  credits bucket. The key needs a modification to include the block height/hash.
-		index, e := fetchRawUnminedCreditIndex(it.ck)
+		var index uint32
+		index, e = fetchRawUnminedCreditIndex(it.ck)
 		if e != nil {
 			return e
 		}
@@ -216,7 +218,7 @@ func (s *Store) updateMinedBalance(
 		cred.outPoint.Index = index
 		cred.amount = amount
 		cred.change = change
-		if e := putUnspentCredit(ns, &cred); E.Chk(e) {
+		if e = putUnspentCredit(ns, &cred); E.Chk(e) {
 			return e
 		}
 		e = putUnspent(ns, &cred.outPoint, &block.Block)
@@ -356,14 +358,14 @@ func (s *Store) addCredit(
 		if existsRawUnspent(ns, k) != nil {
 			return false, nil
 		}
-		v := valueUnminedCredit(amount2.Amount(rec.MsgTx.TxOut[index].Value), change)
+		v := valueUnminedCredit(amt.Amount(rec.MsgTx.TxOut[index].Value), change)
 		return true, putRawUnminedCredit(ns, k, v)
 	}
 	k, v := existsCredit(ns, &rec.Hash, index, &block.Block)
 	if v != nil {
 		return false, nil
 	}
-	txOutAmt := amount2.Amount(rec.MsgTx.TxOut[index].Value)
+	txOutAmt := amt.Amount(rec.MsgTx.TxOut[index].Value)
 	T.F(
 		"marking transaction %v output %d (%v) spendable",
 		rec.Hash, index, txOutAmt,
@@ -447,7 +449,7 @@ func (s *Store) rollback(ns walletdb.ReadWriteBucket, height int32) (e error) {
 					coinBaseCredits = append(coinBaseCredits, op)
 					unspentKey, credKey := existsUnspent(ns, &op)
 					if credKey != nil {
-						minedBalance -= amount2.Amount(output.Value)
+						minedBalance -= amt.Amount(output.Value)
 						e = deleteRawUnspent(ns, unspentKey)
 						if e != nil {
 							return e
@@ -479,7 +481,8 @@ func (s *Store) rollback(ns walletdb.ReadWriteBucket, height int32) (e error) {
 				}
 				// If this input is a debit, remove the debit record and mark the credit that it spent as unspent,
 				// incrementing the mined balance.
-				debKey, credKey, e := existsDebit(
+				var debKey, credKey []byte
+				debKey, credKey, e = existsDebit(
 					ns,
 					&rec.Hash, uint32(i), &b.Block,
 				)
@@ -492,8 +495,8 @@ func (s *Store) rollback(ns walletdb.ReadWriteBucket, height int32) (e error) {
 				// unspendRawCredit does not error in case the no credit exists for this key, but this behavior is
 				// correct. Since blocks are removed in increasing order, this credit may have already been removed from
 				// a previously removed transaction record in this rollback.
-				var amt amount2.Amount
-				amt, e = unspendRawCredit(ns, credKey)
+				var amount amt.Amount
+				amount, e = unspendRawCredit(ns, credKey)
 				if e != nil {
 					return e
 				}
@@ -503,14 +506,15 @@ func (s *Store) rollback(ns walletdb.ReadWriteBucket, height int32) (e error) {
 				}
 				// If the credit was previously removed in the rollback, the credit amount is zero. Only mark the
 				// previously spent credit as unspent if it still exists.
-				if amt == 0 {
+				if amount == 0 {
 					continue
 				}
-				unspentVal, e := fetchRawCreditUnspentValue(credKey)
+				var unspentVal []byte
+				unspentVal, e = fetchRawCreditUnspentValue(credKey)
 				if e != nil {
 					return e
 				}
-				minedBalance += amt
+				minedBalance += amount
 				e = putRawUnspent(ns, prevOutKey, unspentVal)
 				if e != nil {
 					return e
@@ -528,12 +532,14 @@ func (s *Store) rollback(ns walletdb.ReadWriteBucket, height int32) (e error) {
 				if v == nil {
 					continue
 				}
-				amt, change, e := fetchRawCreditAmountChange(v)
+				var amountChange amt.Amount
+				change := false
+				amountChange, change, e = fetchRawCreditAmountChange(v)
 				if e != nil {
 					return e
 				}
 				outPointKey := canonicalOutPoint(&rec.Hash, uint32(i))
-				unminedCredVal := valueUnminedCredit(amt, change)
+				unminedCredVal := valueUnminedCredit(amountChange, change)
 				e = putRawUnminedCredit(ns, outPointKey, unminedCredVal)
 				if e != nil {
 					return e
@@ -544,7 +550,7 @@ func (s *Store) rollback(ns walletdb.ReadWriteBucket, height int32) (e error) {
 				}
 				credKey := existsRawUnspent(ns, outPointKey)
 				if credKey != nil {
-					minedBalance -= amount2.Amount(output.Value)
+					minedBalance -= amt.Amount(output.Value)
 					e = deleteRawUnspent(ns, outPointKey)
 					if e != nil {
 						return e
@@ -641,7 +647,7 @@ func // UnspentOutputs returns all unspent received transaction outputs.
 					Block: block,
 					Time:  blockTime,
 				},
-				Amount:       amount2.Amount(txOut.Value),
+				Amount:       amt.Amount(txOut.Value),
 				PkScript:     txOut.PkScript,
 				Received:     rec.Received,
 				FromCoinBase: blockchain.IsCoinBaseTx(&rec.MsgTx),
@@ -682,7 +688,7 @@ func // UnspentOutputs returns all unspent received transaction outputs.
 				BlockMeta: BlockMeta{
 					Block: Block{Height: -1},
 				},
-				Amount:       amount2.Amount(txOut.Value),
+				Amount:       amt.Amount(txOut.Value),
 				PkScript:     txOut.PkScript,
 				Received:     rec.Received,
 				FromCoinBase: blockchain.IsCoinBaseTx(&rec.MsgTx),
@@ -708,7 +714,7 @@ func // Balance returns the spendable wallet balance (total value of all unspent
 //
 // Balance may return unexpected results if syncHeight is lower than the block
 // height of the most recent mined transaction in the store.
-(s *Store) Balance(ns walletdb.ReadBucket, minConf int32, syncHeight int32) (amount2.Amount, error) {
+(s *Store) Balance(ns walletdb.ReadBucket, minConf int32, syncHeight int32) (amt.Amount, error) {
 	bal, e := fetchMinedBalance(ns)
 	if e != nil {
 		return 0, e
@@ -729,11 +735,12 @@ func // Balance returns the spendable wallet balance (total value of all unspent
 			}
 			if existsRawUnminedInput(ns, k) != nil {
 				_, v := existsCredit(ns, &op.Hash, op.Index, &block)
-				amt, e := fetchRawCreditAmount(v)
+				var amount amt.Amount
+				amount, e = fetchRawCreditAmount(v)
 				if e != nil {
 					return e
 				}
-				bal -= amt
+				bal -= amount
 			}
 			return nil
 		},
@@ -761,7 +768,8 @@ func // Balance returns the spendable wallet balance (total value of all unspent
 		}
 		for i := range block.transactions {
 			txHash := &block.transactions[i]
-			rec, e := fetchTxRecord(ns, txHash, &block.Block)
+			var rec *TxRecord
+			rec, e = fetchTxRecord(ns, txHash, &block.Block)
 			if e != nil {
 				return 0, e
 			}
@@ -778,7 +786,9 @@ func // Balance returns the spendable wallet balance (total value of all unspent
 				if v == nil {
 					continue
 				}
-				amt, spent, e := fetchRawCreditAmountSpent(v)
+				var amountSpent amt.Amount
+				var spent bool
+				amountSpent, spent, e = fetchRawCreditAmountSpent(v)
 				if e != nil {
 					return 0, e
 				}
@@ -788,7 +798,7 @@ func // Balance returns the spendable wallet balance (total value of all unspent
 				confs := syncHeight - block.Height + 1
 				if confs < minConf || (blockchain.IsCoinBaseTx(&rec.MsgTx) &&
 					confs < coinbaseMaturity) {
-					bal -= amt
+					bal -= amountSpent
 				}
 			}
 		}

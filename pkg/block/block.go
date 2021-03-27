@@ -22,6 +22,12 @@ func (e OutOfRangeError) Error() string {
 	return string(e)
 }
 
+// SetBlockBytes sets the internal serialized block byte buffer to the passed buffer. It is used to inject errors and is
+// only available to the test package.
+func (b *Block) SetBlockBytes(buf []byte) {
+	b.serializedBlock = buf
+}
+
 // Block defines a bitcoin block that provides easier and more efficient manipulation of raw blocks. It also memorizes
 // hashes for the block and its transactions on their first access so subsequent accesses don't have to repeat the
 // relatively expensive hashing operations.

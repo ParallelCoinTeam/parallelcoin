@@ -178,8 +178,8 @@ func CreateBlock(
 		blockTxns = append(blockTxns, inclusionTxs...)
 	}
 	merkles := blockchain.BuildMerkleTreeStore(blockTxns, false)
-	var block wire.Block
-	block.Header = wire.BlockHeader{
+	var b wire.Block
+	b.Header = wire.BlockHeader{
 		Version:    blockVersion,
 		PrevBlock:  *prevHash,
 		MerkleRoot: *merkles.GetRoot(),
@@ -187,15 +187,15 @@ func CreateBlock(
 		Bits:       net.PowLimitBits,
 	}
 	for _, tx := range blockTxns {
-		if e := block.AddTransaction(tx.MsgTx()); E.Chk(e) {
+		if e := b.AddTransaction(tx.MsgTx()); E.Chk(e) {
 			return nil, e
 		}
 	}
-	found := solveBlock(&block.Header, net.PowLimit)
+	found := solveBlock(&b.Header, net.PowLimit)
 	if !found {
 		return nil, errors.New("unable to solve block")
 	}
-	utilBlock := block.NewBlock(&block)
+	utilBlock := block.NewBlock(&b)
 	utilBlock.SetHeight(blockHeight)
 	return utilBlock, nil
 }

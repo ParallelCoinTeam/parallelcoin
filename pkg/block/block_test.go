@@ -3,6 +3,7 @@ package block_test
 import (
 	"bytes"
 	"github.com/p9c/pod/pkg/block"
+	"github.com/p9c/pod/pkg/util"
 	"io"
 	"reflect"
 	"testing"
@@ -54,14 +55,15 @@ func TestBlock(t *testing.T) {
 	b = block.NewBlock(&Block100000)
 	// Request hash for all transactions one at a time via Tx.
 	for i, txHash := range wantTxHashes {
-		wantHash, e := chainhash.NewHashFromStr(txHash)
+		wantHash, e = chainhash.NewHashFromStr(txHash)
 		if e != nil  {
 			t.Errorf("NewHashFromStr: %v", e)
 		}
 		// Request the hash multiple times to test generation and
 		// caching.
 		for j := 0; j < 2; j++ {
-			tx, e := b.Tx(i)
+			var tx *util.Tx
+			tx, e = b.Tx(i)
 			if e != nil  {
 				t.Errorf("Tx #%d: %v", i, e)
 				continue
@@ -88,7 +90,7 @@ func TestBlock(t *testing.T) {
 		}
 		// Ensure all of the hashes match.
 		for j, tx := range transactions {
-			wantHash, e := chainhash.NewHashFromStr(wantTxHashes[j])
+			wantHash, e = chainhash.NewHashFromStr(wantTxHashes[j])
 			if e != nil  {
 				t.Errorf("NewHashFromStr: %v", e)
 			}
@@ -109,7 +111,8 @@ func TestBlock(t *testing.T) {
 	block100000Bytes := block100000Buf.Bytes()
 	// Request serialized bytes multiple times to test generation and caching.
 	for i := 0; i < 2; i++ {
-		serializedBytes, e := b.Bytes()
+		var serializedBytes []byte
+		serializedBytes, e = b.Bytes()
 		if e != nil  {
 			t.Errorf("Hash: %v", e)
 			continue

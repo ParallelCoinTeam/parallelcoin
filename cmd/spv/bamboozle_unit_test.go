@@ -94,7 +94,7 @@ var (
 	}
 	// For the purpose of the cfheader mismatch test, we actually only need to have the scripts of each transaction
 	// present.
-	block = &wire.Block{
+	blk = &wire.Block{
 		Transactions: []*wire.MsgTx{
 			{
 				TxOut: []*wire.TxOut{
@@ -119,7 +119,7 @@ var (
 			},
 		},
 	}
-	correctFilter, _ = builder.BuildBasicFilter(block, nil)
+	correctFilter, _ = builder.BuildBasicFilter(blk, nil)
 	fakeFilter1, _   = gcs.FromBytes(
 		2, builder.DefaultP, builder.DefaultM, []byte{
 			0x30, 0x43, 0x02, 0x1f, 0x4d, 0x23, 0x81, 0xdc,
@@ -330,7 +330,7 @@ var (
 	resolveCFHTestCases = []*resolveCFHTestCase{
 		{
 			name:  "all bad 1",
-			block: block,
+			block: blk,
 			peerFilters: map[string]*gcs.Filter{
 				"a": fakeFilter1,
 				"b": fakeFilter1,
@@ -340,7 +340,7 @@ var (
 		},
 		{
 			name:  "all bad 2",
-			block: block,
+			block: blk,
 			peerFilters: map[string]*gcs.Filter{
 				"a": fakeFilter2,
 				"b": fakeFilter2,
@@ -350,7 +350,7 @@ var (
 		},
 		{
 			name:  "all bad 3",
-			block: block,
+			block: blk,
 			peerFilters: map[string]*gcs.Filter{
 				"a": fakeFilter2,
 				"b": fakeFilter2,
@@ -360,7 +360,7 @@ var (
 		},
 		{
 			name:  "all bad 4",
-			block: block,
+			block: blk,
 			peerFilters: map[string]*gcs.Filter{
 				"a": fakeFilter1,
 				"b": fakeFilter2,
@@ -370,7 +370,7 @@ var (
 		},
 		{
 			name:  "all bad 5",
-			block: block,
+			block: blk,
 			peerFilters: map[string]*gcs.Filter{
 				"a": fakeFilter2,
 				"b": fakeFilter1,
@@ -380,7 +380,7 @@ var (
 		},
 		{
 			name:  "one good",
-			block: block,
+			block: blk,
 			peerFilters: map[string]*gcs.Filter{
 				"a": correctFilter,
 				"b": fakeFilter1,
@@ -391,7 +391,7 @@ var (
 		},
 		{
 			name:  "all good",
-			block: block,
+			block: blk,
 			peerFilters: map[string]*gcs.Filter{
 				"a": correctFilter,
 				"b": correctFilter,
@@ -412,7 +412,7 @@ func runCheckCFCheckptSanityTestCase(t *testing.T, testCase *cfCheckptTestCase) 
 		t.Fatalf("Failed to create temporary directory: %s", e)
 	}
 	defer func() {
-		if e := os.RemoveAll(tempDir); E.Chk(e) {
+		if e = os.RemoveAll(tempDir); E.Chk(e) {
 		}
 	}()
 	db, e := walletdb.Create("bdb", tempDir+"/weks.db")
@@ -420,7 +420,7 @@ func runCheckCFCheckptSanityTestCase(t *testing.T, testCase *cfCheckptTestCase) 
 		t.Fatalf("DBError opening DB: %s", e)
 	}
 	defer func() {
-		if e := db.Close(); E.Chk(e) {
+		if e = db.Close(); E.Chk(e) {
 		}
 	}()
 	hdrStore, e := headerfs.NewBlockHeaderStore(
@@ -443,8 +443,8 @@ func runCheckCFCheckptSanityTestCase(t *testing.T, testCase *cfCheckptTestCase) 
 		cfBatch := make([]headerfs.FilterHeader, 0, wire.CFCheckptInterval)
 		hdrBatch := make([]headerfs.BlockHeader, 0, wire.CFCheckptInterval)
 		for j := 1; j < wire.CFCheckptInterval; j++ {
-			height := uint32(i*wire.CFCheckptInterval + j)
-			header := heightToHeader(height)
+			height = uint32(i*wire.CFCheckptInterval + j)
+			header = heightToHeader(height)
 			hdrBatch = append(
 				hdrBatch, headerfs.BlockHeader{
 					BlockHeader: header,
@@ -459,8 +459,8 @@ func runCheckCFCheckptSanityTestCase(t *testing.T, testCase *cfCheckptTestCase) 
 				},
 			)
 		}
-		height := uint32((i + 1) * wire.CFCheckptInterval)
-		header := heightToHeader(height)
+		height = uint32((i + 1) * wire.CFCheckptInterval)
+		header = heightToHeader(height)
 		hdrBatch = append(
 			hdrBatch, headerfs.BlockHeader{
 				BlockHeader: header,
@@ -551,7 +551,7 @@ func TestResolveCFHeadersMismatch(t *testing.T) {
 		t.Run(
 			testCase.name, func(t *testing.T) {
 				badPeers, e := resolveCFHeaderMismatch(
-					block, wire.GCSFilterRegular, testCase.peerFilters,
+					blk, wire.GCSFilterRegular, testCase.peerFilters,
 				)
 				if e != nil {
 					t.Fatalf(

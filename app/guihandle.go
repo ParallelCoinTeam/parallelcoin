@@ -17,6 +17,7 @@ func walletGUIHandle(cx *pod.State) func(c *cli.Context) (e error) {
 		logg.AppColorizer = color.Bit24(128, 255, 255, false).Sprint
 		logg.App = "   gui"
 		D.Ln("starting up parallelcoin pod gui...")
+		// fork.ForkCalc()
 		podconfig.Configure(cx, "gui", true)
 		// D.Ln(os.Args)
 		// interrupt.AddHandler(func() {

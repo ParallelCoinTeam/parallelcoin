@@ -581,7 +581,8 @@ func (b *BlockChain) checkBlockHeaderContext(
 		// a := fork.GetAlgoName(header.Version, prevNode.height+1)
 		// I.F("algo %s %d %8x %d", a, header.Version, header.Bits,
 		// 	prevNode.height+1)
-		expectedDifficulty, e := b.CalcNextRequiredDifficultyFromNode(
+		var expectedDifficulty uint32
+		expectedDifficulty, e = b.CalcNextRequiredDifficultyFromNode(
 			prevNode,
 			fork.GetAlgoName(header.Version, prevNode.height+1),
 			true,

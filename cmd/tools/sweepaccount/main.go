@@ -335,7 +335,7 @@ func promptSecret(what string) (string, error) {
 func saneOutputValue(
 	amount amt.Amount,
 ) bool {
-	return amount >= 0 && amount <= amount.MaxSatoshi
+	return amount >= 0 && amount <= amt.MaxSatoshi
 }
 
 func parseOutPoint(

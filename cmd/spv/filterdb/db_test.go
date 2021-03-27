@@ -15,8 +15,9 @@ import (
 	_ "github.com/p9c/pod/pkg/walletdb/bdb"
 )
 
-func createTestDatabase() (func(), FilterDatabase, error) {
-	tempDir, e := ioutil.TempDir("", "neutrino")
+func createTestDatabase() (cleanUp func(), filterDB FilterDatabase, e error) {
+	var tempDir string
+	tempDir, e = ioutil.TempDir("", "neutrino")
 	if e != nil {
 		return nil, nil, e
 	}
@@ -24,13 +25,14 @@ func createTestDatabase() (func(), FilterDatabase, error) {
 	if e != nil {
 		return nil, nil, e
 	}
-	cleanUp := func() {
-		if e := os.RemoveAll(tempDir); E.Chk(e) {
+	cleanUp = func() {
+		if e = os.RemoveAll(tempDir); E.Chk(e) {
 		}
-		if e := db.Close(); E.Chk(e) {
+		if e = db.Close(); E.Chk(e) {
 		}
 	}
-	filterDB, e := New(db, chaincfg.SimNetParams)
+	// var filterDB *FilterStore
+	filterDB, e = New(db, chaincfg.SimNetParams)
 	if e != nil {
 		return nil, nil, e
 	}

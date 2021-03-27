@@ -35,10 +35,11 @@ func main() {
 		return
 	}
 	// test
-	if loop, e := pc.MulticastLoopback(); e ==  nil {
+	var loop bool
+	if loop, e = pc.MulticastLoopback(); e ==  nil {
 		fmt.Printf("MulticastLoopback status:%v\n", loop)
 		if !loop {
-			if e := pc.SetMulticastLoopback(true); E.Chk(e) {
+			if e = pc.SetMulticastLoopback(true); E.Chk(e) {
 				fmt.Printf("SetMulticastLoopback error:%v\n", e)
 			}
 		}

@@ -36,7 +36,6 @@ func main() {
 		return
 	}
 	if cfg.Directory == "" {
-		var e error
 		cfg.Directory, e = os.Getwd()
 		if e != nil {
 			_, _ = fmt.Fprintf(os.Stderr, "no directory specified and cannot get working directory\n")
@@ -71,7 +70,7 @@ func main() {
 		os.Exit(1)
 	}
 	if e = ioutil.WriteFile(keyFile, key, 0600); E.Chk(e) {
-		if e := os.Remove(certFile); E.Chk(e) {
+		if e = os.Remove(certFile); E.Chk(e) {
 		}
 		_, _ = fmt.Fprintf(os.Stderr, "cannot write key: %v\n", e)
 		os.Exit(1)

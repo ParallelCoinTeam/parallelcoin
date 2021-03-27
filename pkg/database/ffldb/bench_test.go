@@ -20,11 +20,11 @@ func BenchmarkBlockHeader(b *testing.B) {
 		b.Fatal(e)
 	}
 	defer func() {
-		if e := os.RemoveAll(dbPath); E.Chk(e) {
+		if e = os.RemoveAll(dbPath); E.Chk(e) {
 		}
 	}()
 	defer func() {
-		if e := db.Close(); E.Chk(e) {
+		if e = db.Close(); E.Chk(e) {
 		}
 	}()
 	e = db.Update(func(tx database.Tx) (e error) {
@@ -63,11 +63,11 @@ func BenchmarkBlock(b *testing.B) {
 		b.Fatal(e)
 	}
 	defer func() {
-		if e := os.RemoveAll(dbPath); E.Chk(e) {
+		if e = os.RemoveAll(dbPath); E.Chk(e) {
 		}
 	}()
 	defer func() {
-		if e := db.Close(); E.Chk(e) {
+		if e = db.Close(); E.Chk(e) {
 		}
 	}()
 	e = db.Update(func(tx database.Tx) (e error) {

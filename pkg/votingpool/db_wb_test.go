@@ -70,7 +70,7 @@ func TestWithdrawalSerialization(t *testing.T) {
 		t.Fatal(e)
 	}
 	defer func() {
-		e := dbtx.Commit()
+		e = dbtx.Commit()
 		if e != nil  {
 			t.Log(e)
 		}

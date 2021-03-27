@@ -639,7 +639,8 @@ func TestOutboundPeer(t *testing.T) {
 	// Test NewestBlock
 	var newestBlock = func() (*chainhash.Hash, int32, error) {
 		hashStr := "14a0810ac680a3eb3f82edc878cea25ec41d6b790744e5daeef"
-		hash, e := chainhash.NewHashFromStr(hashStr)
+		var hash *chainhash.Hash
+		hash, e = chainhash.NewHashFromStr(hashStr)
 		if e != nil {
 			return nil, 0, e
 		}

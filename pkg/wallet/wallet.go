@@ -308,7 +308,8 @@ func (w *Wallet) activeData(dbtx walletdb.ReadTx) ([]btcaddr.Address, []wtxmgr.C
 // blocks until the rescan has finished.
 func (w *Wallet) syncWithChain() (e error) {
 	T.Ln("syncWithChain")
-	chainClient, e := w.requireChainClient()
+	var chainClient chainclient.Interface
+	chainClient, e = w.requireChainClient()
 	if e != nil {
 		return e
 	}
@@ -347,7 +348,8 @@ func (w *Wallet) syncWithChain() (e error) {
 		// synchronizing from scratch, and lets us avoid a bunch of costly DB transactions in the case when we're using
 		// BDB for the walletdb backend and Neutrino for the chain.Interface backend, and the chain backend starts
 		// synchronizing at the same time as the wallet.
-		_, bestHeight, e := chainClient.GetBestBlock()
+		var bestHeight int32
+		_, bestHeight, e = chainClient.GetBestBlock()
 		if e != nil {
 			return e
 		}
@@ -367,7 +369,8 @@ func (w *Wallet) syncWithChain() (e error) {
 			logHeight,
 		)
 		// Initialize the first database transaction.
-		tx, e := w.db.BeginReadWriteTx()
+		var tx walletdb.ReadWriteTx
+		tx, e = w.db.BeginReadWriteTx()
 		if e != nil {
 			return e
 		}
@@ -386,12 +389,14 @@ func (w *Wallet) syncWithChain() (e error) {
 			)
 			// In the event that this recovery is being resumed, we will need to repopulate all found addresses from the
 			// database. For basic recovery, we will only do so for the default scopes.
-			scopedMgrs, e := w.defaultScopeManagers()
+			var scopedMgrs map[waddrmgr.KeyScope]*waddrmgr.ScopedKeyManager
+			scopedMgrs, e = w.defaultScopeManagers()
 			if e != nil {
 				return e
 			}
 			txmgrNs := tx.ReadBucket(wtxmgrNamespaceKey)
-			credits, e := w.TxStore.UnspentOutputs(txmgrNs)
+			var credits []wtxmgr.Credit
+			credits, e = w.TxStore.UnspentOutputs(txmgrNs)
 			if e != nil {
 				return e
 			}
@@ -401,9 +406,10 @@ func (w *Wallet) syncWithChain() (e error) {
 			}
 		}
 		for height := startHeight; height <= bestHeight; height++ {
-			hash, e := chainClient.GetBlockHash(int64(height))
+			var hash *chainhash.Hash
+			hash, e = chainClient.GetBlockHash(int64(height))
 			if e != nil {
-				e := tx.Rollback()
+				e = tx.Rollback()
 				if e != nil {
 				}
 				return e
@@ -424,13 +430,14 @@ func (w *Wallet) syncWithChain() (e error) {
 				time.Sleep(100 * time.Millisecond)
 				_, bestHeight, e = chainClient.GetBestBlock()
 				if e != nil {
-					e := tx.Rollback()
+					e = tx.Rollback()
 					if e != nil {
 					}
 					return e
 				}
 			}
-			header, e := chainClient.GetBlockHeader(hash)
+			var header *wire.BlockHeader
+			header, e = chainClient.GetBlockHeader(hash)
 			if e != nil {
 				return e
 			}
@@ -466,7 +473,7 @@ func (w *Wallet) syncWithChain() (e error) {
 				},
 			)
 			if e != nil {
-				e := tx.Rollback()
+				e = tx.Rollback()
 				if e != nil {
 				}
 				return e
@@ -474,13 +481,13 @@ func (w *Wallet) syncWithChain() (e error) {
 			// If we are in recovery mode, attempt a recovery on blocks that have been added to the recovery manager's
 			// block batch thus far. If block batch is empty, this will be a NOP.
 			if isRecovery && height%recoveryBatchSize == 0 {
-				e := w.recoverDefaultScopes(
+				e = w.recoverDefaultScopes(
 					chainClient, tx, ns,
 					recoveryMgr.BlockBatch(),
 					recoveryMgr.State(),
 				)
 				if e != nil {
-					e := tx.Rollback()
+					e = tx.Rollback()
 					if e != nil {
 					}
 					return e
@@ -492,7 +499,7 @@ func (w *Wallet) syncWithChain() (e error) {
 			if height%10000 == 0 {
 				e = tx.Commit()
 				if e != nil {
-					e := tx.Rollback()
+					e = tx.Rollback()
 					if e != nil {
 					}
 					return e
@@ -510,12 +517,12 @@ func (w *Wallet) syncWithChain() (e error) {
 		// Perform one last recovery attempt for all blocks that were not batched at the default granularity of 2000
 		// blocks.
 		if isRecovery {
-			e := w.recoverDefaultScopes(
+			e = w.recoverDefaultScopes(
 				chainClient, tx, ns, recoveryMgr.BlockBatch(),
 				recoveryMgr.State(),
 			)
 			if e != nil {
-				e := tx.Rollback()
+				e = tx.Rollback()
 				if e != nil {
 				}
 				return e
@@ -524,7 +531,7 @@ func (w *Wallet) syncWithChain() (e error) {
 		// Commit (or roll back) the final database transaction.
 		e = tx.Commit()
 		if e != nil {
-			e := tx.Rollback()
+			e = tx.Rollback()
 			if e != nil {
 			}
 			return e
@@ -674,7 +681,7 @@ func (w *Wallet) recoverScopedAddresses(
 expandHorizons:
 	for scope, scopedMgr := range scopedMgrs {
 		scopeState := recoveryState.StateForScope(scope)
-		e := expandScopeHorizons(ns, scopedMgr, scopeState)
+		e = expandScopeHorizons(ns, scopedMgr, scopeState)
 		if e != nil {
 			return e
 		}
@@ -985,16 +992,19 @@ out:
 	for {
 		select {
 		case txr := <-w.createTxRequests:
-			heldUnlock, e := w.holdUnlock()
+			var e error
+			var h heldUnlock
+			h, e = w.holdUnlock()
 			if e != nil {
 				txr.resp <- createTxResponse{nil, e}
 				continue
 			}
-			tx, e := w.txToOutputs(
+			var tx *txauthor.AuthoredTx
+			tx, e = w.txToOutputs(
 				txr.outputs, txr.account,
 				txr.minconf, txr.feeSatPerKB,
 			)
-			heldUnlock.release()
+			h.release()
 			txr.resp <- createTxResponse{tx, e}
 		case <-quit.Wait():
 			break out
@@ -1958,13 +1968,11 @@ func (w *Wallet) GetTransactions(startBlock, endBlock *BlockIdentifier, cancel q
 			case *chainclient.RPCClient:
 				startResp = client.GetBlockVerboseTxAsync(startBlock.hash)
 			case *chainclient.BitcoindClient:
-				var e error
 				start, e = client.GetBlockHeight(startBlock.hash)
 				if e != nil {
 					return nil, e
 				}
 			case *chainclient.NeutrinoClient:
-				var e error
 				start, e = client.GetBlockHeight(startBlock.hash)
 				if e != nil {
 					return nil, e
@@ -1983,7 +1991,6 @@ func (w *Wallet) GetTransactions(startBlock, endBlock *BlockIdentifier, cancel q
 			case *chainclient.RPCClient:
 				endResp = client.GetBlockVerboseTxAsync(endBlock.hash)
 			case *chainclient.NeutrinoClient:
-				var e error
 				end, e = client.GetBlockHeight(endBlock.hash)
 				if e != nil {
 					return nil, e
@@ -2163,7 +2170,8 @@ func (w *Wallet) AccountBalances(
 			}
 			results = make([]AccountBalanceResult, lastAcct+2)
 			for i := range results[:len(results)-1] {
-				accountName, e := manager.AccountName(addrmgrNs, uint32(i))
+				var accountName string
+				accountName, e = manager.AccountName(addrmgrNs, uint32(i))
 				if e != nil {
 					return e
 				}
@@ -2447,7 +2455,8 @@ func (w *Wallet) ImportPrivateKey(
 		}
 	} else {
 		// Only update the new birthday time from default value if we actually have timestamp info in the header.
-		header, e := w.chainClient.GetBlockHeader(&bs.Hash)
+		var header *wire.BlockHeader
+		header, e = w.chainClient.GetBlockHeader(&bs.Hash)
 		if e == nil {
 			newBirthday = header.Timestamp
 		}
@@ -2944,7 +2953,8 @@ func (w *Wallet) SignTransaction(
 				if !ok {
 					prevHash := &txIn.PreviousOutPoint.Hash
 					prevIndex := txIn.PreviousOutPoint.Index
-					txDetails, e := w.TxStore.TxDetails(txmgrNs, prevHash)
+					var txDetails *wtxmgr.TxDetails
+					txDetails, e = w.TxStore.TxDetails(txmgrNs, prevHash)
 					if e != nil {
 						return fmt.Errorf(
 							"cannot query previous transaction details for %v: %v",

@@ -25,7 +25,7 @@ func (msg *fakeMessage) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding)
 		}
 		return e
 	}
-	_, e := w.Write(msg.payload)
+	_, e = w.Write(msg.payload)
 	return e
 }
 

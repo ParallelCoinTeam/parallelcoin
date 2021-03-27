@@ -198,7 +198,7 @@ func (wg *WalletGUI) createWalletInputsAreValid() bool {
 func (wg *WalletGUI) createWalletAction() {
 	// wg.NodeRunCommandChan <- "stop"
 	D.Ln("clicked submit wallet")
-	wg.cx.Config.WalletFile.Set(filepath.Join(wg.cx.Config.DataDir.V(), wg.cx.ActiveNet.Name, wallet.DbName))
+	wg.cx.Config.WalletFile.Set(filepath.Join(wg.cx.Config.DataDir.V(), wg.cx.ActiveNet.Name, podcfg.DbName))
 	dbDir := wg.cx.Config.WalletFile.V()
 	loader := wallet.NewLoader(wg.cx.ActiveNet, dbDir, 250)
 	// seed, _ := hex.DecodeString(wg.inputs["walletSeed"].GetText())

@@ -140,7 +140,7 @@ func main() {
 		return
 	}
 	defer func() {
-		if e := db.Close(); E.Chk(e) {
+		if e = db.Close(); E.Chk(e) {
 		}
 	}()
 	// Setup chain.  Ignore notifications since they aren't needed for this util.

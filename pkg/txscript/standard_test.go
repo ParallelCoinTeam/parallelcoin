@@ -3,8 +3,8 @@ package txscript
 import (
 	"bytes"
 	"encoding/hex"
-	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/btcaddr"
+	"github.com/p9c/pod/pkg/chaincfg"
 	"reflect"
 	"testing"
 	
@@ -604,12 +604,11 @@ func TestCalcScriptInfo(t *testing.T) {
 			}
 			witness = append(witness, wit)
 		}
-		si, e := CalcScriptInfo(sigScript, pkScript, test.bip16)
-		if e := tstCheckScriptError(e, test.scriptInfoErr); e != nil {
+		var si *ScriptInfo
+		var e error
+		si, e = CalcScriptInfo(sigScript, pkScript, test.bip16)
+		if e = tstCheckScriptError(e, test.scriptInfoErr); e != nil {
 			t.Errorf("scriptinfo test %q: %v", test.name, e)
-			continue
-		}
-		if e != nil {
 			continue
 		}
 		if *si != test.scriptInfo {
@@ -765,8 +764,9 @@ func TestPayToAddrScript(t *testing.T) {
 	}
 	t.Logf("Running %d tests", len(tests))
 	for i, test := range tests {
-		pkScript, e := PayToAddrScript(test.in)
-		if e := tstCheckScriptError(e, test.err); e != nil {
+		var pkScript []byte
+		pkScript, e = PayToAddrScript(test.in)
+		if e = tstCheckScriptError(e, test.err); e != nil {
 			t.Errorf(
 				"PayToAddrScript #%d unexpected error - "+
 					"got %v, want %v", i, e, test.err,
@@ -889,8 +889,9 @@ func TestMultiSigScript(t *testing.T) {
 	}
 	t.Logf("Running %d tests", len(tests))
 	for i, test := range tests {
-		script, e := MultiSigScript(test.keys, test.nrequired)
-		if e := tstCheckScriptError(e, test.err); e != nil {
+		var script []byte
+		script, e = MultiSigScript(test.keys, test.nrequired)
+		if e = tstCheckScriptError(e, test.err); e != nil {
 			t.Errorf("MultiSigScript #%d: %v", i, e)
 			continue
 		}
@@ -937,11 +938,11 @@ func TestCalcMultiSigStats(t *testing.T) {
 			err: nil,
 		},
 	}
+	var e error
 	for i, test := range tests {
 		script := mustParseShortForm(test.script)
-		var e error
 		_, _, e = CalcMultiSigStats(script)
-		if e := tstCheckScriptError(e, test.err); e != nil {
+		if e = tstCheckScriptError(e, test.err); e != nil {
 			t.Errorf(
 				"CalcMultiSigStats #%d (%s): %v", i, test.name,
 				e,
@@ -1274,9 +1275,11 @@ func TestNullDataScript(t *testing.T) {
 			class:    NonStandardTy,
 		},
 	}
+	var e error
 	for i, test := range tests {
-		script, e := NullDataScript(test.data)
-		if e := tstCheckScriptError(e, test.err); e != nil {
+		var script []byte
+		script, e = NullDataScript(test.data)
+		if e = tstCheckScriptError(e, test.err); e != nil {
 			t.Errorf(
 				"NullDataScript: #%d (%s): %v", i, test.name,
 				e,

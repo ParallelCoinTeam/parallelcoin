@@ -750,18 +750,18 @@ func (s *Store) WriteIfDirty() (e error) {
 	_, e = s.writeTo(fi)
 	if e != nil {
 		s.mtx.RUnlock()
-		if e := fi.Close(); E.Chk(e) {
+		if e = fi.Close(); E.Chk(e) {
 		}
 		return e
 	}
 	e = fi.Sync()
 	if e != nil {
 		s.mtx.RUnlock()
-		if e := fi.Close(); E.Chk(e) {
+		if e = fi.Close(); E.Chk(e) {
 		}
 		return e
 	}
-	if e := fi.Close(); E.Chk(e) {
+	if e = fi.Close(); E.Chk(e) {
 	}
 	e = rename.Atomic(fiPath, s.path)
 	s.mtx.RUnlock()
@@ -784,7 +784,7 @@ func OpenDir(dir string) (*Store, error) {
 		return nil, e
 	}
 	defer func() {
-		if e := fi.Close(); E.Chk(e) {
+		if e = fi.Close(); E.Chk(e) {
 		}
 	}()
 	store := new(Store)
@@ -991,7 +991,7 @@ func (s *Store) extendUnlocked(bs *BlockStamp) (e error) {
 	if e != nil {
 		return e
 	}
-	if e := newAddr.verifyKeypairs(); E.Chk(e) {
+	if e = newAddr.verifyKeypairs(); E.Chk(e) {
 		return e
 	}
 	if e = newAddr.encrypt(s.secret); E.Chk(e) {

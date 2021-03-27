@@ -255,7 +255,7 @@ func (s *Server) WebsocketHandler(
 			s.Config.RPCMaxWebsockets,
 			remoteAddr,
 		)
-		if e := conn.Close(); E.Chk(e) {
+		if e = conn.Close(); E.Chk(e) {
 		}
 		return
 	}
@@ -1210,7 +1210,8 @@ func (m *WSNtfnMgr) NotifyForNewTx(
 	for _, wsc := range clients {
 		if wsc.VerboseTxUpdates {
 			net := m.Server.Cfg.ChainParams
-			rawTx, e := CreateTxRawResult(
+			var rawTx *btcjson.TxRawResult
+			rawTx, e = CreateTxRawResult(
 				net, mtx, txHashStr, nil,
 				"", 0, 0,
 			)
@@ -1226,7 +1227,7 @@ func (m *WSNtfnMgr) NotifyForNewTx(
 				E.Ln("failed to marshal verbose tx notification:", e)
 			}
 			if marshalledJSONVerbose != nil {
-				e := wsc.QueueNotification(marshalledJSONVerbose)
+				e = wsc.QueueNotification(marshalledJSONVerbose)
 				if e != nil {
 					D.Ln(e)
 				}

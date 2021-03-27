@@ -68,7 +68,7 @@ func (s secretSource) GetKey(addr btcaddr.Address) (privKey *ec.PrivateKey, cmpr
 	var mpka waddrmgr.ManagedPubKeyAddress
 	mpka, ok = ma.(waddrmgr.ManagedPubKeyAddress)
 	if !ok {
-		e := fmt.Errorf(
+		e = fmt.Errorf(
 			"managed address type for %v is `%T` but "+
 				"want waddrmgr.ManagedPubKeyAddress", addr, ma,
 		)

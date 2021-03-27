@@ -582,13 +582,15 @@ func (b *blockManager) getUncheckpointedCFHeaders(
 				targetHeight,
 			)
 			// Get the block header for this height, along with the block as well.
-			header, e := b.server.BlockHeaders.FetchHeaderByHeight(
+			var header *wire.BlockHeader
+			header, e = b.server.BlockHeaders.FetchHeaderByHeight(
 				targetHeight,
 			)
 			if e != nil {
 				return e
 			}
-			block, e := b.server.GetBlock(header.BlockHash())
+			var blk *block.Block
+			blk, e = b.server.GetBlock(header.BlockHash())
 			if e != nil {
 				return e
 			}
@@ -601,8 +603,9 @@ func (b *blockManager) getUncheckpointedCFHeaders(
 			filtersFromPeers := b.fetchFilterFromAllPeers(
 				targetHeight, header.BlockHash(), fType,
 			)
-			badPeers, e := resolveCFHeaderMismatch(
-				block.WireBlock(), fType, filtersFromPeers,
+			var badPeers []string
+			badPeers, e = resolveCFHeaderMismatch(
+				blk.WireBlock(), fType, filtersFromPeers,
 			)
 			if e != nil {
 				return e
@@ -685,7 +688,8 @@ func (b *blockManager) getCheckpointedCFHeaders(
 		endHeightRange := (currentInterval + 1) * wire.CFCheckptInterval
 		T.F("checkpointed cfheaders request start_range=%v, end_range=%v", startHeightRange, endHeightRange)
 		// In order to fetch the range, we'll need the block header for the end of the height range.
-		stopHeader, e := b.server.BlockHeaders.FetchHeaderByHeight(
+		var stopHeader *wire.BlockHeader
+		stopHeader, e = b.server.BlockHeaders.FetchHeaderByHeight(
 			endHeightRange,
 		)
 		if e != nil {
@@ -1015,11 +1019,13 @@ func (b *blockManager) resolveConflict(
 			// Get the block header for this height, along with the block as well.
 			targetHeight := startHeight + uint32(i)
 			W.F("detected cfheader mismatch at height=%v!!!", targetHeight)
-			header, e := b.server.BlockHeaders.FetchHeaderByHeight(targetHeight)
+			var header *wire.BlockHeader
+			header, e = b.server.BlockHeaders.FetchHeaderByHeight(targetHeight)
 			if e != nil {
 				return nil, e
 			}
-			block, e := b.server.GetBlock(header.BlockHash())
+			var blk *block.Block
+			blk, e = b.server.GetBlock(header.BlockHash())
 			if e != nil {
 				return nil, e
 			}
@@ -1029,8 +1035,9 @@ func (b *blockManager) resolveConflict(
 			filtersFromPeers := b.fetchFilterFromAllPeers(
 				targetHeight, header.BlockHash(), fType,
 			)
-			badPeers, e := resolveCFHeaderMismatch(
-				block.WireBlock(), fType, filtersFromPeers,
+			var badPeers []string
+			badPeers, e = resolveCFHeaderMismatch(
+				blk.WireBlock(), fType, filtersFromPeers,
 			)
 			if e != nil {
 				return nil, e

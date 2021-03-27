@@ -1966,13 +1966,13 @@ func opcodeCheckSig(op *parsedOpcode, vm *Engine) (e error) {
 	// requirements enabled by the flags.
 	hashType := SigHashType(fullSigBytes[len(fullSigBytes)-1])
 	sigBytes := fullSigBytes[:len(fullSigBytes)-1]
-	if e := vm.checkHashTypeEncoding(hashType); E.Chk(e) {
+	if e = vm.checkHashTypeEncoding(hashType); E.Chk(e) {
 		return e
 	}
-	if e := vm.checkSignatureEncoding(sigBytes); E.Chk(e) {
+	if e = vm.checkSignatureEncoding(sigBytes); E.Chk(e) {
 		return e
 	}
-	if e := vm.checkPubKeyEncoding(pkBytes); E.Chk(e) {
+	if e = vm.checkPubKeyEncoding(pkBytes); E.Chk(e) {
 		return e
 	}
 	// Get script starting from the most recent OP_CODESEPARATOR.
@@ -2101,7 +2101,8 @@ func opcodeCheckMultiSig(op *parsedOpcode, vm *Engine) (e error) {
 	}
 	pubKeys := make([][]byte, 0, numPubKeys)
 	for i := 0; i < numPubKeys; i++ {
-		pubKey, e := vm.dstack.PopByteArray()
+		var pubKey []byte
+		pubKey, e = vm.dstack.PopByteArray()
 		if e != nil {
 			return e
 		}
@@ -2128,7 +2129,8 @@ func opcodeCheckMultiSig(op *parsedOpcode, vm *Engine) (e error) {
 	}
 	signatures := make([]*parsedSigInfo, 0, numSignatures)
 	for i := 0; i < numSignatures; i++ {
-		signature, e := vm.dstack.PopByteArray()
+		var signature []byte
+		signature, e = vm.dstack.PopByteArray()
 		if e != nil {
 			return e
 		}

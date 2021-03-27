@@ -176,7 +176,7 @@ func testReadWriteBucketInterface(
 		return false
 	}
 	// Ensure deleting a bucket works as intended.
-	if e := bucket.DeleteNestedBucket(testBucketName); E.Chk(e) {
+	if e = bucket.DeleteNestedBucket(testBucketName); E.Chk(e) {
 		tc.t.Errorf("DeleteNestedBucket: unexpected error: %v", e)
 		return false
 	}
@@ -187,7 +187,7 @@ func testReadWriteBucketInterface(
 	}
 	// Ensure deleting a bucket that doesn't exist returns the expected error.
 	wantErr = walletdb.ErrBucketNotFound
-	if e := bucket.DeleteNestedBucket(testBucketName); e != wantErr {
+	if e = bucket.DeleteNestedBucket(testBucketName); e != wantErr {
 		tc.t.Errorf("DeleteNestedBucket: unexpected error - got %v, "+
 			"want %v", e, wantErr)
 		return false
@@ -393,7 +393,7 @@ func testNamespaceAndTxInterfaces(
 	}
 	defer func() {
 		// Remove the namespace now that the tests are done for it.
-		e := walletdb.Update(tc.db, func(tx walletdb.ReadWriteTx) (e error) {
+		e = walletdb.Update(tc.db, func(tx walletdb.ReadWriteTx) (e error) {
 			return tx.DeleteTopLevelBucket(namespaceKeyBytes)
 		})
 		if e != nil  {

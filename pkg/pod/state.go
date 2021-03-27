@@ -126,7 +126,7 @@ func (cx *State) PrintWaitChangers() string {
 
 // GetNewContext returns a fresh new context
 func GetNewContext(appName, appLang, subtext string) *State {
-	config, configMap := podcfg.New()
+	config := podcfg.GetDefaultConfig()
 	chainClientReady := qu.T()
 	rand.Seed(time.Now().UnixNano())
 	rand.Seed(rand.Int63())
@@ -135,7 +135,7 @@ func GetNewContext(appName, appLang, subtext string) *State {
 		KillAll:          qu.T(),
 		App:              cli.NewApp(),
 		Config:           config,
-		ConfigMap:        configMap,
+		ConfigMap:        config.Map,
 		StateCfg:         new(state.Config),
 		Language:         lang.ExportLanguage(appLang),
 		// DataDir:          appdata.Dir(appName, false),

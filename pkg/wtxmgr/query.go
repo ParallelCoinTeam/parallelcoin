@@ -298,7 +298,7 @@ func (s *Store) rangeBlockTransactions(
 					// The credit iterator does not record whether this credit was spent by an unmined transaction, so check
 					// that here.
 					if !credIter.elem.Spent {
-						k := canonicalOutPoint(&txHash, credIter.elem.Index)
+						k = canonicalOutPoint(&txHash, credIter.elem.Index)
 						spent := existsRawUnminedInput(ns, k) != nil
 						credIter.elem.Spent = spent
 					}

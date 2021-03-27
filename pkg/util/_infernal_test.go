@@ -10,12 +10,6 @@ import (
 	ec "github.com/p9c/pod/pkg/ecc"
 )
 
-// SetBlockBytes sets the internal serialized block byte buffer to the passed buffer. It is used to inject errors and is
-// only available to the test package.
-func (b *block.Block) SetBlockBytes(buf []byte) {
-	b.serializedBlock = buf
-}
-
 // TstAppDataDir makes the internal appDataDir function available to the test package.
 func TstAppDataDir(goos, appName string, roaming bool) string {
 	return appdata.GetDataDir(goos, appName, roaming)
@@ -23,19 +17,21 @@ func TstAppDataDir(goos, appName string, roaming bool) string {
 
 // TstAddressPubKeyHash makes an PubKeyHash, setting the unexported fields with the parameters hash and netID.
 func TstAddressPubKeyHash(hash [ripemd160.Size]byte,
-	netID byte) *btcaddr.PubKeyHash {
+	netID byte,
+) *btcaddr.PubKeyHash {
 	return &btcaddr.PubKeyHash{
-		hash:  hash,
-		netID: netID,
+		Hash:  hash,
+		NetID: netID,
 	}
 }
 
 // TstAddressScriptHash makes an ScriptHash, setting the unexported fields with the parameters hash and netID.
 func TstAddressScriptHash(hash [ripemd160.Size]byte,
-	netID byte) *btcaddr.ScriptHash {
+	netID byte,
+) *btcaddr.ScriptHash {
 	return &btcaddr.ScriptHash{
-		hash:  hash,
-		netID: netID,
+		Hash:  hash,
+		NetID: netID,
 	}
 }
 
@@ -63,10 +59,11 @@ func TstAddressScriptHash(hash [ripemd160.Size]byte,
 
 // TstAddressPubKey makes an PubKey, setting the unexported fields with the parameters.
 func TstAddressPubKey(serializedPubKey []byte, pubKeyFormat btcaddr.PubKeyFormat,
-	netID byte) *btcaddr.PubKey {
+	netID byte,
+) *btcaddr.PubKey {
 	pubKey, _ := ec.ParsePubKey(serializedPubKey, ec.S256())
 	return &btcaddr.PubKey{
-		pubKeyFormat: pubKeyFormat,
+		PubKeyFormat: pubKeyFormat,
 		pubKey:       pubKey,
 		pubKeyHashID: netID,
 	}
@@ -82,12 +79,12 @@ func TstAddressSAddr(addr string) []byte {
 // encoded P2WPKH and P2WSH bitcoin addresses.
 func TstAddressSegwitSAddr(addr string) []byte {
 	_, data, e := bech32.Decode(addr)
-	if e != nil  {
+	if e != nil {
 		return []byte{}
 	}
 	// First byte is version, rest is base 32 encoded data.
 	data, e = bech32.ConvertBits(data[1:], 5, 8, false)
-	if e != nil  {
+	if e != nil {
 		return []byte{}
 	}
 	return data

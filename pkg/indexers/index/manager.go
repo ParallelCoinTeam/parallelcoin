@@ -216,7 +216,7 @@ func (m *Manager) Init(chain *blockchain.BlockChain, interrupt <-chan struct{}) 
 		return errInterruptRequested
 	}
 	// Finish and drops that were previously interrupted.
-	if e := m.maybeFinishDrops(interrupt); E.Chk(e) {
+	if e = m.maybeFinishDrops(interrupt); E.Chk(e) {
 		return e
 	}
 	// Create the initial state for the indexes as needed.
@@ -235,7 +235,7 @@ func (m *Manager) Init(chain *blockchain.BlockChain, interrupt <-chan struct{}) 
 	}
 	// Initialize each of the enabled indexes.
 	for _, indexer := range m.enabledIndexes {
-		if e := indexer.Init(); E.Chk(e) {
+		if e = indexer.Init(); E.Chk(e) {
 			return e
 		}
 	}
@@ -247,7 +247,7 @@ func (m *Manager) Init(chain *blockchain.BlockChain, interrupt <-chan struct{}) 
 	for i := len(m.enabledIndexes); i > 0; i-- {
 		indexer := m.enabledIndexes[i-1]
 		// Fetch the current tip for the index.
-		e := m.db.View(
+		e = m.db.View(
 			func(dbTx database.Tx) (e error) {
 				idxKey := indexer.Key()
 				hash, height, e = dbFetchIndexerTip(dbTx, idxKey)
@@ -267,18 +267,18 @@ func (m *Manager) Init(chain *blockchain.BlockChain, interrupt <-chan struct{}) 
 			// At this point the index tip is orphaned, so load the orphaned block from the database directly and
 			// disconnect it from the index. The block has to be loaded directly since it is no longer in the main chain
 			// and thus the chain. BlockByHash function would error.
-			var block *block.Block
-			e := m.db.View(
+			var b *block.Block
+			e = m.db.View(
 				func(dbTx database.Tx) (e error) {
 					blockBytes, e := dbTx.FetchBlock(hash)
 					if e != nil {
 						return e
 					}
-					block, e = block.NewBlockFromBytes(blockBytes)
+					b, e = block.NewFromBytes(blockBytes)
 					if e != nil {
 						return e
 					}
-					block.SetHeight(height)
+					b.SetHeight(height)
 					return e
 				},
 			)
@@ -286,7 +286,8 @@ func (m *Manager) Init(chain *blockchain.BlockChain, interrupt <-chan struct{}) 
 				return e
 			}
 			// We'll also grab the set of outputs spent by this block so we can remove them from the index.
-			spentTxos, e := chain.FetchSpendJournal(block)
+			var spentTxos []blockchain.SpentTxOut
+			spentTxos, e = chain.FetchSpendJournal(b)
 			if e != nil {
 				return e
 			}
@@ -295,13 +296,13 @@ func (m *Manager) Init(chain *blockchain.BlockChain, interrupt <-chan struct{}) 
 				func(dbTx database.Tx) (e error) {
 					// Remove all of the index entries associated with the block and update the indexer tip.
 					e = dbIndexDisconnectBlock(
-						dbTx, indexer, block, spentTxos,
+						dbTx, indexer, b, spentTxos,
 					)
 					if e != nil {
 						return e
 					}
 					// Update the tip to the previous block.
-					hash = &block.WireBlock().Header.PrevBlock
+					hash = &b.WireBlock().Header.PrevBlock
 					height--
 					return nil
 				},
@@ -370,7 +371,8 @@ func (m *Manager) Init(chain *blockchain.BlockChain, interrupt <-chan struct{}) 
 	)
 	for height := lowestHeight + 1; height <= bestHeight; height++ {
 		// Load the block for the height since it is required to index it.
-		block, e := chain.BlockByHeight(height)
+		var blk *block.Block
+		blk, e = chain.BlockByHeight(height)
 		if e != nil {
 			return e
 		}
@@ -387,7 +389,7 @@ func (m *Manager) Init(chain *blockchain.BlockChain, interrupt <-chan struct{}) 
 			// When the index requires all of the referenced txouts and they haven't been loaded yet, they need to be
 			// retrieved from the spend journal.
 			if spentTxos == nil && indexNeedsInputs(indexer) {
-				spentTxos, e = chain.FetchSpendJournal(block)
+				spentTxos, e = chain.FetchSpendJournal(blk)
 				if e != nil {
 					return e
 				}
@@ -395,7 +397,7 @@ func (m *Manager) Init(chain *blockchain.BlockChain, interrupt <-chan struct{}) 
 			e := m.db.Update(
 				func(dbTx database.Tx) (e error) {
 					return dbIndexConnectBlock(
-						dbTx, indexer, block, spentTxos,
+						dbTx, indexer, blk, spentTxos,
 					)
 				},
 			)
@@ -405,7 +407,7 @@ func (m *Manager) Init(chain *blockchain.BlockChain, interrupt <-chan struct{}) 
 			indexerHeights[i] = height
 		}
 		// Log indexing progress.
-		progressLogger.LogBlockHeight(block)
+		progressLogger.LogBlockHeight(blk)
 		if interruptRequested(interrupt) {
 			return errInterruptRequested
 		}
@@ -575,7 +577,7 @@ func dropIndex(db database.DB, idxKey []byte, idxName string, interrupt <-chan s
 		// Delete maxDeletions key/value pairs at a time.
 		for numDeleted := maxDeletions; numDeleted == maxDeletions; {
 			numDeleted = 0
-			e := db.Update(
+			e = db.Update(
 				func(dbTx database.Tx) (e error) {
 					subBucket := dbTx.Metadata()
 					for _, subBucketName := range bucketName {
@@ -621,7 +623,7 @@ func dropIndex(db database.DB, idxKey []byte, idxName string, interrupt <-chan s
 	}
 	// Call extra index specific deinitialization for the transaction index.
 	if idxName == txIndexName {
-		if e := dropBlockIDIndex(db); E.Chk(e) {
+		if e = dropBlockIDIndex(db); E.Chk(e) {
 			return e
 		}
 	}

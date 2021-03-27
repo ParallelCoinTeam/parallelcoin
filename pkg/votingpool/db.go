@@ -117,7 +117,7 @@ func putUsedAddrHash(ns walletdb.ReadWriteBucket, poolID []byte, seriesID uint32
 // getUsedAddrHash returns the addr hash with the given index from the used addresses bucket of the given pool, series
 // and branch.
 func getUsedAddrHash(ns walletdb.ReadBucket, poolID []byte, seriesID uint32, branch Branch,
-	index Index
+	index Index,
 ) []byte {
 	usedAddrs := ns.NestedReadBucket(poolID).NestedReadBucket(usedAddrsBucketName)
 	bucket := usedAddrs.NestedReadBucket(getUsedAddrBucketID(seriesID, branch))
@@ -365,7 +365,7 @@ func serializeSeriesRow(row *dbSeriesRow) ([]byte, error) {
 // the DB.
 func serializeWithdrawal(requests []OutputRequest, startAddress WithdrawalAddress,
 	lastSeriesID uint32, changeStart ChangeAddress, dustThreshold amt.Amount,
-	status WithdrawalStatus
+	status WithdrawalStatus,
 ) ([]byte, error) {
 	dbStartAddr := dbWithdrawalAddress{
 		SeriesID: startAddress.SeriesID(),

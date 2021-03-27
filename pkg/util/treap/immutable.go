@@ -289,7 +289,7 @@ func (t *Immutable) ForEach(fn func(k, v []byte) bool) {
 			return
 		}
 		// Extend the nodes to traverse by all children to the left of the current node's right child.
-		for node := node.right; node != nil; node = node.left {
+		for node = node.right; node != nil; node = node.left {
 			parents.Push(node)
 		}
 	}

@@ -4,6 +4,7 @@ package main
 
 import (
 	"fmt"
+	_ "github.com/p9c/pod/pkg/fork"
 	"io/ioutil"
 	"os"
 	"os/exec"

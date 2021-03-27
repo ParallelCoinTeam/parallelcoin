@@ -801,7 +801,7 @@ func (s *ChainService) GetBlock(
 				pbt := pb.WireBlock().Header.Timestamp
 				// If this claims our block but doesn't pass the sanity check, the peer is trying to bamboozle us.
 				// Disconnect it.
-				if e := blockchain.CheckBlockSanity(
+				if e = blockchain.CheckBlockSanity(
 					blk,
 					s.chainParams.PowLimit,
 					s.timeSource,

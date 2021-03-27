@@ -31,13 +31,13 @@ func TestFilterAddLatest(t *testing.T) {
 	var buf bytes.Buffer
 	e := msg.BtcEncode(&buf, pver, enc)
 	if e != nil  {
-		t.Errorf("encode of MsgFilterAdd failed %v err <%v>", msg, e)
+		t.Errorf("encode of MsgFilterAdd failed %v e <%v>", msg, e)
 	}
 	// Test decode with latest protocol version.
 	var readmsg MsgFilterAdd
 	e = readmsg.BtcDecode(&buf, pver, enc)
 	if e != nil  {
-		t.Errorf("decode of MsgFilterAdd failed [%v] err <%v>", buf, e)
+		t.Errorf("decode of MsgFilterAdd failed [%v] e <%v>", buf, e)
 	}
 }
 
@@ -53,7 +53,7 @@ func TestFilterAddCrossProtocol(t *testing.T) {
 	var buf bytes.Buffer
 	e := msg.BtcEncode(&buf, ProtocolVersion, LatestEncoding)
 	if e != nil  {
-		t.Errorf("encode of MsgFilterAdd failed %v err <%v>", msg, e)
+		t.Errorf("encode of MsgFilterAdd failed %v e <%v>", msg, e)
 	}
 	// Decode with old protocol version.
 	var readmsg MsgFilterAdd
@@ -128,14 +128,14 @@ func TestFilterAddWireErrors(t *testing.T) {
 		// Encode to wire format.
 		w := newFixedWriter(test.max)
 		e := test.in.BtcEncode(w, test.pver, test.enc)
-		if reflect.TypeOf(err) != reflect.TypeOf(test.writeErr) {
+		if reflect.TypeOf(e) != reflect.TypeOf(test.writeErr) {
 			t.Errorf("BtcEncode #%d wrong error got: %v, want: %v",
 				i, e, test.writeErr)
 			continue
 		}
 		// For errors which are not of type MessageError, check them for equality.
-		if _, ok := err.(*MessageError); !ok {
-			if err != test.writeErr {
+		if _, ok := e.(*MessageError); !ok {
+			if e != test.writeErr {
 				t.Errorf("BtcEncode #%d wrong error got: %v, "+
 					"want: %v", i, e, test.writeErr)
 				continue
@@ -145,14 +145,14 @@ func TestFilterAddWireErrors(t *testing.T) {
 		var msg MsgFilterAdd
 		r := newFixedReader(test.max, test.buf)
 		e = msg.BtcDecode(r, test.pver, test.enc)
-		if reflect.TypeOf(err) != reflect.TypeOf(test.readErr) {
+		if reflect.TypeOf(e) != reflect.TypeOf(test.readErr) {
 			t.Errorf("BtcDecode #%d wrong error got: %v, want: %v",
 				i, e, test.readErr)
 			continue
 		}
 		// For errors which are not of type MessageError, check them for equality.
-		if _, ok := err.(*MessageError); !ok {
-			if err != test.readErr {
+		if _, ok := e.(*MessageError); !ok {
+			if e != test.readErr {
 				t.Errorf("BtcDecode #%d wrong error got: %v, "+
 					"want: %v", i, e, test.readErr)
 				continue

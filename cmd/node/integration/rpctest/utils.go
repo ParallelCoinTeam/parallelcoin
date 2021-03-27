@@ -99,7 +99,7 @@ func ConnectNode(from *Harness, to *Harness) (e error) {
 	}
 	numPeers := len(peerInfo)
 	targetAddr := to.node.config.listen
-	if e := from.Node.AddNode(targetAddr, rpcclient.ANAdd); E.Chk(e) {
+	if e = from.Node.AddNode(targetAddr, rpcclient.ANAdd); E.Chk(e) {
 		return e
 	}
 	// Block until a new connection has been established.

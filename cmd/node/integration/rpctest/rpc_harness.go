@@ -107,7 +107,7 @@ func New(
 	}
 	certFile := filepath.Join(nodeTestData, "rpc.cert")
 	keyFile := filepath.Join(nodeTestData, "rpc.key")
-	if e := genCertPair(certFile, keyFile); E.Chk(e) {
+	if e = genCertPair(certFile, keyFile); E.Chk(e) {
 		return nil, e
 	}
 	wallet, e := newMemWallet(activeNet, uint32(numTestInstances))
@@ -173,28 +173,28 @@ func New(
 // called from the same goroutine as they are not concurrent safe.
 func (h *Harness) SetUp(createTestChain bool, numMatureOutputs uint32) (e error) {
 	// Start the pod node itself. This spawns a new process which will be managed
-	if e := h.node.start(); E.Chk(e) {
+	if e = h.node.start(); E.Chk(e) {
 		return e
 	}
-	if e := h.connectRPCClient(); E.Chk(e) {
+	if e = h.connectRPCClient(); E.Chk(e) {
 		return e
 	}
 	h.wallet.Start()
 	// Filter transactions that pay to the coinbase associated with the wallet.
 	filterAddrs := []btcaddr.Address{h.wallet.coinbaseAddr}
-	if e := h.Node.LoadTxFilter(true, filterAddrs, nil); E.Chk(e) {
+	if e = h.Node.LoadTxFilter(true, filterAddrs, nil); E.Chk(e) {
 		return e
 	}
 	// Ensure pod properly dispatches our registered call-back for each new block. Otherwise, the memWallet won't
 	// function properly.
-	if e := h.Node.NotifyBlocks(); E.Chk(e) {
+	if e = h.Node.NotifyBlocks(); E.Chk(e) {
 		return e
 	}
 	// Create a test chain with the desired number of mature coinbase outputs.
 	if createTestChain && numMatureOutputs != 0 {
 		numToGenerate := uint32(h.ActiveNet.CoinbaseMaturity) +
 			numMatureOutputs
-		_, e := h.Node.Generate(numToGenerate)
+		_, e = h.Node.Generate(numToGenerate)
 		if e != nil {
 			return e
 		}

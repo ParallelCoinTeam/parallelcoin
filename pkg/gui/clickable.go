@@ -137,11 +137,12 @@ func (c *Clickable) update(gtx l.Context) {
 	for _, ev := range c.click.Events(gtx) {
 		switch ev.Type {
 		case gesture.TypeClick:
-			click := click{
+			var clk click
+			clk = click{
 				Modifiers: ev.Modifiers,
 				NumClicks: ev.NumClicks,
 			}
-			c.clicks = append(c.clicks, click)
+			c.clicks = append(c.clicks, clk)
 			if ll := len(c.history); ll > 0 {
 				c.history[ll-1].End = gtx.Now
 			}

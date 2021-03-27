@@ -384,7 +384,7 @@ func (a *AddrManager) deserializePeers(filePath string) (e error) {
 		return fmt.Errorf("%s error opening file: %v", filePath, e)
 	}
 	defer func() {
-		if e := r.Close(); E.Chk(e) {
+		if e = r.Close(); E.Chk(e) {
 		}
 	}()
 	var sam serializedAddrManager

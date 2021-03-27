@@ -67,10 +67,10 @@ func loadBlocks(filename string) (blocks []*block.Block, e error) {
 		dr = fi
 	}
 	defer func() {
-		if e := fi.Close(); E.Chk(e) {
+		if e = fi.Close(); E.Chk(e) {
 		}
 	}()
-	var block *block.Block
+	var blk *block.Block
 	height := int64(1)
 	for ; ; height++ {
 		var rintbuf uint32
@@ -91,26 +91,26 @@ func loadBlocks(filename string) (blocks []*block.Block, e error) {
 		if e != nil {
 			fmt.Println(e)
 		}
-		block, e = block.NewBlockFromBytes(rbytes)
+		blk, e = block.NewFromBytes(rbytes)
 		if e != nil {
 			return
 		}
-		blocks = append(blocks, block)
+		blocks = append(blocks, blk)
 	}
 	return
 }
 
 // chainSetup is used to create a new db and chain instance with the genesis block already inserted. In addition to the
 // new chain instance, it returns a teardown function the caller should invoke when done testing to clean up.
-func chainSetup(dbName string, netparams *chaincfg.Params) (*BlockChain, func(), error) {
+func chainSetup(dbName string, netparams *chaincfg.Params) (chain *BlockChain, teardown func(), e error) {
 	if !isSupportedDbType(testDbType) {
 		return nil, nil, fmt.Errorf("unsupported db type %v", testDbType)
 	}
 	// Handle memory database specially since it doesn't need the disk specific handling.
 	var db database.DB
-	var teardown func()
 	if testDbType == "memdb" {
-		ndb, e := database.Create(testDbType)
+		var ndb database.DB
+		ndb, e = database.Create(testDbType)
 		if e != nil {
 			return nil, nil, fmt.Errorf("error creating db: %v", e)
 		}
@@ -118,14 +118,14 @@ func chainSetup(dbName string, netparams *chaincfg.Params) (*BlockChain, func(),
 		// Setup a teardown function for cleaning up. This function is returned to the caller to be invoked when it is
 		// done testing.
 		teardown = func() {
-			if e := db.Close(); E.Chk(e) {
+			if e = db.Close(); E.Chk(e) {
 			}
 		}
 	} else {
 		// Create the root directory for test databases.
 		if !fileExists(testDbRoot) {
-			if e := os.MkdirAll(testDbRoot, 0700); E.Chk(e) {
-				e := fmt.Errorf(
+			if e = os.MkdirAll(testDbRoot, 0700); E.Chk(e) {
+				e = fmt.Errorf(
 					"unable to create test db "+
 						"root: %v", e,
 				)
@@ -135,7 +135,8 @@ func chainSetup(dbName string, netparams *chaincfg.Params) (*BlockChain, func(),
 		// Create a new database to store the accepted blocks into.
 		dbPath := filepath.Join(testDbRoot, dbName)
 		_ = os.RemoveAll(dbPath)
-		ndb, e := database.Create(testDbType, dbPath, blockDataNet)
+		var ndb database.DB
+		ndb, e = database.Create(testDbType, dbPath, blockDataNet)
 		if e != nil {
 			return nil, nil, fmt.Errorf("error creating db: %v", e)
 		}
@@ -143,11 +144,11 @@ func chainSetup(dbName string, netparams *chaincfg.Params) (*BlockChain, func(),
 		// Setup a teardown function for cleaning up. This function is returned to the caller to be invoked when it is
 		// done testing.
 		teardown = func() {
-			if e := db.Close(); E.Chk(e) {
+			if e = db.Close(); E.Chk(e) {
 			}
-			if e := os.RemoveAll(dbPath); E.Chk(e) {
+			if e = os.RemoveAll(dbPath); E.Chk(e) {
 			}
-			if e := os.RemoveAll(testDbRoot); E.Chk(e) {
+			if e = os.RemoveAll(testDbRoot); E.Chk(e) {
 			}
 		}
 	}
@@ -155,7 +156,7 @@ func chainSetup(dbName string, netparams *chaincfg.Params) (*BlockChain, func(),
 	// global instance.
 	paramsCopy := *netparams
 	// Create the main chain instance.
-	chain, e := New(
+	chain, e = New(
 		&Config{
 			DB:          db,
 			ChainParams: &paramsCopy,
@@ -166,7 +167,7 @@ func chainSetup(dbName string, netparams *chaincfg.Params) (*BlockChain, func(),
 	)
 	if e != nil {
 		teardown()
-		e := fmt.Errorf("failed to create chain instance: %v", e)
+		e = fmt.Errorf("failed to create chain instance: %v", e)
 		return nil, nil, e
 	}
 	return chain, teardown, nil

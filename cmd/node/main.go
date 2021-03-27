@@ -55,19 +55,19 @@ func Main(cx *pod.State) (e error) {
 			E.Ln("unable to create cpu profile:", e)
 			return
 		}
-		e := pprof.StartCPUProfile(f)
+		e = pprof.StartCPUProfile(f)
 		if e != nil {
 			D.Ln("failed to start up cpu profiler:", e)
 		} else {
 			defer func() {
-				if e := f.Close(); E.Chk(e) {
+				if e = f.Close(); E.Chk(e) {
 				}
 			}()
 			defer pprof.StopCPUProfile()
 			interrupt.AddHandler(
 				func() {
 					D.Ln("stopping CPU profiler")
-					e := f.Close()
+					e = f.Close()
 					if e != nil {
 					}
 					pprof.StopCPUProfile()
@@ -94,7 +94,7 @@ func Main(cx *pod.State) (e error) {
 		// ensure the database is synced and closed on shutdown
 		T.Ln("gracefully shutting down the database")
 		func() {
-			if e := db.Close(); E.Chk(e) {
+			if e = db.Close(); E.Chk(e) {
 			}
 		}()
 	}

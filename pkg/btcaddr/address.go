@@ -214,8 +214,8 @@ func Decode(addr string, defaultNet *chaincfg.Params) (Address, error) {
 
 // PubKeyHash is an Address for a pay-to-pubkey-hash (P2PKH) transaction.
 type PubKeyHash struct {
-	hash  [ripemd160.Size]byte
-	netID byte
+	Hash  [ripemd160.Size]byte
+	NetID byte
 }
 
 // NewPubKeyHash returns a new PubKeyHash.  pkHash must be 20 bytes.
@@ -232,27 +232,27 @@ func newPubKeyHash(pkHash []byte, netID byte) (*PubKeyHash, error) {
 	if len(pkHash) != ripemd160.Size {
 		return nil, errors.New("pkHash must be 20 bytes")
 	}
-	addr := &PubKeyHash{netID: netID}
-	copy(addr.hash[:], pkHash)
+	addr := &PubKeyHash{NetID: netID}
+	copy(addr.Hash[:], pkHash)
 	return addr, nil
 }
 
 // EncodeAddress returns the string encoding of a pay-to-pubkey-hash address.
 // Part of the Address interface.
 func (a *PubKeyHash) EncodeAddress() string {
-	return encode(a.hash[:], a.netID)
+	return encode(a.Hash[:], a.NetID)
 }
 
 // ScriptAddress returns the bytes to be included in a txout script to pay to a
 // pubkey hash. Part of the Address interface.
 func (a *PubKeyHash) ScriptAddress() []byte {
-	return a.hash[:]
+	return a.Hash[:]
 }
 
 // IsForNet returns whether or not the pay-to-pubkey-hash address is associated
 // with the passed bitcoin network.
 func (a *PubKeyHash) IsForNet(net *chaincfg.Params) bool {
-	return a.netID == net.PubKeyHashAddrID
+	return a.NetID == net.PubKeyHashAddrID
 }
 
 // String returns a human-readable string for the pay-to-pubkey-hash address. This is equivalent to calling
@@ -264,13 +264,13 @@ func (a *PubKeyHash) String() string {
 // Hash160 returns the underlying array of the pubkey hash. This can be useful when an array is more appropriate than a
 // slice (for example, when used as map keys).
 func (a *PubKeyHash) Hash160() *[ripemd160.Size]byte {
-	return &a.hash
+	return &a.Hash
 }
 
 // ScriptHash is an Address for a pay-to-script-hash (P2SH) transaction.
 type ScriptHash struct {
-	hash  [ripemd160.Size]byte
-	netID byte
+	Hash  [ripemd160.Size]byte
+	NetID byte
 }
 
 // NewScriptHash returns a new ScriptHash.
@@ -292,25 +292,25 @@ func newScriptHashFromHash(scriptHash []byte, netID byte) (*ScriptHash, error) {
 	if len(scriptHash) != ripemd160.Size {
 		return nil, errors.New("scriptHash must be 20 bytes")
 	}
-	addr := &ScriptHash{netID: netID}
-	copy(addr.hash[:], scriptHash)
+	addr := &ScriptHash{NetID: netID}
+	copy(addr.Hash[:], scriptHash)
 	return addr, nil
 }
 
 // EncodeAddress returns the string encoding of a pay-to-script-hash address.  Part of the Address interface.
 func (a *ScriptHash) EncodeAddress() string {
-	return encode(a.hash[:], a.netID)
+	return encode(a.Hash[:], a.NetID)
 }
 
 // ScriptAddress returns the bytes to be included in a txout script to pay to a script hash. Part of the Address
 // interface.
 func (a *ScriptHash) ScriptAddress() []byte {
-	return a.hash[:]
+	return a.Hash[:]
 }
 
 // IsForNet returns whether or not the pay-to-script-hash address is associated with the passed bitcoin network.
 func (a *ScriptHash) IsForNet(net *chaincfg.Params) bool {
-	return a.netID == net.ScriptHashAddrID
+	return a.NetID == net.ScriptHashAddrID
 }
 
 // String returns a human-readable string for the pay-to-script-hash address. This is equivalent to calling
@@ -322,7 +322,7 @@ func (a *ScriptHash) String() string {
 // Hash160 returns the underlying array of the script hash. This can be useful when an array is more appropriate than a
 // slice (for example, when used as map keys).
 func (a *ScriptHash) Hash160() *[ripemd160.Size]byte {
-	return &a.hash
+	return &a.Hash
 }
 
 // PubKeyFormat describes what format to use for a pay-to-pubkey address.
@@ -339,8 +339,8 @@ const (
 
 // PubKey is an Address for a pay-to-pubkey transaction.
 type PubKey struct {
-	pubKeyFormat PubKeyFormat
-	pubKey       *ec.PublicKey
+	PubKeyFormat PubKeyFormat
+	PublicKey    *ec.PublicKey
 	pubKeyHashID byte
 }
 
@@ -362,8 +362,8 @@ func NewPubKey(serializedPubKey []byte, net *chaincfg.Params) (*PubKey, error) {
 		pkFormat = PKFHybrid
 	}
 	return &PubKey{
-			pubKeyFormat: pkFormat,
-			pubKey:       pubKey,
+			PubKeyFormat: pkFormat,
+			PublicKey:    pubKey,
 			pubKeyHashID: net.PubKeyHashAddrID,
 		},
 		nil
@@ -371,15 +371,15 @@ func NewPubKey(serializedPubKey []byte, net *chaincfg.Params) (*PubKey, error) {
 
 // serialize returns the serialization of the public key according to the format associated with the address.
 func (a *PubKey) serialize() []byte {
-	switch a.pubKeyFormat {
+	switch a.PubKeyFormat {
 	default:
 		fallthrough
 	case PKFUncompressed:
-		return a.pubKey.SerializeUncompressed()
+		return a.PublicKey.SerializeUncompressed()
 	case PKFCompressed:
-		return a.pubKey.SerializeCompressed()
+		return a.PublicKey.SerializeCompressed()
 	case PKFHybrid:
-		return a.pubKey.SerializeHybrid()
+		return a.PublicKey.SerializeHybrid()
 	}
 }
 
@@ -405,24 +405,24 @@ func (a *PubKey) String() string {
 
 // Format returns the format (uncompressed, compressed, etc) of the pay-to-pubkey address.
 func (a *PubKey) Format() PubKeyFormat {
-	return a.pubKeyFormat
+	return a.PubKeyFormat
 }
 
 // SetFormat sets the format (uncompressed, compressed, etc) of the pay-to-pubkey address.
 func (a *PubKey) SetFormat(pkFormat PubKeyFormat) {
-	a.pubKeyFormat = pkFormat
+	a.PubKeyFormat = pkFormat
 }
 
 // PubKeyHash returns the pay-to-pubkey address converted to a pay-to-pubkey-hash address.  Note that the public key format (uncompressed, compressed, etc) will change the resulting address.  This is expected since pay-to-pubkey-hash is a hash of the serialized public key which obviously differs with the format.  At the time of this writing, most Bitcoin addresses are pay-to-pubkey-hash constructed from the uncompressed public key.
 func (a *PubKey) PubKeyHash() *PubKeyHash {
-	addr := &PubKeyHash{netID: a.pubKeyHashID}
-	copy(addr.hash[:], Hash160(a.serialize()))
+	addr := &PubKeyHash{NetID: a.pubKeyHashID}
+	copy(addr.Hash[:], Hash160(a.serialize()))
 	return addr
 }
 
 // PubKey returns the underlying public key for the address.
 func (a *PubKey) PubKey() *ec.PublicKey {
-	return a.pubKey
+	return a.PublicKey
 }
 
 //

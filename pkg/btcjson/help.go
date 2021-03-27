@@ -435,7 +435,7 @@ func GenerateHelp(method string, descs map[string]string, resultTypes ...interfa
 		if resultType == nil {
 			continue
 		}
-		rtp := reflect.TypeOf(resultType)
+		rtp = reflect.TypeOf(resultType)
 		if rtp.Kind() != reflect.Ptr {
 			str := fmt.Sprintf("result #%d (%v) is not a pointer",
 				i, rtp.Kind())

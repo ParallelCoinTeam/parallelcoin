@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/hex"
 	block2 "github.com/p9c/pod/pkg/block"
+	"github.com/p9c/pod/pkg/btcaddr"
 	"testing"
 	
 	"github.com/p9c/pod/pkg/bloom"

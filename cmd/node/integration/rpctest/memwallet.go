@@ -5,8 +5,8 @@ import (
 	"encoding/binary"
 	"fmt"
 	"github.com/p9c/pod/pkg/amt"
-	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/btcaddr"
+	"github.com/p9c/pod/pkg/chaincfg"
 	"sync"
 	
 	"github.com/p9c/pod/pkg/util/qu"
@@ -325,7 +325,7 @@ func (m *memWallet) NewAddress() (btcaddr.Address, error) {
 // The transaction being funded can optionally include a change output indicated by the change boolean. NOTE: The
 // memWallet's mutex must be held when this function is called.
 func (m *memWallet) fundTx(
-	tx *wire.MsgTx, amt amt.Amount,
+	tx *wire.MsgTx, amount amt.Amount,
 	feeRate amt.Amount, change bool,
 ) (e error) {
 	const (
@@ -351,12 +351,12 @@ func (m *memWallet) fundTx(
 		// Calculate the fee required for the txn at this point observing the specified fee rate. If we don't have
 		// enough coins from he current amount selected to pay the fee, then continue to grab more coins.
 		reqFee := amt.Amount(txSize * int(feeRate))
-		if amtSelected-reqFee < amt {
+		if amtSelected-reqFee < amount {
 			continue
 		}
 		// If we have any change left over and we should create a change output, then add an additional output to the
 		// transaction reserved for it.
-		changeVal := amtSelected - amt - reqFee
+		changeVal := amtSelected - amount - reqFee
 		if changeVal > 0 && change {
 			addr, e := m.newAddress()
 			if e != nil {

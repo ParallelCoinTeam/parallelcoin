@@ -34,7 +34,7 @@ func TestAddr(t *testing.T) {
 	na := NewNetAddress(tcpAddr, SFNodeNetwork)
 	e := msg.AddAddress(na)
 	if e != nil  {
-		t.Errorf("AddAddress: %v", err)
+		t.Errorf("AddAddress: %v", e)
 	}
 	if msg.AddrList[0] != na {
 		t.Errorf("AddAddress: wrong address added - got %v, want %v",
@@ -156,7 +156,7 @@ func TestAddrWire(t *testing.T) {
 		var buf bytes.Buffer
 		e := test.in.BtcEncode(&buf, test.pver, test.enc)
 		if e != nil  {
-			t.Errorf("BtcEncode #%d error %v", i, err)
+			t.Errorf("BtcEncode #%d error %v", i, e)
 			continue
 		}
 		if !bytes.Equal(buf.Bytes(), test.buf) {
@@ -169,7 +169,7 @@ func TestAddrWire(t *testing.T) {
 		rbuf := bytes.NewReader(test.buf)
 		e = msg.BtcDecode(rbuf, test.pver, test.enc)
 		if e != nil  {
-			t.Errorf("BtcDecode #%d error %v", i, err)
+			t.Errorf("BtcDecode #%d error %v", i, e)
 			continue
 		}
 		if !reflect.DeepEqual(&msg, test.out) {
@@ -202,7 +202,7 @@ func TestAddrWireErrors(t *testing.T) {
 	baseAddr := NewMsgAddr()
 	e := baseAddr.AddAddresses(na, na2)
 	if e != nil  {
-		t.Log(err)
+		t.Log(e)
 	}
 	baseAddrEncoded := []byte{
 		0x02,                   // Varint for number of addresses
@@ -222,7 +222,7 @@ func TestAddrWireErrors(t *testing.T) {
 	for i := 0; i < MaxAddrPerMsg; i++ {
 		e := maxAddr.AddAddress(na)
 		if e != nil  {
-			t.Log(err)
+			t.Log(e)
 		}
 	}
 	maxAddr.AddrList = append(maxAddr.AddrList, na)
@@ -254,14 +254,14 @@ func TestAddrWireErrors(t *testing.T) {
 		// Encode to wire format.
 		w := newFixedWriter(test.max)
 		e := test.in.BtcEncode(w, test.pver, test.enc)
-		if reflect.TypeOf(err) != reflect.TypeOf(test.writeErr) {
+		if reflect.TypeOf(e) != reflect.TypeOf(test.writeErr) {
 			t.Errorf("BtcEncode #%d wrong error got: %v, want: %v",
 				i, e, test.writeErr)
 			continue
 		}
 		// For errors which are not of type MessageError, check them for equality.
-		if _, ok := err.(*MessageError); !ok {
-			if err != test.writeErr {
+		if _, ok := e.(*MessageError); !ok {
+			if e != test.writeErr {
 				t.Errorf("BtcEncode #%d wrong error got: %v, "+
 					"want: %v", i, e, test.writeErr)
 				continue
@@ -271,16 +271,16 @@ func TestAddrWireErrors(t *testing.T) {
 		var msg MsgAddr
 		r := newFixedReader(test.max, test.buf)
 		e = msg.BtcDecode(r, test.pver, test.enc)
-		if reflect.TypeOf(err) != reflect.TypeOf(test.readErr) {
+		if reflect.TypeOf(e) != reflect.TypeOf(test.readErr) {
 			t.Errorf("BtcDecode #%d wrong error got: %v, want: %v",
-				i, err, test.readErr)
+				i, e, test.readErr)
 			continue
 		}
 		// For errors which are not of type MessageError, check them for equality.
-		if _, ok := err.(*MessageError); !ok {
-			if err != test.readErr {
+		if _, ok := e.(*MessageError); !ok {
+			if e != test.readErr {
 				t.Errorf("BtcDecode #%d wrong error got: %v, "+
-					"want: %v", i, err, test.readErr)
+					"want: %v", i, e, test.readErr)
 				continue
 			}
 		}

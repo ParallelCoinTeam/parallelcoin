@@ -574,7 +574,8 @@ func (s *Server) POSTClientRPC(w http.ResponseWriter, r *http.Request) {
 	var req btcjson.Request
 	e = js.Unmarshal(rpcRequest, &req)
 	if e != nil {
-		resp, e := btcjson.MarshalResponse(req.ID, nil, btcjson.ErrRPCInvalidRequest)
+		var resp []byte
+		resp, e = btcjson.MarshalResponse(req.ID, nil, btcjson.ErrRPCInvalidRequest)
 		if e != nil {
 			E.Ln(
 				"Unable to marshal response:", e,

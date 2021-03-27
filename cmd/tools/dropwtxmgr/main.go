@@ -85,7 +85,7 @@ func mainInt() int {
 			// Exit on EOF.
 			return 0
 		}
-		e := scanner.Err()
+		e = scanner.Err()
 		if e != nil {
 			return 1
 		}
@@ -104,7 +104,7 @@ func mainInt() int {
 		return 1
 	}
 	defer func() {
-		if e := db.Close(); E.Chk(e) {
+		if e = db.Close(); E.Chk(e) {
 			fmt.Println(e)
 		}
 	}()

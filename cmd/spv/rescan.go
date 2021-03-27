@@ -168,7 +168,8 @@ func (s *ChainService) rescan(options ...RescanOption) (e error) {
 	// If we have something to watch, create a watch list. The watch list can be composed of a set of scripts,
 	// outpoints, and txids.
 	for _, addr := range ro.watchAddrs {
-		script, e := txscript.PayToAddrScript(addr)
+		var script []byte
+		script, e = txscript.PayToAddrScript(addr)
 		if e != nil {
 			return e
 		}
@@ -181,7 +182,8 @@ func (s *ChainService) rescan(options ...RescanOption) (e error) {
 	if ro.endBlock != nil {
 		// If the end block hash is non-nil, then we'll query the database to find out the stop height.
 		if (ro.endBlock.Hash != chainhash.Hash{}) {
-			_, height, e := s.BlockHeaders.FetchHeader(
+			var height uint32
+			_, height, e = s.BlockHeaders.FetchHeader(
 				&ro.endBlock.Hash,
 			)
 			if e != nil {
@@ -194,7 +196,8 @@ func (s *ChainService) rescan(options ...RescanOption) (e error) {
 		// find the stopping hash.
 		if (ro.endBlock.Hash == chainhash.Hash{}) {
 			if ro.endBlock.Height != 0 {
-				header, e := s.BlockHeaders.FetchHeaderByHeight(
+				var header *wire.BlockHeader
+				header, e = s.BlockHeaders.FetchHeaderByHeight(
 					uint32(ro.endBlock.Height),
 				)
 				if e == nil {
@@ -221,7 +224,8 @@ func (s *ChainService) rescan(options ...RescanOption) (e error) {
 	)
 	// If no start block is specified, start the scan from our current best block.
 	if ro.startBlock == nil {
-		bs, e := s.BestBlock()
+		var bs *waddrmgr.BlockStamp
+		bs, e = s.BestBlock()
 		if e != nil {
 			return e
 		}
@@ -231,7 +235,9 @@ func (s *ChainService) rescan(options ...RescanOption) (e error) {
 	// To find our starting block, either the start hash should be set, or the start height should be set. If neither
 	// is, then we'll be starting from the genesis block.
 	if (curStamp.Hash != chainhash.Hash{}) {
-		header, height, e := s.BlockHeaders.FetchHeader(&curStamp.Hash)
+		var height uint32
+		var header *wire.BlockHeader
+		header, height, e = s.BlockHeaders.FetchHeader(&curStamp.Hash)
 		if e == nil {
 			curHeader = *header
 			curStamp.Height = int32(height)
@@ -243,7 +249,8 @@ func (s *ChainService) rescan(options ...RescanOption) (e error) {
 		if curStamp.Height == 0 {
 			curStamp.Hash = *s.chainParams.GenesisHash
 		} else {
-			header, e := s.BlockHeaders.FetchHeaderByHeight(
+			var header *wire.BlockHeader
+			header, e = s.BlockHeaders.FetchHeaderByHeight(
 				uint32(curStamp.Height),
 			)
 			if e == nil {
@@ -301,7 +308,7 @@ filterHeaderWaitLoop:
 	}
 	// If any updates were queued while waiting for the filter headers to sync, apply them now.
 	for _, upd := range updates {
-		_, e := ro.updateFilter(upd, &curStamp, &curHeader)
+		_, e = ro.updateFilter(upd, &curStamp, &curHeader)
 		if e != nil {
 			return e
 		}
@@ -378,7 +385,8 @@ rescanLoop:
 			// An update mesage has just come across, if it points to a prior point in the chain, then we may need to
 			// rewind a bit in order to provide the client all its requested client.
 			case update := <-ro.update:
-				rewound, e := ro.updateFilter(update, &curStamp, &curHeader)
+				var rewound bool
+				rewound, e = ro.updateFilter(update, &curStamp, &curHeader)
 				if e != nil {
 					return e
 				}
@@ -744,7 +752,8 @@ func (ro *rescanOptions) updateFilter(
 	ro.watchAddrs = append(ro.watchAddrs, update.addrs...)
 	ro.watchInputs = append(ro.watchInputs, update.inputs...)
 	for _, addr := range update.addrs {
-		script, e := txscript.PayToAddrScript(addr)
+		var script []byte
+		script, e = txscript.PayToAddrScript(addr)
 		if e != nil {
 			return false, e
 		}

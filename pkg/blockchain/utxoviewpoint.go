@@ -247,7 +247,7 @@ func (view *UtxoViewpoint) fetchEntryByHash(db database.DB, hash *chainhash.Hash
 	prevOut := wire.OutPoint{Hash: *hash}
 	for idx := uint32(0); idx < MaxOutputsPerBlock; idx++ {
 		prevOut.Index = idx
-		entry := view.LookupEntry(prevOut)
+		entry = view.LookupEntry(prevOut)
 		if entry != nil {
 			return entry, nil
 		}

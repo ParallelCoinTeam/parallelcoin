@@ -528,7 +528,8 @@ mempoolLoop:
 		// NOTE: This intentionally does not fetch inputs from the mempool since a
 		// transaction which depends on other transactions in the mempool must come
 		// after those dependencies in the final generated block.
-		utxos, e := g.Chain.FetchUtxoView(tx)
+		var utxos *blockchain.UtxoViewpoint
+		utxos, e = g.Chain.FetchUtxoView(tx)
 		if e != nil {
 			W.C(
 				func() string {
@@ -662,7 +663,8 @@ mempoolLoop:
 			continue
 		}
 		// Enforce maximum signature operation cost per block. Also check for overflow.
-		sigOpCost, e := blockchain.GetSigOpCost(tx, false, blockUtxos, true)
+		var sigOpCost int
+		sigOpCost, e = blockchain.GetSigOpCost(tx, false, blockUtxos, true)
 		if e != nil {
 			T.C(
 				func() string {
@@ -864,7 +866,7 @@ mempoolLoop:
 		Bits:       reqDifficulty,
 	}
 	for _, tx := range blockTxns {
-		if e := msgBlock.AddTransaction(tx.MsgTx()); E.Chk(e) {
+		if e = msgBlock.AddTransaction(tx.MsgTx()); E.Chk(e) {
 			return nil, e
 		}
 	}

@@ -3,6 +3,7 @@ package rpctest
 import (
 	"fmt"
 	"github.com/p9c/pod/pkg/amt"
+	"github.com/p9c/pod/pkg/btcaddr"
 	"os"
 	"testing"
 	"time"
@@ -160,30 +161,35 @@ func testJoinMempools(r *Harness, t *testing.T) {
 	}
 	// Create a local test harness with only the genesis block. The nodes will be synced below so the same transaction
 	// can be sent to both nodes without it being an orphan.
-	harness, e := New(&chaincfg.SimNetParams, nil, nil)
+	var harness *Harness
+	harness, e = New(&chaincfg.SimNetParams, nil, nil)
 	if e != nil {
 		t.Fatal(e)
 	}
-	if e := harness.SetUp(false, 0); E.Chk(e) {
+	if e = harness.SetUp(false, 0); E.Chk(e) {
 		t.Fatalf("unable to complete rpctest setup: %v", e)
 	}
 	defer func() {
-		if e := harness.TearDown(); E.Chk(e) {
+		if e = harness.TearDown(); E.Chk(e) {
 		}
 	}()
 	nodeSlice := []*Harness{r, harness}
 	// Both mempools should be considered synced as they are empty. Therefore, this should return instantly.
-	if e := JoinNodes(nodeSlice, Mempools); E.Chk(e) {
+	if e = JoinNodes(nodeSlice, Mempools); E.Chk(e) {
 		t.Fatalf("unable to join node on mempools: %v", e)
 	}
 	// Generate a coinbase spend to a new address within the main harness' mempool.
-	addr, e := r.NewAddress()
-	addrScript, e := txscript.PayToAddrScript(addr)
+	var addr btcaddr.Address
+	if addr, e = r.NewAddress(); E.Chk(e) {
+	}
+	var addrScript []byte
+	addrScript, e = txscript.PayToAddrScript(addr)
 	if e != nil {
 		t.Fatalf("unable to generate pkscript to addr: %v", e)
 	}
 	output := wire.NewTxOut(5e8, addrScript)
-	testTx, e := r.CreateTransaction([]*wire.TxOut{output}, 10, true)
+	var testTx *wire.MsgTx
+	testTx, e = r.CreateTransaction([]*wire.TxOut{output}, 10, true)
 	if e != nil {
 		t.Fatalf("coinbase spend failed: %v", e)
 	}
@@ -194,7 +200,8 @@ func testJoinMempools(r *Harness, t *testing.T) {
 	harnessSynced := qu.T()
 	go func() {
 		for {
-			poolHashes, e := r.Node.GetRawMempool()
+			var poolHashes []*chainhash.Hash
+			poolHashes, e = r.Node.GetRawMempool()
 			if e != nil {
 				t.Fatalf("failed to retrieve harness mempool: %v", e)
 			}
@@ -213,7 +220,7 @@ func testJoinMempools(r *Harness, t *testing.T) {
 	// This select case should fall through to the default as the goroutine should be blocked on the JoinNodes call.
 	poolsSynced := qu.T()
 	go func() {
-		if e := JoinNodes(nodeSlice, Mempools); E.Chk(e) {
+		if e = JoinNodes(nodeSlice, Mempools); E.Chk(e) {
 			t.Fatalf("unable to join node on mempools: %v", e)
 		}
 		poolsSynced <- struct{}{}
@@ -224,10 +231,10 @@ func testJoinMempools(r *Harness, t *testing.T) {
 	default:
 	}
 	// Establish an outbound connection from the local harness to the main harness and wait for the chains to be synced.
-	if e := ConnectNode(harness, r); E.Chk(e) {
+	if e = ConnectNode(harness, r); E.Chk(e) {
 		t.Fatalf("unable to connect harnesses: %v", e)
 	}
-	if e := JoinNodes(nodeSlice, Blocks); E.Chk(e) {
+	if e = JoinNodes(nodeSlice, Blocks); E.Chk(e) {
 		t.Fatalf("unable to join node on blocks: %v", e)
 	}
 	// Send the transaction to the local harness which will result in synced mempools.
@@ -296,8 +303,9 @@ func testGenerateAndSubmitBlock(r *Harness, t *testing.T) {
 	output := wire.NewTxOut(amt.SatoshiPerBitcoin.Int64(), pkScript)
 	const numTxns = 5
 	txns := make([]*util.Tx, 0, numTxns)
+	var tx *wire.MsgTx
 	for i := 0; i < numTxns; i++ {
-		tx, e := r.CreateTransaction([]*wire.TxOut{output}, 10, true)
+		tx, e = r.CreateTransaction([]*wire.TxOut{output}, 10, true)
 		if e != nil {
 			t.Fatalf("unable to create tx: %v", e)
 		}
@@ -364,7 +372,8 @@ func testGenerateAndSubmitBlockWithCustomCoinbaseOutputs(
 	const numTxns = 5
 	txns := make([]*util.Tx, 0, numTxns)
 	for i := 0; i < numTxns; i++ {
-		tx, e := r.CreateTransaction([]*wire.TxOut{output}, 10, true)
+		var tx *wire.MsgTx
+		tx, e = r.CreateTransaction([]*wire.TxOut{output}, 10, true)
 		if e != nil {
 			t.Fatalf("unable to create tx: %v", e)
 		}

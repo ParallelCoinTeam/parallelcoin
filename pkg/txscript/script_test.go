@@ -11,11 +11,14 @@ func TestParseOpcode(t *testing.T) {
 	// Deep copy the array and make one of the opcodes invalid by setting it to the wrong length.
 	fakeArray := OpcodeArray
 	fakeArray[OP_PUSHDATA4] = opcode{value: OP_PUSHDATA4,
-		name: "OP_PUSHDATA4", length: -8, opfunc: opcodePushData}
+		name: "OP_PUSHDATA4", length: -8, opfunc: opcodePushData,
+	}
 	// This script would be fine if -8 was a valid length.
 	_, e := ParseScriptTemplate([]byte{OP_PUSHDATA4, 0x1, 0x00, 0x00,
-		0x00, 0x00, 0x00, 0x00, 0x00}, &fakeArray)
-	if e ==  nil {
+		0x00, 0x00, 0x00, 0x00, 0x00,
+	}, &fakeArray,
+	)
+	if e == nil {
 		t.Errorf("no error with dodgy opcode array!")
 	}
 }
@@ -3660,9 +3663,10 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 	}
+	var e error
 	for _, test := range tests {
-		_, e := test.pop.bytes()
-		if e := tstCheckScriptError(e, test.expectedErr); e != nil {
+		_, e = test.pop.bytes()
+		if e = tstCheckScriptError(e, test.expectedErr); e != nil {
 			t.Errorf("Parsed opcode test '%s': %v", test.name, e)
 			continue
 		}
@@ -3715,14 +3719,16 @@ func TestPushedData(t *testing.T) {
 		if test.valid && e != nil {
 			t.Errorf("TestPushedData failed test #%d: %v\n", i, e)
 			continue
-		} else if !test.valid && e ==  nil {
+		} else if !test.valid && e == nil {
 			t.Errorf("TestPushedData failed test #%d: test should "+
-				"be invalid\n", i)
+				"be invalid\n", i,
+			)
 			continue
 		}
 		if !reflect.DeepEqual(data, test.out) {
 			t.Errorf("TestPushedData failed test #%d: want: %x "+
-				"got: %x\n", i, test.out, data)
+				"got: %x\n", i, test.out, data,
+			)
 		}
 	}
 }
@@ -3732,25 +3738,28 @@ func TestHasCanonicalPush(t *testing.T) {
 	t.Parallel()
 	for i := 0; i < 65535; i++ {
 		script, e := NewScriptBuilder().AddInt64(int64(i)).Script()
-		if e != nil  {
+		if e != nil {
 			t.Errorf("Script: test #%d unexpected error: %v\n", i,
-				e)
+				e,
+			)
 			continue
 		}
 		if result := IsPushOnlyScript(script); !result {
 			t.Errorf("IsPushOnlyScript: test #%d failed: %x\n", i,
-				script)
+				script,
+			)
 			continue
 		}
 		pops, e := parseScript(script)
-		if e != nil  {
+		if e != nil {
 			t.Errorf("parseScript: #%d failed: %v", i, e)
 			continue
 		}
 		for _, pop := range pops {
 			if result := canonicalPush(pop); !result {
 				t.Errorf("canonicalPush: test #%d failed: %x\n",
-					i, script)
+					i, script,
+				)
 				break
 			}
 		}
@@ -3759,7 +3768,7 @@ func TestHasCanonicalPush(t *testing.T) {
 		builder := NewScriptBuilder()
 		builder.AddData(bytes.Repeat([]byte{0x49}, i))
 		script, e := builder.Script()
-		if e != nil  {
+		if e != nil {
 			t.Errorf("StandardPushesTests test #%d unexpected error: %v\n", i, e)
 			continue
 		}
@@ -3768,7 +3777,7 @@ func TestHasCanonicalPush(t *testing.T) {
 			continue
 		}
 		pops, e := parseScript(script)
-		if e != nil  {
+		if e != nil {
 			t.Errorf("StandardPushesTests #%d failed to TstParseScript: %v", i, e)
 			continue
 		}
@@ -3817,12 +3826,14 @@ func TestGetPreciseSigOps(t *testing.T) {
 	// The signature in the p2sh script is nonsensical for the tests since this script will never be executed. What
 	// matters is that it matches the right pattern.
 	pkScript := mustParseShortForm("HASH160 DATA_20 0x433ec2ac1ffa1b7b7d0" +
-		"27f564529c57197f9ae88 EQUAL")
+		"27f564529c57197f9ae88 EQUAL",
+	)
 	for _, test := range tests {
 		count := GetPreciseSigOpCount(test.scriptSig, pkScript, true)
 		if count != test.nSigOps {
 			t.Errorf("%s: expected count of %d, got %d", test.name,
-				test.nSigOps, count)
+				test.nSigOps, count,
+			)
 		}
 	}
 }
@@ -3834,7 +3845,7 @@ func TestRemoveOpcodes(t *testing.T) {
 		name   string
 		before string
 		remove byte
-		e    error
+		e      error
 		after  string
 	}{
 		{
@@ -3868,20 +3879,20 @@ func TestRemoveOpcodes(t *testing.T) {
 			name:   "invalid length (instruction)",
 			before: "PUSHDATA1",
 			remove: OP_CODESEPARATOR,
-			e:    scriptError(ErrMalformedPush, ""),
+			e:      scriptError(ErrMalformedPush, ""),
 		},
 		{
 			name:   "invalid length (data)",
 			before: "PUSHDATA1 0xff 0xfe",
 			remove: OP_CODESEPARATOR,
-			e:    scriptError(ErrMalformedPush, ""),
+			e:      scriptError(ErrMalformedPush, ""),
 		},
 	}
 	// tstRemoveOpcode is a convenience function to parse the provided raw script, remove the passed opcode, then
 	// unparse the result back into a raw script.
 	tstRemoveOpcode := func(script []byte, opcode byte) ([]byte, error) {
 		pops, e := parseScript(script)
-		if e != nil  {
+		if e != nil {
 			return nil, e
 		}
 		pops = removeOpcode(pops, opcode)
@@ -3891,13 +3902,14 @@ func TestRemoveOpcodes(t *testing.T) {
 		before := mustParseShortForm(test.before)
 		after := mustParseShortForm(test.after)
 		result, e := tstRemoveOpcode(before, test.remove)
-		if e := tstCheckScriptError(e, test.e); e != nil {
+		if e = tstCheckScriptError(e, test.e); e != nil {
 			t.Errorf("%s: %v", test.name, e)
 			continue
 		}
 		if !bytes.Equal(after, result) {
 			t.Errorf("%s: value does not equal expected: exp: %q"+
-				" got: %q", test.name, after, result)
+				" got: %q", test.name, after, result,
+			)
 		}
 	}
 }
@@ -3909,7 +3921,7 @@ func TestRemoveOpcodeByData(t *testing.T) {
 		name   string
 		before []byte
 		remove []byte
-		e    error
+		e      error
 		after  []byte
 	}{
 		{
@@ -3934,20 +3946,26 @@ func TestRemoveOpcodeByData(t *testing.T) {
 			// padded to keep it canonical.
 			name: "simple case (pushdata1)",
 			before: append(append([]byte{OP_PUSHDATA1, 76},
-				bytes.Repeat([]byte{0}, 72)...),
-				[]byte{1, 2, 3, 4}...),
+				bytes.Repeat([]byte{0}, 72)...,
+			),
+				[]byte{1, 2, 3, 4}...,
+			),
 			remove: []byte{1, 2, 3, 4},
 			after:  nil,
 		},
 		{
 			name: "simple case (pushdata1 miss)",
 			before: append(append([]byte{OP_PUSHDATA1, 76},
-				bytes.Repeat([]byte{0}, 72)...),
-				[]byte{1, 2, 3, 4}...),
+				bytes.Repeat([]byte{0}, 72)...,
+			),
+				[]byte{1, 2, 3, 4}...,
+			),
 			remove: []byte{1, 2, 3, 5},
 			after: append(append([]byte{OP_PUSHDATA1, 76},
-				bytes.Repeat([]byte{0}, 72)...),
-				[]byte{1, 2, 3, 4}...),
+				bytes.Repeat([]byte{0}, 72)...,
+			),
+				[]byte{1, 2, 3, 4}...,
+			),
 		},
 		{
 			name:   "simple case (pushdata1 miss noncanonical)",
@@ -3958,20 +3976,26 @@ func TestRemoveOpcodeByData(t *testing.T) {
 		{
 			name: "simple case (pushdata2)",
 			before: append(append([]byte{OP_PUSHDATA2, 0, 1},
-				bytes.Repeat([]byte{0}, 252)...),
-				[]byte{1, 2, 3, 4}...),
+				bytes.Repeat([]byte{0}, 252)...,
+			),
+				[]byte{1, 2, 3, 4}...,
+			),
 			remove: []byte{1, 2, 3, 4},
 			after:  nil,
 		},
 		{
 			name: "simple case (pushdata2 miss)",
 			before: append(append([]byte{OP_PUSHDATA2, 0, 1},
-				bytes.Repeat([]byte{0}, 252)...),
-				[]byte{1, 2, 3, 4}...),
+				bytes.Repeat([]byte{0}, 252)...,
+			),
+				[]byte{1, 2, 3, 4}...,
+			),
 			remove: []byte{1, 2, 3, 4, 5},
 			after: append(append([]byte{OP_PUSHDATA2, 0, 1},
-				bytes.Repeat([]byte{0}, 252)...),
-				[]byte{1, 2, 3, 4}...),
+				bytes.Repeat([]byte{0}, 252)...,
+			),
+				[]byte{1, 2, 3, 4}...,
+			),
 		},
 		{
 			name:   "simple case (pushdata2 miss noncanonical)",
@@ -3983,8 +4007,10 @@ func TestRemoveOpcodeByData(t *testing.T) {
 			// This is padded to make the push canonical.
 			name: "simple case (pushdata4)",
 			before: append(append([]byte{OP_PUSHDATA4, 0, 0, 1, 0},
-				bytes.Repeat([]byte{0}, 65532)...),
-				[]byte{1, 2, 3, 4}...),
+				bytes.Repeat([]byte{0}, 65532)...,
+			),
+				[]byte{1, 2, 3, 4}...,
+			),
 			remove: []byte{1, 2, 3, 4},
 			after:  nil,
 		},
@@ -3998,10 +4024,14 @@ func TestRemoveOpcodeByData(t *testing.T) {
 			// This is padded to make the push canonical.
 			name: "simple case (pushdata4 miss)",
 			before: append(append([]byte{OP_PUSHDATA4, 0, 0, 1, 0},
-				bytes.Repeat([]byte{0}, 65532)...), []byte{1, 2, 3, 4}...),
+				bytes.Repeat([]byte{0}, 65532)...,
+			), []byte{1, 2, 3, 4}...,
+			),
 			remove: []byte{1, 2, 3, 4, 5},
 			after: append(append([]byte{OP_PUSHDATA4, 0, 0, 1, 0},
-				bytes.Repeat([]byte{0}, 65532)...), []byte{1, 2, 3, 4}...),
+				bytes.Repeat([]byte{0}, 65532)...,
+			), []byte{1, 2, 3, 4}...,
+			),
 		},
 		{
 			name:   "invalid opcode ",
@@ -4013,20 +4043,20 @@ func TestRemoveOpcodeByData(t *testing.T) {
 			name:   "invalid length (instruction)",
 			before: []byte{OP_PUSHDATA1},
 			remove: []byte{1, 2, 3, 4},
-			e:    scriptError(ErrMalformedPush, ""),
+			e:      scriptError(ErrMalformedPush, ""),
 		},
 		{
 			name:   "invalid length (data)",
 			before: []byte{OP_PUSHDATA1, 255, 254},
 			remove: []byte{1, 2, 3, 4},
-			e:    scriptError(ErrMalformedPush, ""),
+			e:      scriptError(ErrMalformedPush, ""),
 		},
 	}
 	// tstRemoveOpcodeByData is a convenience function to parse the provided raw script, remove the passed data, then
 	// unparse the result back into a raw script.
 	tstRemoveOpcodeByData := func(script []byte, data []byte) ([]byte, error) {
 		pops, e := parseScript(script)
-		if e != nil  {
+		if e != nil {
 			return nil, e
 		}
 		pops = removeOpcodeByData(pops, data)
@@ -4034,13 +4064,14 @@ func TestRemoveOpcodeByData(t *testing.T) {
 	}
 	for _, test := range tests {
 		result, e := tstRemoveOpcodeByData(test.before, test.remove)
-		if e := tstCheckScriptError(e, test.e); e != nil {
+		if e = tstCheckScriptError(e, test.e); e != nil {
 			t.Errorf("%s: %v", test.name, e)
 			continue
 		}
 		if !bytes.Equal(test.after, result) {
 			t.Errorf("%s: value does not equal expected: exp: %q"+
-				" got: %q", test.name, test.after, result)
+				" got: %q", test.name, test.after, result,
+			)
 		}
 	}
 }
@@ -4055,11 +4086,11 @@ func TestIsPayToScriptHash(t *testing.T) {
 		p2sh := IsPayToScriptHash(script)
 		if p2sh != shouldBe {
 			t.Errorf("%s: expected p2sh %v, got %v", test.name,
-				shouldBe, p2sh)
+				shouldBe, p2sh,
+			)
 		}
 	}
 }
-
 
 // TestHasCanonicalPushes ensures the canonicalPush function properly determines what is considered a canonical push for
 // the purposes of removeOpcodeByData.
@@ -4085,7 +4116,7 @@ func TestHasCanonicalPushes(t *testing.T) {
 	for i, test := range tests {
 		script := mustParseShortForm(test.script)
 		pops, e := parseScript(script)
-		if e != nil  {
+		if e != nil {
 			if test.expected {
 				t.Errorf("TstParseScript #%d failed: %v", i, e)
 			}
@@ -4095,7 +4126,8 @@ func TestHasCanonicalPushes(t *testing.T) {
 			if canonicalPush(pop) != test.expected {
 				t.Errorf("canonicalPush: #%d (%s) wrong result"+
 					"\ngot: %v\nwant: %v", i, test.name,
-					true, test.expected)
+					true, test.expected,
+				)
 				break
 			}
 		}
@@ -4112,12 +4144,14 @@ func TestIsPushOnlyScript(t *testing.T) {
 	}{
 		name: "does not parse",
 		script: mustParseShortForm("0x046708afdb0fe5548271967f1a67130" +
-			"b7105cd6a828e03909a67962e0ea1f61d"),
+			"b7105cd6a828e03909a67962e0ea1f61d",
+		),
 		expected: false,
 	}
 	if IsPushOnlyScript(test.script) != test.expected {
 		t.Errorf("IsPushOnlyScript (%s) wrong result\ngot: %v\nwant: "+
-			"%v", test.name, true, test.expected)
+			"%v", test.name, true, test.expected,
+		)
 	}
 }
 
@@ -4139,7 +4173,8 @@ func TestIsUnspendable(t *testing.T) {
 			pkScript: []byte{0x76, 0xa9, 0x14, 0x29, 0x95, 0xa0,
 				0xfe, 0x68, 0x43, 0xfa, 0x9b, 0x95, 0x45,
 				0x97, 0xf0, 0xdc, 0xa7, 0xa4, 0x4d, 0xf6,
-				0xfa, 0x0b, 0x5c, 0x88, 0xac},
+				0xfa, 0x0b, 0x5c, 0x88, 0xac,
+			},
 			expected: false,
 		},
 	}
@@ -4147,7 +4182,8 @@ func TestIsUnspendable(t *testing.T) {
 		res := IsUnspendable(test.pkScript)
 		if res != test.expected {
 			t.Errorf("TestIsUnspendable #%d failed: got %v want %v",
-				i, res, test.expected)
+				i, res, test.expected,
+			)
 			continue
 		}
 	}

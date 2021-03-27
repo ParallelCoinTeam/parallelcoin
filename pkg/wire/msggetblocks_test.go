@@ -106,11 +106,11 @@ func TestGetBlocksWire(t *testing.T) {
 	multiLocators := NewMsgGetBlocks(hashStop)
 	e = multiLocators.AddBlockLocatorHash(hashLocator2)
 	if e != nil  {
-		t.Log(err)
+		t.Log(e)
 	}
 	e = multiLocators.AddBlockLocatorHash(hashLocator)
 	if e != nil  {
-		t.Log(err)
+		t.Log(e)
 	}
 	multiLocators.ProtocolVersion = pver
 	multiLocatorsEncoded := []byte{
@@ -277,11 +277,11 @@ func TestGetBlocksWireErrors(t *testing.T) {
 	baseGetBlocks.ProtocolVersion = pver
 	e = baseGetBlocks.AddBlockLocatorHash(hashLocator2)
 	if e != nil  {
-		t.Log(err)
+		t.Log(e)
 	}
 	e = baseGetBlocks.AddBlockLocatorHash(hashLocator)
 	if e != nil  {
-		t.Log(err)
+		t.Log(e)
 	}
 	baseGetBlocksEncoded := []byte{
 		0x62, 0xea, 0x00, 0x00, // Protocol version 60002
@@ -305,7 +305,7 @@ func TestGetBlocksWireErrors(t *testing.T) {
 	for i := 0; i < MaxBlockLocatorsPerMsg; i++ {
 		e := maxGetBlocks.AddBlockLocatorHash(&mainNetGenesisHash)
 		if e != nil  {
-			t.Log(err)
+			t.Log(e)
 		}
 	}
 	maxGetBlocks.BlockLocatorHashes = append(maxGetBlocks.BlockLocatorHashes,
@@ -339,14 +339,14 @@ func TestGetBlocksWireErrors(t *testing.T) {
 		// Encode to wire format.
 		w := newFixedWriter(test.max)
 		e := test.in.BtcEncode(w, test.pver, test.enc)
-		if reflect.TypeOf(err) != reflect.TypeOf(test.writeErr) {
+		if reflect.TypeOf(e) != reflect.TypeOf(test.writeErr) {
 			t.Errorf("BtcEncode #%d wrong error got: %v, want: %v",
 				i, e, test.writeErr)
 			continue
 		}
 		// For errors which are not of type MessageError, check them for equality.
-		if _, ok := err.(*MessageError); !ok {
-			if err != test.writeErr {
+		if _, ok := e.(*MessageError); !ok {
+			if e != test.writeErr {
 				t.Errorf("BtcEncode #%d wrong error got: %v, "+
 					"want: %v", i, e, test.writeErr)
 				continue
@@ -356,14 +356,14 @@ func TestGetBlocksWireErrors(t *testing.T) {
 		var msg MsgGetBlocks
 		r := newFixedReader(test.max, test.buf)
 		e = msg.BtcDecode(r, test.pver, test.enc)
-		if reflect.TypeOf(err) != reflect.TypeOf(test.readErr) {
+		if reflect.TypeOf(e) != reflect.TypeOf(test.readErr) {
 			t.Errorf("BtcDecode #%d wrong error got: %v, want: %v",
 				i, e, test.readErr)
 			continue
 		}
 		// For errors which are not of type MessageError, check them for equality.
-		if _, ok := err.(*MessageError); !ok {
-			if err != test.readErr {
+		if _, ok := e.(*MessageError); !ok {
+			if e != test.readErr {
 				t.Errorf("BtcDecode #%d wrong error got: %v, "+
 					"want: %v", i, e, test.readErr)
 				continue

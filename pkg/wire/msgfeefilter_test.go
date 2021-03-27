@@ -37,13 +37,13 @@ func TestFeeFilterLatest(t *testing.T) {
 	var buf bytes.Buffer
 	e := msg.BtcEncode(&buf, pver, BaseEncoding)
 	if e != nil  {
-		t.Errorf("encode of MsgFeeFilter failed %v err <%v>", msg, err)
+		t.Errorf("encode of MsgFeeFilter failed %v e <%v>", msg, e)
 	}
 	// Test decode with latest protocol version.
 	readmsg := NewMsgFeeFilter(0)
 	e = readmsg.BtcDecode(&buf, pver, BaseEncoding)
 	if e != nil  {
-		t.Errorf("decode of MsgFeeFilter failed [%v] err <%v>", buf, err)
+		t.Errorf("decode of MsgFeeFilter failed [%v] e <%v>", buf, e)
 	}
 	// Ensure minfee is the same.
 	if msg.MinFee != readmsg.MinFee {
@@ -80,7 +80,7 @@ func TestFeeFilterWire(t *testing.T) {
 		var buf bytes.Buffer
 		e := test.in.BtcEncode(&buf, test.pver, BaseEncoding)
 		if e != nil  {
-			t.Errorf("BtcEncode #%d error %v", i, err)
+			t.Errorf("BtcEncode #%d error %v", i, e)
 			continue
 		}
 		if !bytes.Equal(buf.Bytes(), test.buf) {
@@ -93,7 +93,7 @@ func TestFeeFilterWire(t *testing.T) {
 		rbuf := bytes.NewReader(test.buf)
 		e = msg.BtcDecode(rbuf, test.pver, BaseEncoding)
 		if e != nil  {
-			t.Errorf("BtcDecode #%d error %v", i, err)
+			t.Errorf("BtcDecode #%d error %v", i, e)
 			continue
 		}
 		if !reflect.DeepEqual(msg, test.out) {
@@ -132,14 +132,14 @@ func TestFeeFilterWireErrors(t *testing.T) {
 		// Encode to wire format.
 		w := newFixedWriter(test.max)
 		e := test.in.BtcEncode(w, test.pver, BaseEncoding)
-		if reflect.TypeOf(err) != reflect.TypeOf(test.writeErr) {
+		if reflect.TypeOf(e) != reflect.TypeOf(test.writeErr) {
 			t.Errorf("BtcEncode #%d wrong error got: %v, want: %v",
 				i, e, test.writeErr)
 			continue
 		}
 		// For errors which are not of type MessageError, check them for equality.
-		if _, ok := err.(*MessageError); !ok {
-			if err != test.writeErr {
+		if _, ok := e.(*MessageError); !ok {
+			if e != test.writeErr {
 				t.Errorf("BtcEncode #%d wrong error got: %v, "+
 					"want: %v", i, e, test.writeErr)
 				continue
@@ -149,16 +149,16 @@ func TestFeeFilterWireErrors(t *testing.T) {
 		var msg MsgFeeFilter
 		r := newFixedReader(test.max, test.buf)
 		e = msg.BtcDecode(r, test.pver, BaseEncoding)
-		if reflect.TypeOf(err) != reflect.TypeOf(test.readErr) {
+		if reflect.TypeOf(e) != reflect.TypeOf(test.readErr) {
 			t.Errorf("BtcDecode #%d wrong error got: %v, want: %v",
-				i, err, test.readErr)
+				i, e, test.readErr)
 			continue
 		}
 		// For errors which are not of type MessageError, check them for equality.
-		if _, ok := err.(*MessageError); !ok {
-			if err != test.readErr {
+		if _, ok := e.(*MessageError); !ok {
+			if e != test.readErr {
 				t.Errorf("BtcDecode #%d wrong error got: %v, "+
-					"want: %v", i, err, test.readErr)
+					"want: %v", i, e, test.readErr)
 				continue
 			}
 		}

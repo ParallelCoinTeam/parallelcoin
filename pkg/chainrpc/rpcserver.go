@@ -1352,9 +1352,9 @@ func (s *Server) JSONRPCRead(w http.ResponseWriter, r *http.Request, isAdmin boo
 		return
 	}
 	defer func() {
-		if e := buf.Flush(); E.Chk(e) {
+		if e = buf.Flush(); E.Chk(e) {
 		}
-		if e := conn.Close(); E.Chk(e) {
+		if e = conn.Close(); E.Chk(e) {
 		}
 	}()
 	e = conn.SetReadDeadline(TimeZeroVal)
@@ -1366,7 +1366,7 @@ func (s *Server) JSONRPCRead(w http.ResponseWriter, r *http.Request, isAdmin boo
 	var jsonErr error
 	var result interface{}
 	var request btcjson.Request
-	if e := js.Unmarshal(body, &request); E.Chk(e) {
+	if e = js.Unmarshal(body, &request); E.Chk(e) {
 		jsonErr = &btcjson.RPCError{
 			Code:    btcjson.ErrRPCParse.Code,
 			Message: "Failed to parse request: " + e.Error(),
@@ -1397,7 +1397,7 @@ func (s *Server) JSONRPCRead(w http.ResponseWriter, r *http.Request, isAdmin boo
 		// available.
 		closeChan := qu.Ts(1)
 		go func() {
-			_, e := conn.Read(make([]byte, 1))
+			_, e = conn.Read(make([]byte, 1))
 			if e != nil {
 				// L.Script				closeChan.Q()
 			}
@@ -1957,7 +1957,7 @@ func GenCertPair(certFile, keyFile string) (e error) {
 		return e
 	}
 	if e = ioutil.WriteFile(keyFile, key, 0600); E.Chk(e) {
-		if e := os.Remove(certFile); E.Chk(e) {
+		if e = os.Remove(certFile); E.Chk(e) {
 		}
 		return e
 	}

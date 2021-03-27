@@ -1867,15 +1867,15 @@ func (p *Peer) start(msgChan chan *wire.MsgVersion) (e error) {
 	T.Ln("starting peer", p, p.LocalAddr())
 	negotiateErr := make(chan error, 1)
 	go func() {
-		var e error
+		var ee error
 		var msg *wire.MsgVersion
 		if p.inbound {
-			if msg, e = p.negotiateInboundProtocol(); E.Chk(e) {
-				negotiateErr <- e
+			if msg, ee = p.negotiateInboundProtocol(); E.Chk(ee) {
+				negotiateErr <- ee
 			}
 		} else {
-			if msg, e = p.negotiateOutboundProtocol(); E.Chk(e) {
-				negotiateErr <- e
+			if msg, e = p.negotiateOutboundProtocol(); E.Chk(ee) {
+				negotiateErr <- ee
 			}
 		}
 		I.Ln("sending version message back")
@@ -1914,7 +1914,7 @@ func (p *Peer) start(msgChan chan *wire.MsgVersion) (e error) {
 func (p *Peer) AssociateConnection(conn net.Conn) (msgChan chan *wire.MsgVersion) {
 	// Already connected?
 	if !atomic.CompareAndSwapInt32(&p.connected, 0, 1) {
-		I.Ln("already connected to peer", conn.RemoteAddr(),conn.LocalAddr())
+		I.Ln("already connected to peer", conn.RemoteAddr(), conn.LocalAddr())
 		return
 	}
 	p.conn = conn
@@ -1933,15 +1933,15 @@ func (p *Peer) AssociateConnection(conn net.Conn) (msgChan chan *wire.MsgVersion
 		p.na = na
 	}
 	msgChan = make(chan *wire.MsgVersion, 1)
-	I.Ln("starting peer", conn.RemoteAddr(),conn.LocalAddr())
+	I.Ln("starting peer", conn.RemoteAddr(), conn.LocalAddr())
 	go func() {
 		if e := p.start(msgChan); E.Chk(e) {
 			D.F("cannot start peer %v: %v", p, e)
 			p.Disconnect()
 		}
-		I.Ln("finished starting peer", conn.RemoteAddr(),conn.LocalAddr())
+		I.Ln("finished starting peer", conn.RemoteAddr(), conn.LocalAddr())
 	}()
-	I.Ln("returning meanwhile starting peer", conn.RemoteAddr(),conn.LocalAddr())
+	I.Ln("returning meanwhile starting peer", conn.RemoteAddr(), conn.LocalAddr())
 	return
 }
 

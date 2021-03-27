@@ -15,7 +15,7 @@ func TestPing(t *testing.T) {
 	// Ensure we get the same nonce back out.
 	nonce, e := RandomUint64()
 	if e != nil  {
-		t.Errorf("RandomUint64: Error generating nonce: %v", err)
+		t.Errorf("RandomUint64: Error generating nonce: %v", e)
 	}
 	msg := NewMsgPing(nonce)
 	if msg.Nonce != nonce {
@@ -45,7 +45,7 @@ func TestPingBIP0031(t *testing.T) {
 	enc := BaseEncoding
 	nonce, e := RandomUint64()
 	if e != nil  {
-		t.Errorf("RandomUint64: Error generating nonce: %v", err)
+		t.Errorf("RandomUint64: Error generating nonce: %v", e)
 	}
 	msg := NewMsgPing(nonce)
 	if msg.Nonce != nonce {
@@ -64,13 +64,13 @@ func TestPingBIP0031(t *testing.T) {
 	var buf bytes.Buffer
 	e = msg.BtcEncode(&buf, pver, enc)
 	if e != nil  {
-		t.Errorf("encode of MsgPing failed %v err <%v>", msg, err)
+		t.Errorf("encode of MsgPing failed %v e <%v>", msg, e)
 	}
 	// Test decode with old protocol version.
 	readmsg := NewMsgPing(0)
 	e = readmsg.BtcDecode(&buf, pver, enc)
 	if e != nil  {
-		t.Errorf("decode of MsgPing failed [%v] err <%v>", buf, err)
+		t.Errorf("decode of MsgPing failed [%v] e <%v>", buf, e)
 	}
 	// Since this protocol version doesn't support the nonce, make sure it didn't get encoded and decoded back out.
 	if msg.Nonce == readmsg.Nonce {
@@ -83,7 +83,7 @@ func TestPingBIP0031(t *testing.T) {
 func TestPingCrossProtocol(t *testing.T) {
 	nonce, e := RandomUint64()
 	if e != nil  {
-		t.Errorf("RandomUint64: Error generating nonce: %v", err)
+		t.Errorf("RandomUint64: Error generating nonce: %v", e)
 	}
 	msg := NewMsgPing(nonce)
 	if msg.Nonce != nonce {
@@ -94,13 +94,13 @@ func TestPingCrossProtocol(t *testing.T) {
 	var buf bytes.Buffer
 	e = msg.BtcEncode(&buf, ProtocolVersion, BaseEncoding)
 	if e != nil  {
-		t.Errorf("encode of MsgPing failed %v err <%v>", msg, err)
+		t.Errorf("encode of MsgPing failed %v e <%v>", msg, e)
 	}
 	// Decode with old protocol version.
 	readmsg := NewMsgPing(0)
 	e = readmsg.BtcDecode(&buf, BIP0031Version, BaseEncoding)
 	if e != nil  {
-		t.Errorf("decode of MsgPing failed [%v] err <%v>", buf, err)
+		t.Errorf("decode of MsgPing failed [%v] e <%v>", buf, e)
 	}
 	// Since one of the protocol versions doesn't support the nonce, make sure it didn't get encoded and decoded back
 	// out.
@@ -149,7 +149,7 @@ func TestPingWire(t *testing.T) {
 		var buf bytes.Buffer
 		e := test.in.BtcEncode(&buf, test.pver, test.enc)
 		if e != nil  {
-			t.Errorf("BtcEncode #%d error %v", i, err)
+			t.Errorf("BtcEncode #%d error %v", i, e)
 			continue
 		}
 		if !bytes.Equal(buf.Bytes(), test.buf) {
@@ -162,7 +162,7 @@ func TestPingWire(t *testing.T) {
 		rbuf := bytes.NewReader(test.buf)
 		e = msg.BtcDecode(rbuf, test.pver, test.enc)
 		if e != nil  {
-			t.Errorf("BtcDecode #%d error %v", i, err)
+			t.Errorf("BtcDecode #%d error %v", i, e)
 			continue
 		}
 		if !reflect.DeepEqual(msg, test.out) {
@@ -202,7 +202,7 @@ func TestPingWireErrors(t *testing.T) {
 		// Encode to wire format.
 		w := newFixedWriter(test.max)
 		e := test.in.BtcEncode(w, test.pver, test.enc)
-		if err != test.writeErr {
+		if e != test.writeErr {
 			t.Errorf("BtcEncode #%d wrong error got: %v, want: %v",
 				i, e, test.writeErr)
 			continue
@@ -211,7 +211,7 @@ func TestPingWireErrors(t *testing.T) {
 		var msg MsgPing
 		r := newFixedReader(test.max, test.buf)
 		e = msg.BtcDecode(r, test.pver, test.enc)
-		if err != test.readErr {
+		if e != test.readErr {
 			t.Errorf("BtcDecode #%d wrong error got: %v, want: %v",
 				i, e, test.readErr)
 			continue

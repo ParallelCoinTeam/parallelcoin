@@ -10,8 +10,9 @@ import (
 
 // A lotta constants that probably aren't being used
 const (
-	defaultConfigFilename        = "conf.json"
-	defaultDataDirname           = "node"
+	// defaultConfigFilename        = "conf.json"
+	// defaultDataDirname           = "node"
+	
 	DefaultPort                  = "11047"
 	DefaultRPCListener           = "127.0.0.1"
 	DefaultMaxPeers              = 23
@@ -41,7 +42,7 @@ const (
 	// calculating minimum required fees for larger transactions. This value is in
 	// Satoshi/1000 bytes.
 	DefaultMinRelayTxFee = amt.Amount(1000)
-	DefaultAppDataDirname   = "wallet"
+	DefaultDataDirname   = "wallet"
 	DefaultCAFilename       = "wallet.cert"
 	DefaultConfigFilename   = "conf.json"
 	DefaultLogLevel         = "info"
@@ -54,4 +55,4 @@ const (
 	DbName = "wallet.db"
 )
 
-var defaultHomeDir = appdata.Dir("pod", false)
+var DefaultHomeDir = appdata.Dir("pod", false)

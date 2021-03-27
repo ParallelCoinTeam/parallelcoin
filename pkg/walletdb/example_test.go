@@ -41,17 +41,17 @@ func ExampleCreate() {
 var exampleNum = 0
 
 // exampleLoadDB is used in the examples to elide the setup code.
-func exampleLoadDB() (walletdb.DB, func(), error) {
+func exampleLoadDB() (db walletdb.DB, teardownFunc func(),e error) {
 	dbName := fmt.Sprintf("exampleload%d.db", exampleNum)
 	dbPath := filepath.Join(os.TempDir(), dbName)
-	db, e := walletdb.Create("bdb", dbPath)
+	db, e = walletdb.Create("bdb", dbPath)
 	if e != nil {
 		return nil, nil, e
 	}
-	teardownFunc := func() {
-		if e := db.Close(); walletdb.E.Chk(e) {
+	teardownFunc = func() {
+		if e = db.Close(); walletdb.E.Chk(e) {
 		}
-		if e := os.Remove(dbPath); walletdb.E.Chk(e) {
+		if e = os.Remove(dbPath); walletdb.E.Chk(e) {
 		}
 	}
 	exampleNum++
@@ -72,7 +72,7 @@ func ExampleDB_createTopLevelBucket() {
 		return
 	}
 	defer func() {
-		e := dbtx.Commit()
+		e = dbtx.Commit()
 		if E.Chk(e) {
 			return
 		}
@@ -107,11 +107,11 @@ func Example_basicUsage() {
 		return
 	}
 	defer func() {
-		if e := os.Remove(dbPath); walletdb.E.Chk(e) {
+		if e = os.Remove(dbPath); walletdb.E.Chk(e) {
 		}
 	}()
 	defer func() {
-		if e := db.Close(); walletdb.E.Chk(e) {
+		if e = db.Close(); walletdb.E.Chk(e) {
 		}
 	}()
 	// Get or create a bucket in the database as needed. This bucket is what is typically passed to specific
@@ -143,7 +143,7 @@ func Example_basicUsage() {
 			// Store a key/value pair directly in the root bucket.
 			key := []byte("mykey")
 			value := []byte("myvalue")
-			if e := rootBucket.Put(key, value); E.Chk(e) {
+			if e = rootBucket.Put(key, value); E.Chk(e) {
 				return e
 			}
 			// Read the key back and ensure it matches.

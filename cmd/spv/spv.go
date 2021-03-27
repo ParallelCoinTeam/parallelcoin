@@ -630,7 +630,8 @@ func (s *ChainService) rollBackToHeight(height uint32) (*waddrmgr.BlockStamp, er
 		newTip := &header.PrevBlock
 		// Only roll back filter headers if they've caught up this far.
 		if uint32(bs.Height) <= regHeight {
-			newFilterTip, e := s.RegFilterHeaders.RollbackLastBlock(newTip)
+			var newFilterTip *waddrmgr.BlockStamp
+			newFilterTip, e = s.RegFilterHeaders.RollbackLastBlock(newTip)
 			if e != nil {
 				return nil, e
 			}

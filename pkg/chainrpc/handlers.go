@@ -37,7 +37,8 @@ func HandleAddNode(s *Server, cmd interface{}, closeChan qu.C) (ifc interface{},
 	var msg string
 	c, ok := cmd.(*btcjson.AddNodeCmd)
 	if !ok {
-		h, e := s.HelpCacher.RPCMethodHelp("addnode")
+		var h string
+		h, e = s.HelpCacher.RPCMethodHelp("addnode")
 		D.Ln(h, e)
 		if e != nil {
 			msg = e.Error() + "\n\n"
@@ -94,7 +95,8 @@ func HandleCreateRawTransaction(
 	var e error
 	c, ok := cmd.(*btcjson.CreateRawTransactionCmd)
 	if !ok {
-		h, e := s.HelpCacher.RPCMethodHelp("createrawtransaction")
+		var h string
+		h, e = s.HelpCacher.RPCMethodHelp("createrawtransaction")
 		D.Ln(h, e)
 		if e != nil {
 			msg = e.Error() + "\n\n"
@@ -117,7 +119,8 @@ func HandleCreateRawTransaction(
 	// Add all transaction inputs to a new transaction after performing some validity checks.
 	mtx := wire.NewMsgTx(wire.TxVersion)
 	for _, input := range c.Inputs {
-		txHash, e := chainhash.NewHashFromStr(input.Txid)
+		var txHash *chainhash.Hash
+		txHash, e = chainhash.NewHashFromStr(input.Txid)
 		if e != nil {
 			E.Ln(e)
 			return nil, DecodeHexError(input.Txid)
@@ -140,7 +143,8 @@ func HandleCreateRawTransaction(
 			}
 		}
 		// Decode the provided address.
-		addr, e := btcaddr.Decode(encodedAddr, params)
+		var addr btcaddr.Address
+		addr, e = btcaddr.Decode(encodedAddr, params)
 		if e != nil {
 			E.Ln(e)
 			return nil, &btcjson.RPCError{
@@ -167,14 +171,16 @@ func HandleCreateRawTransaction(
 			}
 		}
 		// Create a new script which pays to the provided address.
-		pkScript, e := txscript.PayToAddrScript(addr)
+		var pkScript []byte
+		pkScript, e = txscript.PayToAddrScript(addr)
 		if e != nil {
 			E.Ln(e)
 			context := "Failed to generate pay-to-address script"
 			return nil, InternalRPCError(e.Error(), context)
 		}
 		// Convert the amount to satoshi.
-		satoshi, e := amt.NewAmount(amount)
+		var satoshi amt.Amount
+		satoshi, e = amt.NewAmount(amount)
 		if e != nil {
 			E.Ln(e)
 			context := "Failed to convert amount"
@@ -208,7 +214,8 @@ func HandleDecodeRawTransaction(
 	var e error
 	c, ok := cmd.(*btcjson.DecodeRawTransactionCmd)
 	if !ok {
-		h, e := s.HelpCacher.RPCMethodHelp("decoderawtransaction")
+		var h string
+		h, e = s.HelpCacher.RPCMethodHelp("decoderawtransaction")
 		D.Ln(h, e)
 		if e != nil {
 			msg = e.Error() + "\n\n"
@@ -260,7 +267,8 @@ func HandleDecodeScript(
 	var e error
 	c, ok := cmd.(*btcjson.DecodeScriptCmd)
 	if !ok {
-		h, e := s.HelpCacher.RPCMethodHelp("decodescript")
+		var h string
+		h, e = s.HelpCacher.RPCMethodHelp("decodescript")
 		D.Ln(h, e)
 		if e != nil {
 			msg = e.Error() + "\n\n"
@@ -324,7 +332,8 @@ func HandleEstimateFee(
 	var e error
 	c, ok := cmd.(*btcjson.EstimateFeeCmd)
 	if !ok {
-		h, e := s.HelpCacher.RPCMethodHelp("estimatefee")
+		var h string
+		h, e = s.HelpCacher.RPCMethodHelp("estimatefee")
 		D.Ln(h, e)
 		if e != nil {
 			msg = e.Error() + "\n\n"
@@ -820,7 +829,7 @@ func HandleGetBlockHeader(
 	// When the verbose flag isn't set, simply return the serialized block header as a hex-encoded string.
 	if c.Verbose != nil && !*c.Verbose {
 		var headerBuf bytes.Buffer
-		e := blockHeader.Serialize(&headerBuf)
+		e = blockHeader.Serialize(&headerBuf)
 		if e != nil {
 			context := "Failed to serialize block header"
 			return nil, InternalRPCError(e.Error(), context)
@@ -929,8 +938,9 @@ func HandleGetBlockTemplateLongPoll(
 	}
 	// Just return the current block template if the long poll ID provided by the caller is invalid.
 	prevHash, lastGenerated, e := DecodeTemplateID(longPollID)
+	var result *btcjson.GetBlockTemplateResult
 	if e != nil {
-		result, e := state.BlockTemplateResult(useCoinbaseValue, nil)
+		result, e = state.BlockTemplateResult(useCoinbaseValue, nil)
 		if e != nil {
 			state.Unlock()
 			return nil, e
@@ -946,7 +956,7 @@ func HandleGetBlockTemplateLongPoll(
 		// Include whether or not it is valid to submit work against the old block template depending on whether or not
 		// a solution has already been found and added to the block chain.
 		submitOld := prevHash.IsEqual(prevTemplateHash)
-		result, e := state.BlockTemplateResult(
+		result, e = state.BlockTemplateResult(
 			useCoinbaseValue,
 			&submitOld,
 		)
@@ -972,13 +982,13 @@ func HandleGetBlockTemplateLongPoll(
 	// Get the lastest block template
 	state.Lock()
 	defer state.Unlock()
-	if e := state.UpdateBlockTemplate(s, useCoinbaseValue); E.Chk(e) {
+	if e = state.UpdateBlockTemplate(s, useCoinbaseValue); E.Chk(e) {
 		return nil, e
 	}
 	// Include whether or not it is valid to submit work against the old block template depending on whether or not a
 	// solution has already been found and added to the block chain.
 	submitOld := prevHash.IsEqual(&state.Template.Block.Header.PrevBlock)
-	result, e := state.BlockTemplateResult(useCoinbaseValue, &submitOld)
+	result, e = state.BlockTemplateResult(useCoinbaseValue, &submitOld)
 	if e != nil {
 		return nil, e
 	}
@@ -1888,7 +1898,8 @@ func HandleGetRawTransaction(s *Server, cmd interface{}, closeChan qu.C) (interf
 			}
 		}
 		// Look up the location of the transaction.
-		blockRegion, e := s.Cfg.TxIndex.TxBlockRegion(txHash)
+		var blockRegion *database.BlockRegion
+		blockRegion, e = s.Cfg.TxIndex.TxBlockRegion(txHash)
 		if e != nil {
 			context := "Failed to retrieve transaction location"
 			return nil, InternalRPCError(e.Error(), context)
@@ -1932,7 +1943,8 @@ func HandleGetRawTransaction(s *Server, cmd interface{}, closeChan qu.C) (interf
 		if !verbose {
 			// Note that this is intentionally not directly returning because the first return value is a string and it
 			// would result in returning an empty string to the client instead of nothing (nil) in the case of an error.
-			mtxHex, e := MessageToHex(tx.MsgTx())
+			var mtxHex string
+			mtxHex, e = MessageToHex(tx.MsgTx())
 			if e != nil {
 				return nil, e
 			}
@@ -1946,7 +1958,8 @@ func HandleGetRawTransaction(s *Server, cmd interface{}, closeChan qu.C) (interf
 	var chainHeight int32
 	if blkHash != nil {
 		// Fetch the header from chain.
-		header, e := s.Cfg.Chain.HeaderByHash(blkHash)
+		var header wire.BlockHeader
+		header, e = s.Cfg.Chain.HeaderByHash(blkHash)
 		if e != nil {
 			context := "Failed to fetch block header"
 			return nil, InternalRPCError(e.Error(), context)
@@ -2100,7 +2113,8 @@ func HandleHelp(s *Server, cmd interface{}, closeChan qu.C) (
 		command = *c.Command
 	}
 	if command == "" {
-		usage, e := s.HelpCacher.RPCUsage(false)
+		var usage string
+		usage, e = s.HelpCacher.RPCUsage(false)
 		if e != nil {
 			context := "Failed to generate RPC usage"
 			return nil, InternalRPCError(e.Error(), context)
@@ -2408,12 +2422,13 @@ func HandleSearchRawTransactions(s *Server, cmd interface{}, closeChan qu.C) (in
 		// The deserialized transaction is needed, so deserialize the retrieved transaction if it's in serialized form
 		// (which will be the case when it was lookup up from the database). Otherwise, use the existing deserialized
 		// transaction.
-		rtx := &addressTxns[i]
+		var rtx *RetrievedTx
+		rtx = &addressTxns[i]
 		var mtx *wire.MsgTx
 		if rtx.Tx == nil {
 			// Deserialize the transaction.
 			mtx = new(wire.MsgTx)
-			e := mtx.Deserialize(bytes.NewReader(rtx.TxBytes))
+			e = mtx.Deserialize(bytes.NewReader(rtx.TxBytes))
 			if e != nil {
 				context := deserialfail
 				return nil, InternalRPCError(e.Error(), context)

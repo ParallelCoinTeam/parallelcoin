@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"github.com/p9c/pod/pkg/amt"
 	"github.com/p9c/pod/pkg/btcaddr"
+	ec "github.com/p9c/pod/pkg/ecc"
+	"github.com/p9c/pod/pkg/util/hdkeychain"
 	"math"
 	"reflect"
 	"sort"
@@ -131,7 +133,7 @@ func (tx *changeAwareTx) addSelfToStore(store *wtxmgr.Store, txmgrNs walletdb.Re
 	if e != nil {
 		return newError(ErrWithdrawalTxStorage, "error constructing TxRecord for storing", e)
 	}
-	if e := store.InsertTx(txmgrNs, rec, nil); E.Chk(e) {
+	if e = store.InsertTx(txmgrNs, rec, nil); E.Chk(e) {
 		return newError(ErrWithdrawalTxStorage, "error adding tx to store", e)
 	}
 	if tx.changeIdx != -1 {
@@ -460,7 +462,7 @@ func (p *Pool) StartWithdrawal(
 		return nil, e
 	}
 	w := newWithdrawal(roundID, requests, eligible, changeStart)
-	if e := w.fulfillRequests(); E.Chk(e) {
+	if e = w.fulfillRequests(); E.Chk(e) {
 		return nil, e
 	}
 	w.status.sigs, e = getRawSigs(w.transactions)
@@ -798,8 +800,8 @@ func getWithdrawalStatus(
 
 // getRawSigs iterates over the inputs of each transaction given, constructing the raw signatures for them using the
 // private keys available to us. It returns a map of ntxids to signature lists.
-func getRawSigs(transactions []*withdrawalTx) (map[Ntxid]TxSigs, error) {
-	sigs := make(map[Ntxid]TxSigs)
+func getRawSigs(transactions []*withdrawalTx) (sigs map[Ntxid]TxSigs,e error) {
+	sigs = make(map[Ntxid]TxSigs)
 	for _, tx := range transactions {
 		txSigs := make(TxSigs, len(tx.inputs))
 		msgtx := tx.toMsgTx()
@@ -811,23 +813,27 @@ func getRawSigs(transactions []*withdrawalTx) (map[Ntxid]TxSigs, error) {
 			// The order of the raw signatures in the signature script must match the order of the public keys in the
 			// redeem script, so we txsort the public keys here using the same API used to txsort them in the redeem script
 			// and use series.getPrivKeyFor() to lookup the corresponding private keys.
-			pubKeys, e := branchOrder(series.publicKeys, creditAddr.Branch())
+			var pubKeys []*hdkeychain.ExtendedKey
+			pubKeys, e = branchOrder(series.publicKeys, creditAddr.Branch())
 			if e != nil {
 				return nil, e
 			}
 			txInSigs := make([]RawSig, len(pubKeys))
 			for i, pubKey := range pubKeys {
 				var sig RawSig
-				privKey, e := series.getPrivKeyFor(pubKey)
+				var privKey *hdkeychain.ExtendedKey
+				privKey, e = series.getPrivKeyFor(pubKey)
 				if e != nil {
 					return nil, e
 				}
 				if privKey != nil {
-					childKey, e := privKey.Child(uint32(creditAddr.Index()))
+					var childKey *hdkeychain.ExtendedKey
+					childKey, e = privKey.Child(uint32(creditAddr.Index()))
 					if e != nil {
 						return nil, newError(ErrKeyChain, "failed to derive private key", e)
 					}
-					ecPrivKey, e := childKey.ECPrivKey()
+					var ecPrivKey *ec.PrivateKey
+					ecPrivKey, e = childKey.ECPrivKey()
 					if e != nil {
 						return nil, newError(ErrKeyChain, "failed to obtain ECPrivKey", e)
 					}

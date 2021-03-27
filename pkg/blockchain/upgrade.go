@@ -482,13 +482,15 @@ func upgradeUtxoSetToV2(db database.DB, interrupt <-chan struct{}) (e error) {
 			var txHash chainhash.Hash
 			copy(txHash[:], oldKey)
 			// Deserialize the old entry which included all utxos for the given transaction.
-			utxos, e := deserializeUtxoEntryV0(v1Cursor.Value())
+			var utxos map[uint32]*UtxoEntry
+			utxos, e = deserializeUtxoEntryV0(v1Cursor.Value())
 			if e != nil {
 				return 0, e
 			}
 			// Add an entry for each utxo into the new bucket using the new format.
 			for txOutIdx, utxo := range utxos {
-				reserialized, e := serializeUtxoEntry(utxo)
+				var reserialized []byte
+				reserialized, e = serializeUtxoEntry(utxo)
 				if e != nil {
 					return 0, e
 				}
@@ -523,7 +525,7 @@ func upgradeUtxoSetToV2(db database.DB, interrupt <-chan struct{}) (e error) {
 	var totalUtxos uint64
 	for {
 		var numUtxos uint32
-		e := db.Update(
+		e = db.Update(
 			func(dbTx database.Tx) (e error) {
 				numUtxos, e = doBatch(dbTx)
 				return e

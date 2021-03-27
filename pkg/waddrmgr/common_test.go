@@ -274,7 +274,7 @@ func setupManager(t *testing.T) (tearDownFunc func(), db walletdb.DB, mgr *waddr
 	})
 	if e != nil  {
 		func() {
-			if e := db.Close(); addrmgr.E.Chk(e) {
+			if e = db.Close(); addrmgr.E.Chk(e) {
 			}
 		}()
 		_ = os.RemoveAll(dirName)

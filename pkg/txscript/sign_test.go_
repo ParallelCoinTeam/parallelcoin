@@ -3,13 +3,12 @@ package txscript
 import (
 	"errors"
 	"fmt"
-	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/btcaddr"
+	"github.com/p9c/pod/pkg/chaincfg"
 	"testing"
 	
 	"github.com/p9c/pod/pkg/chainhash"
 	ec "github.com/p9c/pod/pkg/ecc"
-	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/wire"
 )
 
@@ -643,7 +642,8 @@ func TestSignTxOutput(t *testing.T) {
 			}
 			pk := (*ec.PublicKey)(&key.PublicKey).
 				SerializeUncompressed()
-			address, e := btcaddr.NewPubKeyHash(
+			var ad *btcaddr.PubKeyHash
+			ad, e = btcaddr.NewPubKeyHash(
 				btcaddr.Hash160(pk), &chaincfg.TestNet3Params,
 			)
 			if e != nil {
@@ -653,7 +653,7 @@ func TestSignTxOutput(t *testing.T) {
 				)
 				break
 			}
-			pkScript, e := PayToAddrScript(address)
+			pkScript, e := PayToAddrScript(ad)
 			if e != nil {
 				t.Errorf(
 					"failed to make pkscript "+
@@ -661,7 +661,7 @@ func TestSignTxOutput(t *testing.T) {
 				)
 				break
 			}
-			scriptAddr, e := address.NewAddressScriptHash(
+			scriptAddr, e := NewAddressScriptHash(
 				pkScript, &chaincfg.TestNet3Params,
 			)
 			if e != nil {

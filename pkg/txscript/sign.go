@@ -237,11 +237,12 @@ func mergeScripts(
 		// assume that script in sigPops is the correct one, we just made it.
 		script := sigPops[len(sigPops)-1].data
 		// We already know this information somewhere up the stack.
-		class, addresses, nrequired, _ :=
+		var nrequired int
+		class, addresses, nrequired, _ =
 			ExtractPkScriptAddrs(script, chainParams)
 		// regenerate scripts.
-		sigScript, _ := unparseScript(sigPops)
-		prevScript, _ := unparseScript(prevPops)
+		sigScript, _ = unparseScript(sigPops)
+		prevScript, _ = unparseScript(prevPops)
 		// Merge
 		mergedScript := mergeScripts(
 			chainParams, tx, idx, script,

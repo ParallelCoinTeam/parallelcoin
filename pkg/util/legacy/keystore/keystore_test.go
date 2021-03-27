@@ -529,14 +529,15 @@ func TestWatchingWalletExport(t *testing.T) {
 	}
 	// Chk that the new addresses created by each wallet match.  The
 	// original wallet is unlocked so addresses are chained with privkeys.
-	if e := w.Unlock([]byte("banana")); E.Chk(e) {
+	if e = w.Unlock([]byte("banana")); E.Chk(e) {
 		t.Errorf("Unlocking original wallet failed: %v", e)
 	}
 	// Test that ExtendActiveAddresses for the watching wallet match
 	// manually requested addresses of the original wallet.
 	var newAddrs []btcaddr.Address
 	for i := 0; i < 10; i++ {
-		addr, e := w.NextChainedAddress(createdAt)
+		var addr btcaddr.Address
+		addr, e = w.NextChainedAddress(createdAt)
 		if e != nil  {
 			t.Errorf("Cannot get next chained address for original wallet: %v", e)
 			return
@@ -558,7 +559,8 @@ func TestWatchingWalletExport(t *testing.T) {
 	// requesting addresses for the watching wallet.
 	newWWAddrs = newWWAddrs[:0]
 	for i := 0; i < 10; i++ {
-		addr, e := ww.NextChainedAddress(createdAt)
+		var addr btcaddr.Address
+		addr, e = ww.NextChainedAddress(createdAt)
 		if e != nil  {
 			t.Errorf("Cannot get next chained address for watching wallet: %v", e)
 			return
@@ -595,11 +597,11 @@ func TestWatchingWalletExport(t *testing.T) {
 		return
 	}
 	// Verify that nonsensical functions fail with correct error.
-	if e := ww.Lock(); e != ErrWatchingOnly {
+	if e = ww.Lock(); e != ErrWatchingOnly {
 		t.Errorf("Nonsensical func Lock returned no or incorrect error: %v", e)
 		return
 	}
-	if e := ww.Unlock([]byte("banana")); e != ErrWatchingOnly {
+	if e = ww.Unlock([]byte("banana")); e != ErrWatchingOnly {
 		t.Errorf("Nonsensical func Unlock returned no or incorrect error: %v", e)
 		return
 	}
@@ -704,7 +706,7 @@ func TestImportPrivateKey(t *testing.T) {
 	// Mark imported address as partially synced with a block somewhere inbetween
 	// the import height and the chain height.
 	partialHeight := (createHeight-importHeight)/2 + importHeight
-	if e := w2.SetSyncStatus(address, PartialSync(partialHeight)); E.Chk(e) {
+	if e = w2.SetSyncStatus(address, PartialSync(partialHeight)); E.Chk(e) {
 		t.Errorf("Cannot mark address partially synced: %v", e)
 		return
 	}
@@ -733,7 +735,7 @@ func TestImportPrivateKey(t *testing.T) {
 	}
 	// Mark imported address as not synced at all, and verify sync height is now
 	// the import height.
-	if e := w3.SetSyncStatus(address, Unsynced(0)); E.Chk(e) {
+	if e = w3.SetSyncStatus(address, Unsynced(0)); E.Chk(e) {
 		t.Errorf("Cannot mark address synced: %v", e)
 		return
 	}
@@ -744,7 +746,7 @@ func TestImportPrivateKey(t *testing.T) {
 	// Mark imported address as synced with the recently-seen blocks, and verify
 	// that the sync height now equals the most recent block (the one at wallet
 	// creation).
-	if e := w3.SetSyncStatus(address, FullSync{}); E.Chk(e) {
+	if e = w3.SetSyncStatus(address, FullSync{}); E.Chk(e) {
 		t.Errorf("Cannot mark address synced: %v", e)
 		return
 	}
@@ -963,7 +965,7 @@ func TestImportScript(t *testing.T) {
 	// Mark imported address as partially synced with a block somewhere inbetween
 	// the import height and the chain height.
 	partialHeight := (createHeight-importHeight)/2 + importHeight
-	if e := w2.SetSyncStatus(address, PartialSync(partialHeight)); E.Chk(e) {
+	if e = w2.SetSyncStatus(address, PartialSync(partialHeight)); E.Chk(e) {
 		t.Errorf("Cannot mark address partially synced: %v", e)
 		return
 	}
@@ -992,7 +994,7 @@ func TestImportScript(t *testing.T) {
 	}
 	// Mark imported address as not synced at all, and verify sync height is now
 	// the import height.
-	if e := w3.SetSyncStatus(address, Unsynced(0)); E.Chk(e) {
+	if e = w3.SetSyncStatus(address, Unsynced(0)); E.Chk(e) {
 		t.Errorf("Cannot mark address synced: %v", e)
 		return
 	}
@@ -1003,7 +1005,7 @@ func TestImportScript(t *testing.T) {
 	// Mark imported address as synced with the recently-seen blocks, and verify
 	// that the sync height now equals the most recent block (the one at wallet
 	// creation).
-	if e := w3.SetSyncStatus(address, FullSync{}); E.Chk(e) {
+	if e = w3.SetSyncStatus(address, FullSync{}); E.Chk(e) {
 		t.Errorf("Cannot mark address synced: %v", e)
 		return
 	}
@@ -1018,19 +1020,21 @@ func TestImportScript(t *testing.T) {
 }
 func TestChangePassphrase(t *testing.T) {
 	createdAt := makeBS(0)
-	w, e := New(dummyDir, "A wallet for testing.",
+	var e error
+	var w *Store
+	w, e = New(dummyDir, "A wallet for testing.",
 		[]byte("banana"), tstNetParams, createdAt)
 	if e != nil  {
 		t.Error("ScriptError creating new wallet: " + e.Error())
 		return
 	}
 	// Changing the passphrase with a locked wallet must fail with ErrWalletLocked.
-	if e := w.ChangePassphrase([]byte("potato")); e != ErrLocked {
+	if e = w.ChangePassphrase([]byte("potato")); e != ErrLocked {
 		t.Errorf("Changing passphrase on a locked wallet did not fail correctly: %v", e)
 		return
 	}
 	// Unlock wallet so the passphrase can be changed.
-	if e := w.Unlock([]byte("banana")); E.Chk(e) {
+	if e = w.Unlock([]byte("banana")); E.Chk(e) {
 		t.Errorf("Cannot unlock: %v", e)
 		return
 	}
@@ -1049,7 +1053,7 @@ func TestChangePassphrase(t *testing.T) {
 		return
 	}
 	// Change passphrase.
-	if e := w.ChangePassphrase([]byte("potato")); E.Chk(e) {
+	if e = w.ChangePassphrase([]byte("potato")); E.Chk(e) {
 		t.Errorf("Changing passphrase failed: %v", e)
 		return
 	}
@@ -1059,17 +1063,17 @@ func TestChangePassphrase(t *testing.T) {
 		return
 	}
 	// Lock it.
-	if e := w.Lock(); E.Chk(e) {
+	if e = w.Lock(); E.Chk(e) {
 		t.Errorf("Cannot lock wallet after passphrase change: %v", e)
 		return
 	}
 	// Unlock with old passphrase.  This must fail with ErrWrongPassphrase.
-	if e := w.Unlock([]byte("banana")); e != ErrWrongPassphrase {
+	if e = w.Unlock([]byte("banana")); e != ErrWrongPassphrase {
 		t.Errorf("Unlocking with old passphrases did not fail correctly: %v", e)
 		return
 	}
 	// Unlock with new passphrase.  This must succeed.
-	if e := w.Unlock([]byte("potato")); E.Chk(e) {
+	if e = w.Unlock([]byte("potato")); E.Chk(e) {
 		t.Errorf("Unlocking with new passphrase failed: %v", e)
 		return
 	}

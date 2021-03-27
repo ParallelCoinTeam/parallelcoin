@@ -1567,7 +1567,7 @@ func deletePrivateKeys(ns walletdb.ReadWriteBucket) (e error) {
 				return nil
 			}
 			managerScopeBucket := scopeBucket.NestedReadWriteBucket(scopeKey)
-			if e := managerScopeBucket.Delete(coinTypePrivKeyName); E.Chk(e) {
+			if e = managerScopeBucket.Delete(coinTypePrivKeyName); E.Chk(e) {
 				str := "failed to delete cointype private key"
 				return managerError(ErrDatabase, str, e)
 			}

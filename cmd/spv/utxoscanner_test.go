@@ -353,7 +353,7 @@ func TestUtxoScannerScanBasic(t *testing.T) {
 		t.Log(e)
 	}
 	defer func() {
-		e := scanner.Stop()
+		e = scanner.Stop()
 		t.Log(e)
 	}()
 	var (
@@ -408,7 +408,7 @@ func TestUtxoScannerScanAddBlocks(t *testing.T) {
 		t.Log(e)
 	}
 	defer func() {
-		e := scanner.Stop()
+		e = scanner.Stop()
 		t.Log(e)
 	}()
 	var (
@@ -472,7 +472,7 @@ func TestUtxoScannerCancelRequest(t *testing.T) {
 		t.Log(e)
 	}
 	defer func() {
-		e := scanner.Stop()
+		e = scanner.Stop()
 		t.Log(e)
 	}()
 	// Add the requests in order of their block heights.

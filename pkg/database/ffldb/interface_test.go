@@ -514,7 +514,7 @@ func testBucketInterface(tc *testContext, bucket database.Bucket) bool {
 			return false
 		}
 		// Ensure deleting a bucket works as intended.
-		if e := bucket.DeleteBucket(testBucketName); E.Chk(e) {
+		if e = bucket.DeleteBucket(testBucketName); E.Chk(e) {
 			tc.t.Errorf("DeleteBucket: unexpected error: %v", e)
 			return false
 		}
@@ -1758,7 +1758,8 @@ func testClosedTxInterface(tc *testContext, tx database.Tx) bool {
 	for i, block := range tc.blocks {
 		blockHash := block.Hash()
 		allBlockHashes[i] = *blockHash
-		txLocs, e := block.TxLoc()
+		var txLocs []wire.TxLoc
+		txLocs, e = block.TxLoc()
 		if e != nil {
 			tc.t.Errorf(
 				"block.TxLoc(%d): unexpected error: %v", i,
@@ -1854,11 +1855,11 @@ func testTxClosed(tc *testContext) bool {
 		tc.t.Errorf("CreateBucket: unexpected error: %v", e)
 		return false
 	}
-	if e := tx.Metadata().Put(keyName, []byte("test")); E.Chk(e) {
+	if e = tx.Metadata().Put(keyName, []byte("test")); E.Chk(e) {
 		tc.t.Errorf("Put: unexpected error: %v", e)
 		return false
 	}
-	if e := tx.Commit(); E.Chk(e) {
+	if e = tx.Commit(); E.Chk(e) {
 		tc.t.Errorf("Commit: unexpected error: %v", e)
 		return false
 	}
@@ -1914,7 +1915,7 @@ func testConcurrency(tc *testContext) bool {
 	numReaders := len(tc.blocks)
 	resultChan := make(chan bool, numReaders)
 	reader := func(blockNum int) {
-		e := tc.db.View(
+		e = tc.db.View(
 			func(tx database.Tx) (e error) {
 				time.Sleep(sleepTime)
 				_, e = tx.FetchBlock(tc.blocks[blockNum].Hash())
@@ -1978,7 +1979,7 @@ func testConcurrency(tc *testContext) bool {
 	started := qu.T()
 	writeComplete := qu.T()
 	reader = func(blockNum int) {
-		e := tc.db.View(
+		e = tc.db.View(
 			func(tx database.Tx) (e error) {
 				started <- struct{}{}
 				// Wait for the writer to complete.

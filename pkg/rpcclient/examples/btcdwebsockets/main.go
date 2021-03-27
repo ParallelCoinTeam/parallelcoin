@@ -35,7 +35,9 @@ func main() {
 	}
 	// Connect to local pod RPC server using websockets.
 	podHomeDir := appdata.Dir("pod", false)
-	certs, e := ioutil.ReadFile(filepath.Join(podHomeDir, "rpc.cert"))
+	var certs []byte
+	var e error
+	certs, e = ioutil.ReadFile(filepath.Join(podHomeDir, "rpc.cert"))
 	if e != nil {
 		F.Ln(e)
 	}
@@ -46,12 +48,13 @@ func main() {
 		Pass:         "yourrpcpass",
 		Certificates: certs,
 	}
-	client, e := rpcclient.New(connCfg, &ntfnHandlers, qu.T())
+	var client *rpcclient.Client
+	client, e = rpcclient.New(connCfg, &ntfnHandlers, qu.T())
 	if e != nil {
 		F.Ln(e)
 	}
 	// Register for block connect and disconnect notifications.
-	if e := client.NotifyBlocks(); E.Chk(e) {
+	if e = client.NotifyBlocks(); E.Chk(e) {
 		F.Ln(e)
 	}
 	fmt.Println("NotifyBlocks: Registration Complete")

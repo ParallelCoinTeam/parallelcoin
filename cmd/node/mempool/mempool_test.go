@@ -378,7 +378,8 @@ func TestSimpleOrphanChain(t *testing.T) {
 	}
 	// Ensure the orphans are accepted (only up to the maximum allowed so none are evicted).
 	for _, tx := range chainedTxns[1 : maxOrphans+1] {
-		acceptedTxns, e := harness.txPool.ProcessTransaction(
+		var acceptedTxns []*TxDesc
+		acceptedTxns, e = harness.txPool.ProcessTransaction(
 			nil, tx, true,
 			false, 0,
 		)
@@ -562,7 +563,8 @@ func TestBasicOrphanRemoval(t *testing.T) {
 	}
 	// Ensure the orphans are accepted (only up to the maximum allowed so none are evicted).
 	for _, tx := range chainedTxns[1 : maxOrphans+1] {
-		acceptedTxns, e := harness.txPool.ProcessTransaction(
+		var acceptedTxns []*TxDesc
+		acceptedTxns, e = harness.txPool.ProcessTransaction(
 			nil, tx, true,
 			false, 0,
 		)
@@ -691,7 +693,8 @@ func TestMultiInputOrphanDoubleSpend(t *testing.T) {
 	}
 	// Start by adding the orphan transactions from the generated chain except the final one.
 	for _, tx := range chainedTxns[1:maxOrphans] {
-		acceptedTxns, e := harness.txPool.ProcessTransaction(
+		var acceptedTxns []*TxDesc
+		acceptedTxns, e = harness.txPool.ProcessTransaction(
 			nil, tx, true,
 			false, 0,
 		)

@@ -33,7 +33,7 @@ func main() {
 		F.Ln(e)
 	}
 	defer func() {
-		if e := ttfs.Close(); E.Chk(e) {
+		if e = ttfs.Close(); E.Chk(e) {
 		}
 	}()
 

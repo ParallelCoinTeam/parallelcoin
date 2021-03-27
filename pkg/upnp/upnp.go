@@ -76,12 +76,11 @@ func Discover() (nat NAT, e error) {
 	}
 	socket := conn.(*net.UDPConn)
 	defer func() {
-		if e := socket.Close(); E.Chk(e) {
+		if e = socket.Close(); E.Chk(e) {
 		}
 	}()
 	e = socket.SetDeadline(time.Now().Add(3 * time.Second))
-	if e != nil {
-		E.Ln(e)
+	if E.Chk(e) {
 		return
 	}
 	st := "ST: urn:schemas-upnp-org:device:InternetGatewayDevice:1\r\n"
@@ -223,27 +222,27 @@ func getOurIP() (ip string, e error) {
 // getServiceURL parses the xml description at the given root url to find the url for the WANIPConnection service to be
 // used for port forwarding.
 func getServiceURL(rootURL string) (url string, e error) {
-	var r *http.Response
-	r, e = http.Get(rootURL)
+	var re *http.Response
+	re, e = http.Get(rootURL)
 	if e != nil {
 		E.Ln(e)
 		return
 	}
 	defer func() {
-		if e = r.Body.Close(); E.Chk(e) {
+		if e = re.Body.Close(); E.Chk(e) {
 		}
 	}()
-	if r.StatusCode >= 400 {
-		e = errors.New(string(rune(r.StatusCode)))
+	if re.StatusCode >= 400 {
+		e = errors.New(string(rune(re.StatusCode)))
 		return
 	}
-	var root root
-	e = xml.NewDecoder(r.Body).Decode(&root)
+	var r root
+	e = xml.NewDecoder(re.Body).Decode(&r)
 	if e != nil {
 		E.Ln(e)
 		return
 	}
-	a := &root.Device
+	a := &r.Device
 	if a.DeviceType != "urn:schemas-upnp-org:device:InternetGatewayDevice:1" {
 		e = errors.New("no InternetGatewayDevice")
 		return
