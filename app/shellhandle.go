@@ -5,6 +5,7 @@ import (
 	"github.com/gookit/color"
 	"github.com/p9c/pod/pkg/logg"
 	"github.com/p9c/pod/pkg/pod"
+	"github.com/p9c/pod/pkg/podcfg"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -16,7 +17,6 @@ import (
 	"github.com/p9c/pod/cmd/node"
 	"github.com/p9c/pod/cmd/walletmain"
 	"github.com/p9c/pod/pkg/apputil"
-	"github.com/p9c/pod/pkg/wallet"
 )
 
 func ShellHandle(cx *pod.State) func(c *cli.Context) (e error) {
@@ -37,7 +37,7 @@ func ShellHandle(cx *pod.State) func(c *cli.Context) (e error) {
 		dbFilename := filepath.Join(
 			cx.Config.DataDir.V(),
 			cx.ActiveNet.Name,
-			wallet.DbName,
+			podcfg.DbName,
 		)
 		if !apputil.FileExists(dbFilename) && !cx.IsGUI {
 			// log.SetLevel("off", false)
