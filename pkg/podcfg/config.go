@@ -144,12 +144,15 @@ type Config struct {
 
 // ForEach iterates the configuration items in their defined order, running a function with the configuration item in
 // the field
-func (c *Config) ForEach(fn func(ifc interface{}) bool) bool {
+func (c *Config) ForEach(fn func(ifc Option) bool) bool {
 	t := reflect.ValueOf(c)
 	t = t.Elem()
 	for i := 0; i < t.NumField(); i++ {
-		if !fn(t.Field(i).Interface()) {
-			return false
+		// asserting to an Option ensures we skip the ancillary fields
+		if iff, ok := t.Field(i).Interface().(Option); ok {
+			if !fn(iff) {
+				return false
+			}
 		}
 	}
 	return true
@@ -157,47 +160,23 @@ func (c *Config) ForEach(fn func(ifc interface{}) bool) bool {
 
 func (c *Config) GetOption(input string) (opt Option, value string, e error) {
 	I.Ln("checking arg for option:", input)
-	if c.ForEach(func(ifc interface{}) bool {
-		var md *Metadata
-		switch ii := ifc.(type) {
-		case *Bool:
-			opt = ii
-			md = &ii.Metadata
-		case *Strings:
-			opt = ii
-			md = &ii.Metadata
-		case *Float:
-			opt = ii
-			md = &ii.Metadata
-		case *Int:
-			opt = ii
-			md = &ii.Metadata
-		case *String:
-			opt = ii
-			md = &ii.Metadata
-		case *Duration:
-			opt = ii
-			md = &ii.Metadata
-		}
-		if md != nil {
-			I.Ln(input, md.Option, input == md.Option, len(md.Option))
-			if strings.HasPrefix(input, md.Option) {
-				value = input[len(md.Option):]
+	found := false
+	if c.ForEach(func(ifc Option) bool {
+		aos := ifc.GetAllOptionStrings()
+		for i := range aos {
+			if strings.HasPrefix(input, aos[i]) {
+				value = input[len(aos[i]):]
 				I.Ln("value", value)
+				found = true
+				opt = ifc
 				return false
-			}
-			I.Ln(md.Aliases)
-			for i := range md.Aliases {
-				if strings.HasPrefix(input, md.Aliases[i]) {
-					value = input[len(md.Aliases[i]):]
-					I.Ln("value", value)
-					return false
-				}
 			}
 		}
 		return true
 	},
 	) {
+	}
+	if !found {
 		e = fmt.Errorf("option not found")
 	}
 	return
@@ -209,7 +188,7 @@ func (c *Config) GetOption(input string) (opt Option, value string, e error) {
 func (c *Config) MarshalJSON() (b []byte, e error) {
 	outMap := make(map[string]interface{})
 	c.ForEach(
-		func(ifc interface{}) bool {
+		func(ifc Option) bool {
 			switch ii := ifc.(type) {
 			case *Bool:
 				if ii.True() == ii.def && ii.Metadata.OmitEmpty && !c.ShowAll {
@@ -270,7 +249,7 @@ func (c *Config) UnmarshalJSON(data []byte) (e error) {
 		return
 	}
 	// I.S(ifc)
-	c.ForEach(func(iii interface{}) bool {
+	c.ForEach(func(iii Option) bool {
 		switch ii := iii.(type) {
 		case *Bool:
 			if i, ok := ifc[ii.Option]; ok {
@@ -335,10 +314,22 @@ func (c *Config) UnmarshalJSON(data []byte) (e error) {
 // the several places configuration is sourced from are overlaid in the following order:
 // default -> config file -> environment variables -> commandline flags
 func (c *Config) Initialize() (e error) {
-	// first process the commandline
+	// first lint the configuration
+	var aos map[string][]string
+	if aos, e = c.getAllOptionStrings(); E.Chk(e) {
+		return
+	}
+	// this function will panic if there is potential for ambiguity in the commandline configuration args
+	if _, e = findConflictingItems(aos); E.Chk(e) {
+	}
+	// process the commandline
 	var cm *Command
 	if cm, e = c.processCommandlineArgs(); E.Chk(e) {
 		return
+	}
+	var j []byte
+	if j, e = json.MarshalIndent(c, "", "    "); !E.Chk(e) {
+		I.Ln("\n"+string(j))
 	}
 	_ = cm
 	return
@@ -429,10 +420,10 @@ func (c *Config) processCommandlineArgs() (cm *Command, e error) {
 				e = fmt.Errorf("argument %d: '%s' lacks a valid option prefix", i, os.Args[i])
 				return
 			}
-			I.Ln("found option:", opt.GetMetadata().Option, "with value", val)
-			if opt, e = opt.ReadInput(val); E.Chk(e) {
+			if _, e = opt.ReadInput(val); E.Chk(e) {
 				return
 			}
+			I.Ln("found option:", opt.String())
 			options = append(options, opt)
 		}
 	}

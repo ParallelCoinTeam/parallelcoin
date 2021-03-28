@@ -11,6 +11,13 @@ type Command struct {
 	Commands    Commands
 }
 
+func (c Commands) GetAllCommands() (o []string) {
+	for i := range c {
+		o = append(o, c[i].Commands.GetAllCommands()...)
+	}
+	return
+}
+
 var tabs = "\t\t\t\t\t"
 
 // Find the Command you are looking for. Note that the namespace is assumed to be flat, no duplicated names on different

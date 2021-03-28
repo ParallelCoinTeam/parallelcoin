@@ -5,7 +5,7 @@ func MapGen(in *Config) (c *Config) {
 	c = in
 	c.Map = make(map[string]interface{})
 	c.ForEach(
-		func(ifc interface{}) bool {
+		func(ifc Option) bool {
 			switch ii := ifc.(type) {
 			case *Bool:
 				im := ii.Metadata

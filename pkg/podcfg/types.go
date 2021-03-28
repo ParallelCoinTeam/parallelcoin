@@ -25,6 +25,8 @@ type (
 		String() string
 		MarshalJSON() (b []byte, e error)
 		UnmarshalJSON(data []byte) (e error)
+		GetAllOptionStrings() []string
+		Type() interface{}
 	}
 	Metadata struct {
 		Option      string
@@ -37,6 +39,14 @@ type (
 		Options     []string
 		OmitEmpty   bool
 	}
+)
+
+func (m Metadata) GetAllOptionStrings() (opts []string) {
+	opts = append([]string{m.Option}, m.Aliases...)
+	return opts
+}
+
+type(
 	Bool struct {
 		Metadata
 		hook  []func(b bool)
@@ -219,6 +229,11 @@ func NewBool(m Metadata, def bool, hook ...func(b bool)) *Bool {
 	return &Bool{value: uberatomic.NewBool(def), Metadata: m, def: def, hook: hook}
 }
 
+// Type returns the receiver wrapped in an interface for identifying its type
+func (x *Bool) Type() interface{} {
+	return x
+}
+
 // GetMetadata returns the metadata of the option type
 func (x *Bool) GetMetadata() *Metadata {
 	return &x.Metadata
@@ -318,6 +333,11 @@ func NewStrings(m Metadata, def []string, hook ...func(s []string)) *Strings {
 	return &Strings{value: as, Metadata: m, def: def, hook: hook}
 }
 
+// Type returns the receiver wrapped in an interface for identifying its type
+func (x *Strings) Type() interface{} {
+	return x
+}
+
 // GetMetadata returns the metadata of the option type
 func (x *Strings) GetMetadata() *Metadata {
 	return &x.Metadata
@@ -394,6 +414,11 @@ func NewFloat(m Metadata, def float64) *Float {
 	return &Float{value: uberatomic.NewFloat64(def), Metadata: m, def: def}
 }
 
+// Type returns the receiver wrapped in an interface for identifying its type
+func (x *Float) Type() interface{} {
+	return x
+}
+
 // GetMetadata returns the metadata of the option type
 func (x *Float) GetMetadata() *Metadata {
 	return &x.Metadata
@@ -461,6 +486,11 @@ func (x *Float) UnmarshalJSON(data []byte) (e error) {
 // NewInt creates a new Int with a given default value
 func NewInt(m Metadata, def int64) *Int {
 	return &Int{value: uberatomic.NewInt64(def), Metadata: m, def: def}
+}
+
+// Type returns the receiver wrapped in an interface for identifying its type
+func (x *Int) Type() interface{} {
+	return x
 }
 
 // GetMetadata returns the metadata of the option type
@@ -532,6 +562,11 @@ func NewString(m Metadata, def string) *String {
 	v := &atomic.Value{}
 	v.Store([]byte(def))
 	return &String{value: v, Metadata: m, def: def}
+}
+
+// Type returns the receiver wrapped in an interface for identifying its type
+func (x *String) Type() interface{} {
+	return x
 }
 
 // GetMetadata returns the metadata of the option type
@@ -613,6 +648,11 @@ func (x *String) UnmarshalJSON(data []byte) (e error) {
 // NewDuration creates a new Duration with a given default value set
 func NewDuration(m Metadata, def time.Duration) *Duration {
 	return &Duration{value: uberatomic.NewDuration(def), Metadata: m, def: def}
+}
+
+// Type returns the receiver wrapped in an interface for identifying its type
+func (x *Duration) Type() interface{} {
+	return x
 }
 
 // GetMetadata returns the metadata of the option type
