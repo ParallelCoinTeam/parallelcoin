@@ -1,4 +1,4 @@
-// +podbuild !headless
+// +build !headless
 
 package app
 

@@ -1,4 +1,4 @@
-// +podbuild !windows
+// +build !windows
 
 package worker
 

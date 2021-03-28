@@ -1,4 +1,4 @@
-// +podbuild !headless
+// +build !headless
 
 package pod
 
@@ -87,24 +87,27 @@ type State struct {
 }
 
 // GetNewContext returns a fresh new context
-func GetNewContext(appName, appLang, subtext string) *State {
+func GetNewContext() (s *State, e error) {
 	config := podcfg.GetDefaultConfig()
+	if e = config.Initialize(); E.Chk(e){
+		return
+	}
 	chainClientReady := qu.T()
 	rand.Seed(time.Now().UnixNano())
 	rand.Seed(rand.Int63())
-	cx := &State{
+	s = &State{
 		ChainClientReady: chainClientReady,
 		KillAll:          qu.T(),
 		App:              cli.NewApp(),
 		Config:           config,
 		ConfigMap:        config.Map,
 		StateCfg:         new(state.Config),
-		Language:         lang.ExportLanguage(appLang),
+		// Language:         lang.ExportLanguage(appLang),
 		// DataDir:          appdata.Dir(appName, false),
 		NodeChan: make(chan *chainrpc.Server),
 		Syncing:  atomic.NewBool(false),
 	}
-	return cx
+	return
 }
 
 func (cx *State) WaitAdd() {

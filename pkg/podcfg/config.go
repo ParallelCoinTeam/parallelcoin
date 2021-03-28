@@ -31,57 +31,6 @@ const (
 	PARSER            = "json"
 )
 
-// Commands are a slice of podcfg.Command entries
-type Commands []Command
-
-// Command is a specification for a command and can include any number of subcommands
-type Command struct {
-	Name        string
-	Description string
-	Entrypoint  func(c *Config) error
-	Commands    Commands
-}
-
-var tabs = "\t\t\t\t\t"
-
-// Find the Command you are looking for. Note that the namespace is assumed to be flat, no duplicated names on different
-// levels, as it returns on the first one it finds, which goes depth-first recursive
-func (c Commands) Find(name string, hereDepth, hereDist int) (found bool, depth, dist int, cm *Command, e error) {
-	// I.S(c)
-	depth = hereDepth + 1
-	dist = hereDist + 1
-	if c == nil {
-		depth--
-		// I.Ln(tabs[:depth]+"end of the line", depth, dist)
-		// e = errors.New("end of the branch")
-		return
-	}
-	// I.Ln("depth", depth)
-	for i := range c {
-		if found, depth, dist, cm, e = c[i].Commands.Find(name, depth, dist); E.Chk(e) {
-			depth--
-			return
-		}
-		cm = &c[i]
-		if found {
-			depth--
-			return
-		}
-		if c[i].Name == name {
-			I.Ln(tabs[:depth-1]+"found", name, "at depth", depth, "distance", dist)
-			depth++
-			found = true
-			cm = &c[i]
-			e = nil
-			return
-		}
-		I.Ln(tabs[:depth-1]+"walking", c[i].Name)
-	}
-	depth--
-	// I.Ln(tabs[:depth-1]+"end of the line", depth, dist)
-	return
-}
-
 // Config defines the configuration items used by pod along with the various components included in the suite
 type Config struct {
 	// ShowAll is a flag to make the json encoder explicitly define all fields and not just the ones different to the
@@ -203,26 +152,6 @@ func (c *Config) ForEach(fn func(ifc interface{}) bool) {
 	}
 }
 
-
-func (c *Config) processCommandlineArgs() {
-	// first we will locate all the commands specified
-	var cm *Command
-	var e error
-	for i := range os.Args {
-		if i == 0 {
-			continue
-		}
-		var depth, dist int
-		var found bool
-		if found, depth, dist, cm, e = c.Commands.Find(os.Args[i], depth, dist); E.Chk(e) {
-		}
-		_ = depth
-		_ = dist
-		_ = found
-	}
-	_ = cm
-}
-
 // MarshalJSON implements the json marshaller for the config. This marshaller only saves what is different from the
 // defaults, and when it is unmarshalled, only the fields stored are altered, thus allowing stacking several sources
 // such as environment variables, command line flags and the config file itself.
@@ -280,13 +209,6 @@ func (c *Config) MarshalJSON() (b []byte, e error) {
 		},
 	)
 	return json.Marshal(&outMap)
-}
-
-func ifcToStrings(ifc []interface{}) (o []string) {
-	for i := range ifc {
-		o = append(o, ifc[i].(string))
-	}
-	return
 }
 
 // UnmarshalJSON implements the Unmarshaller interface with a specific goal to be well suited to compositing multiple
@@ -357,6 +279,52 @@ func (c *Config) UnmarshalJSON(data []byte) (e error) {
 	return
 }
 
+// Initialize loads in configuration from disk and from environment on top of the default base
+//
+// the several places configuration is sourced from are overlaid in the following order:
+// default -> config file -> environment variables -> commandline flags
+func (c *Config) Initialize() (e error) {
+	// first process the commandline
+	var cm *Command
+	if cm, e = c.processCommandlineArgs(); E.Chk(e) {
+		return
+	}
+	_ = cm
+	return
+}
+
+func (c *Config) processCommandlineArgs() (cm *Command, e error) {
+	// first we will locate all the commands specified to mark the 3 sections, options, commands, and the remainder is
+	// arbitrary for the app
+	var commands map[int]*Command
+	commands = make(map[int]*Command)
+	for i := range os.Args {
+		if i == 0 {
+			continue
+		}
+		var depth, dist int
+		var found bool
+		if found, depth, dist, cm, e = c.Commands.Find(os.Args[i], depth, dist); E.Chk(e) || !found {
+			continue
+		}
+		if found {
+			if oc, ok := commands[depth]; ok {
+				e = fmt.Errorf("second command found at same depth %s %s", oc.Name, cm.Name)
+				return
+			}
+			I.Ln("found command", cm.Name, "argument number", i, "at depth", depth, "distance", dist)
+			commands[depth] = cm
+		} else {
+			I.Ln("argument", os.Args[i], "is not a command")
+		}
+	}
+	I.S(commands)
+	// next, enforce the constraint that more than one command are adjacent and each subsequent is a child of the prior
+	
+	// gather the
+	return
+}
+
 // ReadCAFile reads in the configured Certificate Authority for TLS connections
 func ReadCAFile(config *Config) []byte {
 	// Read certificate file if TLS is not disabled.
@@ -379,4 +347,11 @@ func genPassword() string {
 		panic("can't do nothing without entropy! " + e.Error())
 	}
 	return base58.Encode(s)
+}
+
+func ifcToStrings(ifc []interface{}) (o []string) {
+	for i := range ifc {
+		o = append(o, ifc[i].(string))
+	}
+	return
 }

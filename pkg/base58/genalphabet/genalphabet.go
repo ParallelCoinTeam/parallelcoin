@@ -1,4 +1,4 @@
-// +podbuild ignore
+// +build ignore
 
 package main
 

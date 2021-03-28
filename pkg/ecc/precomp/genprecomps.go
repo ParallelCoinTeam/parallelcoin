@@ -1,4 +1,4 @@
-// +podbuild gensecp256k1
+// +build gensecp256k1
 
 package main
 

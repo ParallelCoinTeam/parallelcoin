@@ -221,25 +221,25 @@ func chainedPubKey(pubkey, chaincode []byte) ([]byte, error) {
 	return newPk.SerializeUncompressed(), nil
 }
 
-type version struct {
+type ksVersion struct {
 	major         byte
 	minor         byte
 	bugfix        byte
 	autoincrement byte
 }
 
-// Enforce that version satisfies the io.ReaderFrom and io.WriterTo interfaces.
-var _ io.ReaderFrom = &version{}
-var _ io.WriterTo = &version{}
+// Enforce that ksVersion satisfies the io.ReaderFrom and io.WriterTo interfaces.
+var _ io.ReaderFrom = &ksVersion{}
+var _ io.WriterTo = &ksVersion{}
 
 // readerFromVersion is an io.ReaderFrom and io.WriterTo that can specify any particular key store file format for
-// reading depending on the key store file version.
+// reading depending on the key store file ksVersion.
 type readerFromVersion interface {
-	readFromVersion(version, io.Reader) (int64, error)
+	readFromVersion(ksVersion, io.Reader) (int64, error)
 	io.WriterTo
 }
 
-func (v version) String() string {
+func (v ksVersion) String() string {
 	str := fmt.Sprintf("%d.%d", v.major, v.minor)
 	if v.bugfix != 0x00 || v.autoincrement != 0x00 {
 		str += fmt.Sprintf(".%d", v.bugfix)
@@ -249,11 +249,11 @@ func (v version) String() string {
 	}
 	return str
 }
-func (v version) Uint32() uint32 {
+func (v ksVersion) Uint32() uint32 {
 	return uint32(v.major)<<6 | uint32(v.minor)<<4 | uint32(v.bugfix)<<2 | uint32(v.autoincrement)
 }
-func (v *version) ReadFrom(r io.Reader) (int64, error) {
-	// Read 4 bytes for the version.
+func (v *ksVersion) ReadFrom(r io.Reader) (int64, error) {
+	// Read 4 bytes for the ksVersion.
 	var versBytes [4]byte
 	n, e := io.ReadFull(r, versBytes[:])
 	if e != nil {
@@ -266,8 +266,8 @@ func (v *version) ReadFrom(r io.Reader) (int64, error) {
 	v.autoincrement = versBytes[3]
 	return int64(n), nil
 }
-func (v *version) WriteTo(w io.Writer) (int64, error) {
-	// Write 4 bytes for the version.
+func (v *ksVersion) WriteTo(w io.Writer) (int64, error) {
+	// Write 4 bytes for the ksVersion.
 	versBytes := []byte{
 		v.major,
 		v.minor,
@@ -278,8 +278,8 @@ func (v *version) WriteTo(w io.Writer) (int64, error) {
 	return int64(n), e
 }
 
-// LT returns whether v is an earlier version than v2.
-func (v version) LT(v2 version) bool {
+// LT returns whether v is an earlier ksVersion than v2.
+func (v ksVersion) LT(v2 ksVersion) bool {
 	switch {
 	case v.major < v2.major:
 		return true
@@ -294,8 +294,8 @@ func (v version) LT(v2 version) bool {
 	}
 }
 
-// EQ returns whether v2 is an equal version to v.
-func (v version) EQ(v2 version) bool {
+// EQ returns whether v2 is an equal ksVersion to v.
+func (v ksVersion) EQ(v2 ksVersion) bool {
 	switch {
 	case v.major != v2.major:
 		return false
@@ -310,8 +310,8 @@ func (v version) EQ(v2 version) bool {
 	}
 }
 
-// GT returns whether v is a later version than v2.
-func (v version) GT(v2 version) bool {
+// GT returns whether v is a later ksVersion than v2.
+func (v ksVersion) GT(v2 ksVersion) bool {
 	switch {
 	case v.major > v2.major:
 		return true
@@ -328,19 +328,19 @@ func (v version) GT(v2 version) bool {
 
 // Various versions.
 var (
-	// VersArmory is the latest version used by Armory.
-	VersArmory = version{1, 35, 0, 0}
-	// Vers20LastBlocks is the version where key store files now hold the 20 most recently seen block hashes.
-	Vers20LastBlocks = version{1, 36, 0, 0}
-	// VersUnsetNeedsPrivkeyFlag is the bugfix version where the createPrivKeyNextUnlock address flag is correctly unset
+	// VersArmory is the latest ksVersion used by Armory.
+	VersArmory = ksVersion{1, 35, 0, 0}
+	// Vers20LastBlocks is the ksVersion where key store files now hold the 20 most recently seen block hashes.
+	Vers20LastBlocks = ksVersion{1, 36, 0, 0}
+	// VersUnsetNeedsPrivkeyFlag is the bugfix ksVersion where the createPrivKeyNextUnlock address flag is correctly unset
 	// after creating and encrypting its private key after unlock.
 	//
 	// Otherwise, re-creating private keys will occur too early in the address chain and fail due to encrypting an
 	// already encrypted address.
 	//
-	// Key store versions at or before this version include a special case to allow the duplicate encrypt.
-	VersUnsetNeedsPrivkeyFlag = version{1, 36, 1, 0}
-	// VersCurrent is the current key store file version.
+	// Key store versions at or before this ksVersion include a special case to allow the duplicate encrypt.
+	VersUnsetNeedsPrivkeyFlag = ksVersion{1, 36, 1, 0}
+	// VersCurrent is the current key store file ksVersion.
 	VersCurrent = VersUnsetNeedsPrivkeyFlag
 )
 
@@ -463,7 +463,7 @@ type Store struct {
 	dir          string
 	file         string
 	mtx          sync.RWMutex
-	vers         version
+	vers         ksVersion
 	net          *netParams
 	flags        walletFlags
 	createDate   int64
@@ -1576,9 +1576,9 @@ type recentBlocks struct {
 	lastHeight int32
 }
 
-func (rb *recentBlocks) readFromVersion(v version, r io.Reader) (int64, error) {
+func (rb *recentBlocks) readFromVersion(v ksVersion, r io.Reader) (int64, error) {
 	if !v.LT(Vers20LastBlocks) {
-		// Use current version.
+		// Use current ksVersion.
 		return rb.ReadFrom(r)
 	}
 	// Old file versions only saved the most recently seen block height and hash, not the last 20.
@@ -1751,7 +1751,7 @@ func newUnusedSpace(nBytes int, rfvs ...readerFromVersion) *unusedSpace {
 		rfvs:   rfvs,
 	}
 }
-func (u *unusedSpace) readFromVersion(v version, r io.Reader) (int64, error) {
+func (u *unusedSpace) readFromVersion(v ksVersion, r io.Reader) (int64, error) {
 	var read int64
 	for _, rfv := range u.rfvs {
 		n, e := rfv.readFromVersion(v, r)
@@ -1997,7 +1997,7 @@ func (a *btcAddress) ReadFrom(r io.Reader) (n int64, e error) {
 	datas := []interface{}{
 		&pubKeyHash,
 		&chkPubKeyHash,
-		make([]byte, 4), // version
+		make([]byte, 4), // ksVersion
 		&a.flags,
 		&a.chaincode,
 		&chkChaincode,
@@ -2063,7 +2063,7 @@ func (a *btcAddress) WriteTo(w io.Writer) (n int64, e error) {
 	datas := []interface{}{
 		&hash,
 		walletHash(hash),
-		make([]byte, 4), // version
+		make([]byte, 4), // ksVersion
 		&a.flags,
 		&a.chaincode,
 		walletHash(a.chaincode[:]),
@@ -2491,7 +2491,7 @@ func (sa *scriptAddress) ReadFrom(r io.Reader) (n int64, e error) {
 	datas := []interface{}{
 		&scriptHash,
 		&chkScriptHash,
-		make([]byte, 4), // version
+		make([]byte, 4), // ksVersion
 		&sa.flags,
 		&sa.script,
 		&chkScript,
@@ -2553,7 +2553,7 @@ func (sa *scriptAddress) WriteTo(w io.Writer) (n int64, e error) {
 	datas := []interface{}{
 		&hash,
 		walletHash(hash),
-		make([]byte, 4), // version
+		make([]byte, 4), // ksVersion
 		&sa.flags,
 		&sa.script,
 		walletHash(sa.script),
