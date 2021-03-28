@@ -21,7 +21,10 @@ const (
 
 // Main is the entrypoint for the pod AiO suite
 func Main() int {
-	cx := pod.GetNewContext()
+	cx, e := pod.GetNewContext()
+	if E.Chk(e){
+		return 1
+	}
 	cx.App = getApp(cx)
 	if e := cx.App.Run(os.Args); E.Chk(e) {
 		return 1

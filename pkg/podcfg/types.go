@@ -11,15 +11,20 @@ import (
 	"fmt"
 	"github.com/urfave/cli"
 	uberatomic "go.uber.org/atomic"
+	"strconv"
+	"strings"
 	"sync/atomic"
 	"time"
 )
 
 type (
 	Option interface {
-		ReadInput(string) Option
+		ReadInput(string) (o Option, e error)
 		GetMetadata() *Metadata
 		Name() string
+		String() string
+		MarshalJSON() (b []byte, e error)
+		UnmarshalJSON(data []byte) (e error)
 	}
 	Metadata struct {
 		Option      string
@@ -220,8 +225,22 @@ func (x *Bool) GetMetadata() *Metadata {
 }
 
 // ReadInput sets the value from a string
-func (x *Bool) ReadInput(s string) Option {
-	return x
+func (x *Bool) ReadInput(s string) (opt Option, e error) {
+	// if the input is empty, the user intends the default
+	if s == "" {
+		x.value.Store(x.def)
+		return
+	}
+	s = strings.ToLower(s)
+	switch s {
+	case "t", "true":
+		x.value.Store(true)
+	case "f", "false":
+		x.value.Store(false)
+	default:
+		e = fmt.Errorf("input on option %s: '%s' is not valid for a boolean flag", x.Name(), s)
+	}
+	return
 }
 
 // Name returns the name of the option
@@ -305,8 +324,13 @@ func (x *Strings) GetMetadata() *Metadata {
 }
 
 // ReadInput sets the value from a string
-func (x *Strings) ReadInput(s string) Option {
-	return x
+func (x *Strings) ReadInput(s string) (o Option, e error) {
+	if s == "" {
+		e = fmt.Errorf("string option %s %v may not be empty", x.Name(), x.Metadata.Aliases)
+		return
+	}
+	x.Set(append(x.S(), s))
+	return x, e
 }
 
 // Name returns the name of the option
@@ -376,8 +400,17 @@ func (x *Float) GetMetadata() *Metadata {
 }
 
 // ReadInput sets the value from a string
-func (x *Float) ReadInput(s string) Option {
-	return x
+func (x *Float) ReadInput(s string) (o Option, e error) {
+	if s == "" {
+		e = fmt.Errorf("floating point number option %s %v may not be empty", x.Name(), x.Metadata.Aliases)
+		return
+	}
+	var v float64
+	if v, e = strconv.ParseFloat(s, 64); E.Chk(e) {
+		return
+	}
+	x.value.Store(v)
+	return x, e
 }
 
 // Name returns the name of the option
@@ -436,8 +469,17 @@ func (x *Int) GetMetadata() *Metadata {
 }
 
 // ReadInput sets the value from a string
-func (x *Int) ReadInput(s string) Option {
-	return x
+func (x *Int) ReadInput(s string) (o Option, e error) {
+	if s == "" {
+		e = fmt.Errorf("integer number option %s %v may not be empty", x.Name(), x.Metadata.Aliases)
+		return
+	}
+	var v int64
+	if v, e = strconv.ParseInt(s, 10, 64); E.Chk(e) {
+		return
+	}
+	x.value.Store(v)
+	return x, e
 }
 
 // Name returns the name of the option
@@ -498,8 +540,13 @@ func (x *String) GetMetadata() *Metadata {
 }
 
 // ReadInput sets the value from a string
-func (x *String) ReadInput(s string) Option {
-	return x
+func (x *String) ReadInput(s string) (o Option, e error) {
+	if s == "" {
+		e = fmt.Errorf("string option %s %v may not be empty", x.Name(), x.Metadata.Aliases)
+		return
+	}
+	x.Set(s)
+	return x, e
 }
 
 // Name returns the name of the option
@@ -538,6 +585,7 @@ func (x *String) Set(s string) *String {
 	return x
 }
 
+// SetBytes sets the string from bytes
 func (x *String) SetBytes(s []byte) *String {
 	x.value.Store(s)
 	return x
@@ -573,8 +621,16 @@ func (x *Duration) GetMetadata() *Metadata {
 }
 
 // ReadInput sets the value from a string
-func (x *Duration) ReadInput(s string) Option {
-	return x
+func (x *Duration) ReadInput(s string) (o Option, e error) {
+	if s == "" {
+		e = fmt.Errorf("integer number option %s %v may not be empty", x.Name(), x.Metadata.Aliases)
+		return
+	}
+	var v time.Duration
+	if v, e = time.ParseDuration(s); !E.Chk(e) {
+		x.value.Store(v)
+	}
+	return
 }
 
 // Name returns the name of the option

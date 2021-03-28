@@ -157,8 +157,8 @@ func (c *Config) ForEach(fn func(ifc interface{}) bool) bool {
 
 func (c *Config) GetOption(input string) (opt Option, value string, e error) {
 	I.Ln("checking arg for option:", input)
-	var md *Metadata
 	if c.ForEach(func(ifc interface{}) bool {
+		var md *Metadata
 		switch ii := ifc.(type) {
 		case *Bool:
 			opt = ii
@@ -180,13 +180,17 @@ func (c *Config) GetOption(input string) (opt Option, value string, e error) {
 			md = &ii.Metadata
 		}
 		if md != nil {
+			I.Ln(input, md.Option, input == md.Option, len(md.Option))
 			if strings.HasPrefix(input, md.Option) {
 				value = input[len(md.Option):]
+				I.Ln("value", value)
 				return false
 			}
+			I.Ln(md.Aliases)
 			for i := range md.Aliases {
 				if strings.HasPrefix(input, md.Aliases[i]) {
 					value = input[len(md.Aliases[i]):]
+					I.Ln("value", value)
 					return false
 				}
 			}
@@ -426,7 +430,10 @@ func (c *Config) processCommandlineArgs() (cm *Command, e error) {
 				return
 			}
 			I.Ln("found option:", opt.GetMetadata().Option, "with value", val)
-			options = append(options, opt.ReadInput(val))
+			if opt, e = opt.ReadInput(val); E.Chk(e) {
+				return
+			}
+			options = append(options, opt)
 		}
 	}
 	I.S(commands[cmds[len(cmds)-1]], options, os.Args[commandsEnd:])
