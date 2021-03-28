@@ -20,6 +20,7 @@ import (
 	"io/ioutil"
 	"os"
 	"reflect"
+	"sort"
 	"time"
 )
 
@@ -296,8 +297,8 @@ func (c *Config) Initialize() (e error) {
 func (c *Config) processCommandlineArgs() (cm *Command, e error) {
 	// first we will locate all the commands specified to mark the 3 sections, options, commands, and the remainder is
 	// arbitrary for the app
-	var commands map[int]*Command
-	commands = make(map[int]*Command)
+	var commands map[int]Command
+	commands = make(map[int]Command)
 	for i := range os.Args {
 		if i == 0 {
 			continue
@@ -309,19 +310,59 @@ func (c *Config) processCommandlineArgs() (cm *Command, e error) {
 		}
 		if found {
 			if oc, ok := commands[depth]; ok {
-				e = fmt.Errorf("second command found at same depth %s %s", oc.Name, cm.Name)
+				e = fmt.Errorf("second command found at same depth '%s' and '%s'", oc.Name, cm.Name)
 				return
 			}
 			I.Ln("found command", cm.Name, "argument number", i, "at depth", depth, "distance", dist)
-			commands[depth] = cm
+			commands[depth] = *cm
 		} else {
 			I.Ln("argument", os.Args[i], "is not a command")
 		}
 	}
 	I.S(commands)
-	// next, enforce the constraint that more than one command are adjacent and each subsequent is a child of the prior
-	
-	// gather the
+	if len(commands) == 0 {
+		commands[0] = c.Commands[0]
+	} else {
+		cmds := []int{}
+		for i := range commands {
+			cmds = append(cmds, i)
+		}
+		if len(cmds) > 0 {
+			sort.Ints(cmds)
+			I.S(cmds)
+			var cms []string
+			for j := range commands {
+				cms = append(cms, commands[j].Name)
+			}
+			if cmds[0] != 1 {
+				e = fmt.Errorf("commands must include base level item for disambiguation %v", cms)
+			}
+			prev := cmds[0]
+			for i := range cmds {
+				if i == 0 {
+					continue
+				}
+				if cmds[i] != prev+1 {
+					e = fmt.Errorf("more than one command specified, %v", cms)
+					return
+				}
+				found := false
+				for j := range commands[cmds[i-1]].Commands {
+					if commands[cmds[i]].Name == commands[cmds[i-1]].Commands[j].Name {
+						found = true
+					}
+				}
+				if !found {
+					var cms []string
+					for j := range commands {
+						cms = append(cms, commands[j].Name)
+					}
+					e = fmt.Errorf("multiple commands are not a path on the command tree %v", cms)
+					return
+				}
+			}
+		}
+	}
 	return
 }
 

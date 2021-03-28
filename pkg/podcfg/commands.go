@@ -30,7 +30,6 @@ func (c Commands) Find(name string, hereDepth, hereDist int) (found bool, depth,
 	for i := range c {
 		T.Ln(tabs[:depth]+"walking", c[i].Name, depth, dist)
 		if c[i].Name == name {
-			// depth++
 			T.Ln(tabs[:depth]+"found", name, "at depth", depth, "distance", dist)
 			found = true
 			cm = &c[i]
@@ -41,7 +40,6 @@ func (c Commands) Find(name string, hereDepth, hereDist int) (found bool, depth,
 		}
 		if found, depth, dist, cm, e = c[i].Commands.Find(name, depth, dist); E.Chk(e) {
 			T.Ln(tabs[:depth]+"error", c[i].Name)
-			// depth--
 			return
 		}
 		if found {
