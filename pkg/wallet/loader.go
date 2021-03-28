@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 	
-	"github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/qu"
 	
 	"github.com/p9c/pod/pkg/util/prompt"
 	"github.com/p9c/pod/pkg/waddrmgr"

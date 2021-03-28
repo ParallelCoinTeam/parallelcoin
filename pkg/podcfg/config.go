@@ -18,6 +18,7 @@ import (
 	"github.com/p9c/pod/pkg/base58"
 	"github.com/p9c/pod/pkg/util/hdkeychain"
 	"io/ioutil"
+	"os"
 	"reflect"
 	"time"
 )
@@ -68,6 +69,7 @@ func (c Commands) Find(name string, hereDepth, hereDist int) (found bool, depth,
 		}
 		if c[i].Name == name {
 			I.Ln(tabs[:depth-1]+"found", name, "at depth", depth, "distance", dist)
+			depth++
 			found = true
 			cm = &c[i]
 			e = nil
@@ -201,23 +203,25 @@ func (c *Config) ForEach(fn func(ifc interface{}) bool) {
 	}
 }
 
-//
-// func (c *Config) processCommandlineArgs() {
-// 	// first we will locate all the commands specified
-// 	var cm *Command
-// 	var e error
-// 	for i := range os.Args {
-// 		if i == 0 {
-// 			continue
-// 		}
-// 		var depth, dist int
-// 		if depth, dist, cm, e = c.Commands.Find(os.Args[i], depth, dist); E.Chk(e) {
-// 		}
-// 		_ = depth
-// 		_ = dist
-// 	}
-// 	_ = cm
-// }
+
+func (c *Config) processCommandlineArgs() {
+	// first we will locate all the commands specified
+	var cm *Command
+	var e error
+	for i := range os.Args {
+		if i == 0 {
+			continue
+		}
+		var depth, dist int
+		var found bool
+		if found, depth, dist, cm, e = c.Commands.Find(os.Args[i], depth, dist); E.Chk(e) {
+		}
+		_ = depth
+		_ = dist
+		_ = found
+	}
+	_ = cm
+}
 
 // MarshalJSON implements the json marshaller for the config. This marshaller only saves what is different from the
 // defaults, and when it is unmarshalled, only the fields stored are altered, thus allowing stacking several sources

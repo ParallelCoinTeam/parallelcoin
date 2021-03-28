@@ -3,14 +3,14 @@ package app
 import (
 	"fmt"
 	"github.com/gookit/color"
-	"github.com/p9c/pod/pkg/logg"
+	"github.com/p9c/log"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/podcfg"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	
-	"github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/qu"
 	
 	"github.com/urfave/cli"
 	
@@ -21,8 +21,8 @@ import (
 
 func WalletHandle(cx *pod.State) func(c *cli.Context) (e error) {
 	return func(c *cli.Context) (e error) {
-		logg.AppColorizer = color.Bit24(255, 255, 128, false).Sprint
-		logg.App = "wallet"
+		log.AppColorizer = color.Bit24(255, 255, 128, false).Sprint
+		log.App = "wallet"
 		podconfig.Configure(cx, c.Command.Name, true)
 		cx.Config.WalletFile.Set(filepath.Join(cx.Config.DataDir.V(), cx.ActiveNet.Name, podcfg.DbName))
 		// dbFilename := *cx.Config.DataDir + slash + cx.ActiveNet.

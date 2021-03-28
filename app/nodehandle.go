@@ -2,14 +2,14 @@ package app
 
 import (
 	"github.com/gookit/color"
-	"github.com/p9c/pod/pkg/logg"
+	"github.com/p9c/log"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/urfave/cli"
 	
 	"github.com/p9c/pod/cmd/walletmain"
 	"github.com/p9c/pod/pkg/apputil"
 	"github.com/p9c/pod/pkg/podconfig"
-	"github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/qu"
 	
 	"github.com/p9c/pod/cmd/node"
 )
@@ -21,8 +21,8 @@ func rpcNodeHandle(cx *pod.State) func(c *cli.Context) (e error) {
 
 func nodeHandle(cx *pod.State) func(c *cli.Context) (e error) {
 	return func(c *cli.Context) (e error) {
-		logg.AppColorizer = color.Bit24(128, 128, 255, false).Sprint
-		logg.App = "  node"
+		log.AppColorizer = color.Bit24(128, 128, 255, false).Sprint
+		log.App = "  node"
 		F.Ln("running node handler")
 		podconfig.Configure(cx, "node", true)
 		cx.NodeReady = qu.T()

@@ -1,4 +1,4 @@
-// +build ignore
+// +podbuild ignore
 
 package main
 
@@ -298,7 +298,7 @@ var handlers = handlersT{
 }
 
 func main() {
-	logg.SetLogLevel("trace")
+	log.SetLogLevel("trace")
 	if fd, e := os.Create("rpchandlers.go"); E.Chk(e) {
 	} else {
 		defer fd.Close()
@@ -325,7 +325,7 @@ import (
 	"net/rpc"
 	"time"
 
-	qu "github.com/p9c/pod/pkg/util/qu"
+	qu "github.com/p9c/qu"
 
 	"github.com/p9c/pod/pkg/btcjson"
 	"github.com/p9c/pod/pkg/wallet"

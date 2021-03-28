@@ -3,7 +3,7 @@ package chainclient
 import (
 	"container/list"
 	
-	"github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/qu"
 )
 
 // ConcurrentQueue is a concurrent-safe FIFO queue with unbounded capacity. Clients interact with the queue by pushing

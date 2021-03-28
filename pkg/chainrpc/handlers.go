@@ -6,19 +6,19 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"github.com/p9c/log"
 	"github.com/p9c/pod/cmd/node/version"
 	"github.com/p9c/pod/pkg/amt"
 	block2 "github.com/p9c/pod/pkg/block"
 	"github.com/p9c/pod/pkg/btcaddr"
 	"github.com/p9c/pod/pkg/fork"
-	"github.com/p9c/pod/pkg/logg"
 	"math/big"
 	"net"
 	"strconv"
 	"strings"
 	"time"
 	
-	"github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/qu"
 	
 	"github.com/p9c/pod/cmd/node/mempool"
 	"github.com/p9c/pod/pkg/blockchain"
@@ -504,7 +504,7 @@ func HandleGetAddedNodeInfo(
 			addr.Address = ip
 			addr.Connected = "false"
 			if ip == host && peer.Connected() {
-				addr.Connected = logg.DirectionString(peer.Inbound())
+				addr.Connected = log.DirectionString(peer.Inbound())
 			}
 			addrs = append(addrs, addr)
 		}
@@ -2652,7 +2652,7 @@ func HandleSetGenerate(s *Server, cmd interface{}, closeChan qu.C) (interface{},
 	// //	}
 	// //	args = append(args, "kopach")
 	// //	// args = apputil.PrependForWindows(args)
-	// //	s.StateCfg.Miner = consume.Log(s.Quit, func(ent *logg.Entry) (e error) {
+	// //	s.StateCfg.Miner = consume.Log(s.Quit, func(ent *log.Entry) (e error) {
 	// //		D.Ln(ent.Level, ent.Time, ent.Text, ent.CodeLocation)
 	// //		return
 	// //	}, func(pkg string) (out bool) {

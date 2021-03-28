@@ -1,4 +1,4 @@
-// +build !headless
+// +podbuild !headless
 
 package pod
 
@@ -14,7 +14,7 @@ import (
 	"sync"
 	"time"
 	
-	"github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/qu"
 	
 	"go.uber.org/atomic"
 	
@@ -26,9 +26,9 @@ import (
 	"github.com/p9c/pod/pkg/wallet"
 )
 
-type _dtype int
-
-var _d _dtype
+// type _dtype int
+//
+// var _d _dtype
 
 // State stores all the common state data used in pod
 type State struct {
@@ -86,6 +86,27 @@ type State struct {
 	Syncing      *atomic.Bool
 }
 
+// GetNewContext returns a fresh new context
+func GetNewContext(appName, appLang, subtext string) *State {
+	config := podcfg.GetDefaultConfig()
+	chainClientReady := qu.T()
+	rand.Seed(time.Now().UnixNano())
+	rand.Seed(rand.Int63())
+	cx := &State{
+		ChainClientReady: chainClientReady,
+		KillAll:          qu.T(),
+		App:              cli.NewApp(),
+		Config:           config,
+		ConfigMap:        config.Map,
+		StateCfg:         new(state.Config),
+		Language:         lang.ExportLanguage(appLang),
+		// DataDir:          appdata.Dir(appName, false),
+		NodeChan: make(chan *chainrpc.Server),
+		Syncing:  atomic.NewBool(false),
+	}
+	return cx
+}
+
 func (cx *State) WaitAdd() {
 	cx.WaitGroup.Add(1)
 	_, file, line, _ := runtime.Caller(1)
@@ -122,27 +143,6 @@ func (cx *State) PrintWaitChangers() string {
 	o += "current total:"
 	o += fmt.Sprint(cx.waitCounter)
 	return o
-}
-
-// GetNewContext returns a fresh new context
-func GetNewContext(appName, appLang, subtext string) *State {
-	config := podcfg.GetDefaultConfig()
-	chainClientReady := qu.T()
-	rand.Seed(time.Now().UnixNano())
-	rand.Seed(rand.Int63())
-	cx := &State{
-		ChainClientReady: chainClientReady,
-		KillAll:          qu.T(),
-		App:              cli.NewApp(),
-		Config:           config,
-		ConfigMap:        config.Map,
-		StateCfg:         new(state.Config),
-		Language:         lang.ExportLanguage(appLang),
-		// DataDir:          appdata.Dir(appName, false),
-		NodeChan: make(chan *chainrpc.Server),
-		Syncing:  atomic.NewBool(false),
-	}
-	return cx
 }
 
 func GetContext(cx *State) *chainrpc.Context {

@@ -1,10 +1,10 @@
-// +build !headless
+// +podbuild !headless
 
 package app
 
 import (
 	"github.com/gookit/color"
-	"github.com/p9c/pod/pkg/logg"
+	"github.com/p9c/log"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/urfave/cli"
 	
@@ -14,8 +14,8 @@ import (
 
 func walletGUIHandle(cx *pod.State) func(c *cli.Context) (e error) {
 	return func(c *cli.Context) (e error) {
-		logg.AppColorizer = color.Bit24(128, 255, 255, false).Sprint
-		logg.App = "   gui"
+		log.AppColorizer = color.Bit24(128, 255, 255, false).Sprint
+		log.App = "   gui"
 		D.Ln("starting up parallelcoin pod gui...")
 		// fork.ForkCalc()
 		podconfig.Configure(cx, "gui", true)

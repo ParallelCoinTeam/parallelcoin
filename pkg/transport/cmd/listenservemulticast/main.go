@@ -2,11 +2,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/p9c/pod/pkg/logg"
+	"github.com/p9c/log"
 	"net"
 	"time"
 	
-	"github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/qu"
 	
 	"github.com/p9c/pod/pkg/transport"
 	"github.com/p9c/pod/pkg/util/loop"
@@ -21,7 +21,7 @@ var (
 )
 
 func main() {
-	logg.SetLogLevel("trace")
+	log.SetLogLevel("trace")
 	D.Ln("starting test")
 	quit := qu.T()
 	var c *transport.Channel

@@ -1,11 +1,12 @@
 package ecc
 
 import (
-	"github.com/p9c/pod/pkg/logg"
+	"github.com/p9c/log"
+	"github.com/p9c/pod/version"
 )
 
-var subsystem = logg.AddLoggerSubsystem()
-var F, E, W, I, D, T logg.LevelPrinter = logg.GetLogPrinterSet(subsystem)
+var subsystem = log.AddLoggerSubsystem(version.PathBase)
+var F, E, W, I, D, T log.LevelPrinter = log.GetLogPrinterSet(subsystem)
 
 func init() {
 	// to filter out this package, uncomment the following

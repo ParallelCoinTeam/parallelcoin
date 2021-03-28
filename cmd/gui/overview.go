@@ -10,8 +10,8 @@ import (
 	
 	l "gioui.org/layout"
 	
+	"github.com/p9c/gel"
 	"github.com/p9c/pod/pkg/btcjson"
-	"github.com/p9c/pod/pkg/gui"
 )
 
 func (wg *WalletGUI) balanceCard() func(gtx l.Context) l.Dimensions {
@@ -149,7 +149,7 @@ func (wg *WalletGUI) OverviewPage() l.Widget {
 	}
 	return func(gtx l.Context) l.Dimensions {
 		return wg.Responsive(
-			*wg.Size, gui.Widgets{
+			*wg.Size, gel.Widgets{
 				{
 					Size: 0,
 					Widget:
@@ -165,7 +165,7 @@ func (wg *WalletGUI) OverviewPage() l.Widget {
 								).Fn,
 							// ).Fn,
 						).
-						// Rigid(wg.Inset(0.25, gui.EmptySpace(0, 0)).Fn).
+						// Rigid(wg.Inset(0.25, gel.EmptySpace(0, 0)).Fn).
 						Flexed(
 							1,
 							wg.VFlex().AlignStart().
@@ -200,7 +200,7 @@ func (wg *WalletGUI) OverviewPage() l.Widget {
 								).Fn,
 							// ).Fn,
 						).
-						// Rigid(wg.Inset(0.25, gui.EmptySpace(0, 0)).Fn).
+						// Rigid(wg.Inset(0.25, gel.EmptySpace(0, 0)).Fn).
 						Flexed(
 							1,
 							// wg.Inset(
@@ -299,7 +299,7 @@ func (wg *WalletGUI) recentTxCardStub(txs *btcjson.ListTransactionsResult) l.Wid
 					).
 					Fn,
 			).
-			// Flexed(1, gui.EmptyMaxWidth()).
+			// Flexed(1, gel.EmptyMaxWidth()).
 			Rigid(
 				wg.Flex().
 					Rigid(
@@ -423,7 +423,7 @@ func (wg *WalletGUI) recentTxCardSummary(txs *btcjson.ListTransactionsResult) l.
 
 func (wg *WalletGUI) recentTxCardSummaryButton(
 	txs *btcjson.ListTransactionsResult,
-	clickable *gui.Clickable,
+	clickable *gel.Clickable,
 	bgColor string, back bool,
 ) l.Widget {
 	return wg.ButtonLayout(
@@ -454,14 +454,14 @@ func (wg *WalletGUI) recentTxCardSummaryButton(
 	).
 		Background(bgColor).
 		Embed(
-			gui.If(
+			gel.If(
 				back,
 				wg.Flex().
 					Rigid(
 						wg.Icon().Color("PanelText").Scale(4).Src(&icons2.NavigationArrowBack).Fn,
 					).
 					Rigid(
-						wg.Inset(0.5, gui.EmptyMinWidth()).Fn,
+						wg.Inset(0.5, gel.EmptyMinWidth()).Fn,
 					).
 					Flexed(
 						1,
@@ -475,7 +475,7 @@ func (wg *WalletGUI) recentTxCardSummaryButton(
 					Fn,
 				wg.Flex().
 					Rigid(
-						wg.Inset(0.5, gui.EmptyMaxHeight()).Fn,
+						wg.Inset(0.5, gel.EmptyMaxHeight()).Fn,
 					).
 					Flexed(
 						1,
@@ -493,7 +493,7 @@ func (wg *WalletGUI) recentTxCardSummaryButton(
 
 func (wg *WalletGUI) recentTxCardSummaryButtonGenerate(
 	txs *btcjson.ListTransactionsResult,
-	clickable *gui.Clickable,
+	clickable *gel.Clickable,
 	bgColor string, back bool,
 ) l.Widget {
 	return wg.ButtonLayout(
@@ -529,7 +529,7 @@ func (wg *WalletGUI) recentTxCardSummaryButtonGenerate(
 					// wg.Fill(
 					// 	"Primary", l.W, 0, 0, wg.Inset(
 					// 		0.5,
-					gui.If(
+					gel.If(
 						back,
 						wg.Flex().AlignStart().
 							Rigid(
@@ -548,7 +548,7 @@ func (wg *WalletGUI) recentTxCardSummaryButtonGenerate(
 							Fn,
 						// wg.Flex().
 						// 	Rigid(
-						// 		wg.Inset(0.5, gui.EmptyMaxHeight()).Fn,
+						// 		wg.Inset(0.5, gel.EmptyMaxHeight()).Fn,
 						// 	).
 						// 	Flexed(
 						// 		1,
@@ -567,7 +567,7 @@ func (wg *WalletGUI) recentTxCardSummaryButtonGenerate(
 		).Fn
 }
 
-func (wg *WalletGUI) recentTxCardDetail(txs *btcjson.ListTransactionsResult, clickable *gui.Clickable) l.Widget {
+func (wg *WalletGUI) recentTxCardDetail(txs *btcjson.ListTransactionsResult, clickable *gel.Clickable) l.Widget {
 	return wg.VFlex().
 		Rigid(
 			wg.Fill(
@@ -584,7 +584,7 @@ func (wg *WalletGUI) recentTxCardDetail(txs *btcjson.ListTransactionsResult, cli
 			// 				wg.Inset(
 			// 					0.25,
 			// 					wg.VFlex().
-			// 						Rigid(wg.Inset(0.25, gui.EmptySpace(0, 0)).Fn).
+			// 						Rigid(wg.Inset(0.25, gel.EmptySpace(0, 0)).Fn).
 			// 						Rigid(
 			// 							wg.H6("Transaction Details").
 			// 								Color("PanelText").
@@ -691,7 +691,7 @@ func (wg *WalletGUI) RecentTransactions(n int, listName string) l.Widget {
 	// first := true
 	// out = append(out)
 	var txList []btcjson.ListTransactionsResult
-	var clickables []*gui.Clickable
+	var clickables []*gel.Clickable
 	txList = wg.txHistoryList
 	switch listName {
 	case "history":
@@ -734,7 +734,7 @@ func (wg *WalletGUI) RecentTransactions(n int, listName string) l.Widget {
 		// if !first {
 		// 	out = append(
 		// 		out,
-		// 		wg.Inset(0.25, gui.EmptyMaxWidth()).Fn,
+		// 		wg.Inset(0.25, gel.EmptyMaxWidth()).Fn,
 		// 	)
 		// } else {
 		// 	first = false
@@ -744,19 +744,19 @@ func (wg *WalletGUI) RecentTransactions(n int, listName string) l.Widget {
 		out = append(
 			out,
 			func(gtx l.Context) l.Dimensions {
-				return gui.If(
+				return gel.If(
 					txs.Category == "immature",
 					wg.recentTxCardSummaryButtonGenerate(&txs, ck, "DocBg", false),
-					gui.If(
+					gel.If(
 						txs.Category == "send",
 						wg.recentTxCardSummaryButton(&txs, ck, "Danger", false),
-						gui.If(
+						gel.If(
 							txs.Category == "receive",
 							wg.recentTxCardSummaryButton(&txs, ck, "Success", false),
-							gui.If(
+							gel.If(
 								txs.Category == "generate",
 								wg.recentTxCardSummaryButtonGenerate(&txs, ck, "DocBg", false),
-								gui.If(
+								gel.If(
 									wg.prevOpenTxID.Load() == txs.TxID,
 									wg.recentTxCardSummaryButton(&txs, ck, "Primary", false),
 									wg.recentTxCardSummaryButton(&txs, ck, "DocBg", false),

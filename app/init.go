@@ -2,7 +2,7 @@ package app
 
 import (
 	"github.com/gookit/color"
-	"github.com/p9c/pod/pkg/logg"
+	"github.com/p9c/log"
 	"github.com/p9c/pod/pkg/pod"
 	"os"
 	"os/exec"
@@ -14,8 +14,8 @@ import (
 
 var initHandle = func(cx *pod.State) func(c *cli.Context) (e error) {
 	return func(c *cli.Context) (e error) {
-		logg.AppColorizer = color.Bit24(255, 255, 255, false).Sprint
-		logg.App = "  init"
+		log.AppColorizer = color.Bit24(255, 255, 255, false).Sprint
+		log.App = "  init"
 		I.Ln("running configuration and wallet initialiser")
 		podconfig.Configure(cx, "init", true)
 		args := append(os.Args[1:len(os.Args)-1], "wallet")

@@ -9,7 +9,7 @@ import (
 	"runtime/debug"
 	"runtime/trace"
 	
-	"github.com/p9c/pod/app"
+	"github.com/p9c/pod/cmd/app"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/util/limits"
 )
@@ -28,15 +28,15 @@ func Main() {
 	var f *os.File
 	if os.Getenv("POD_TRACE") == "on" {
 		D.Ln("starting trace")
-		if f, e = os.Create(fmt.Sprintf("%v.trace", fmt.Sprint(os.Args))); E.Chk(e) {
+		tpath := fmt.Sprintf("%v.trace", fmt.Sprint(os.Args))
+		if f, e = os.Create(tpath); E.Chk(e) {
 			E.Ln(
-				"tracing env POD_TRACE=on but we can't write to it",
+				"tracing env POD_TRACE=on but we can't write to trace file",
+				fmt.Sprintf("'%s'", tpath),
 				e,
 			)
 		} else {
-			e = trace.Start(f)
-			if e != nil {
-				E.Ln("could not start tracing", e)
+			if e = trace.Start(f); E.Chk(e) {
 			} else {
 				D.Ln("tracing started")
 				defer trace.Stop()

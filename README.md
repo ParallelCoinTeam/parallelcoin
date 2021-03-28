@@ -36,7 +36,7 @@ using](https://golang.org).
 
 ```bash
 cd ~
-sudo apt get install -y wget git build-essential
+sudo apt get install -y wget git podbuild-essential
 wget https://golang.org/dl/go1.14.13.linux-amd64.tar.gz
 tar zxvf go1.14.13.linux-amd64.tar.gz
 ```

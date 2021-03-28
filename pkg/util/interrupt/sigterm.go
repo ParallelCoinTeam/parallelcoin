@@ -1,4 +1,4 @@
-// +build darwin dragonfly freebsd linux netbsd openbsd solaris
+// +podbuild darwin dragonfly freebsd linux netbsd openbsd solaris
 
 package interrupt
 

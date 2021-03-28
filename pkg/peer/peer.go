@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/p9c/pod/pkg/chaincfg"
-	"github.com/p9c/pod/pkg/logg"
+	"github.com/p9c/log"
 	"io"
 	"math/rand"
 	"net"
@@ -14,7 +14,7 @@ import (
 	"sync/atomic"
 	"time"
 	
-	"github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/qu"
 	
 	"github.com/btcsuite/go-socks/socks"
 	
@@ -393,7 +393,7 @@ type Peer struct {
 //
 // This function is safe for concurrent access.
 func (p *Peer) String() string {
-	return fmt.Sprintf("%s (%s)", p.addr, logg.DirectionString(p.inbound))
+	return fmt.Sprintf("%s (%s)", p.addr, log.DirectionString(p.inbound))
 }
 
 // UpdateLastBlockHeight updates the last known block for the peer.
@@ -1661,7 +1661,7 @@ func (p *Peer) Disconnect() {
 	if atomic.AddInt32(&p.disconnect, 1) != 1 {
 		return
 	}
-	T.Ln("disconnecting", p, logg.Caller("from", 1))
+	T.Ln("disconnecting", p, log.Caller("from", 1))
 	if atomic.LoadInt32(&p.connected) != 0 {
 		_ = p.conn.Close()
 	}

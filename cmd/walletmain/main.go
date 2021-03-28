@@ -3,7 +3,7 @@ package walletmain
 import (
 	"fmt"
 	"github.com/p9c/pod/pkg/chaincfg"
-	"github.com/p9c/pod/pkg/logg"
+	"github.com/p9c/log"
 	"github.com/p9c/pod/pkg/podcfg"
 	walletrpc2 "github.com/p9c/pod/pkg/walletrpc"
 	
@@ -11,7 +11,7 @@ import (
 	// _ "net/http/pprof"
 	"sync"
 	
-	"github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/qu"
 	
 	"github.com/p9c/pod/pkg/chainclient"
 	"github.com/p9c/pod/pkg/pod"
@@ -157,7 +157,7 @@ func rpcClientConnectLoop(
 	cx *pod.State, legacyServer *walletrpc2.Server,
 	loader *wallet.Loader,
 ) {
-	T.Ln("rpcClientConnectLoop", logg.Caller("which was started at:", 2))
+	T.Ln("rpcClientConnectLoop", log.Caller("which was started at:", 2))
 	// var certs []byte
 	// if !cx.PodConfig.UseSPV {
 	certs := podcfg.ReadCAFile(cx.Config)

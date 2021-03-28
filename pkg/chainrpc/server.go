@@ -11,7 +11,7 @@ import (
 	block2 "github.com/p9c/pod/pkg/block"
 	"github.com/p9c/pod/pkg/control/peersummary"
 	"github.com/p9c/pod/pkg/fork"
-	"github.com/p9c/pod/pkg/logg"
+	"github.com/p9c/log"
 	"github.com/p9c/pod/pkg/mining"
 	"github.com/p9c/pod/pkg/podcfg"
 	"math"
@@ -27,7 +27,7 @@ import (
 	"time"
 	
 	"github.com/p9c/pod/pkg/util/interrupt"
-	"github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/qu"
 	
 	uberatomic "go.uber.org/atomic"
 	
@@ -449,7 +449,7 @@ func (n *Node) Start() {
 	// 	}
 	// 	args = append(args, "kopach")
 	// 	// args = apputil.PrependForWindows(args)
-	// 	n.StateCfg.Miner = consume.Log(n.Quit, func(ent *logg.Entry) (e error) {
+	// 	n.StateCfg.Miner = consume.Log(n.Quit, func(ent *log.Entry) (e error) {
 	// 		D.Ln(ent.Level, ent.Time, ent.Text, ent.CodeLocation)
 	// 		return
 	// 	}, func(pkg string) (out bool) {
@@ -644,7 +644,7 @@ func (n *Node) HandleBanPeerMsg(state *PeerState, sp *NodePeer) {
 		E.F("can't split ban peer %n %v %n", sp.Addr(), e)
 		return
 	}
-	direction := logg.DirectionString(sp.Inbound())
+	direction := log.DirectionString(sp.Inbound())
 	I.F("banned peer %n (%n) for %v", host, direction, *n.Config.BanDuration)
 	state.Banned[host] = time.Now().Add(n.Config.BanDuration.V())
 }
@@ -1030,7 +1030,7 @@ func (n *Node) PeerDoneHandler(sp *NodePeer) {
 		if numEvicted > 0 {
 			D.F(
 				"Evicted %d %n from peer %v (id %d)",
-				numEvicted, logg.PickNoun(int(numEvicted), "orphan", "orphans"),
+				numEvicted, log.PickNoun(int(numEvicted), "orphan", "orphans"),
 				sp, sp.ID(),
 			)
 		}

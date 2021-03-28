@@ -2,9 +2,9 @@ package app
 
 import (
 	"github.com/gookit/color"
+	"github.com/p9c/log"
 	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/fork"
-	"github.com/p9c/pod/pkg/logg"
 	"github.com/p9c/pod/pkg/pod"
 	"os"
 	
@@ -19,8 +19,8 @@ import (
 
 func KopachHandle(cx *pod.State) func(c *cli.Context) (e error) {
 	return func(c *cli.Context) (e error) {
-		logg.AppColorizer = color.Bit24(255, 128, 128, false).Sprint
-		logg.App = "kopach"
+		log.AppColorizer = color.Bit24(255, 128, 128, false).Sprint
+		log.App = "kopach"
 		I.Ln("starting up kopach standalone miner for parallelcoin")
 		D.Ln(os.Args)
 		podconfig.Configure(cx, "kopach", true)

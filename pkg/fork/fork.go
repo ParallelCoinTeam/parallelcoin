@@ -4,8 +4,8 @@ package fork
 import (
 	"encoding/hex"
 	"fmt"
+	"github.com/p9c/log"
 	"github.com/p9c/pod/pkg/bits"
-	"github.com/p9c/pod/pkg/logg"
 	"math/big"
 	"math/rand"
 	"sort"
@@ -63,11 +63,11 @@ var done bool
 
 func ForkCalc() {
 	if done {
-		I.Ln(logg.Caller("called again", 1))
+		I.Ln(log.Caller("called again", 1))
 		return
 	}
 	done = true
-	// logg.SetLogLevel("trace")
+	// log.SetLogLevel("trace")
 	// T.Ln("running fork data init")
 	for i := range P9AlgosNumeric {
 		List[1].AlgoVers[i] = fmt.Sprintf("Div%d", P9AlgosNumeric[i].VersionInterval)

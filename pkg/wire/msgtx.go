@@ -219,7 +219,7 @@ func NewTxOut(value int64, pkScript []byte) *TxOut {
 
 // MsgTx implements the Message interface and represents a bitcoin tx message. It is used to deliver transaction
 // information in response to a getdata message (MsgGetData) for a given transaction. Use the AddTxIn and AddTxOut
-// functions to build up the list of transaction inputs and outputs.
+// functions to podbuild up the list of transaction inputs and outputs.
 type MsgTx struct {
 	Version  int32
 	TxIn     []*TxIn

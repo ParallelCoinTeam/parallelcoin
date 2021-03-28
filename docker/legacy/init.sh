@@ -21,8 +21,8 @@ alias   .enter="sudo docker exec -it $NAME bash"
          ### [ open a shell inside the container ]
 alias     .log="sudo tail -f $DATADIR/data/debug.log"
          ### [ show the current output from the primary process in the container ]
-alias   .build="sudo docker build -t $NAME $DATADIR"
-         ### [ build the container from the Dockerfile ]
+alias   .podbuild="sudo docker build -t $NAME $DATADIR"
+         ### [ podbuild the container from the Dockerfile ]
 alias      .rm="sudo docker rm $NAME"
          ### [ remove the current container (for rebuilding) ]
 alias .editdkr="nano $DATADIR/Dockerfile"

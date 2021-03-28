@@ -3,7 +3,7 @@ package app
 import (
 	"fmt"
 	"github.com/gookit/color"
-	"github.com/p9c/pod/pkg/logg"
+	"github.com/p9c/log"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/podcfg"
 	"io/ioutil"
@@ -21,8 +21,8 @@ import (
 
 func ShellHandle(cx *pod.State) func(c *cli.Context) (e error) {
 	return func(c *cli.Context) (e error) {
-		logg.AppColorizer = color.Bit24(255, 128, 128, false).Sprint
-		logg.App = " shell"
+		log.AppColorizer = color.Bit24(255, 128, 128, false).Sprint
+		log.App = " shell"
 		podconfig.Configure(cx, c.Command.Name, true)
 		D.Ln("starting shell")
 		if cx.Config.TLS.True() || cx.Config.ServerTLS.True() {

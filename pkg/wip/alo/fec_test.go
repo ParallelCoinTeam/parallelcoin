@@ -2,7 +2,7 @@ package alo
 
 import (
 	"crypto/rand"
-	"github.com/p9c/pod/pkg/logg"
+	"github.com/p9c/log"
 	"testing"
 	
 )
@@ -29,7 +29,7 @@ func TestSegmentBytes(t *testing.T) {
 }
 
 func TestGetShards(t *testing.T) {
-	logg.SetLogLevel("trace")
+	log.SetLogLevel("trace")
 	for dataLen := 256; dataLen < 1025; dataLen += 16 {
 		red := 300
 		b := MakeRandomBytes(dataLen, t)

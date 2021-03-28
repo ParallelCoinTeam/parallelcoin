@@ -1,11 +1,11 @@
 package rununit
 
 import (
-	"github.com/p9c/pod/pkg/logg"
+	"github.com/p9c/log"
 	uberatomic "go.uber.org/atomic"
 	
 	"github.com/p9c/pod/pkg/util/interrupt"
-	"github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/qu"
 	
 	"github.com/p9c/pod/pkg/pipe/consume"
 	"github.com/p9c/pod/pkg/pipe/stdconn/worker"
@@ -24,7 +24,7 @@ type RunUnit struct {
 // receives log entries and processes them (such as logging them).
 func New(
 	run, stop func(),
-	logger func(ent *logg.Entry) (e error),
+	logger func(ent *log.Entry) (e error),
 	pkgFilter func(pkg string) (out bool),
 	quit qu.C,
 	args ...string,

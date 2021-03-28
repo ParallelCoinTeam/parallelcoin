@@ -6,12 +6,12 @@ import (
 	"errors"
 	"fmt"
 	"github.com/p9c/pod/pkg/amt"
-	"github.com/p9c/pod/pkg/logg"
+	"github.com/p9c/log"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	
-	"github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/qu"
 	
 	"github.com/jessevdk/go-flags"
 	"golang.org/x/crypto/ssh/terminal"
@@ -357,12 +357,12 @@ func pickNoun(
 	return pluralForm
 }
 
-var subsystem = logg.AddLoggerSubsystem()
-var F, E, W, I, D, T logg.LevelPrinter = logg.GetLogPrinterSet(subsystem)
+var subsystem = log.AddLoggerSubsystem()
+var F, E, W, I, D, T log.LevelPrinter = log.GetLogPrinterSet(subsystem)
 
 func init() {
-	// var _ = logg.AddFilteredSubsystem(subsystem)
-	// var _ = logg.AddHighlightedSubsystem(subsystem)
+	// var _ = log.AddFilteredSubsystem(subsystem)
+	// var _ = log.AddHighlightedSubsystem(subsystem)
 	F.Ln("F.Ln")
 	E.Ln("E.Ln")
 	W.Ln("W.Ln")

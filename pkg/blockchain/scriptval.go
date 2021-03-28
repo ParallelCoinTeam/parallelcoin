@@ -6,7 +6,7 @@ import (
 	"math"
 	"runtime"
 	
-	"github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/qu"
 	
 	"github.com/p9c/pod/pkg/hardfork"
 	"github.com/p9c/pod/pkg/txscript"

@@ -632,7 +632,7 @@ func (b *BlockChain) checkBlockHeaderContext(
 		return ruleError(ErrBadCheckpoint, str)
 	}
 	// Find the previous checkpoint and prevent blocks which fork the main chain before it. This prevents storage of
-	// new, otherwise valid, blocks which build off of old blocks that are likely at a much easier difficulty and
+	// new, otherwise valid, blocks which podbuild off of old blocks that are likely at a much easier difficulty and
 	// therefore could be used to waste cache and disk space.
 	checkpointNode, e := b.findPreviousCheckpoint()
 	if e != nil {

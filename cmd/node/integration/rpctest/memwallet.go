@@ -9,7 +9,7 @@ import (
 	"github.com/p9c/pod/pkg/chaincfg"
 	"sync"
 	
-	"github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/qu"
 	
 	"github.com/p9c/pod/pkg/blockchain"
 	"github.com/p9c/pod/pkg/chainhash"

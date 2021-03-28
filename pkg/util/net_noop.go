@@ -1,4 +1,4 @@
-// +build appengine
+// +podbuild appengine
 
 package util
 

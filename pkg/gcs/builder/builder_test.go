@@ -79,7 +79,7 @@ func TestUseBlockHash(t *testing.T) {
 	}
 	addrBytes, e := txscript.PayToAddrScript(addr)
 	if e != nil {
-		t.Fatalf("Address script build failed: %s", e.Error())
+		t.Fatalf("Address script podbuild failed: %s", e.Error())
 	}
 	// Create a GCS with a key hash and check that the key is derived correctly, then test it.
 	b := builder.WithKeyHash(hash)
@@ -207,7 +207,7 @@ func BuilderTest(
 	b.AddEntries(contents)
 	f, e := b.Build()
 	if e != nil {
-		t.Fatalf("Filter build failed: %s", e.Error())
+		t.Fatalf("Filter podbuild failed: %s", e.Error())
 	}
 	if f.P() != p {
 		t.Fatalf("Filter built with wrong probability")
@@ -229,11 +229,11 @@ func BuilderTest(
 			builder.DefaultP,
 		)
 	}
-	// Add a hash, build a filter, and test matches
+	// Add a hash, podbuild a filter, and test matches
 	b.AddHash(hash)
 	f, e = b.Build()
 	if e != nil {
-		t.Fatalf("Filter build failed: %s", e.Error())
+		t.Fatalf("Filter podbuild failed: %s", e.Error())
 	}
 	match, e = f.Match(key, hash.CloneBytes())
 	if e != nil {
@@ -242,11 +242,11 @@ func BuilderTest(
 	if !match {
 		t.Fatal("Filter didn't match when it should have!")
 	}
-	// Add a script, build a filter, and test matches
+	// Add a script, podbuild a filter, and test matches
 	b.AddEntry(addrBytes)
 	f, e = b.Build()
 	if e != nil {
-		t.Fatalf("Filter build failed: %s", e.Error())
+		t.Fatalf("Filter podbuild failed: %s", e.Error())
 	}
 	match, e = f.MatchAny(key, [][]byte{addrBytes})
 	if e != nil {
@@ -255,11 +255,11 @@ func BuilderTest(
 	if !match {
 		t.Fatal("Filter didn't match when it should have!")
 	}
-	// Add a routine witness stack, build a filter, and test that it matches.
+	// Add a routine witness stack, podbuild a filter, and test that it matches.
 	b.AddWitness(witness)
 	f, e = b.Build()
 	if e != nil {
-		t.Fatalf("Filter build failed: %s", e.Error())
+		t.Fatalf("Filter podbuild failed: %s", e.Error())
 	}
 	match, e = f.MatchAny(key, witness)
 	if e != nil {
@@ -274,7 +274,7 @@ func BuilderTest(
 	b.AddWitness(witness)
 	f, e = b.Build()
 	if e != nil {
-		t.Fatalf("Filter build failed: %s", e.Error())
+		t.Fatalf("Filter podbuild failed: %s", e.Error())
 	}
 	if f.N() != originalSize {
 		t.Fatal("Filter size increased with duplicate items")

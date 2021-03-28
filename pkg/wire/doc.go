@@ -50,7 +50,7 @@ following chart indicates message interactions in no particular order.
 Common Parameters
 
 There are several common parameters that arise when using this package to read and write bitcoin messages. The following
-sections provide a quick overview of these parameters so the next sections can build on them.
+sections provide a quick overview of these parameters so the next sections can podbuild on them.
 
 Protocol Version
 

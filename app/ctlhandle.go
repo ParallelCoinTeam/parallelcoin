@@ -2,7 +2,7 @@ package app
 
 import (
 	"github.com/gookit/color"
-	"github.com/p9c/pod/pkg/logg"
+	"github.com/p9c/log"
 	"github.com/p9c/pod/pkg/pod"
 	"os"
 	
@@ -24,8 +24,8 @@ func ctlHandleList(c *cli.Context) (e error) {
 
 func ctlHandle(cx *pod.State) func(c *cli.Context) (e error) {
 	return func(c *cli.Context) (e error) {
-		logg.AppColorizer = color.Bit24(128, 128, 255, false).Sprint
-		logg.App = "   ctl"
+		log.AppColorizer = color.Bit24(128, 128, 255, false).Sprint
+		log.App = "   ctl"
 		cx.Config.LogLevel.Set("off")
 		podconfig.Configure(cx, "ctl", true)
 		args := c.Args()

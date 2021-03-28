@@ -27,7 +27,7 @@ func (e ErrScriptNotCanonical) Error() string {
 // data pushes which would exceed the maximum allowed script engine limits and
 // are therefore guaranteed not to execute will not be pushed and will result in
 // the Script function returning an error. For example, the following would
-// build a 2-of-3 multisig script for usage in a pay-to-script-hash (although in
+// podbuild a 2-of-3 multisig script for usage in a pay-to-script-hash (although in
 // this situation MultiSigScript() would be a better choice to generate the
 // script):
 //

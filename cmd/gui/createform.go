@@ -4,7 +4,7 @@ import (
 	"encoding/hex"
 	l "gioui.org/layout"
 	"gioui.org/text"
-	"github.com/p9c/pod/pkg/gui"
+	"github.com/p9c/gel"
 	p9icons "github.com/p9c/pod/pkg/icons/svg"
 	"github.com/p9c/pod/pkg/podcfg"
 	"github.com/tyler-smith/go-bip39"
@@ -14,7 +14,7 @@ import (
 
 func (wg *WalletGUI) centered(w l.Widget) l.Widget {
 	return wg.Flex().
-		Flexed(0.5, gui.EmptyMaxWidth()).
+		Flexed(0.5, gel.EmptyMaxWidth()).
 		Rigid(
 			wg.VFlex().
 				AlignMiddle().
@@ -23,14 +23,14 @@ func (wg *WalletGUI) centered(w l.Widget) l.Widget {
 				).
 				Fn,
 		).
-		Flexed(0.5, gui.EmptyMaxWidth()).
+		Flexed(0.5, gel.EmptyMaxWidth()).
 		Fn
 }
 
 func (wg *WalletGUI) cwfLogoHeader() l.Widget {
 	return wg.centered(
 		wg.Icon().
-			Scale(gui.Scales["H2"]).
+			Scale(gel.Scales["H2"]).
 			Color("DocText").
 			Src(&p9icons.ParallelCoin).Fn,
 	)
@@ -72,7 +72,7 @@ func (wg *WalletGUI) cwfShuffleButton() l.Widget {
 					Rigid(
 						wg.Icon().
 							Scale(
-								gui.Scales["H6"],
+								gel.Scales["H6"],
 							).
 							Color("DocText").
 							Src(
@@ -115,7 +115,7 @@ func (wg *WalletGUI) cwfRestoreButton() l.Widget {
 					Rigid(
 						wg.Icon().
 							Scale(
-								gui.
+								gel.
 									Scales["H6"],
 							).
 							Color("DocText").
@@ -174,7 +174,7 @@ func (wg *WalletGUI) cwfSetGenesis() l.Widget {
 							Rigid(
 								wg.Icon().
 									Scale(
-										gui.
+										gel.
 											Scales["H6"],
 									).
 									Color("DocText").
@@ -217,7 +217,7 @@ func (wg *WalletGUI) cwfSetAutofill() l.Widget {
 							Rigid(
 								wg.Icon().
 									Scale(
-										gui.
+										gel.
 											Scales["H6"],
 									).
 									Color("DocText").
@@ -245,13 +245,13 @@ func (wg *WalletGUI) cwfSeedHeader() l.Widget {
 					Fn,
 			).Fn,
 		).
-		Rigid(wg.Inset(0.25, gui.EmptySpace(0, 0)).Fn).
+		Rigid(wg.Inset(0.25, gel.EmptySpace(0, 0)).Fn).
 		Rigid(wg.cwfShuffleButton()).
-		Rigid(wg.Inset(0.25, gui.EmptySpace(0, 0)).Fn).
+		Rigid(wg.Inset(0.25, gel.EmptySpace(0, 0)).Fn).
 		Rigid(wg.cwfRestoreButton()).
-		Rigid(wg.Inset(0.25, gui.EmptySpace(0, 0)).Fn).
+		Rigid(wg.Inset(0.25, gel.EmptySpace(0, 0)).Fn).
 		Rigid(wg.cwfSetGenesis()).
-		Rigid(wg.Inset(0.25, gui.EmptySpace(0, 0)).Fn).
+		Rigid(wg.Inset(0.25, gel.EmptySpace(0, 0)).Fn).
 		Rigid(wg.cwfSetAutofill()).
 		Fn
 }

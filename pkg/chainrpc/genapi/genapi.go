@@ -1,4 +1,4 @@
-//+build ignore
+//+podbuild ignore
 
 package main
 
@@ -6,7 +6,7 @@ import (
 	"os"
 	"sort"
 	"text/template"
-	"github.com/p9c/pod/pkg/logg"
+	"github.com/p9c/log"
 )
 
 const (
@@ -320,7 +320,7 @@ import (
 	"net/rpc"
 	"time"
 
-	"github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/qu"
 
 	"github.com/p9c/pod/pkg/btcjson"
 )
@@ -491,7 +491,7 @@ func (r *CAPIClient) {{.Handler}}(cmd ...{{.Cmd}}) (res {{.ResType}}, e error) {
 }
 {{end}}
 `
-	logg.SetLogLevel("trace")
+	log.SetLogLevel("trace")
 	if fd, e := os.Create("rpchandlers.go"); E.Chk(e) {
 		if fd, e := os.OpenFile("rpchandlers.go", os.O_RDWR|os.O_CREATE, 0755); E.Chk(e) {
 		} else {

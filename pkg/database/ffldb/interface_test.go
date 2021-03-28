@@ -19,7 +19,7 @@ import (
 	"testing"
 	"time"
 	
-	"github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/qu"
 	"github.com/p9c/pod/pkg/walletdb/bdb"
 	
 	"github.com/p9c/pod/pkg/chaincfg"
@@ -1063,7 +1063,7 @@ func testFetchBlockIOMissing(tc *testContext, tx database.Tx) bool {
 	wantErrCode := database.ErrBlockNotFound
 	// Non-bulk Block IO API
 	//
-	// Test the individual block APIs one block at a time to ensure they return the expected error. Also, build the data
+	// Test the individual block APIs one block at a time to ensure they return the expected error. Also, podbuild the data
 	// needed to test the bulk APIs below while looping.
 	allBlockHashes := make([]chainhash.Hash, len(tc.blocks))
 	allBlockRegions := make([]database.BlockRegion, len(tc.blocks))
@@ -1155,7 +1155,7 @@ func testFetchBlockIOMissing(tc *testContext, tx database.Tx) bool {
 func testFetchBlockIO(tc *testContext, tx database.Tx) bool {
 	// Non-bulk Block IO API
 	//
-	// Test the individual block APIs one block at a time. Also, build the data needed to test the bulk APIs below while
+	// Test the individual block APIs one block at a time. Also, podbuild the data needed to test the bulk APIs below while
 	// looping.
 	allBlockHashes := make([]chainhash.Hash, len(tc.blocks))
 	allBlockBytes := make([][]byte, len(tc.blocks))
@@ -1751,7 +1751,7 @@ func testClosedTxInterface(tc *testContext, tx database.Tx) bool {
 	}
 	// Non-bulk Block IO API
 	//
-	// Test the individual block APIs one block at a time to ensure they return the expected error. Also, build the data
+	// Test the individual block APIs one block at a time to ensure they return the expected error. Also, podbuild the data
 	// needed to test the bulk APIs below while looping.
 	allBlockHashes := make([]chainhash.Hash, len(tc.blocks))
 	allBlockRegions := make([]database.BlockRegion, len(tc.blocks))

@@ -1,4 +1,4 @@
-// +build headless
+// +podbuild headless
 
 package pod
 
@@ -14,7 +14,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/qu"
 
 	"go.uber.org/atomic"
 

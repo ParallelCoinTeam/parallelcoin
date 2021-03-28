@@ -2,9 +2,9 @@ package node
 
 import (
 	"github.com/p9c/pod/pkg/control"
-	"github.com/p9c/pod/pkg/logg"
+	"github.com/p9c/log"
 	"github.com/p9c/pod/pkg/pod"
-	"github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/qu"
 	"net"
 	"net/http"
 	// // This enables pprof
@@ -190,7 +190,7 @@ func Main(cx *pod.State) (e error) {
 		}
 		server.WaitForShutdown()
 		I.Ln("server shutdown complete")
-		logg.LogChanDisabled.Store(true)
+		log.LogChanDisabled.Store(true)
 		cx.WaitDone()
 		cx.KillAll.Q()
 		cx.NodeKill.Q()

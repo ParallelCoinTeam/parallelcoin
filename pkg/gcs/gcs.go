@@ -76,7 +76,7 @@ type Filter struct {
 // `1/(2**P)`, key `key`, and including every `[]byte` in `data` as a member of
 // the set.
 func BuildGCSFilter(P uint8, M uint64, key [KeySize]byte, data [][]byte) (*Filter, error) {
-	// Some initial parameter checks: make sure we have data from which to build the
+	// Some initial parameter checks: make sure we have data from which to podbuild the
 	// filter, and make sure our parameters will fit the hash function we're using.
 	if uint64(len(data)) >= (1 << 32) {
 		return nil, ErrNTooBig
@@ -240,7 +240,7 @@ func (f *Filter) P() uint8 {
 	return f.p
 }
 
-// N returns the size of the data set used to build the filter.
+// N returns the size of the data set used to podbuild the filter.
 func (f *Filter) N() uint32 {
 	return f.n
 }

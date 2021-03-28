@@ -104,7 +104,7 @@ func (a Amount) String() string {
 }
 
 // MulF64 multiplies an Amount by a floating point value. While this is not an operation that must typically be done by
-// a full node or wallet, it is useful for services that build on top of bitcoin (for example, calculating a fee by
+// a full node or wallet, it is useful for services that podbuild on top of bitcoin (for example, calculating a fee by
 // multiplying by a percentage).
 func (a Amount) MulF64(f float64) Amount {
 	return round(float64(a) * f)

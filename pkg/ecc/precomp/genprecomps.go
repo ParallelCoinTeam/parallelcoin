@@ -1,4 +1,4 @@
-// +build gensecp256k1
+// +podbuild gensecp256k1
 
 package main
 
@@ -7,7 +7,7 @@ import (
 	"compress/zlib"
 	"encoding/base64"
 	"fmt"
-	"github.com/p9c/pod/pkg/logg"
+	"github.com/p9c/log"
 	"os"
 	
 	"github.com/p9c/pod/pkg/ecc"
@@ -64,12 +64,12 @@ func main() {
 	_, _ = fmt.Fprintf(fi, "// b2: %x\n", b2)
 }
 
-var subsystem = logg.AddLoggerSubsystem()
-var F, E, W, I, D, T logg.LevelPrinter = logg.GetLogPrinterSet(subsystem)
+var subsystem = log.AddLoggerSubsystem()
+var F, E, W, I, D, T log.LevelPrinter = log.GetLogPrinterSet(subsystem)
 
 func init() {
-	// // var _ = logg.AddFilteredSubsystem(subsystem)
-	// // var _ = logg.AddHighlightedSubsystem(subsystem)
+	// // var _ = log.AddFilteredSubsystem(subsystem)
+	// // var _ = log.AddHighlightedSubsystem(subsystem)
 	// F.Ln("F.Ln")
 	// E.Ln("E.Ln")
 	// W.Ln("W.Ln")

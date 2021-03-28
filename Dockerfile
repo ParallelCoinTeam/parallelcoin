@@ -1,4 +1,4 @@
-# TODO: write the build for minimal Go environment and headless build
+# TODO: write the podbuild for minimal Go environment and headless podbuild
 FROM golang:1.14 as builder
 WORKDIR /pod
 COPY .git /pod/.git

@@ -14,24 +14,24 @@ import (
 	
 	icons2 "golang.org/x/exp/shiny/materialdesign/icons"
 	
-	"github.com/p9c/pod/pkg/gui"
+	"github.com/p9c/gel"
 	
 	"github.com/p9c/pod/pkg/rpcctl"
 )
 
 type Console struct {
-	*gui.Window
+	*gel.Window
 	output         []l.Widget
-	outputList     *gui.List
-	editor         *gui.Editor
-	clearClickable *gui.Clickable
-	clearButton    *gui.IconButton
-	copyClickable  *gui.Clickable
-	copyButton     *gui.IconButton
-	pasteClickable *gui.Clickable
-	pasteButton    *gui.IconButton
+	outputList     *gel.List
+	editor         *gel.Editor
+	clearClickable *gel.Clickable
+	clearButton    *gel.IconButton
+	copyClickable  *gel.Clickable
+	copyButton     *gel.IconButton
+	pasteClickable *gel.Clickable
+	pasteButton    *gel.IconButton
 	submitFunc     func(txt string)
-	clickables     []*gui.Clickable
+	clickables     []*gel.Clickable
 }
 
 var findSpaceRegexp = regexp.MustCompile(`\s+`)
@@ -53,7 +53,7 @@ func (wg *WalletGUI) ConsolePage() *Console {
 				c.output,
 				func(gtx l.Context) l.Dimensions {
 					return wg.VFlex().
-						Rigid(wg.Inset(0.25, gui.EmptySpace(0, 0)).Fn).
+						Rigid(wg.Inset(0.25, gel.EmptySpace(0, 0)).Fn).
 						Rigid(
 							wg.Flex().
 								Flexed(
@@ -350,7 +350,7 @@ func GetJSONElements(in map[string]interface{}) (je JSONElements) {
 func (c *Console) getIndent(n int, size float32, widget l.Widget) (out l.Widget) {
 	o := c.Theme.Flex()
 	for i := 0; i < n; i++ {
-		o.Rigid(c.Inset(size/2, gui.EmptySpace(0, 0)).Fn)
+		o.Rigid(c.Inset(size/2, gel.EmptySpace(0, 0)).Fn)
 	}
 	o.Rigid(widget)
 	out = o.Fn
@@ -439,7 +439,7 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 					key, color, depth, func(gtx l.Context) l.Dimensions {
 						return c.Theme.Flex().
 							Rigid(c.Body2("\"" + res + "\"").Color(color).Fn).
-							Rigid(c.Inset(0.25, gui.EmptySpace(0, 0)).Fn).
+							Rigid(c.Inset(0.25, gel.EmptySpace(0, 0)).Fn).
 							Rigid(
 								c.IconButton(clk).
 									Background("").
@@ -468,7 +468,7 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 					key, color, depth, func(gtx l.Context) l.Dimensions {
 						return c.Theme.Flex().
 							Rigid(c.Body2(fmt.Sprint(res)).Color(color).Fn).
-							Rigid(c.Inset(0.25, gui.EmptySpace(0, 0)).Fn).
+							Rigid(c.Inset(0.25, gel.EmptySpace(0, 0)).Fn).
 							Rigid(
 								c.IconButton(clk).
 									Background("").
@@ -510,7 +510,7 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 				key, color, depth, func(gtx l.Context) l.Dimensions {
 					return c.Theme.Flex().
 						Rigid(c.Body2("\"" + res + "\"").Color(color).Fn).
-						Rigid(c.Inset(0.25, gui.EmptySpace(0, 0)).Fn).
+						Rigid(c.Inset(0.25, gel.EmptySpace(0, 0)).Fn).
 						Rigid(
 							c.IconButton(clk).
 								Background("").
@@ -539,7 +539,7 @@ func (c *Console) jsonWidget(color string, depth int, key string, in interface{}
 				key, color, depth, func(gtx l.Context) l.Dimensions {
 					return c.Theme.Flex().
 						Rigid(c.Body2(fmt.Sprint(res)).Color(color).Fn).
-						Rigid(c.Inset(0.25, gui.EmptySpace(0, 0)).Fn).
+						Rigid(c.Inset(0.25, gel.EmptySpace(0, 0)).Fn).
 						Rigid(
 							c.IconButton(clk).
 								Background("").
@@ -585,7 +585,7 @@ func (c *Console) jsonElement(key, color string, depth int, w l.Widget) l.Widget
 					c.Body2(key).Font("bariol bold").Color(color).Fn,
 				),
 		).
-			Rigid(c.Inset(0.125, gui.EmptySpace(0, 0)).Fn).
+			Rigid(c.Inset(0.125, gel.EmptySpace(0, 0)).Fn).
 			Rigid(w).
 			Fn(gtx)
 	}

@@ -1,17 +1,17 @@
 package main
 
 import (
-	"github.com/p9c/pod/pkg/logg"
+	"github.com/p9c/log"
 	"os"
 	"time"
 	
 	"github.com/p9c/pod/pkg/pipe/consume"
-	"github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/qu"
 )
 
 func main() {
 	// var e error
-	logg.SetLogLevel("trace")
+	log.SetLogLevel("trace")
 	// command := "pod -D test0 -n testnet -l trace --solo --lan --pipelog node"
 	quit := qu.T()
 	// splitted := strings.Split(command, " ")

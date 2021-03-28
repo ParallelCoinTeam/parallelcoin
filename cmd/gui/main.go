@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/niubaoshu/gotiny"
 	"github.com/p9c/pod/pkg/control/p2padvt"
-	"github.com/p9c/pod/pkg/logg"
+	"github.com/p9c/log"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/podcfg"
 	"github.com/p9c/pod/pkg/transport"
@@ -20,10 +20,10 @@ import (
 	"gioui.org/op/paint"
 	uberatomic "go.uber.org/atomic"
 	
+	"github.com/p9c/gel"
 	"github.com/p9c/pod/pkg/btcjson"
-	"github.com/p9c/pod/pkg/gui"
 	"github.com/p9c/pod/pkg/util/interrupt"
-	"github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/qu"
 	
 	"github.com/urfave/cli"
 	
@@ -34,7 +34,7 @@ import (
 	
 	"github.com/p9c/pod/pkg/apputil"
 	
-	"github.com/p9c/pod/pkg/gui/cfg"
+	"github.com/p9c/pod/cmd/gui/cfg"
 	"github.com/p9c/pod/pkg/rpcclient"
 )
 
@@ -53,13 +53,13 @@ func Main(cx *pod.State, c *cli.Context) (e error) {
 	return wg.Run()
 }
 
-type BoolMap map[string]*gui.Bool
-type ListMap map[string]*gui.List
-type CheckableMap map[string]*gui.Checkable
-type ClickableMap map[string]*gui.Clickable
-type Inputs map[string]*gui.Input
-type Passwords map[string]*gui.Password
-type IncDecMap map[string]*gui.IncDec
+type BoolMap map[string]*gel.Bool
+type ListMap map[string]*gel.List
+type CheckableMap map[string]*gel.Checkable
+type ClickableMap map[string]*gel.Clickable
+type Inputs map[string]*gel.Input
+type Passwords map[string]*gel.Password
+type IncDecMap map[string]*gel.IncDec
 
 type WalletGUI struct {
 	wg                        sync.WaitGroup
@@ -74,31 +74,31 @@ type WalletGUI struct {
 	ChainMutex, WalletMutex   sync.Mutex
 	ChainClient, WalletClient *rpcclient.Client
 	WalletWatcher             qu.C
-	*gui.Window
-	Size                                     *int
-	MainApp                                  *gui.App
-	invalidate                               qu.C
-	unlockPage                               *gui.App
-	loadingPage                              *gui.App
-	config                                   *cfg.Config
-	configs                                  cfg.GroupsMap
-	unlockPassword                           *gui.Password
-	sidebarButtons                           []*gui.Clickable
-	buttonBarButtons                         []*gui.Clickable
-	statusBarButtons                         []*gui.Clickable
-	receiveAddressbookClickables             []*gui.Clickable
-	sendAddressbookClickables                []*gui.Clickable
-	quitClickable                            *gui.Clickable
-	bools                                    BoolMap
-	lists                                    ListMap
-	checkables                               CheckableMap
+	*gel.Window
+	Size                         *int
+	MainApp                      *gel.App
+	invalidate                   qu.C
+	unlockPage                   *gel.App
+	loadingPage                  *gel.App
+	config                       *cfg.Config
+	configs                      cfg.GroupsMap
+	unlockPassword               *gel.Password
+	sidebarButtons               []*gel.Clickable
+	buttonBarButtons             []*gel.Clickable
+	statusBarButtons             []*gel.Clickable
+	receiveAddressbookClickables []*gel.Clickable
+	sendAddressbookClickables    []*gel.Clickable
+	quitClickable                *gel.Clickable
+	bools                        BoolMap
+	lists                        ListMap
+	checkables                   CheckableMap
 	clickables                               ClickableMap
 	inputs                                   Inputs
 	passwords                                Passwords
 	incdecs                                  IncDecMap
 	console                                  *Console
 	RecentTxsWidget, TxHistoryWidget         l.Widget
-	recentTxsClickables, txHistoryClickables []*gui.Clickable
+	recentTxsClickables, txHistoryClickables []*gel.Clickable
 	txHistoryList                            []btcjson.ListTransactionsResult
 	openTxID, prevOpenTxID                   *uberatomic.String
 	originTxDetail                           string
@@ -107,11 +107,11 @@ type WalletGUI struct {
 	currentReceiveQRCode                     *paint.ImageOp
 	currentReceiveAddress                    string
 	currentReceiveQR                         l.Widget
-	currentReceiveRegenClickable             *gui.Clickable
-	currentReceiveCopyClickable              *gui.Clickable
+	currentReceiveRegenClickable             *gel.Clickable
+	currentReceiveCopyClickable              *gel.Clickable
 	currentReceiveRegenerate                 *uberatomic.Bool
 	// currentReceiveGetNew         *uberatomic.Bool
-	sendClickable *gui.Clickable
+	sendClickable *gel.Clickable
 	ready         *uberatomic.Bool
 	mainDirection l.Direction
 	preRendering  bool
@@ -265,9 +265,9 @@ func (wg *WalletGUI) Run() (e error) {
 	wg.currentReceiveRegenerate = uberatomic.NewBool(true)
 	// wg.currentReceiveGetNew = uberatomic.NewBool(false)
 	wg.ready = uberatomic.NewBool(false)
-	// wg.th = gui.NewTheme(p9fonts.Collection(), wg.quit)
-	// wg.Window = gui.NewWindow(wg.th)
-	wg.Window = gui.NewWindowP9(wg.quit)
+	// wg.th = gel.NewTheme(p9fonts.Collection(), wg.quit)
+	// wg.Window = gel.NewWindow(wg.th)
+	wg.Window = gel.NewWindowP9(wg.quit)
 	wg.Dark = wg.cx.Config.DarkTheme.Ptr()
 	wg.Colors.SetTheme(*wg.Dark)
 	*wg.noWallet = true
@@ -376,7 +376,7 @@ func (wg *WalletGUI) Run() (e error) {
 			func(gtx l.Context) l.Dimensions {
 				return wg.Fill(
 					"DocBg", l.Center, 0, 0, func(gtx l.Context) l.Dimensions {
-						return gui.If(
+						return gel.If(
 							*wg.noWallet,
 							wg.CreateWalletPage,
 							func(gtx l.Context) l.Dimensions {
@@ -393,18 +393,18 @@ func (wg *WalletGUI) Run() (e error) {
 									return wg.unlockPage.Fn()(gtx)
 								}
 							},
-							// gui.If(
+							// gel.If(
 							// 	wg.ready.Load(),
-							// 	gui.If(
+							// 	gel.If(
 							// 		wg.WalletAndClientRunning(),
-							// 		gui.If(
+							// 		gel.If(
 							// 			wg.stateLoaded.Load(),
 							// 			wg.MainApp.Fn(),
 							// 			wg.loadingPage.Fn(),
 							// 		),
 							// 		wg.loadingPage.Fn(),
 							// 	),
-							// 	gui.If(
+							// 	gel.If(
 							// 		wg.WalletAndClientRunning(),
 							// 		wg.loadingPage.Fn(),
 							// 		wg.unlockPage.Fn(),
@@ -425,16 +425,16 @@ func (wg *WalletGUI) Run() (e error) {
 }
 
 func (wg *WalletGUI) GetButtons() {
-	wg.sidebarButtons = make([]*gui.Clickable, 12)
+	wg.sidebarButtons = make([]*gel.Clickable, 12)
 	// wg.walletLocked.Store(true)
 	for i := range wg.sidebarButtons {
 		wg.sidebarButtons[i] = wg.Clickable()
 	}
-	wg.buttonBarButtons = make([]*gui.Clickable, 5)
+	wg.buttonBarButtons = make([]*gel.Clickable, 5)
 	for i := range wg.buttonBarButtons {
 		wg.buttonBarButtons[i] = wg.Clickable()
 	}
-	wg.statusBarButtons = make([]*gui.Clickable, 8)
+	wg.statusBarButtons = make([]*gel.Clickable, 8)
 	for i := range wg.statusBarButtons {
 		wg.statusBarButtons[i] = wg.Clickable()
 	}
@@ -698,7 +698,7 @@ var shuttingDown = false
 
 func (wg *WalletGUI) gracefulShutdown() {
 	if shuttingDown {
-		D.Ln(logg.Caller("already called gracefulShutdown", 1))
+		D.Ln(log.Caller("already called gracefulShutdown", 1))
 		return
 	} else {
 		shuttingDown = true

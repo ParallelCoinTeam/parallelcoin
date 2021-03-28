@@ -12,8 +12,8 @@ import (
 	"gioui.org/text"
 	"github.com/atotto/clipboard"
 	
+	"github.com/p9c/gel"
 	"github.com/p9c/pod/pkg/chainhash"
-	"github.com/p9c/pod/pkg/gui"
 )
 
 type SendPage struct {
@@ -36,7 +36,7 @@ func (wg *WalletGUI) GetSendPage() (sp *SendPage) {
 func (sp *SendPage) Fn(gtx l.Context) l.Dimensions {
 	wg := sp.wg
 	return wg.Responsive(
-		*wg.Size, gui.Widgets{
+		*wg.Size, gel.Widgets{
 			{
 				Widget: sp.SmallList,
 			},
@@ -62,13 +62,13 @@ func (sp *SendPage) SmallList(gtx l.Context) l.Dimensions {
 				sp.SendButton(),
 			).
 			Rigid(
-				wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn,
+				wg.Inset(0.5, gel.EmptySpace(0, 0)).Fn,
 			).
 			Rigid(
 				sp.PasteButton(),
 			).
 			Rigid(
-				wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn,
+				wg.Inset(0.5, gel.EmptySpace(0, 0)).Fn,
 			).
 			Rigid(
 				sp.SaveButton(),
@@ -106,13 +106,13 @@ func (sp *SendPage) MediumList(gtx l.Context) l.Dimensions {
 				sp.SendButton(),
 			).
 			Rigid(
-				wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn,
+				wg.Inset(0.5, gel.EmptySpace(0, 0)).Fn,
 			).
 			Rigid(
 				sp.PasteButton(),
 			).
 			Rigid(
-				wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn,
+				wg.Inset(0.5, gel.EmptySpace(0, 0)).Fn,
 			).
 			Rigid(
 				sp.SaveButton(),
@@ -145,7 +145,7 @@ func (sp *SendPage) MediumList(gtx l.Context) l.Dimensions {
 					).Fn(gtx)
 			},
 		).
-		// Rigid(wg.Inset(0.25, gui.EmptySpace(0, 0)).Fn).
+		// Rigid(wg.Inset(0.25, gel.EmptySpace(0, 0)).Fn).
 		Flexed(
 			1,
 			wg.VFlex().AlignStart().
@@ -455,7 +455,7 @@ func (sp *SendPage) GetAddressbookHistoryCards(bg string) (widgets []l.Widget) {
 									).Fn,
 								).
 								Rigid(
-									gui.If(
+									gel.If(
 										wg.State.sendAddresses[i].TxID != "",
 										func(ctx l.Context) l.Dimensions {
 											for j := range wg.txHistoryList {

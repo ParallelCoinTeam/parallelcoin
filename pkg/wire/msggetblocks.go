@@ -17,7 +17,7 @@ const MaxBlockLocatorsPerMsg = 50000
 // the maximum number of blocks per message, which is currently 500.
 //
 // The HashStop field to the hash at which to stop and use AddBlockLocatorHash
-// to build up the list of block locator hashes. The algorithm for building the
+// to podbuild up the list of block locator hashes. The algorithm for building the
 // block locator hashes should be to add the hashes in reverse order until you
 // reach the genesis block. In order to keep the list of locator hashes to a
 // reasonable number of entries, first add the most recent 10 block hashes, then

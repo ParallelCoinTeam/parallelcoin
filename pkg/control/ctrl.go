@@ -24,7 +24,7 @@ import (
 	rav "github.com/p9c/pod/pkg/ring"
 	"github.com/p9c/pod/pkg/rpcclient"
 	"github.com/p9c/pod/pkg/transport"
-	"github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/qu"
 	"github.com/p9c/pod/pkg/util/routeable"
 	"github.com/p9c/pod/pkg/wire"
 	"github.com/urfave/cli"

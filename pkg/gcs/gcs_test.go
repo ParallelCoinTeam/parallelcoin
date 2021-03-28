@@ -71,7 +71,7 @@ func TestGCSFilterBuild(t *testing.T) {
 	}
 	filter, e = gcs.BuildGCSFilter(P, M, key, contents)
 	if e != nil  {
-		t.Fatalf("Filter build failed: %s", e.Error())
+		t.Fatalf("Filter podbuild failed: %s", e.Error())
 	}
 }
 

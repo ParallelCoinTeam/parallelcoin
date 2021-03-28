@@ -2,12 +2,12 @@ package gui
 
 import (
 	"fmt"
+	"github.com/p9c/gel"
 	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/fork"
-	"github.com/p9c/pod/pkg/gui"
 	"github.com/p9c/pod/pkg/podcfg"
 	"github.com/p9c/pod/pkg/util/interrupt"
-	"github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/qu"
 	"golang.org/x/exp/shiny/materialdesign/icons"
 	"os"
 	"path/filepath"
@@ -75,7 +75,7 @@ func (wg *WalletGUI) createConfirmExitBar() l.Widget {
 												Rigid(
 													wg.Icon().
 														Scale(
-															gui.
+															gel.
 																Scales["H4"],
 														).
 														Color("DocText").
@@ -87,7 +87,7 @@ func (wg *WalletGUI) createConfirmExitBar() l.Widget {
 												Rigid(
 													wg.Inset(
 														0.5,
-														gui.EmptySpace(
+														gel.EmptySpace(
 															0,
 															0,
 														),
@@ -99,7 +99,7 @@ func (wg *WalletGUI) createConfirmExitBar() l.Widget {
 												Rigid(
 													wg.Inset(
 														0.5,
-														gui.EmptySpace(
+														gel.EmptySpace(
 															0,
 															0,
 														),
@@ -114,7 +114,7 @@ func (wg *WalletGUI) createConfirmExitBar() l.Widget {
 				).
 				Flexed(
 					1,
-					gui.EmptyMaxWidth(),
+					gel.EmptyMaxWidth(),
 				).
 				Rigid(
 					func(gtx l.Context) l.Dimensions {
@@ -141,7 +141,7 @@ func (wg *WalletGUI) createConfirmExitBar() l.Widget {
 												Rigid(
 													wg.Icon().
 														Scale(
-															gui.
+															gel.
 																Scales["H4"],
 														).
 														Color("DocText").
@@ -153,7 +153,7 @@ func (wg *WalletGUI) createConfirmExitBar() l.Widget {
 												Rigid(
 													wg.Inset(
 														0.5,
-														gui.EmptySpace(
+														gel.EmptySpace(
 															0,
 															0,
 														),
@@ -165,7 +165,7 @@ func (wg *WalletGUI) createConfirmExitBar() l.Widget {
 												Rigid(
 													wg.Inset(
 														0.5,
-														gui.EmptySpace(
+														gel.EmptySpace(
 															0,
 															0,
 														),

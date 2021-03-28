@@ -9,7 +9,7 @@ import (
 	"gioui.org/text"
 	"github.com/atotto/clipboard"
 	
-	"github.com/p9c/pod/pkg/gui"
+	"github.com/p9c/gel"
 )
 
 const Break1 = 48
@@ -34,7 +34,7 @@ func (wg *WalletGUI) GetReceivePage() (rp *ReceivePage) {
 func (rp *ReceivePage) Fn(gtx l.Context) l.Dimensions {
 	wg := rp.wg
 	return wg.Responsive(
-		*wg.Size, gui.Widgets{
+		*wg.Size, gel.Widgets{
 			{
 				Widget: rp.SmallList,
 			},
@@ -126,7 +126,7 @@ func (rp *ReceivePage) MediumList(gtx l.Context) l.Dimensions {
 }
 
 func (rp *ReceivePage) Spacer() l.Widget {
-	return rp.wg.Flex().AlignMiddle().Flexed(1, rp.wg.Inset(0.25, gui.EmptySpace(0, 0)).Fn).Fn
+	return rp.wg.Flex().AlignMiddle().Flexed(1, rp.wg.Inset(0.25, gel.EmptySpace(0, 0)).Fn).Fn
 }
 
 func (rp *ReceivePage) GetAddressbookHistoryCards(bg string) (widgets []l.Widget) {

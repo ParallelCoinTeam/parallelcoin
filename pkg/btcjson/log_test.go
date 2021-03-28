@@ -2,16 +2,16 @@ package btcjson_test
 
 import (
 	"errors"
-	"github.com/p9c/pod/pkg/logg"
+	"github.com/p9c/log"
 )
 
 
-var subsystem string = logg.AddLoggerSubsystem()
-var F, E, W, I, D, T logg.LevelPrinter = logg.GetLogPrinterSet(subsystem)
+var subsystem string = log.AddLoggerSubsystem()
+var F, E, W, I, D, T log.LevelPrinter = log.GetLogPrinterSet(subsystem)
 
 func init() {
-	// var _ = logg.AddFilteredSubsystem(subsystem)
-	// var _ = logg.AddHighlightedSubsystem(subsystem)
+	// var _ = log.AddFilteredSubsystem(subsystem)
+	// var _ = log.AddHighlightedSubsystem(subsystem)
 	F.Ln("F.Ln")
 	E.Ln("E.Ln")
 	W.Ln("W.Ln")

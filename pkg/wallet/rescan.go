@@ -2,7 +2,7 @@ package wallet
 
 import (
 	"github.com/p9c/pod/pkg/chainclient"
-	"github.com/p9c/pod/pkg/logg"
+	"github.com/p9c/log"
 	"github.com/p9c/pod/pkg/btcaddr"
 	txs "github.com/p9c/pod/pkg/txscript"
 	wm "github.com/p9c/pod/pkg/waddrmgr"
@@ -172,7 +172,7 @@ out:
 		case msg := <-w.rescanFinished:
 			n := msg.Notification
 			addrs := msg.Addresses
-			noun := logg.PickNoun(len(addrs), "address", "addresses")
+			noun := log.PickNoun(len(addrs), "address", "addresses")
 			I.F(
 				"finished rescan for %d %s (synced to block %s, height %d)",
 				len(addrs), noun, n.Hash, n.Height,
@@ -202,7 +202,7 @@ out:
 		case batch := <-w.rescanBatch:
 			// Log the newly-started rescan.
 			numAddrs := len(batch.addrs)
-			noun := logg.PickNoun(numAddrs, "address", "addresses")
+			noun := log.PickNoun(numAddrs, "address", "addresses")
 			I.F(
 				"started rescan from block %v (height %d) for %d %s",
 				batch.bs.Hash, batch.bs.Height, numAddrs, noun,

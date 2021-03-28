@@ -14,7 +14,7 @@ const defaultInvListAlloc = 1000
 // MsgInv implements the Message interface and represents a bitcoin inv message. It is used to advertise a peer's known
 // data such as blocks and transactions through inventory vectors. It may be sent unsolicited to inform other peers of
 // the data or in response to a getblocks message (MsgGetBlocks). Each message is limited to a maximum number of
-// inventory vectors, which is currently 50,000. Use the AddInvVect function to build up the list of inventory vectors
+// inventory vectors, which is currently 50,000. Use the AddInvVect function to podbuild up the list of inventory vectors
 // when sending an inv message to another peer.
 type MsgInv struct {
 	InvList []*InvVect

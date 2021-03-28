@@ -303,7 +303,7 @@ func mergeMultiSig(
 	possibleSigs = extractSigs(sigPops, possibleSigs)
 	possibleSigs = extractSigs(prevPops, possibleSigs)
 	// Now we need to match the signatures to pubkeys, the only real way to do that is to try to verify them all and match
-	// it to the pubkey that verifies it. we then can go through the addresses in order to build our script. Anything that
+	// it to the pubkey that verifies it. we then can go through the addresses in order to podbuild our script. Anything that
 	// doesn't parse or doesn't verify we throw away.
 	addrToSig := make(map[string][]byte)
 sigLoop:

@@ -4,7 +4,7 @@ import (
 	l "gioui.org/layout"
 	"gioui.org/text"
 	
-	"github.com/p9c/pod/pkg/gui"
+	"github.com/p9c/gel"
 	p9icons "github.com/p9c/pod/pkg/icons/svg"
 	"github.com/p9c/pod/version"
 )
@@ -12,7 +12,7 @@ import (
 func (wg *WalletGUI) HelpPage() func(gtx l.Context) l.Dimensions {
 	return func(gtx l.Context) l.Dimensions {
 		return wg.VFlex().AlignMiddle().
-			Flexed(0.5, gui.EmptyMaxWidth()).
+			Flexed(0.5, gel.EmptyMaxWidth()).
 			Rigid(
 				wg.H5("ParallelCoin Pod Gio Wallet").Alignment(text.Middle).Fn,
 			).
@@ -103,7 +103,7 @@ func (wg *WalletGUI) HelpPage() func(gtx l.Context) l.Dimensions {
 							
 							).
 							Rigid(
-								wg.Icon().Scale(gui.Scales["H6"]).
+								wg.Icon().Scale(gel.Scales["H6"]).
 									Color("DocText").
 									Src(&p9icons.Gio).
 									Fn,
@@ -115,7 +115,7 @@ func (wg *WalletGUI) HelpPage() func(gtx l.Context) l.Dimensions {
 					).Fn,
 				).Fn,
 			).
-			Flexed(0.5, gui.EmptyMaxWidth()).
+			Flexed(0.5, gel.EmptyMaxWidth()).
 			Fn(gtx)
 	}
 }

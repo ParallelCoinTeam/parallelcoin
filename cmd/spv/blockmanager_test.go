@@ -343,7 +343,7 @@ const maxHeight = 20 * uint32(wire.CFCheckptInterval)
 // 		chaincfg.SimNetParams.GenesisBlock, nil,
 // 	)
 // 	if e != nil  {
-// 		return nil, fmt.Errorf("unable to build genesis filter: %v",
+// 		return nil, fmt.Errorf("unable to podbuild genesis filter: %v",
 // 			err)
 // 	}
 // 	genesisFilterHash, e := builder.GetFilterHash(genesisFilter)

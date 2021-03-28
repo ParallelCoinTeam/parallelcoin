@@ -3,7 +3,7 @@ package cpc
 import (
 	"github.com/p9c/pod/pkg/btcjson"
 	"github.com/p9c/pod/pkg/chainrpc"
-	"github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/qu"
 )
 
 // StartAPI starts up the api handler server that receives rpc.API messages and runs the handler and returns the result

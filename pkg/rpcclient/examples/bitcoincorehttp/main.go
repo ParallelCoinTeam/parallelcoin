@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 	
-	qu "github.com/p9c/pod/pkg/util/qu"
+	qu "github.com/p9c/qu"
 	
 	rpcclient "github.com/p9c/pod/pkg/rpcclient"
 )

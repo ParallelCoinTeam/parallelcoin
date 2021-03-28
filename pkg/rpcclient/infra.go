@@ -19,7 +19,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/qu"
 
 	"github.com/btcsuite/go-socks/socks"
 	"github.com/btcsuite/websocket"

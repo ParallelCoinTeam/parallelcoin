@@ -160,7 +160,7 @@ func makeSpendableOut(block *wire.Block, txIndex, txOutIndex uint32) spendableOu
 	return makeSpendableOutForTx(block.Transactions[txIndex], txOutIndex)
 }
 
-// testGenerator houses state used to easy the process of generating test blocks that build from one another along with
+// testGenerator houses state used to easy the process of generating test blocks that podbuild from one another along with
 // housing other useful things such as available spendable outputs used throughout the tests.
 type testGenerator struct {
 	params       *chaincfg.Params

@@ -4,7 +4,7 @@ import (
 	"github.com/p9c/pod/pkg/btcjson"
 	"time"
 	
-	"github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/qu"
 )
 
 // Watcher keeps the chain and wallet and rpc clients connected

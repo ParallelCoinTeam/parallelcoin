@@ -1,4 +1,4 @@
-// +build !generate
+// +podbuild !generate
 
 package rpchelp
 

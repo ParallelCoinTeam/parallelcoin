@@ -5,11 +5,11 @@ import (
 	"github.com/p9c/pod/pkg/podcfg"
 	"golang.org/x/exp/shiny/materialdesign/icons"
 	
-	"github.com/p9c/pod/pkg/gui"
+	"github.com/p9c/gel"
 	p9icons "github.com/p9c/pod/pkg/icons/svg"
 )
 
-func (wg *WalletGUI) getLoadingPage() (a *gui.App) {
+func (wg *WalletGUI) getLoadingPage() (a *gel.App) {
 	a = wg.App(&wg.Window.Width, wg.State.activePage, wg.invalidate, Break1).SetMainDirection(l.Center + 1)
 	a.SetThemeHook(
 		func() {
@@ -27,8 +27,8 @@ func (wg *WalletGUI) getLoadingPage() (a *gui.App) {
 	a.Pages(
 		map[string]l.Widget{
 			"loading": wg.Page(
-				"loading", gui.Widgets{
-					gui.WidgetSize{
+				"loading", gel.Widgets{
+					gel.WidgetSize{
 						Widget:
 						func(gtx l.Context) l.Dimensions {
 							return a.Flex().Flexed(1, a.Direction().Center().Embed(a.H1("loading").Fn).Fn).Fn(gtx)
@@ -37,8 +37,8 @@ func (wg *WalletGUI) getLoadingPage() (a *gui.App) {
 				},
 			),
 			"unlocking": wg.Page(
-				"unlocking", gui.Widgets{
-					gui.WidgetSize{
+				"unlocking", gel.Widgets{
+					gel.WidgetSize{
 						Widget:
 						func(gtx l.Context) l.Dimensions {
 							return a.Flex().Flexed(1, a.Direction().Center().Embed(a.H1("unlocking").Fn).Fn).Fn(gtx)
@@ -55,7 +55,7 @@ func (wg *WalletGUI) getLoadingPage() (a *gui.App) {
 					wg.unlockPage.ActivePage(name)
 				}, wg.unlockPage, "Danger",
 			),
-			// wg.Flex().Rigid(wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn).Fn,
+			// wg.Flex().Rigid(wg.Inset(0.5, gel.EmptySpace(0, 0)).Fn).Fn,
 		},
 	)
 	a.StatusBar(
@@ -79,7 +79,7 @@ func (wg *WalletGUI) getLoadingPage() (a *gui.App) {
 					wg.unlockPage.ActivePage(name)
 				}, wg.unlockPage,
 			),
-			// wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn,
+			// wg.Inset(0.5, gel.EmptySpace(0, 0)).Fn,
 		},
 	)
 	// a.PushOverlay(wg.toasts.DrawToasts())

@@ -11,7 +11,7 @@ import (
 	
 	uberatomic "go.uber.org/atomic"
 	
-	"github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/qu"
 	
 	"github.com/kardianos/osext"
 )

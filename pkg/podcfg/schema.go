@@ -1,7 +1,7 @@
 package podcfg
 
 import (
-	"github.com/p9c/pod/pkg/logg"
+	"github.com/p9c/log"
 	"reflect"
 	"sort"
 )
@@ -50,8 +50,8 @@ func GetConfigSchema(cfg *Config) Schema {
 	t := reflect.TypeOf(cfg)
 	t = t.Elem()
 	var levelOptions, network []string
-	for i := range logg.LevelSpecs {
-		levelOptions = append(levelOptions, logg.LevelSpecs[i].Name)
+	for i := range log.LevelSpecs {
+		levelOptions = append(levelOptions, log.LevelSpecs[i].Name)
 	}
 	network = []string{"mainnet", "testnet", "regtestnet", "simnet"}
 	rawFields := make(map[string]Fields)

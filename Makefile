@@ -1,8 +1,8 @@
 #!/usr/bin/make -f
 
 builder:
-	go install -v ./cmd/build/.
-	build builder
+	go install -v ./cmd/podbuild/.
+	podbuild builder
 
 ubuntu:
 	./prereqs/ubuntu.sh

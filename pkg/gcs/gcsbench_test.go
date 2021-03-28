@@ -82,7 +82,7 @@ func BenchmarkGCSFilterMatch(b *testing.B) {
 	b.StopTimer()
 	filter, e := gcs.BuildGCSFilter(P, M, key, contents)
 	if e != nil  {
-		b.Fatalf("Failed to build filter")
+		b.Fatalf("Failed to podbuild filter")
 	}
 	b.StartTimer()
 	var (
@@ -106,7 +106,7 @@ func BenchmarkGCSFilterMatchAny(b *testing.B) {
 	b.StopTimer()
 	filter, e := gcs.BuildGCSFilter(P, M, key, contents)
 	if e != nil  {
-		b.Fatalf("Failed to build filter")
+		b.Fatalf("Failed to podbuild filter")
 	}
 	b.StartTimer()
 	var (

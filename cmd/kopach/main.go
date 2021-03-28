@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/p9c/pod/pkg/control/sol"
 	"github.com/p9c/pod/pkg/control/templates"
-	"github.com/p9c/pod/pkg/logg"
+	"github.com/p9c/log"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/podcfg"
 	"net"
@@ -18,7 +18,7 @@ import (
 	
 	"github.com/niubaoshu/gotiny"
 	
-	"github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/qu"
 	
 	"github.com/VividCortex/ewma"
 	"github.com/urfave/cli"
@@ -242,7 +242,7 @@ func Handle(cx *pod.State) func(c *cli.Context) (e error) {
 				}
 			}
 			D.Ln("finished kopach miner work loop")
-			logg.LogChanDisabled.Store(true)
+			log.LogChanDisabled.Store(true)
 		}()
 		D.Ln("listening on", control.UDP4MulticastAddress)
 		<-w.quit

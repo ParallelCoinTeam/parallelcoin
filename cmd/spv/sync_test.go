@@ -1,4 +1,4 @@
-// +build ignore
+// +podbuild ignore
 
 package spv_test
 
@@ -915,7 +915,7 @@ func testRandomBlocks(harness *neutrinoHarness, t *testing.T) {
 			)
 			if e != nil {
 				errChan <- fmt.Errorf(
-					"Couldn't build basic "+
+					"Couldn't podbuild basic "+
 						"filter for block %d (%s): %s", height,
 					blockHash, err,
 				)

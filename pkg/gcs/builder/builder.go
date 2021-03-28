@@ -51,7 +51,7 @@ func DeriveKey(keyHash *chainhash.Hash) [gcs.KeySize]byte {
 	return key
 }
 
-// Key retrieves the key with which the builder will build a filter. This is useful if the builder is created with a
+// Key retrieves the key with which the builder will podbuild a filter. This is useful if the builder is created with a
 // random initial key.
 func (b *GCS) Key() ([gcs.KeySize]byte, error) {
 	// Do nothing if the builder's errored out.
@@ -61,7 +61,7 @@ func (b *GCS) Key() ([gcs.KeySize]byte, error) {
 	return b.key, nil
 }
 
-// SetKey sets the key with which the builder will build a filter to the passed [gcs.KeySize]byte.
+// SetKey sets the key with which the builder will podbuild a filter to the passed [gcs.KeySize]byte.
 func (b *GCS) SetKey(key [gcs.KeySize]byte) *GCS {
 	// Do nothing if the builder's already errored out.
 	if b.err != nil {
@@ -71,7 +71,7 @@ func (b *GCS) SetKey(key [gcs.KeySize]byte) *GCS {
 	return b
 }
 
-// SetKeyFromHash sets the key with which the builder will build a filter to a key derived from the passed
+// SetKeyFromHash sets the key with which the builder will podbuild a filter to a key derived from the passed
 // chainhash.Hash using DeriveKey().
 func (b *GCS) SetKeyFromHash(keyHash *chainhash.Hash) *GCS {
 	// Do nothing if the builder's already errored out.
@@ -172,12 +172,12 @@ func (b *GCS) Build() (*gcs.Filter, error) {
 	if b.err != nil {
 		return nil, b.err
 	}
-	// We'll ensure that all the parmaters we need to actually build the filter properly are set.
+	// We'll ensure that all the parmaters we need to actually podbuild the filter properly are set.
 	if b.p == 0 {
-		return nil, fmt.Errorf("p value is not set, cannot build")
+		return nil, fmt.Errorf("p value is not set, cannot podbuild")
 	}
 	if b.m == 0 {
-		return nil, fmt.Errorf("m value is not set, cannot build")
+		return nil, fmt.Errorf("m value is not set, cannot podbuild")
 	}
 	dataSlice := make([][]byte, 0, len(b.data))
 	for item := range b.data {
@@ -260,7 +260,7 @@ func BuildBasicFilter(block *wire.Block, prevOutScripts [][]byte) (*gcs.Filter, 
 	if e != nil {
 		return nil, e
 	}
-	// In order to build a basic filter, we'll range over the entire block, adding each whole script itself.
+	// In order to podbuild a basic filter, we'll range over the entire block, adding each whole script itself.
 	for _, tx := range block.Transactions {
 		// For each output in a transaction, we'll add each of the individual data pushes within the script.
 		for _, txOut := range tx.TxOut {

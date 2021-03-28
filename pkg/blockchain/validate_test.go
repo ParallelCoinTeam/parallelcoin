@@ -109,7 +109,7 @@ import (
 // 		t.Fatalf("CheckConnectBlockTemplate: Received unexpected error on "+
 // 			"block 4: %v", e)
 // 	}
-// 	// Block 3a should fail to connect since does not build on chain tip.
+// 	// Block 3a should fail to connect since does not podbuild on chain tip.
 // 	e = chain.CheckConnectBlockTemplate(blocks[5])
 // 	if e ==  nil {
 // 		t.Fatal("CheckConnectBlockTemplate: Did not received expected error " +

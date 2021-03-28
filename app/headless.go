@@ -1,10 +1,10 @@
-// +build headless
+// +podbuild headless
 
 package app
 
 import (
 	"github.com/p9c/pod/pkg/pod"
-	"github.com/p9c/pod/pkg/logg"
+	"github.com/p9c/log"
 	"os"
 	
 	"github.com/urfave/cli"
@@ -12,8 +12,8 @@ import (
 
 var walletGUIHandle = func(cx *pod.State) func(c *cli.Context) (e error) {
 	return func(c *cli.Context) (e error) {
-		logg.App = c.Command.Name
-		W.Ln("GUI was disabled for this build (server only version)")
+		log.App = c.Command.Name
+		W.Ln("GUI was disabled for this podbuild (server only version)")
 		os.Exit(1)
 		return nil
 	}

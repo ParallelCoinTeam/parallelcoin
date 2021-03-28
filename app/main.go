@@ -2,7 +2,7 @@
 //
 // Parallelcoin Save
 //
-// This is the heart of configuration and coordination of the parts that compose the parallelcoin Save - Ctl, Node and
+// This is the heart of configuration and coordination of the parts that compose the parallelcoin pod - Ctl, Node and
 // Wallet, and the extended, combined Shell and the Gio GUI.
 package app
 

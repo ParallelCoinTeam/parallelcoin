@@ -2,10 +2,10 @@ package consume
 
 import (
 	"github.com/niubaoshu/gotiny"
-	"github.com/p9c/pod/pkg/logg"
+	"github.com/p9c/log"
 	"github.com/p9c/pod/pkg/pipe"
 	"github.com/p9c/pod/pkg/pipe/stdconn/worker"
-	"github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/qu"
 )
 
 // FilterNone is a filter that doesn't
@@ -14,8 +14,8 @@ func FilterNone(string) bool {
 }
 
 // SimpleLog is a very simple log printer
-func SimpleLog(name string) func(ent *logg.Entry) (e error) {
-	return func(ent *logg.Entry) (e error) {
+func SimpleLog(name string) func(ent *log.Entry) (e error) {
+	return func(ent *log.Entry) (e error) {
 		D.F(
 			"%s[%s] %s %s",
 			name,
@@ -29,7 +29,7 @@ func SimpleLog(name string) func(ent *logg.Entry) (e error) {
 }
 
 func Log(
-	quit qu.C, handler func(ent *logg.Entry) (e error,), filter func(pkg string) (out bool), args ...string,
+	quit qu.C, handler func(ent *log.Entry) (e error,), filter func(pkg string) (out bool), args ...string,
 ) *worker.Worker {
 	D.Ln("starting log consumer")
 	return pipe.Consume(
@@ -39,7 +39,7 @@ func Log(
 				magic := string(b[:4])
 				switch magic {
 				case "entr":
-					var ent logg.Entry
+					var ent log.Entry
 					n := gotiny.Unmarshal(b, &ent)
 					D.Ln("consume", n)
 					if filter(ent.Package) {
@@ -47,13 +47,13 @@ func Log(
 						return
 					}
 					switch ent.Level {
-					case logg.Fatal:
-					case logg.Error:
-					case logg.Warn:
-					case logg.Info:
-					case logg.Check:
-					case logg.Debug:
-					case logg.Trace:
+					case log.Fatal:
+					case log.Error:
+					case log.Warn:
+					case log.Info:
+					case log.Check:
+					case log.Debug:
+					case log.Trace:
 					default:
 						D.Ln("got an empty log entry")
 						return
@@ -113,8 +113,8 @@ func SetLevel(w *worker.Worker, level string) {
 	}
 	D.Ln("sending set level", level)
 	lvl := 0
-	for i := range logg.Levels {
-		if level == logg.Levels[i] {
+	for i := range log.Levels {
+		if level == log.Levels[i] {
 			lvl = i
 		}
 	}

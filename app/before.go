@@ -3,8 +3,8 @@ package app
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/p9c/log"
 	"github.com/p9c/pod/pkg/fork"
-	"github.com/p9c/pod/pkg/logg"
 	"github.com/p9c/pod/pkg/podcfg"
 	"io/ioutil"
 	prand "math/rand"
@@ -73,7 +73,7 @@ func beforeFunc(cx *pod.State) func(c *cli.Context) (e error) {
 			T.Ln("set loglevel", c.String("loglevel"))
 			cx.Config.LogLevel.Set(c.String("loglevel"))
 		}
-		logg.SetLogLevel(cx.Config.LogLevel.V())
+		log.SetLogLevel(cx.Config.LogLevel.V())
 		if cx.Config.PipeLog.False() {
 			// if/when running further instances of the same version no reason
 			// to print the version message again

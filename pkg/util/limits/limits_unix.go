@@ -1,4 +1,4 @@
-// +build !windows,!plan9
+// +podbuild !windows,!plan9
 
 package limits
 

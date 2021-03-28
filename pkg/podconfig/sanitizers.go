@@ -10,7 +10,7 @@ import (
 	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/fork"
 	"github.com/p9c/pod/pkg/forkhash"
-	"github.com/p9c/pod/pkg/logg"
+	"github.com/p9c/log"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/podcfg"
 	"io/ioutil"
@@ -338,7 +338,7 @@ func initLogLevel(cfg *podcfg.Config) {
 		E.Ln("unrecognised loglevel", loglevel, "setting default info")
 		cfg.LogLevel.Set("info")
 	}
-	logg.SetLogLevel(cfg.LogLevel.V())
+	log.SetLogLevel(cfg.LogLevel.V())
 }
 
 func normalizeAddresses(cfg *podcfg.Config) {

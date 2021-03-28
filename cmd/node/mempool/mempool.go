@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/p9c/pod/pkg/amt"
 	"github.com/p9c/pod/pkg/chaincfg"
-	"github.com/p9c/pod/pkg/logg"
+	"github.com/p9c/log"
 	"github.com/p9c/pod/pkg/podcfg"
 	"math"
 	"sync"
@@ -571,7 +571,7 @@ func (mp *TxPool) limitNumOrphans() (e error) {
 		if numExpired := origNumOrphans - numOrphans; numExpired > 0 {
 			D.F(
 				"Expired %d %s (remaining: %d)",
-				numExpired, logg.PickNoun(numExpired, "orphan", "orphans"),
+				numExpired, log.PickNoun(numExpired, "orphan", "orphans"),
 				numOrphans,
 			)
 		}

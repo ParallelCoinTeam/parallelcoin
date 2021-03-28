@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"testing"
 	
-	"github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/qu"
 )
 
 func TestThrottle(t *testing.T) {

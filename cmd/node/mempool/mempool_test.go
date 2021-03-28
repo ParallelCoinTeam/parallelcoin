@@ -251,7 +251,7 @@ func (p *poolHarness) CreateTxChain(firstOutput spendableOutput, numTxns uint32)
 
 // newPoolHarness returns a new instance of a pool harness initialized with a fake chain and a TxPool bound to it that
 // is configured with a policy suitable for testing. Also the fake chain is populated with the returned spendable
-// outputs so the caller can easily create new valid transactions which build off of it.
+// outputs so the caller can easily create new valid transactions which podbuild off of it.
 func newPoolHarness(chainParams *chaincfg.Params) (*poolHarness, []spendableOutput, error) {
 	// Use a hard coded key pair for deterministic results.
 	keyBytes, e := hex.DecodeString(

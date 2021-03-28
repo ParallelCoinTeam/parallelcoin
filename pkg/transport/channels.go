@@ -4,13 +4,13 @@ import (
 	"crypto/cipher"
 	"errors"
 	"fmt"
-	"github.com/p9c/pod/pkg/logg"
+	"github.com/p9c/log"
 	"net"
 	"runtime"
 	"strings"
 	"time"
 	
-	"github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/qu"
 	
 	"github.com/p9c/pod/pkg/fec"
 	"github.com/p9c/pod/pkg/gcm"
@@ -79,7 +79,7 @@ func (c *Channel) Send(magic []byte, nonce []byte, data []byte) (n int, e error)
 
 // SendMany sends a BufIter of shards as produced by GetShards
 func (c *Channel) SendMany(magic []byte, b [][]byte) (e error) {
-	D.Ln("magic", string(magic), logg.Caller("sending from", 1))
+	D.Ln("magic", string(magic), log.Caller("sending from", 1))
 	var nonce []byte
 	if nonce, e = GetNonce(c.sendCiph); E.Chk(e) {
 	} else {

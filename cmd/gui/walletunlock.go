@@ -15,7 +15,7 @@ import (
 	l "gioui.org/layout"
 	"gioui.org/text"
 	
-	"github.com/p9c/pod/pkg/gui"
+	"github.com/p9c/gel"
 	p9icons "github.com/p9c/pod/pkg/icons/svg"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
@@ -24,7 +24,7 @@ func (wg *WalletGUI) unlockWallet(pass string) {
 	D.Ln("entered password", pass)
 	// unlock wallet
 	// wg.cx.Config.Lock()
-	wg.cx.Config.WalletPass.Set( pass)
+	wg.cx.Config.WalletPass.Set(pass)
 	wg.cx.Config.WalletOff.F()
 	// wg.cx.Config.Unlock()
 	// load config into a fresh variable
@@ -33,7 +33,7 @@ func (wg *WalletGUI) unlockWallet(pass string) {
 	var e error
 	if cfgFile, e = ioutil.ReadFile(wg.cx.Config.ConfigFile.V()); E.Chk(e) {
 		// this should not happen
-		// TODO: panic-type conditions - for gui should have a notification maybe?
+		// TODO: panic-type conditions - for gel should have a notification maybe?
 		panic("config file does not exist")
 	}
 	D.Ln("loaded config")
@@ -45,7 +45,7 @@ func (wg *WalletGUI) unlockWallet(pass string) {
 		if cfg.WalletPass.V() == bh {
 			D.Ln("loading previously saved state")
 			filename := filepath.Join(wg.cx.Config.DataDir.V(), "state.json")
-			// if logg.FileExists(filename) {
+			// if log.FileExists(filename) {
 			I.Ln("#### loading state data...")
 			if e = wg.State.Load(filename, wg.cx.Config.WalletPass.Ptr()); !E.Chk(e) {
 				D.Ln("#### loaded state data")
@@ -74,7 +74,7 @@ func (wg *WalletGUI) unlockWallet(pass string) {
 			// 		}
 			// 	})).
 			// 		// CornerRadius(0.5).
-			// 		// Corners(gui.NW | gui.SW | gui.NE).
+			// 		// Corners(gel.NW | gel.SW | gel.NE).
 			// 		Background("white").
 			// 		Embed(
 			// 			wg.Inset(0.125,
@@ -89,7 +89,7 @@ func (wg *WalletGUI) unlockWallet(pass string) {
 	}
 }
 
-func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
+func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gel.App) {
 	a = wg.App(&wg.Window.Width, wg.State.activePage, wg.invalidate, Break1).SetMainDirection(l.Center + 1)
 	wg.unlockPage = a
 	password := ""
@@ -117,8 +117,8 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
 	a.Pages(
 		map[string]l.Widget{
 			"home": wg.Page(
-				"home", gui.Widgets{
-					gui.WidgetSize{
+				"home", gel.Widgets{
+					gel.WidgetSize{
 						Widget:
 						func(gtx l.Context) l.Dimensions {
 							var dims l.Dimensions
@@ -127,7 +127,7 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
 								Flexed(
 									1,
 									wg.VFlex().
-										Flexed(0.5, gui.EmptyMaxHeight()).
+										Flexed(0.5, gel.EmptyMaxHeight()).
 										Rigid(
 											wg.Flex().
 												SpaceEvenly().
@@ -155,7 +155,7 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
 																							wg.Inset(
 																								0.5,
 																								wg.Icon().
-																									Scale(gui.Scales["H3"]).
+																									Scale(gel.Scales["H3"]).
 																									Color("DocBg").
 																									Src(&icons.ActionLock).Fn,
 																							).Fn,
@@ -164,7 +164,7 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
 																					Rigid(
 																						wg.Inset(
 																							0.5,
-																							gui.EmptySpace(0, 0),
+																							gel.EmptySpace(0, 0),
 																						).Fn,
 																					).
 																					Rigid(
@@ -174,7 +174,7 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
 																				return dims
 																			},
 																		).
-																		Rigid(wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn).
+																		Rigid(wg.Inset(0.5, gel.EmptySpace(0, 0)).Fn).
 																		Rigid(
 																			func(gtx l.Context) l.
 																			Dimensions {
@@ -185,7 +185,7 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
 																					Fn(gtx)
 																			},
 																		).
-																		Rigid(wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn).
+																		Rigid(wg.Inset(0.5, gel.EmptySpace(0, 0)).Fn).
 																		Rigid(
 																			wg.Body1(
 																				fmt.Sprintf(
@@ -208,7 +208,7 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
 																					wg.incdecs["idleTimeout"].
 																						Color("DocText").
 																						Background("DocBg").
-																						Scale(gui.Scales["Caption"]).
+																						Scale(gel.Scales["Caption"]).
 																						Fn,
 																				).
 																				Fn,
@@ -236,7 +236,7 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
 																										Rigid(
 																											wg.Icon().
 																												Scale(
-																													gui.
+																													gel.
 																														Scales["H4"],
 																												).
 																												Color("DocText").
@@ -248,7 +248,7 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
 																										Rigid(
 																											wg.Inset(
 																												0.5,
-																												gui.EmptySpace(
+																												gel.EmptySpace(
 																													0,
 																													0,
 																												),
@@ -260,7 +260,7 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
 																										Rigid(
 																											wg.Inset(
 																												0.5,
-																												gui.EmptySpace(
+																												gel.EmptySpace(
 																													0,
 																													0,
 																												),
@@ -299,14 +299,14 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
 																									wg.Flex().AlignMiddle().
 																										Rigid(
 																											wg.Icon().
-																												Scale(gui.Scales["H4"]).
+																												Scale(gel.Scales["H4"]).
 																												Color("Light").
 																												Src(&icons.ActionLockOpen).Fn,
 																										).
 																										Rigid(
 																											wg.Inset(
 																												0.5,
-																												gui.EmptySpace(
+																												gel.EmptySpace(
 																													0,
 																													0,
 																												),
@@ -318,7 +318,7 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
 																										Rigid(
 																											wg.Inset(
 																												0.5,
-																												gui.EmptySpace(
+																												gel.EmptySpace(
 																													0,
 																													0,
 																												),
@@ -338,7 +338,7 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
 													).Fn,
 												).
 												Fn,
-										).Flexed(0.5, gui.EmptyMaxHeight()).Fn,
+										).Flexed(0.5, gel.EmptyMaxHeight()).Fn,
 								).
 								Fn(gtx)
 						},
@@ -346,8 +346,8 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
 				},
 			),
 			"settings": wg.Page(
-				"settings", gui.Widgets{
-					gui.WidgetSize{
+				"settings", gel.Widgets{
+					gel.WidgetSize{
 						Widget: func(gtx l.Context) l.Dimensions {
 							return wg.configs.Widget(wg.config)(gtx)
 						},
@@ -355,23 +355,23 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
 				},
 			),
 			"console": wg.Page(
-				"console", gui.Widgets{
-					gui.WidgetSize{Widget: wg.console.Fn},
+				"console", gel.Widgets{
+					gel.WidgetSize{Widget: wg.console.Fn},
 				},
 			),
 			"help": wg.Page(
-				"help", gui.Widgets{
-					gui.WidgetSize{Widget: wg.HelpPage()},
+				"help", gel.Widgets{
+					gel.WidgetSize{Widget: wg.HelpPage()},
 				},
 			),
 			"log": wg.Page(
-				"log", gui.Widgets{
-					gui.WidgetSize{Widget: a.Placeholder("log")},
+				"log", gel.Widgets{
+					gel.WidgetSize{Widget: a.Placeholder("log")},
 				},
 			),
 			"quit": wg.Page(
-				"quit", gui.Widgets{
-					gui.WidgetSize{
+				"quit", gel.Widgets{
+					gel.WidgetSize{
 						Widget: func(gtx l.Context) l.Dimensions {
 							return wg.VFlex().
 								SpaceEvenly().
@@ -382,7 +382,7 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
 								Rigid(
 									wg.Flex().
 										// SpaceEvenly().
-										Flexed(0.5, gui.EmptyMaxWidth()).
+										Flexed(0.5, gel.EmptyMaxWidth()).
 										Rigid(
 											wg.Button(
 												wg.clickables["quit"].SetClick(
@@ -395,7 +395,7 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
 												"yes!!!",
 											).Fn,
 										).
-										Flexed(0.5, gui.EmptyMaxWidth()).
+										Flexed(0.5, gel.EmptyMaxWidth()).
 										Fn,
 								).
 								Fn(gtx)
@@ -441,13 +441,13 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
 			// 	},
 			// ),
 			"mining": wg.Page(
-				"mining", gui.Widgets{
-					gui.WidgetSize{Widget: a.Placeholder("mining")},
+				"mining", gel.Widgets{
+					gel.WidgetSize{Widget: a.Placeholder("mining")},
 				},
 			),
 			"explorer": wg.Page(
-				"explorer", gui.Widgets{
-					gui.WidgetSize{Widget: a.Placeholder("explorer")},
+				"explorer", gel.Widgets{
+					gel.WidgetSize{Widget: a.Placeholder("explorer")},
 				},
 			),
 		},
@@ -482,7 +482,7 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
 					wg.unlockPage.ActivePage(name)
 				}, wg.unlockPage, "Danger",
 			),
-			// wg.Flex().Rigid(wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn).Fn,
+			// wg.Flex().Rigid(wg.Inset(0.5, gel.EmptySpace(0, 0)).Fn).Fn,
 			// wg.PageTopBarButton(
 			// 	"quit", 3, &icons.ActionExitToApp, func(name string) {
 			// 		wg.unlockPage.ActivePage(name)
@@ -492,7 +492,7 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
 	)
 	a.StatusBar(
 		[]l.Widget{
-			// wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn,
+			// wg.Inset(0.5, gel.EmptySpace(0, 0)).Fn,
 			wg.RunStatusPanel,
 		},
 		[]l.Widget{
@@ -512,7 +512,7 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gui.App) {
 					wg.unlockPage.ActivePage(name)
 				}, wg.unlockPage,
 			),
-			// wg.Inset(0.5, gui.EmptySpace(0, 0)).Fn,
+			// wg.Inset(0.5, gel.EmptySpace(0, 0)).Fn,
 		},
 	)
 	// a.PushOverlay(wg.toasts.DrawToasts())

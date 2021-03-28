@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 	
-	"github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/qu"
 	
 	sac "github.com/p9c/pod/cmd/spv"
 	"github.com/p9c/pod/pkg/chainhash"

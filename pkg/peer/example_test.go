@@ -2,19 +2,19 @@ package peer_test
 
 import (
 	"fmt"
-	"github.com/p9c/pod/pkg/logg"
+	"github.com/p9c/log"
 	"net"
 	"time"
 	
-	"github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/qu"
 	
 	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/peer"
 	"github.com/p9c/pod/pkg/wire"
 )
 
-var subsystem = logg.AddLoggerSubsystem()
-var F, E, W, I, D, T logg.LevelPrinter = logg.GetLogPrinterSet(subsystem)
+var subsystem = log.AddLoggerSubsystem()
+var F, E, W, I, D, T log.LevelPrinter = log.GetLogPrinterSet(subsystem)
 
 // mockRemotePeer creates a basic inbound peer listening on the simnet port for use with Example_peerConnection. It does
 // not return until the listner is active.

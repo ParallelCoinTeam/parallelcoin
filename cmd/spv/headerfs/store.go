@@ -52,7 +52,7 @@ var headerBufPool = sync.Pool{
 }
 
 // headerStore combines a on-disk set of headers within a flat file in addition to a databse which indexes that flat
-// file. Together, these two abstractions can be used in order to build an indexed header store for any type of "header"
+// file. Together, these two abstractions can be used in order to podbuild an indexed header store for any type of "header"
 // as it deals only with raw bytes, and leaves it to a higher layer to interpret those raw bytes accordingly.
 //
 // TODO(roasbeef): quickcheck coverage

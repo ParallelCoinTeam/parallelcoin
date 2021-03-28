@@ -3,13 +3,13 @@ package connmgr
 import (
 	"errors"
 	"fmt"
-	"github.com/p9c/pod/pkg/logg"
+	"github.com/p9c/log"
 	"net"
 	"sync"
 	"sync/atomic"
 	"time"
 	
-	"github.com/p9c/pod/pkg/util/qu"
+	"github.com/p9c/qu"
 )
 
 // maxFailedAttempts is the maximum number of successive failed connection
@@ -316,7 +316,7 @@ out:
 
 // NewConnReq creates a new connection request and connects to the corresponding address.
 func (cm *ConnManager) NewConnReq() {
-	T.Ln("creating new connreq @", logg.Caller("thingy", 1))
+	T.Ln("creating new connreq @", log.Caller("thingy", 1))
 	if atomic.LoadInt32(&cm.stop) != 0 {
 		return
 	}
