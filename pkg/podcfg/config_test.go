@@ -14,22 +14,22 @@ func TestForEach(t *testing.T) {
 			switch ii := ifc.(type) {
 			case *Bool:
 				t.Log("case *Bool")
-				t.Log(spew.Sdump(ii.metadata))
+				t.Log(spew.Sdump(ii.Metadata))
 			case *Strings:
 				t.Log("case *Strings")
-				t.Log(spew.Sdump(ii.metadata))
+				t.Log(spew.Sdump(ii.Metadata))
 			case *Float:
 				t.Log("case *Float")
-				t.Log(spew.Sdump(ii.metadata))
+				t.Log(spew.Sdump(ii.Metadata))
 			case *Int:
 				t.Log("case *Int")
-				t.Log(spew.Sdump(ii.metadata))
+				t.Log(spew.Sdump(ii.Metadata))
 			case *String:
 				t.Log("case *String")
-				t.Log(spew.Sdump(ii.metadata))
+				t.Log(spew.Sdump(ii.Metadata))
 			case *Duration:
 				t.Log("case *Duration")
-				t.Log(spew.Sdump(ii.metadata))
+				t.Log(spew.Sdump(ii.Metadata))
 			default:
 				// t.Log(spew.Sdump(ii))
 			}

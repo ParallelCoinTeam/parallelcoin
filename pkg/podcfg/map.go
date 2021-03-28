@@ -8,47 +8,47 @@ func MapGen(in *Config) (c *Config) {
 		func(ifc interface{}) bool {
 			switch ii := ifc.(type) {
 			case *Bool:
-				im := ii.metadata
+				im := ii.Metadata
 				// sanity check for programmers
-				if _, ok := c.Map[im.Name]; ok {
+				if _, ok := c.Map[im.Option]; ok {
 					panic("duplicate configuration item name")
 				}
-				c.Map[im.Name] = ii
+				c.Map[im.Option] = ii
 			case *Strings:
-				im := ii.metadata
+				im := ii.Metadata
 				// sanity check for programmers
-				if _, ok := c.Map[im.Name]; ok {
+				if _, ok := c.Map[im.Option]; ok {
 					panic("duplicate configuration item name")
 				}
-				c.Map[im.Name] = ii
+				c.Map[im.Option] = ii
 			case *Float:
-				im := ii.metadata
+				im := ii.Metadata
 				// sanity check for programmers
-				if _, ok := c.Map[im.Name]; ok {
+				if _, ok := c.Map[im.Option]; ok {
 					panic("duplicate configuration item name")
 				}
-				c.Map[im.Name] = ii
+				c.Map[im.Option] = ii
 			case *Int:
-				im := ii.metadata
+				im := ii.Metadata
 				// sanity check for programmers
-				if _, ok := c.Map[im.Name]; ok {
+				if _, ok := c.Map[im.Option]; ok {
 					panic("duplicate configuration item name")
 				}
-				c.Map[im.Name] = ii
+				c.Map[im.Option] = ii
 			case *String:
-				im := ii.metadata
+				im := ii.Metadata
 				// sanity check for programmers
-				if _, ok := c.Map[im.Name]; ok {
+				if _, ok := c.Map[im.Option]; ok {
 					panic("duplicate configuration item name")
 				}
-				c.Map[im.Name] = ii
+				c.Map[im.Option] = ii
 			case *Duration:
-				im := ii.metadata
+				im := ii.Metadata
 				// sanity check for programmers
-				if _, ok := c.Map[im.Name]; ok {
+				if _, ok := c.Map[im.Option]; ok {
 					panic("duplicate configuration item name")
 				}
-				c.Map[im.Name] = ii
+				c.Map[im.Option] = ii
 			default:
 			}
 			return true

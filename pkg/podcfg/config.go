@@ -21,6 +21,7 @@ import (
 	"os"
 	"reflect"
 	"sort"
+	"strings"
 	"time"
 )
 
@@ -143,14 +144,59 @@ type Config struct {
 
 // ForEach iterates the configuration items in their defined order, running a function with the configuration item in
 // the field
-func (c *Config) ForEach(fn func(ifc interface{}) bool) {
+func (c *Config) ForEach(fn func(ifc interface{}) bool) bool {
 	t := reflect.ValueOf(c)
 	t = t.Elem()
 	for i := 0; i < t.NumField(); i++ {
 		if !fn(t.Field(i).Interface()) {
-			return
+			return false
 		}
 	}
+	return true
+}
+
+func (c *Config) GetOption(input string) (opt Option, value string, e error) {
+	I.Ln("checking arg for option:", input)
+	var md *Metadata
+	if c.ForEach(func(ifc interface{}) bool {
+		switch ii := ifc.(type) {
+		case *Bool:
+			opt = ii
+			md = &ii.Metadata
+		case *Strings:
+			opt = ii
+			md = &ii.Metadata
+		case *Float:
+			opt = ii
+			md = &ii.Metadata
+		case *Int:
+			opt = ii
+			md = &ii.Metadata
+		case *String:
+			opt = ii
+			md = &ii.Metadata
+		case *Duration:
+			opt = ii
+			md = &ii.Metadata
+		}
+		if md != nil {
+			if strings.HasPrefix(input, md.Option) {
+				value = input[len(md.Option):]
+				return false
+			}
+			for i := range md.Aliases {
+				if strings.HasPrefix(input, md.Aliases[i]) {
+					value = input[len(md.Aliases[i]):]
+					return false
+				}
+			}
+		}
+		return true
+	},
+	) {
+		e = fmt.Errorf("option not found")
+	}
+	return
 }
 
 // MarshalJSON implements the json marshaller for the config. This marshaller only saves what is different from the
@@ -162,13 +208,13 @@ func (c *Config) MarshalJSON() (b []byte, e error) {
 		func(ifc interface{}) bool {
 			switch ii := ifc.(type) {
 			case *Bool:
-				if ii.True() == ii.def && ii.metadata.OmitEmpty && !c.ShowAll {
+				if ii.True() == ii.def && ii.Metadata.OmitEmpty && !c.ShowAll {
 					return true
 				}
-				outMap[ii.Name] = ii.True()
+				outMap[ii.Option] = ii.True()
 			case *Strings:
 				v := ii.S()
-				if len(v) == len(ii.def) && ii.metadata.OmitEmpty && !c.ShowAll {
+				if len(v) == len(ii.def) && ii.Metadata.OmitEmpty && !c.ShowAll {
 					foundMismatch := false
 					for i := range v {
 						if v[i] != ii.def[i] {
@@ -180,30 +226,30 @@ func (c *Config) MarshalJSON() (b []byte, e error) {
 						return true
 					}
 				}
-				outMap[ii.Name] = v
+				outMap[ii.Option] = v
 			case *Float:
-				if ii.value.Load() == ii.def && ii.metadata.OmitEmpty && !c.ShowAll {
+				if ii.value.Load() == ii.def && ii.Metadata.OmitEmpty && !c.ShowAll {
 					return true
 				}
-				outMap[ii.Name] = ii.value.Load()
+				outMap[ii.Option] = ii.value.Load()
 			case *Int:
-				if ii.value.Load() == ii.def && ii.metadata.OmitEmpty && !c.ShowAll {
+				if ii.value.Load() == ii.def && ii.Metadata.OmitEmpty && !c.ShowAll {
 					return true
 				}
-				outMap[ii.Name] = ii.value.Load()
+				outMap[ii.Option] = ii.value.Load()
 			case *String:
 				v := string(ii.value.Load().([]byte))
 				// fmt.Printf("def: '%s'", v)
 				// spew.Dump(ii.def)
-				if v == ii.def && ii.metadata.OmitEmpty && !c.ShowAll {
+				if v == ii.def && ii.Metadata.OmitEmpty && !c.ShowAll {
 					return true
 				}
-				outMap[ii.Name] = v
+				outMap[ii.Option] = v
 			case *Duration:
-				if ii.value.Load() == ii.def && ii.metadata.OmitEmpty && !c.ShowAll {
+				if ii.value.Load() == ii.def && ii.Metadata.OmitEmpty && !c.ShowAll {
 					return true
 				}
-				outMap[ii.Name] = fmt.Sprint(ii.value.Load())
+				outMap[ii.Option] = fmt.Sprint(ii.value.Load())
 			default:
 			}
 			return true
@@ -223,15 +269,15 @@ func (c *Config) UnmarshalJSON(data []byte) (e error) {
 	c.ForEach(func(iii interface{}) bool {
 		switch ii := iii.(type) {
 		case *Bool:
-			if i, ok := ifc[ii.Name]; ok {
+			if i, ok := ifc[ii.Option]; ok {
 				if i.(bool) != ii.def {
-					// I.Ln(ii.Name+":", i.(bool), "default:", ii.def, "prev:", c.Map[ii.Name].(*Bool).True())
-					c.Map[ii.Name].(*Bool).Set(i.(bool))
+					// I.Ln(ii.Option+":", i.(bool), "default:", ii.def, "prev:", c.Map[ii.Option].(*Bool).True())
+					c.Map[ii.Option].(*Bool).Set(i.(bool))
 				}
 			}
 		case *Strings:
 			matched := true
-			if d, ok := ifc[ii.Name]; ok {
+			if d, ok := ifc[ii.Option]; ok {
 				if ds, ok2 := d.([]interface{}); ok2 {
 					for i := range ds {
 						if ds[i] != ii.def[i] {
@@ -242,35 +288,35 @@ func (c *Config) UnmarshalJSON(data []byte) (e error) {
 					if matched {
 						return true
 					}
-					// I.Ln(ii.Name+":", ds, "default:", ii.def, "prev:", c.Map[ii.Name].(*Strings).S())
-					c.Map[ii.Name].(*Strings).Set(ifcToStrings(ds))
+					// I.Ln(ii.Option+":", ds, "default:", ii.def, "prev:", c.Map[ii.Option].(*Strings).S())
+					c.Map[ii.Option].(*Strings).Set(ifcToStrings(ds))
 				}
 			}
 		case *Float:
-			if d, ok := ifc[ii.Name]; ok {
-				// I.Ln(ii.Name+":", d.(float64), "default:", ii.def, "prev:", c.Map[ii.Name].(*Float).V())
-				c.Map[ii.Name].(*Float).Set(d.(float64))
+			if d, ok := ifc[ii.Option]; ok {
+				// I.Ln(ii.Option+":", d.(float64), "default:", ii.def, "prev:", c.Map[ii.Option].(*Float).V())
+				c.Map[ii.Option].(*Float).Set(d.(float64))
 			}
 		case *Int:
-			if d, ok := ifc[ii.Name]; ok {
-				// I.Ln(ii.Name+":", int64(d.(float64)), "default:", ii.def, "prev:", c.Map[ii.Name].(*Int).V())
-				c.Map[ii.Name].(*Int).Set(int(d.(float64)))
+			if d, ok := ifc[ii.Option]; ok {
+				// I.Ln(ii.Option+":", int64(d.(float64)), "default:", ii.def, "prev:", c.Map[ii.Option].(*Int).V())
+				c.Map[ii.Option].(*Int).Set(int(d.(float64)))
 			}
 		case *String:
-			if d, ok := ifc[ii.Name]; ok {
+			if d, ok := ifc[ii.Option]; ok {
 				if ds, ok2 := d.(string); ok2 {
 					if ds != ii.def {
-						// I.Ln(ii.Name+":", d.(string), "default:", ii.def, "prev:", c.Map[ii.Name].(*String).V())
-						c.Map[ii.Name].(*String).Set(d.(string))
+						// I.Ln(ii.Option+":", d.(string), "default:", ii.def, "prev:", c.Map[ii.Option].(*String).V())
+						c.Map[ii.Option].(*String).Set(d.(string))
 					}
 				}
 			}
 		case *Duration:
-			if d, ok := ifc[ii.Name]; ok {
+			if d, ok := ifc[ii.Option]; ok {
 				var parsed time.Duration
 				parsed, e = time.ParseDuration(d.(string))
-				// I.Ln(ii.Name+":", parsed, "default:", ii.def.String(), "prev:", c.Map[ii.Name].(*Duration).V())
-				c.Map[ii.Name].(*Duration).Set(parsed)
+				// I.Ln(ii.Option+":", parsed, "default:", ii.def.String(), "prev:", c.Map[ii.Option].(*Duration).V())
+				c.Map[ii.Option].(*Duration).Set(parsed)
 			}
 		default:
 		}
@@ -299,6 +345,7 @@ func (c *Config) processCommandlineArgs() (cm *Command, e error) {
 	// arbitrary for the app
 	var commands map[int]Command
 	commands = make(map[int]Command)
+	var commandsStart, commandsEnd int
 	for i := range os.Args {
 		if i == 0 {
 			continue
@@ -309,30 +356,33 @@ func (c *Config) processCommandlineArgs() (cm *Command, e error) {
 			continue
 		}
 		if found {
+			if commandsStart == 0 {
+				commandsStart = i
+			}
+			commandsEnd = i
 			if oc, ok := commands[depth]; ok {
 				e = fmt.Errorf("second command found at same depth '%s' and '%s'", oc.Name, cm.Name)
 				return
 			}
-			I.Ln("found command", cm.Name, "argument number", i, "at depth", depth, "distance", dist)
+			D.Ln("found command", cm.Name, "argument number", i, "at depth", depth, "distance", dist)
 			commands[depth] = *cm
 		} else {
-			I.Ln("argument", os.Args[i], "is not a command")
+			T.Ln("argument", os.Args[i], "is not a command")
 		}
 	}
-	I.S(commands)
+	commandsEnd++
+	cmds := []int{}
 	if len(commands) == 0 {
 		commands[0] = c.Commands[0]
 	} else {
-		cmds := []int{}
 		for i := range commands {
 			cmds = append(cmds, i)
 		}
 		if len(cmds) > 0 {
 			sort.Ints(cmds)
-			I.S(cmds)
 			var cms []string
-			for j := range commands {
-				cms = append(cms, commands[j].Name)
+			for i := range commands {
+				cms = append(cms, commands[i].Name)
 			}
 			if cmds[0] != 1 {
 				e = fmt.Errorf("commands must include base level item for disambiguation %v", cms)
@@ -353,16 +403,33 @@ func (c *Config) processCommandlineArgs() (cm *Command, e error) {
 					}
 				}
 				if !found {
-					var cms []string
-					for j := range commands {
-						cms = append(cms, commands[j].Name)
-					}
 					e = fmt.Errorf("multiple commands are not a path on the command tree %v", cms)
 					return
 				}
 			}
 		}
 	}
+	var options []Option
+	if commandsStart > 1 {
+		// we have options to check
+		for i := range os.Args {
+			if i == 0 {
+				continue
+			}
+			if i == commandsStart {
+				break
+			}
+			var val string
+			var opt Option
+			if opt, val, e = c.GetOption(os.Args[i]); E.Chk(e) {
+				e = fmt.Errorf("argument %d: '%s' lacks a valid option prefix", i, os.Args[i])
+				return
+			}
+			I.Ln("found option:", opt.GetMetadata().Option, "with value", val)
+			options = append(options, opt.ReadInput(val))
+		}
+	}
+	I.S(commands[cmds[len(cmds)-1]], options, os.Args[commandsEnd:])
 	return
 }
 

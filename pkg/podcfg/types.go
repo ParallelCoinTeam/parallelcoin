@@ -16,8 +16,13 @@ import (
 )
 
 type (
-	metadata struct {
-		Name        string
+	Option interface {
+		ReadInput(string) Option
+		GetMetadata() *Metadata
+		Name() string
+	}
+	Metadata struct {
+		Option      string
 		Aliases     []string
 		Group       string
 		Label       string
@@ -28,37 +33,37 @@ type (
 		OmitEmpty   bool
 	}
 	Bool struct {
-		metadata
+		Metadata
 		hook  []func(b bool)
 		value *uberatomic.Bool
 		def   bool
 	}
 	Strings struct {
-		metadata
+		Metadata
 		hook  []func(s []string)
 		value *atomic.Value
 		def   []string
 	}
 	Float struct {
-		metadata
+		Metadata
 		hook  []func(f float64)
 		value *uberatomic.Float64
 		def   float64
 	}
 	Int struct {
-		metadata
+		Metadata
 		hook  []func(i int64)
 		value *uberatomic.Int64
 		def   int64
 	}
 	String struct {
-		metadata
+		Metadata
 		hook  []func(s Strice)
 		value *atomic.Value
 		def   string
 	}
 	Duration struct {
-		metadata
+		Metadata
 		hook  []func(d time.Duration)
 		value *uberatomic.Duration
 		def   time.Duration
@@ -205,8 +210,23 @@ func (s *Strice) Split(cutset string) (out []*Strice) {
 }
 
 // NewBool creates a new podcfg.Bool with default values set
-func NewBool(m metadata, def bool, hook ...func(b bool)) *Bool {
-	return &Bool{value: uberatomic.NewBool(def), metadata: m, def: def, hook: hook}
+func NewBool(m Metadata, def bool, hook ...func(b bool)) *Bool {
+	return &Bool{value: uberatomic.NewBool(def), Metadata: m, def: def, hook: hook}
+}
+
+// GetMetadata returns the metadata of the option type
+func (x *Bool) GetMetadata() *Metadata {
+	return &x.Metadata
+}
+
+// ReadInput sets the value from a string
+func (x *Bool) ReadInput(s string) Option {
+	return x
+}
+
+// Name returns the name of the option
+func (x *Bool) Name() string {
+	return x.Metadata.Option
 }
 
 // AddHooks appends callback hooks to be run when the value is changed
@@ -242,7 +262,7 @@ func (x *Bool) Set(b bool) *Bool {
 
 // String returns a string form of the value
 func (x *Bool) String() string {
-	return fmt.Sprint(x.True())
+	return fmt.Sprint(x.Metadata.Option, ": ", x.True())
 }
 
 // T sets the value to true
@@ -272,11 +292,26 @@ func (x *Bool) UnmarshalJSON(data []byte) (e error) {
 }
 
 // NewStrings  creates a new podcfg.Strings with default values set
-func NewStrings(m metadata, def []string, hook ...func(s []string)) *Strings {
+func NewStrings(m Metadata, def []string, hook ...func(s []string)) *Strings {
 	as := &atomic.Value{}
 	v := cli.StringSlice(def)
 	as.Store(&v)
-	return &Strings{value: as, metadata: m, def: def, hook: hook}
+	return &Strings{value: as, Metadata: m, def: def, hook: hook}
+}
+
+// GetMetadata returns the metadata of the option type
+func (x *Strings) GetMetadata() *Metadata {
+	return &x.Metadata
+}
+
+// ReadInput sets the value from a string
+func (x *Strings) ReadInput(s string) Option {
+	return x
+}
+
+// Name returns the name of the option
+func (x *Strings) Name() string {
+	return x.Metadata.Option
 }
 
 // AddHooks appends callback hooks to be run when the value is changed
@@ -313,7 +348,7 @@ func (x *Strings) S() []string {
 
 // String returns a string representation of the value
 func (x *Strings) String() string {
-	return fmt.Sprint(x.S())
+	return fmt.Sprint(x.Metadata.Option, ": ", x.S())
 }
 
 // MarshalJSON returns the json representation of
@@ -331,8 +366,23 @@ func (x *Strings) UnmarshalJSON(data []byte) (e error) {
 }
 
 // NewFloat returns a new Float value set to a default value
-func NewFloat(m metadata, def float64) *Float {
-	return &Float{value: uberatomic.NewFloat64(def), metadata: m, def: def}
+func NewFloat(m Metadata, def float64) *Float {
+	return &Float{value: uberatomic.NewFloat64(def), Metadata: m, def: def}
+}
+
+// GetMetadata returns the metadata of the option type
+func (x *Float) GetMetadata() *Metadata {
+	return &x.Metadata
+}
+
+// ReadInput sets the value from a string
+func (x *Float) ReadInput(s string) Option {
+	return x
+}
+
+// Name returns the name of the option
+func (x *Float) Name() string {
+	return x.Metadata.Option
 }
 
 // AddHooks appends callback hooks to be run when the value is changed
@@ -358,7 +408,7 @@ func (x *Float) Set(f float64) *Float {
 
 // String returns a string representation of the value
 func (x *Float) String() string {
-	return fmt.Sprintf("%0.8f", x.V())
+	return fmt.Sprintf("%s: %0.8f", x.Metadata.Option, x.V())
 }
 
 // MarshalJSON returns the json representation of
@@ -376,8 +426,23 @@ func (x *Float) UnmarshalJSON(data []byte) (e error) {
 }
 
 // NewInt creates a new Int with a given default value
-func NewInt(m metadata, def int64) *Int {
-	return &Int{value: uberatomic.NewInt64(def), metadata: m, def: def}
+func NewInt(m Metadata, def int64) *Int {
+	return &Int{value: uberatomic.NewInt64(def), Metadata: m, def: def}
+}
+
+// GetMetadata returns the metadata of the option type
+func (x *Int) GetMetadata() *Metadata {
+	return &x.Metadata
+}
+
+// ReadInput sets the value from a string
+func (x *Int) ReadInput(s string) Option {
+	return x
+}
+
+// Name returns the name of the option
+func (x *Int) Name() string {
+	return x.Metadata.Option
 }
 
 // AddHooks appends callback hooks to be run when the value is changed
@@ -403,7 +468,7 @@ func (x *Int) Set(i int) *Int {
 
 // String returns the string stored
 func (x *Int) String() string {
-	return fmt.Sprintf("%d", x.V())
+	return fmt.Sprintf("%s: %d", x.Metadata.Option, x.V())
 }
 
 // MarshalJSON returns the json representation of
@@ -421,10 +486,25 @@ func (x *Int) UnmarshalJSON(data []byte) (e error) {
 }
 
 // NewString creates a new String with a given default value set
-func NewString(m metadata, def string) *String {
+func NewString(m Metadata, def string) *String {
 	v := &atomic.Value{}
 	v.Store([]byte(def))
-	return &String{value: v, metadata: m, def: def}
+	return &String{value: v, Metadata: m, def: def}
+}
+
+// GetMetadata returns the metadata of the option type
+func (x *String) GetMetadata() *Metadata {
+	return &x.Metadata
+}
+
+// ReadInput sets the value from a string
+func (x *String) ReadInput(s string) Option {
+	return x
+}
+
+// Name returns the name of the option
+func (x *String) Name() string {
+	return x.Metadata.Option
 }
 
 // AddHooks appends callback hooks to be run when the value is changed
@@ -465,7 +545,7 @@ func (x *String) SetBytes(s []byte) *String {
 
 // String returns a string representation of the value
 func (x *String) String() string {
-	return x.V()
+	return fmt.Sprintf("%s: '%s'", x.Metadata.Option, x.V())
 }
 
 // MarshalJSON returns the json representation
@@ -483,8 +563,23 @@ func (x *String) UnmarshalJSON(data []byte) (e error) {
 }
 
 // NewDuration creates a new Duration with a given default value set
-func NewDuration(m metadata, def time.Duration) *Duration {
-	return &Duration{value: uberatomic.NewDuration(def), metadata: m, def: def}
+func NewDuration(m Metadata, def time.Duration) *Duration {
+	return &Duration{value: uberatomic.NewDuration(def), Metadata: m, def: def}
+}
+
+// GetMetadata returns the metadata of the option type
+func (x *Duration) GetMetadata() *Metadata {
+	return &x.Metadata
+}
+
+// ReadInput sets the value from a string
+func (x *Duration) ReadInput(s string) Option {
+	return x
+}
+
+// Name returns the name of the option
+func (x *Duration) Name() string {
+	return x.Metadata.Option
 }
 
 // AddHooks appends callback hooks to be run when the value is changed
@@ -510,7 +605,7 @@ func (x *Duration) Set(d time.Duration) *Duration {
 
 // String returns a string representation of the value
 func (x *Duration) String() string {
-	return fmt.Sprint(x.V())
+	return fmt.Sprintf("%s: %v", x.Metadata.Option, x.V())
 }
 
 // MarshalJSON returns the json representation
