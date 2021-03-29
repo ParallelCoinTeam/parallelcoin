@@ -2,7 +2,7 @@ package main
 
 var commands = map[string][]string{
 	"build": {
-		"go podbuild -v %ldflags",
+		"go build -v %ldflags",
 	},
 	"install": {
 		"go install -v %ldflags",
@@ -14,7 +14,7 @@ var commands = map[string][]string{
 		"go install -v -tags headless %ldflags",
 	},
 	"windows": {
-		`go podbuild -v -ldflags="-H windowsgui \"%ldflags"\"`,
+		`go build -v -ldflags="-H windowsgui \"%ldflags"\"`,
 	},
 	"tests": {
 		"go test ./...",

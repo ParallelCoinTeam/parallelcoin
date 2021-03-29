@@ -116,7 +116,7 @@ func GetDefaultConfig() (c *Config) {
 			// Hook:        "dropaddrindex",
 			OmitEmpty: true,
 		},
-			true,
+			false,
 		),
 		AutoPorts: NewBool(Metadata{
 			Option: "autoports",
@@ -134,7 +134,7 @@ func GetDefaultConfig() (c *Config) {
 			Option:  "autolisten",
 			Aliases: []string{"al"},
 			Group:   "node",
-			Label:   "Manual Listeners",
+			Label:   "Automatic Listeners",
 			Description:
 			"automatically update inbound addresses dynamically according to discovered network interfaces",
 			Widget: "toggle",
@@ -514,7 +514,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		Language: NewString(Metadata{
 			Option:  "locale",
-			Aliases: []string{"L"},
+			Aliases: []string{"lc"},
 			Group:   "config",
 			Label:   "Language",
 			Description:
@@ -581,7 +581,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		LogLevel: NewString(Metadata{
 			Option:  "loglevel",
-			Aliases: []string{"L", "ll"},
+			Aliases: []string{"ll"},
 			Group:   "config",
 			Label:   "Log Level",
 			Description:
@@ -1203,7 +1203,7 @@ func GetDefaultConfig() (c *Config) {
 			// Hook:        "droptxindex",
 			OmitEmpty: true,
 		},
-			true,
+			false,
 		),
 		UPNP: NewBool(Metadata{
 			Option: "upnp",

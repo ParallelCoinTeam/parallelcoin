@@ -156,7 +156,7 @@ func (c *Config) Initialize() (e error) {
 	}
 	// process the commandline
 	var cm *Command
-	if cm, e = c.processCommandlineArgs(os.Args); E.Chk(e) {
+	if cm, e = c.processCommandlineArgs(os.Args[1:]); E.Chk(e) {
 		return
 	}
 	var j []byte
@@ -193,7 +193,6 @@ func (c *Config) GetOption(input string) (opt Option, value string, e error) {
 		for i := range aos {
 			if strings.HasPrefix(input, aos[i]) {
 				value = input[len(aos[i]):]
-				T.Ln("value", value)
 				found = true
 				opt = ifc
 				return false
@@ -344,12 +343,13 @@ func (c *Config) processCommandlineArgs(args []string) (cm *Command, e error) {
 	var commandsStart, commandsEnd int
 	var found bool
 	for i := range args {
-		T.Ln("checking for commands:",args[i])
 		if i == 0 {
-			commandsStart++
-			commandsEnd++
+			// commandsStart = i
+			// commandsEnd = i
 			continue
 		}
+		T.Ln("checking for commands:", args[i])
+		T.Ln("commandStart", commandsStart, commandsEnd, args[commandsStart:commandsEnd])
 		var depth, dist int
 		if found, depth, dist, cm, e = c.Commands.Find(args[i], depth, dist); E.Chk(e) {
 			continue
@@ -357,24 +357,24 @@ func (c *Config) processCommandlineArgs(args []string) (cm *Command, e error) {
 		if found {
 			if commandsStart == 0 {
 				commandsStart = i
+				commandsEnd = i + 1
 			}
-			commandsEnd++
-			T.Ln("commandStart", commandsStart, commandsEnd, args)
+			T.Ln("commandStart", commandsStart, commandsEnd, args[commandsStart:commandsEnd])
 			if oc, ok := commands[depth]; ok {
 				e = fmt.Errorf("second command found at same depth '%s' and '%s'", oc.Name, cm.Name)
 				return
 			}
+			commandsEnd = i + 1
 			T.Ln("found command", cm.Name, "argument number", i, "at depth", depth, "distance", dist)
 			commands[depth] = *cm
 		} else {
-			T.Ln("commandStart", commandsStart, commandsEnd, args)
-			commandsStart++
-			commandsEnd++
+			T.Ln("not found:", args[i], "commandStart", commandsStart, commandsEnd, args[commandsStart:commandsEnd])
+			// commandsStart++
+			// commandsEnd++
 			T.Ln("argument", args[i], "is not a command")
 		}
 	}
 	// commandsEnd++
-	T.Ln("commandStart", commandsStart, commandsEnd, args)
 	cmds := []int{}
 	if len(commands) == 0 {
 		commands[0] = c.Commands[0]
@@ -412,15 +412,16 @@ func (c *Config) processCommandlineArgs(args []string) (cm *Command, e error) {
 				}
 			}
 		}
+		T.Ln("commandStart", commandsStart, commandsEnd, args[commandsStart:commandsEnd])
 	}
 	var options []Option
 	if commandsStart > 1 {
-		T.Ln("options found")
+		T.Ln("options found", args[:commandsStart])
 		// we have options to check
 		for i := range args {
-			if i == 0 {
-				continue
-			}
+			// if i == 0 {
+			// 	continue
+			// }
 			if i == commandsStart {
 				break
 			}
