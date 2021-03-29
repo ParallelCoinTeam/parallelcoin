@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	uberatomic "go.uber.org/atomic"
+	"strings"
 	"time"
 )
 
@@ -34,6 +35,10 @@ func (x *Duration) ReadInput(s string) (o Option, e error) {
 	if s == "" {
 		e = fmt.Errorf("integer number option %s %v may not be empty", x.Name(), x.Metadata.Aliases)
 		return
+	}
+	if strings.HasPrefix(s, "=") {
+		// the following removes leading and trailing characters
+		s = strings.Join(strings.Split(s, "=")[1:], "=")
 	}
 	var v time.Duration
 	if v, e = time.ParseDuration(s); !E.Chk(e) {

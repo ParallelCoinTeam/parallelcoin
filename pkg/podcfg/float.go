@@ -5,6 +5,7 @@ import (
 	"fmt"
 	uberatomic "go.uber.org/atomic"
 	"strconv"
+	"strings"
 )
 
 type Float struct {
@@ -34,6 +35,10 @@ func (x *Float) ReadInput(s string) (o Option, e error) {
 	if s == "" {
 		e = fmt.Errorf("floating point number option %s %v may not be empty", x.Name(), x.Metadata.Aliases)
 		return
+	}
+	if strings.HasPrefix(s, "=") {
+		// the following removes leading and trailing characters
+		s = strings.Join(strings.Split(s, "=")[1:], "=")
 	}
 	var v float64
 	if v, e = strconv.ParseFloat(s, 64); E.Chk(e) {

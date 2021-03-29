@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/urfave/cli"
+	"strings"
 	"sync/atomic"
 )
 
@@ -32,11 +33,15 @@ func (x *Strings) GetMetadata() *Metadata {
 	return &x.Metadata
 }
 
-// ReadInput sets the value from a string
+// ReadInput sets the value from a string. For this option this means appending to the list
 func (x *Strings) ReadInput(s string) (o Option, e error) {
 	if s == "" {
 		e = fmt.Errorf("string option %s %v may not be empty", x.Name(), x.Metadata.Aliases)
 		return
+	}
+	if strings.HasPrefix(s, "=") {
+		// the following removes leading and trailing characters
+		s = strings.Join(strings.Split(s, "=")[1:], "=")
 	}
 	x.Set(append(x.S(), s))
 	return x, e

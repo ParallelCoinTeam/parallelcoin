@@ -471,7 +471,7 @@ func GetDefaultConfig() (c *Config) {
 			// Hook:        "generate",
 			OmitEmpty: true,
 		},
-			true,
+			false,
 		),
 		GenThreads: NewInt(Metadata{
 			Option:  "genthreads",
@@ -513,7 +513,7 @@ func GetDefaultConfig() (c *Config) {
 			false,
 		),
 		Language: NewString(Metadata{
-			Option:  "language",
+			Option:  "locale",
 			Aliases: []string{"L"},
 			Group:   "config",
 			Label:   "Language",

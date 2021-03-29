@@ -5,6 +5,7 @@ import (
 	"fmt"
 	uberatomic "go.uber.org/atomic"
 	"strconv"
+	"strings"
 )
 
 type Int struct {
@@ -34,6 +35,10 @@ func (x *Int) ReadInput(s string) (o Option, e error) {
 	if s == "" {
 		e = fmt.Errorf("integer number option %s %v may not be empty", x.Name(), x.Metadata.Aliases)
 		return
+	}
+	if strings.HasPrefix(s, "=") {
+		// the following removes leading and trailing characters
+		s = strings.Join(strings.Split(s, "=")[1:], "=")
 	}
 	var v int64
 	if v, e = strconv.ParseInt(s, 10, 64); E.Chk(e) {

@@ -3,6 +3,7 @@ package podcfg
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 	"sync/atomic"
 )
 
@@ -36,6 +37,10 @@ func (x *String) ReadInput(s string) (o Option, e error) {
 	if s == "" {
 		e = fmt.Errorf("string option %s %v may not be empty", x.Name(), x.Metadata.Aliases)
 		return
+	}
+	if strings.HasPrefix(s, "=") {
+		// the following removes leading and trailing characters
+		s = strings.Join(strings.Split(s, "=")[1:], "=")
 	}
 	x.Set(s)
 	return x, e

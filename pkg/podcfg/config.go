@@ -160,6 +160,7 @@ func (c *Config) Initialize() (e error) {
 		return
 	}
 	var j []byte
+	// c.ShowAll=true
 	if j, e = json.MarshalIndent(c, "", "    "); !E.Chk(e) {
 		I.Ln("\n" + string(j))
 	}

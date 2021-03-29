@@ -29,12 +29,17 @@ func (x *Bool) GetMetadata() *Metadata {
 	return &x.Metadata
 }
 
-// ReadInput sets the value from a string
+// ReadInput sets the value from a string.
+// The value can be right up against the keyword or separated by a ':' or '='.
 func (x *Bool) ReadInput(s string) (opt Option, e error) {
-	// if the input is empty, the user intends the default
+	// if the input is empty, the user intends the opposite of the default
 	if s == "" {
-		x.value.Store(x.def)
+		x.value.Store(!x.def)
 		return
+	}
+	if strings.HasPrefix(s, "=") {
+		// the following removes leading and trailing characters
+		s = strings.Join(strings.Split(s, "=")[1:], "=")
 	}
 	s = strings.ToLower(s)
 	switch s {
