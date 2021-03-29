@@ -166,18 +166,34 @@ func (c *Config) Initialize() (e error) {
 	c.RunningCommand = cm
 	// if the user sets the datadir on the commandline we need to load it from that path
 	datadir := c.DataDir.V()
+	var configFile string
 	for i := range opts {
-		if opts[i].Name() == "datadir" {
+		if opts[i].Name() == "configFile" {
 			if _, e = opts[i].ReadInput(optVals[i]); E.Chk(e) {
-				datadir=optVals[i]
+				configFile = optVals[i]
 			}
 		}
 	}
-	_=datadir
+	_ = datadir
+	_ = configFile
 	// load the configuration file into the config
-	
+	readFrom := c.ConfigFile.V()
+	if configFile != "" {
+		readFrom = configFile
+	}
+	var cf []byte
+	if cf, e = ioutil.ReadFile(readFrom); E.Chk(e) {
+		// todo: what to do if file doesn't exist? save new one? Also shouldn't this load stuff be in its own function?
+	}
+	if e = json.Unmarshal(cf, c); E.Chk(e){
+	}
 	// read the environment variables into the config
 	
+	// read in the commandline options
+	for i := range opts {
+		if _, e = opts[i].ReadInput(optVals[i]); E.Chk(e) {
+		}
+	}
 	var j []byte
 	// c.ShowAll=true
 	if j, e = json.MarshalIndent(c, "", "    "); !E.Chk(e) {
