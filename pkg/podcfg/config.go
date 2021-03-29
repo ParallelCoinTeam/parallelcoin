@@ -7,8 +7,7 @@
 //
 // There is a custom JSON marshal/unmarshal for each field type and for the whole configuration that only saves values
 // that differ from the defaults, similar to 'omitempty' in struct tags but where 'empty' is the default value instead
-// of the default zero created by Go's memory allocator.
-//
+// of the default zero created by Go's memory allocator. This enables easy compositing of multiple sources.
 //
 package podcfg
 
@@ -140,6 +139,32 @@ type Config struct {
 	WalletRPCMaxWebsockets *Int
 	WalletServer           *String
 	Whitelists             *Strings
+}
+
+// Initialize loads in configuration from disk and from environment on top of the default base
+//
+// the several places configuration is sourced from are overlaid in the following order:
+// default -> config file -> environment variables -> commandline flags
+func (c *Config) Initialize() (e error) {
+	// first lint the configuration
+	var aos map[string][]string
+	if aos, e = c.getAllOptionStrings(); E.Chk(e) {
+		return
+	}
+	// this function will panic if there is potential for ambiguity in the commandline configuration args
+	if _, e = findConflictingItems(aos); E.Chk(e) {
+	}
+	// process the commandline
+	var cm *Command
+	if cm, e = c.processCommandlineArgs(os.Args); E.Chk(e) {
+		return
+	}
+	var j []byte
+	if j, e = json.MarshalIndent(c, "", "    "); !E.Chk(e) {
+		I.Ln("\n" + string(j))
+	}
+	_ = cm
+	return
 }
 
 // ForEach iterates the configuration items in their defined order, running a function with the configuration item in
@@ -309,32 +334,6 @@ func (c *Config) UnmarshalJSON(data []byte) (e error) {
 	return
 }
 
-// Initialize loads in configuration from disk and from environment on top of the default base
-//
-// the several places configuration is sourced from are overlaid in the following order:
-// default -> config file -> environment variables -> commandline flags
-func (c *Config) Initialize() (e error) {
-	// first lint the configuration
-	var aos map[string][]string
-	if aos, e = c.getAllOptionStrings(); E.Chk(e) {
-		return
-	}
-	// this function will panic if there is potential for ambiguity in the commandline configuration args
-	if _, e = findConflictingItems(aos); E.Chk(e) {
-	}
-	// process the commandline
-	var cm *Command
-	if cm, e = c.processCommandlineArgs(os.Args); E.Chk(e) {
-		return
-	}
-	var j []byte
-	if j, e = json.MarshalIndent(c, "", "    "); !E.Chk(e) {
-		I.Ln("\n"+string(j))
-	}
-	_ = cm
-	return
-}
-
 func (c *Config) processCommandlineArgs(args []string) (cm *Command, e error) {
 	// first we will locate all the commands specified to mark the 3 sections, options, commands, and the remainder is
 	// arbitrary for the app
@@ -432,12 +431,12 @@ func (c *Config) processCommandlineArgs(args []string) (cm *Command, e error) {
 }
 
 // ReadCAFile reads in the configured Certificate Authority for TLS connections
-func ReadCAFile(config *Config) []byte {
+func (c *Config) ReadCAFile() []byte {
 	// Read certificate file if TLS is not disabled.
 	var certs []byte
-	if config.TLS.True() {
+	if c.TLS.True() {
 		var e error
-		if certs, e = ioutil.ReadFile(config.CAFile.V()); E.Chk(e) {
+		if certs, e = ioutil.ReadFile(c.CAFile.V()); E.Chk(e) {
 			// If there's an error reading the CA file, continue with nil certs and without the client connection.
 			certs = nil
 		}

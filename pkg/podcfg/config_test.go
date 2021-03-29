@@ -10,7 +10,7 @@ import (
 func TestForEach(t *testing.T) {
 	c := GetDefaultConfig()
 	c.ForEach(
-		func(ifc interface{}) bool {
+		func(ifc Option) bool {
 			switch ii := ifc.(type) {
 			case *Bool:
 				t.Log("case *Bool")
