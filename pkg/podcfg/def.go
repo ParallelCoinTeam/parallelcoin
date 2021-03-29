@@ -79,7 +79,7 @@ func GetDefaultConfig() (c *Config) {
 		},
 		AddCheckpoints: NewStrings(Metadata{
 			Option:  "addcheckpoint",
-			Aliases: []string{"ac"},
+			Aliases: []string{"AC"},
 			Group:   "debug",
 			Label:   "Add Checkpoints",
 			Description:
@@ -92,7 +92,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		AddPeers: NewStrings(Metadata{
 			Option:  "addpeer",
-			Aliases: []string{"ap"},
+			Aliases: []string{"AP"},
 			Group:   "node",
 			Label:   "Add Peers",
 			Description:
@@ -107,7 +107,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		AddrIndex: NewBool(Metadata{
 			Option:  "addrindex",
-			Aliases: []string{"ai"},
+			Aliases: []string{"AI"},
 			Group:   "node",
 			Label:   "Address Index",
 			Description:
@@ -132,7 +132,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		AutoListen: NewBool(Metadata{
 			Option:  "autolisten",
-			Aliases: []string{"al"},
+			Aliases: []string{"AL"},
 			Group:   "node",
 			Label:   "Automatic Listeners",
 			Description:
@@ -145,7 +145,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		BanDuration: NewDuration(Metadata{
 			Option:  "banduration",
-			Aliases: []string{"bd"},
+			Aliases: []string{"BD"},
 			Group:   "debug",
 			Label:   "Ban Duration",
 			Description:
@@ -158,7 +158,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		BanThreshold: NewInt(Metadata{
 			Option:  "banthreshold",
-			Aliases: []string{"bt"},
+			Aliases: []string{"BT"},
 			Group:   "debug",
 			Label:   "Ban Threshold",
 			Description:
@@ -171,7 +171,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		BlockMaxSize: NewInt(Metadata{
 			Option:  "blockmaxsize",
-			Aliases: []string{"bmxs"},
+			Aliases: []string{"BMXS"},
 			Group:   "mining",
 			Label:   "Block Max Size",
 			Description:
@@ -184,7 +184,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		BlockMaxWeight: NewInt(Metadata{
 			Option:  "blockmaxweight",
-			Aliases: []string{"bmxw"},
+			Aliases: []string{"BMXW"},
 			Group:   "mining",
 			Label:   "Block Max Weight",
 			Description:
@@ -197,7 +197,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		BlockMinSize: NewInt(Metadata{
 			Option:  "blockminsize",
-			Aliases: []string{"bms"},
+			Aliases: []string{"BMS"},
 			Group:   "mining",
 			Label:   "Block Min Size",
 			Description:
@@ -210,7 +210,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		BlockMinWeight: NewInt(Metadata{
 			Option:  "blockminweight",
-			Aliases: []string{"bmw"},
+			Aliases: []string{"BMW"},
 			Group:   "mining",
 			Label:   "Block Min Weight",
 			Description:
@@ -223,7 +223,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		BlockPrioritySize: NewInt(Metadata{
 			Option:  "blockprioritysize",
-			Aliases: []string{"bps"},
+			Aliases: []string{"BPS"},
 			Group:   "mining",
 			Label:   "Block Priority Size",
 			Description:
@@ -236,7 +236,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		BlocksOnly: NewBool(Metadata{
 			Option:  "blocksonly",
-			Aliases: []string{"bo"},
+			Aliases: []string{"BO"},
 			Group:   "node",
 			Label:   "Blocks Only",
 			Description:
@@ -249,7 +249,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		CAFile: NewString(Metadata{
 			Option:  "cafile",
-			Aliases: []string{"ca"},
+			Aliases: []string{"CA"},
 			Group:   "tls",
 			Label:   "Certificate Authority File",
 			Description:
@@ -263,7 +263,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		ConfigFile: NewString(Metadata{
 			Option:  "configfile",
-			Aliases: []string{"cf"},
+			Aliases: []string{"CF"},
 			Label:   "Configuration File",
 			Description:
 			"location of configuration file, cannot actually be changed",
@@ -290,7 +290,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		Controller: NewBool(Metadata{
 			Option:  "controller",
-			Aliases: []string{"ctrl"},
+			Aliases: []string{"CT"},
 			Group:   "node",
 			Label:   "Enable Controller",
 			Description:
@@ -303,7 +303,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		CPUProfile: NewString(Metadata{
 			Option:  "cpuprofile",
-			Aliases: []string{"cprof"},
+			Aliases: []string{"CP"},
 			Group:   "debug",
 			Label:   "CPU Profile",
 			Description:
@@ -317,7 +317,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		DarkTheme: NewBool(Metadata{
 			Option:  "darktheme",
-			Aliases: []string{"dt"},
+			Aliases: []string{"DT"},
 			Group:   "config",
 			Label:   "Dark Theme",
 			Description:
@@ -332,7 +332,7 @@ func GetDefaultConfig() (c *Config) {
 			value: datadir,
 			Metadata: Metadata{
 				Option:  "datadir",
-				Aliases: []string{"dd", "D"},
+				Aliases: []string{"DD"},
 				Label:   "Data Directory",
 				Description:
 				"root folder where application data is stored",
@@ -344,7 +344,7 @@ func GetDefaultConfig() (c *Config) {
 		},
 		DbType: NewString(Metadata{
 			Option:  "dbtype",
-			Aliases: []string{"dt"},
+			Aliases: []string{"DB"},
 			Group:   "debug",
 			Label:   "Database Type",
 			Description:
@@ -357,7 +357,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		DisableBanning: NewBool(Metadata{
 			Option:  "nobanning",
-			Aliases: []string{"nb"},
+			Aliases: []string{"NB"},
 			Group:   "debug",
 			Label:   "Disable Banning",
 			Description:
@@ -370,7 +370,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		DisableCheckpoints: NewBool(Metadata{
 			Option:  "nocheckpoints",
-			Aliases: []string{"nc"},
+			Aliases: []string{"NCP"},
 			Group:   "debug",
 			Label:   "Disable Checkpoints",
 			Description:
@@ -383,7 +383,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		DisableDNSSeed: NewBool(Metadata{
 			Option:  "nodnsseed",
-			Aliases: []string{"nds"},
+			Aliases: []string{"NDS"},
 			Group:   "node",
 			Label:   "Disable DNS Seed",
 			Description:
@@ -396,7 +396,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		DisableListen: NewBool(Metadata{
 			Option:  "nolisten",
-			Aliases: []string{"nl"},
+			Aliases: []string{"NL"},
 			Group:   "node",
 			Label:   "Disable Listen",
 			Description:
@@ -409,7 +409,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		DisableRPC: NewBool(Metadata{
 			Option:  "norpc",
-			Aliases: []string{"nr"},
+			Aliases: []string{"NR"},
 			Group:   "rpc",
 			Label:   "Disable RPC",
 			Description:
@@ -422,7 +422,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		Discovery: NewBool(Metadata{
 			Option:  "discover",
-			Aliases: []string{"di"},
+			Aliases: []string{"DI"},
 			Group:   "node",
 			Label:   "Disovery",
 			Description:
@@ -435,7 +435,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		ExternalIPs: NewStrings(Metadata{
 			Option:  "externalip",
-			Aliases: []string{"ei"},
+			Aliases: []string{"EI"},
 			Group:   "node",
 			Label:   "External IP Addresses",
 			Description:
@@ -449,7 +449,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		FreeTxRelayLimit: NewFloat(Metadata{
 			Option:  "limitfreerelay",
-			Aliases: []string{"lfr"},
+			Aliases: []string{"LFR"},
 			Group:   "policy",
 			Label:   "Free Tx Relay Limit",
 			Description:
@@ -461,10 +461,10 @@ func GetDefaultConfig() (c *Config) {
 			DefaultFreeTxRelayLimit,
 		),
 		Generate: NewBool(Metadata{
-			Option: "generate",
+			Option:  "generate",
 			Aliases: []string{"M"},
-			Group:  "mining",
-			Label:  "Generate Blocks",
+			Group:   "mining",
+			Label:   "Generate Blocks",
 			Description:
 			"turn on Kopach CPU miner",
 			Widget: "toggle",
@@ -488,7 +488,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		Hilite: NewStrings(Metadata{
 			Option:  "highlight",
-			Aliases: []string{"hl"},
+			Aliases: []string{"HL"},
 			Group:   "debug",
 			Label:   "Hilite",
 			Description:
@@ -514,7 +514,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		Language: NewString(Metadata{
 			Option:  "locale",
-			Aliases: []string{"lc"},
+			Aliases: []string{"LC"},
 			Group:   "config",
 			Label:   "Language",
 			Description:
@@ -527,7 +527,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		LimitPass: NewString(Metadata{
 			Option:  "limitpass",
-			Aliases: []string{"lp"},
+			Aliases: []string{"LP"},
 			Group:   "rpc",
 			Label:   "Limit Password",
 			Description:
@@ -540,7 +540,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		LimitUser: NewString(Metadata{
 			Option:  "limituser",
-			Aliases: []string{"lu"},
+			Aliases: []string{"LU"},
 			Group:   "rpc",
 			Label:   "Limit Username",
 			Description:
@@ -553,7 +553,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		LogDir: NewString(Metadata{
 			Option:  "logdir",
-			Aliases: []string{"ld"},
+			Aliases: []string{"LD"},
 			Group:   "config",
 			Label:   "Log Directory",
 			Description:
@@ -567,7 +567,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		LogFilter: NewStrings(Metadata{
 			Option:  "logfilter",
-			Aliases: []string{"lf"},
+			Aliases: []string{"LF"},
 			Group:   "debug",
 			Label:   "Log Filter",
 			Description:
@@ -581,7 +581,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		LogLevel: NewString(Metadata{
 			Option:  "loglevel",
-			Aliases: []string{"ll"},
+			Aliases: []string{"LL"},
 			Group:   "config",
 			Label:   "Log Level",
 			Description:
@@ -602,7 +602,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		MaxOrphanTxs: NewInt(Metadata{
 			Option:  "maxorphantx",
-			Aliases: []string{"mt"},
+			Aliases: []string{"MOT"},
 			Group:   "policy",
 			Label:   "Max Orphan Txs",
 			Description:
@@ -615,7 +615,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		MaxPeers: NewInt(Metadata{
 			Option:  "maxpeers",
-			Aliases: []string{"mp"},
+			Aliases: []string{"MP"},
 			Group:   "node",
 			Label:   "Max Peers",
 			Description:
@@ -628,7 +628,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		MulticastPass: NewString(Metadata{
 			Option:  "minerpass",
-			Aliases: []string{"M"},
+			Aliases: []string{"PM"},
 			Group:   "config",
 			Label:   "Multicast Pass",
 			Description:
@@ -640,9 +640,9 @@ func GetDefaultConfig() (c *Config) {
 			"pa55word",
 		),
 		MiningAddrs: NewStrings(Metadata{
-			Option: "miningaddrs",
-			// Aliases: []string{"ma"},
-			Label: "Mining Addresses",
+			Option:  "miningaddrs",
+			Aliases: []string{"MA"},
+			Label:   "Mining Addresses",
 			Description:
 			"addresses to pay block rewards to (not in use)",
 			Type:   "base58",
@@ -654,7 +654,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		MinRelayTxFee: NewFloat(Metadata{
 			Option:  "minrelaytxfee",
-			Aliases: []string{"mrf"},
+			Aliases: []string{"MRTF"},
 			Group:   "policy",
 			Label:   "Min Relay Transaction Fee",
 			Description:
@@ -667,7 +667,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		Network: NewString(Metadata{
 			Option:  "network",
-			Aliases: []string{"nw"},
+			Aliases: []string{"NW"},
 			Group:   "node",
 			Label:   "Network",
 			Description:
@@ -685,7 +685,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		NoCFilters: NewBool(Metadata{
 			Option:  "nocfilters",
-			Aliases: []string{"ncf"},
+			Aliases: []string{"NCF"},
 			Group:   "node",
 			Label:   "No CFilters",
 			Description:
@@ -698,7 +698,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		NodeOff: NewBool(Metadata{
 			Option:  "nodeoff",
-			Aliases: []string{"nn"},
+			Aliases: []string{"NO"},
 			Group:   "debug",
 			Label:   "Node Off",
 			Description:
@@ -711,7 +711,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		NoInitialLoad: NewBool(Metadata{
 			Option:  "noinitialload",
-			Aliases: []string{"nil"},
+			Aliases: []string{"NIL"},
 			Label:   "No Initial Load",
 			Description:
 			"do not load a wallet at startup",
@@ -723,7 +723,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		NoPeerBloomFilters: NewBool(Metadata{
 			Option:  "nopeerbloomfilters",
-			Aliases: []string{"nbf"},
+			Aliases: []string{"NBF"},
 			Group:   "node",
 			Label:   "No Peer Bloom Filters",
 			Description:
@@ -736,7 +736,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		NoRelayPriority: NewBool(Metadata{
 			Option:  "norelaypriority",
-			Aliases: []string{"nrp"},
+			Aliases: []string{"NRP"},
 			Group:   "policy",
 			Label:   "No Relay Priority",
 			Description:
@@ -749,7 +749,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		OneTimeTLSKey: NewBool(Metadata{
 			Option:  "onetimetlskey",
-			Aliases: []string{"otk"},
+			Aliases: []string{"OTK"},
 			Group:   "wallet",
 			Label:   "One Time TLS Key",
 			Description:
@@ -762,7 +762,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		Onion: NewBool(Metadata{
 			Option:  "onion",
-			Aliases: []string{"O"},
+			Aliases: []string{"ON"},
 			Group:   "proxy",
 			Label:   "Onion Enabled",
 			Description:
@@ -775,7 +775,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		OnionProxy: NewString(Metadata{
 			Option:  "onionproxy",
-			Aliases: []string{"ox"},
+			Aliases: []string{"OP"},
 			Group:   "proxy",
 			Label:   "Onion Proxy Address",
 			Description:
@@ -789,7 +789,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		OnionProxyPass: NewString(Metadata{
 			Option:  "onionproxypass",
-			Aliases: []string{"op"},
+			Aliases: []string{"OPW"},
 			Group:   "proxy",
 			Label:   "Onion Proxy Password",
 			Description:
@@ -802,7 +802,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		OnionProxyUser: NewString(Metadata{
 			Option:  "onionproxyuser",
-			Aliases: []string{"ou"},
+			Aliases: []string{"OU"},
 			Group:   "proxy",
 			Label:   "Onion Proxy Username",
 			Description:
@@ -815,7 +815,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		P2PConnect: NewStrings(Metadata{
 			Option:  "p2pconnect",
-			Aliases: []string{"p2c"},
+			Aliases: []string{"P2P"},
 			Group:   "node",
 			Label:   "P2P Connect",
 			Description:
@@ -829,7 +829,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		P2PListeners: NewStrings(Metadata{
 			Option:  "listen",
-			Aliases: []string{"L"},
+			Aliases: []string{"LA"},
 			Group:   "node",
 			Label:   "P2PListeners",
 			Description:
@@ -846,7 +846,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		Password: NewString(Metadata{
 			Option:  "password",
-			Aliases: []string{"P"},
+			Aliases: []string{"PW"},
 			Group:   "rpc",
 			Label:   "Password",
 			Description:
@@ -860,7 +860,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		PipeLog: NewBool(Metadata{
 			Option:  "pipelog",
-			Aliases: []string{"pl"},
+			Aliases: []string{"PL"},
 			Label:   "Pipe Logger",
 			Description:
 			"enable pipe based logger IPC",
@@ -871,10 +871,10 @@ func GetDefaultConfig() (c *Config) {
 			false,
 		),
 		Profile: NewString(Metadata{
-			Option: "profile",
-			// Aliases: []string{"pr"},
-			Group: "debug",
-			Label: "Profile",
+			Option:  "profile",
+			Aliases: []string{"PR"},
+			Group:   "debug",
+			Label:   "Profile",
 			Description:
 			"http profiling on given port (1024-40000)",
 			// Type:        "",
@@ -886,7 +886,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		Proxy: NewString(Metadata{
 			Option:  "proxy",
-			Aliases: []string{"P"},
+			Aliases: []string{"PX"},
 			Group:   "proxy",
 			Label:   "Proxy",
 			Description:
@@ -900,7 +900,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		ProxyPass: NewString(Metadata{
 			Option:  "proxypass",
-			Aliases: []string{"pp"},
+			Aliases: []string{"PPW"},
 			Group:   "proxy",
 			Label:   "Proxy Pass",
 			Description:
@@ -914,7 +914,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		ProxyUser: NewString(Metadata{
 			Option:  "proxyuser",
-			Aliases: []string{"pu"},
+			Aliases: []string{"PU"},
 			Group:   "proxy",
 			Label:   "ProxyUser",
 			Description:
@@ -927,7 +927,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		RejectNonStd: NewBool(Metadata{
 			Option:  "rejectnonstd",
-			Aliases: []string{"rn"},
+			Aliases: []string{"REJ"},
 			Group:   "node",
 			Label:   "Reject Non Std",
 			Description:
@@ -940,7 +940,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		RelayNonStd: NewBool(Metadata{
 			Option:  "relaynonstd",
-			Aliases: []string{"R"},
+			Aliases: []string{"RNS"},
 			Group:   "node",
 			Label:   "Relay Nonstandard Transactions",
 			Description:
@@ -953,7 +953,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		RPCCert: NewString(Metadata{
 			Option:  "rpccert",
-			Aliases: []string{"rc"},
+			Aliases: []string{"RC"},
 			Group:   "rpc",
 			Label:   "RPC Cert",
 			Description:
@@ -967,7 +967,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		RPCConnect: NewString(Metadata{
 			Option:  "rpcconnect",
-			Aliases: []string{"R"},
+			Aliases: []string{"RA"},
 			Group:   "wallet",
 			Label:   "RPC Connect",
 			Description:
@@ -982,7 +982,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		RPCKey: NewString(Metadata{
 			Option:  "rpckey",
-			Aliases: []string{"rk"},
+			Aliases: []string{"RK"},
 			Group:   "rpc",
 			Label:   "RPC Key",
 			Description:
@@ -996,7 +996,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		RPCListeners: NewStrings(Metadata{
 			Option:  "rpclisten",
-			Aliases: []string{"rl"},
+			Aliases: []string{"RL"},
 			Group:   "rpc",
 			Label:   "RPC Listeners",
 			Description:
@@ -1013,7 +1013,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		RPCMaxClients: NewInt(Metadata{
 			Option:  "rpcmaxclients",
-			Aliases: []string{"rmc"},
+			Aliases: []string{"RMXC"},
 			Group:   "rpc",
 			Label:   "Maximum RPC Clients",
 			Description:
@@ -1026,7 +1026,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		RPCMaxConcurrentReqs: NewInt(Metadata{
 			Option:  "rpcmaxconcurrentreqs",
-			Aliases: []string{"rr"},
+			Aliases: []string{"RMCR"},
 			Group:   "rpc",
 			Label:   "Maximum RPC Concurrent Reqs",
 			Description:
@@ -1039,7 +1039,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		RPCMaxWebsockets: NewInt(Metadata{
 			Option:  "rpcmaxwebsockets",
-			Aliases: []string{"rw"},
+			Aliases: []string{"RMWS"},
 			Group:   "rpc",
 			Label:   "Maximum RPC Websockets",
 			Description:
@@ -1052,7 +1052,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		RPCQuirks: NewBool(Metadata{
 			Option:  "rpcquirks",
-			Aliases: []string{"rq"},
+			Aliases: []string{"RQ"},
 			Group:   "rpc",
 			Label:   "RPC Quirks",
 			Description:
@@ -1065,7 +1065,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		RunAsService: NewBool(Metadata{
 			Option:  "runasservice",
-			Aliases: []string{"raas"},
+			Aliases: []string{"RAS"},
 			Label:   "Run As Service",
 			Description:
 			"shuts down on lock timeout",
@@ -1077,7 +1077,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		ServerPass: NewString(Metadata{
 			Option:  "serverpass",
-			Aliases: []string{"sp"},
+			Aliases: []string{"SPW"},
 			Group:   "rpc",
 			Label:   "Server Pass",
 			Description:
@@ -1091,7 +1091,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		ServerTLS: NewBool(Metadata{
 			Option:  "servertls",
-			Aliases: []string{"st"},
+			Aliases: []string{"ST"},
 			Group:   "wallet",
 			Label:   "Server TLS",
 			Description:
@@ -1104,7 +1104,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		ServerUser: NewString(Metadata{
 			Option:  "serveruser",
-			Aliases: []string{"su"},
+			Aliases: []string{"SU"},
 			Group:   "rpc",
 			Label:   "Server User",
 			Description:
@@ -1117,7 +1117,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		SigCacheMaxSize: NewInt(Metadata{
 			Option:  "sigcachemaxsize",
-			Aliases: []string{"scm"},
+			Aliases: []string{"SCM"},
 			Group:   "node",
 			Label:   "Signature Cache Max Size",
 			Description:
@@ -1142,7 +1142,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		TLS: NewBool(Metadata{
 			Option:  "clienttls",
-			Aliases: []string{"ct"},
+			Aliases: []string{"CT"},
 			Group:   "tls",
 			Label:   "TLS",
 			Description:
@@ -1155,7 +1155,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		TLSSkipVerify: NewBool(Metadata{
 			Option:  "tlsskipverify",
-			Aliases: []string{"sv"},
+			Aliases: []string{"TSV"},
 			Group:   "tls",
 			Label:   "TLS Skip Verify",
 			Description:
@@ -1168,7 +1168,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		TorIsolation: NewBool(Metadata{
 			Option:  "torisolation",
-			Aliases: []string{"T"},
+			Aliases: []string{"TI"},
 			Group:   "proxy",
 			Label:   "Tor Isolation",
 			Description:
@@ -1181,7 +1181,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		TrickleInterval: NewDuration(Metadata{
 			Option:  "trickleinterval",
-			Aliases: []string{"tt"},
+			Aliases: []string{"TKI"},
 			Group:   "policy",
 			Label:   "Trickle Interval",
 			Description:
@@ -1194,7 +1194,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		TxIndex: NewBool(Metadata{
 			Option:  "txindex",
-			Aliases: []string{"ti"},
+			Aliases: []string{"TXI"},
 			Group:   "node",
 			Label:   "Tx Index",
 			Description:
@@ -1206,9 +1206,10 @@ func GetDefaultConfig() (c *Config) {
 			false,
 		),
 		UPNP: NewBool(Metadata{
-			Option: "upnp",
-			Group:  "node",
-			Label:  "UPNP",
+			Option:  "upnp",
+			Aliases: []string{"UP"},
+			Group:   "node",
+			Label:   "UPNP",
 			Description:
 			"enable UPNP for NAT traversal",
 			Widget: "toggle",
@@ -1219,7 +1220,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		UserAgentComments: NewStrings(Metadata{
 			Option:  "uacomment",
-			Aliases: []string{"ua"},
+			Aliases: []string{"UA"},
 			Group:   "policy",
 			Label:   "User Agent Comments",
 			Description:
@@ -1232,7 +1233,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		Username: NewString(Metadata{
 			Option:  "username",
-			Aliases: []string{"U"},
+			Aliases: []string{"UN"},
 			Group:   "rpc",
 			Label:   "Username",
 			Description:
@@ -1255,7 +1256,7 @@ func GetDefaultConfig() (c *Config) {
 		},
 		Wallet: NewBool(Metadata{
 			Option:  "walletconnect",
-			Aliases: []string{"wc"},
+			Aliases: []string{"WC"},
 			Group:   "debug",
 			Label:   "Connect to Wallet",
 			Description:
@@ -1267,7 +1268,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		WalletFile: NewString(Metadata{
 			Option:  "walletfile",
-			Aliases: []string{"wf"},
+			Aliases: []string{"WF"},
 			Group:   "config",
 			Label:   "Wallet File",
 			Description:
@@ -1281,7 +1282,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		WalletOff: NewBool(Metadata{
 			Option:  "walletoff",
-			Aliases: []string{"wo"},
+			Aliases: []string{"WO"},
 			Group:   "debug",
 			Label:   "Wallet Off",
 			Description:
@@ -1294,7 +1295,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		WalletPass: NewString(Metadata{
 			Option:  "walletpass",
-			Aliases: []string{"wp"},
+			Aliases: []string{"WPW"},
 			Label:   "Wallet Pass",
 			Description:
 			"password encrypting public data in wallet - hash is stored so give on command line",
@@ -1307,7 +1308,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		WalletRPCListeners: NewStrings(Metadata{
 			Option:  "walletrpclisten",
-			Aliases: []string{"wr"},
+			Aliases: []string{"WRL"},
 			Group:   "wallet",
 			Label:   "Wallet RPC Listeners",
 			Description:
@@ -1324,7 +1325,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		WalletRPCMaxClients: NewInt(Metadata{
 			Option:  "walletrpcmaxclients",
-			Aliases: []string{"wmc"},
+			Aliases: []string{"WRMC"},
 			Group:   "wallet",
 			Label:   "Legacy RPC Max Clients",
 			Description:
@@ -1337,7 +1338,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		WalletRPCMaxWebsockets: NewInt(Metadata{
 			Option:  "walletrpcmaxwebsockets",
-			Aliases: []string{"wrm"},
+			Aliases: []string{"WRMWS"},
 			Group:   "wallet",
 			Label:   "Legacy RPC Max Websockets",
 			Description:
@@ -1350,7 +1351,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		WalletServer: NewString(Metadata{
 			Option:  "walletserver",
-			Aliases: []string{"ws"},
+			Aliases: []string{"WS"},
 			Group:   "wallet",
 			Label:   "Wallet Server",
 			Description:
@@ -1366,7 +1367,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		Whitelists: NewStrings(Metadata{
 			Option:  "whitelists",
-			Aliases: []string{"wl"},
+			Aliases: []string{"WL"},
 			Group:   "debug",
 			Label:   "Whitelists",
 			Description:
