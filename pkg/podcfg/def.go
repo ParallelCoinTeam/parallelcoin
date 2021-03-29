@@ -73,7 +73,7 @@ func shortestString(a, b string) (s, l string) {
 	return
 }
 
-// GetDefaultConfig returns a Config struct pristine factory freshaoeu
+// GetDefaultConfig returns a Config struct pristine factory fresh
 func GetDefaultConfig() (c *Config) {
 	network := "mainnet"
 	rand.Seed(time.Now().Unix())

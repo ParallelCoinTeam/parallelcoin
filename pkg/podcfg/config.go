@@ -324,7 +324,7 @@ func (c *Config) Initialize() (e error) {
 	}
 	// process the commandline
 	var cm *Command
-	if cm, e = c.processCommandlineArgs(); E.Chk(e) {
+	if cm, e = c.processCommandlineArgs(os.Args); E.Chk(e) {
 		return
 	}
 	var j []byte
@@ -335,19 +335,19 @@ func (c *Config) Initialize() (e error) {
 	return
 }
 
-func (c *Config) processCommandlineArgs() (cm *Command, e error) {
+func (c *Config) processCommandlineArgs(args []string) (cm *Command, e error) {
 	// first we will locate all the commands specified to mark the 3 sections, options, commands, and the remainder is
 	// arbitrary for the app
 	var commands map[int]Command
 	commands = make(map[int]Command)
 	var commandsStart, commandsEnd int
-	for i := range os.Args {
+	for i := range args {
 		if i == 0 {
 			continue
 		}
 		var depth, dist int
 		var found bool
-		if found, depth, dist, cm, e = c.Commands.Find(os.Args[i], depth, dist); E.Chk(e) || !found {
+		if found, depth, dist, cm, e = c.Commands.Find(args[i], depth, dist); E.Chk(e) || !found {
 			continue
 		}
 		if found {
@@ -362,7 +362,7 @@ func (c *Config) processCommandlineArgs() (cm *Command, e error) {
 			D.Ln("found command", cm.Name, "argument number", i, "at depth", depth, "distance", dist)
 			commands[depth] = *cm
 		} else {
-			T.Ln("argument", os.Args[i], "is not a command")
+			T.Ln("argument", args[i], "is not a command")
 		}
 	}
 	commandsEnd++
@@ -407,7 +407,7 @@ func (c *Config) processCommandlineArgs() (cm *Command, e error) {
 	var options []Option
 	if commandsStart > 1 {
 		// we have options to check
-		for i := range os.Args {
+		for i := range args {
 			if i == 0 {
 				continue
 			}
@@ -416,8 +416,8 @@ func (c *Config) processCommandlineArgs() (cm *Command, e error) {
 			}
 			var val string
 			var opt Option
-			if opt, val, e = c.GetOption(os.Args[i]); E.Chk(e) {
-				e = fmt.Errorf("argument %d: '%s' lacks a valid option prefix", i, os.Args[i])
+			if opt, val, e = c.GetOption(args[i]); E.Chk(e) {
+				e = fmt.Errorf("argument %d: '%s' lacks a valid option prefix", i, args[i])
 				return
 			}
 			if _, e = opt.ReadInput(val); E.Chk(e) {
@@ -427,7 +427,7 @@ func (c *Config) processCommandlineArgs() (cm *Command, e error) {
 			options = append(options, opt)
 		}
 	}
-	I.S(commands[cmds[len(cmds)-1]], options, os.Args[commandsEnd:])
+	I.S(commands[cmds[len(cmds)-1]], options, args[commandsEnd:])
 	return
 }
 
