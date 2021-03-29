@@ -7,6 +7,7 @@
 package podcfg
 
 type (
+	// Option is an interface to simplify concurrent-safe access to a variety of types of configuration item
 	Option interface {
 		ReadInput(string) (o Option, e error)
 		GetMetadata() *Metadata
@@ -17,6 +18,7 @@ type (
 		GetAllOptionStrings() []string
 		Type() interface{}
 	}
+	// Metadata is the information about the option to be used by interface code and other presentations of the data
 	Metadata struct {
 		Option      string
 		Aliases     []string

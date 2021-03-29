@@ -39,8 +39,9 @@ type Config struct {
 	ShowAll bool
 	// Map is the same data but addressible using its name as found inside the various configuration types, the key is
 	// the same as the .Name field field in the various data types
-	Map      map[string]interface{}
-	Commands Commands
+	Map            map[string]interface{}
+	Commands       Commands
+	RunningCommand *Command
 	// These are just the definitions, the things put in them are more useful than doc comments
 	AddCheckpoints         *Strings
 	AddPeers               *Strings
@@ -156,15 +157,32 @@ func (c *Config) Initialize() (e error) {
 	}
 	// process the commandline
 	var cm *Command
-	if cm, e = c.processCommandlineArgs(os.Args[1:]); E.Chk(e) {
+	var opts []Option
+	var optVals []string
+	if cm, opts, optVals, e = c.processCommandlineArgs(os.Args[1:]); E.Chk(e) {
 		return
 	}
+	_ = opts
+	c.RunningCommand = cm
+	// if the user sets the datadir on the commandline we need to load it from that path
+	datadir := c.DataDir.V()
+	for i := range opts {
+		if opts[i].Name() == "datadir" {
+			if _, e = opts[i].ReadInput(optVals[i]); E.Chk(e) {
+				datadir=optVals[i]
+			}
+		}
+	}
+	_=datadir
+	// load the configuration file into the config
+	
+	// read the environment variables into the config
+	
 	var j []byte
 	// c.ShowAll=true
 	if j, e = json.MarshalIndent(c, "", "    "); !E.Chk(e) {
 		I.Ln("\n" + string(j))
 	}
-	_ = cm
 	return
 }
 
@@ -335,7 +353,7 @@ func (c *Config) UnmarshalJSON(data []byte) (e error) {
 	return
 }
 
-func (c *Config) processCommandlineArgs(args []string) (cm *Command, e error) {
+func (c *Config) processCommandlineArgs(args []string) (cm *Command, options []Option, optVals []string, e error) {
 	// first we will locate all the commands specified to mark the 3 sections, options, commands, and the remainder is
 	// arbitrary for the app
 	var commands map[int]Command
@@ -414,7 +432,6 @@ func (c *Config) processCommandlineArgs(args []string) (cm *Command, e error) {
 		}
 		T.Ln("commandStart", commandsStart, commandsEnd, args[commandsStart:commandsEnd])
 	}
-	var options []Option
 	if commandsStart > 1 {
 		T.Ln("options found", args[:commandsStart])
 		// we have options to check
@@ -431,11 +448,12 @@ func (c *Config) processCommandlineArgs(args []string) (cm *Command, e error) {
 				e = fmt.Errorf("argument %d: '%s' lacks a valid option prefix", i, args[i])
 				return
 			}
-			if _, e = opt.ReadInput(val); E.Chk(e) {
-				return
-			}
+			// if _, e = opt.ReadInput(val); E.Chk(e) {
+			// 	return
+			// }
 			T.Ln("found option:", opt.String())
 			options = append(options, opt)
+			optVals = append(optVals, val)
 		}
 	}
 	if len(cmds) < 1 {
