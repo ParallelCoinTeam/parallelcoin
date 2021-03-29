@@ -163,7 +163,7 @@ func (s *State) Shutdown() {
 
 func (s *State) startWallet() (e error) {
 	I.Ln("getting configured TLS certificates")
-	certs := podcfg.ReadCAFile(s.cfg)
+	certs := s.cfg.ReadCAFile()
 	I.Ln("establishing wallet connection")
 	if s.walletClient, e = rpcclient.New(
 		&rpcclient.ConnConfig{

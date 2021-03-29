@@ -6,6 +6,7 @@ import (
 	"sync/atomic"
 )
 
+// String stores a string configuration value as bytes
 type String struct {
 	Metadata
 	hook  []func(s Strice)
@@ -62,7 +63,7 @@ func (x *String) V() string {
 
 // Empty returns true if the string is empty
 func (x *String) Empty() bool {
-	return len(x.value.Load().([]byte)) == 0
+	return len(x.value.Load().(Strice)) == 0
 }
 
 // Bytes returns the raw bytes in the underlying storage

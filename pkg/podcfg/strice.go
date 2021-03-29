@@ -1,10 +1,8 @@
 package podcfg
 
-type (
-	// Strice is a wrapper around byte slices to enable optional security features and possibly better performance for
-	// bulk comparison and editing. There isn't any extensive editing primitives for this purpose,
-	Strice []byte
-)
+// Strice is a wrapper around byte slices to enable optional security features and possibly better performance for
+// bulk comparison and editing. There isn't any extensive editing primitives for this purpose,
+type Strice []byte
 
 // S returns the underlying bytes converted into string
 func (s *Strice) S() string {

@@ -1,7 +1,7 @@
 package main
 
 var commands = map[string][]string{
-	"podbuild": {
+	"build": {
 		"go podbuild -v %ldflags",
 	},
 	"install": {

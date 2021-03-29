@@ -38,9 +38,9 @@ func (x *Bool) ReadInput(s string) (opt Option, e error) {
 	}
 	s = strings.ToLower(s)
 	switch s {
-	case "t", "true":
+	case "t", "true", "+":
 		x.value.Store(true)
-	case "f", "false":
+	case "f", "false", "-":
 		x.value.Store(false)
 	default:
 		e = fmt.Errorf("input on option %s: '%s' is not valid for a boolean flag", x.Name(), s)

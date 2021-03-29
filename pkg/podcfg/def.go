@@ -462,6 +462,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		Generate: NewBool(Metadata{
 			Option: "generate",
+			Aliases: []string{"M"},
 			Group:  "mining",
 			Label:  "Generate Blocks",
 			Description:
@@ -470,7 +471,7 @@ func GetDefaultConfig() (c *Config) {
 			// Hook:        "generate",
 			OmitEmpty: true,
 		},
-			false,
+			true,
 		),
 		GenThreads: NewInt(Metadata{
 			Option:  "genthreads",

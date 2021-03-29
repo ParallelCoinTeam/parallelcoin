@@ -183,15 +183,16 @@ func (c *Config) ForEach(fn func(ifc Option) bool) bool {
 	return true
 }
 
+// GetOption searches for a match amongst the options
 func (c *Config) GetOption(input string) (opt Option, value string, e error) {
-	I.Ln("checking arg for option:", input)
+	T.Ln("checking arg for option:", input)
 	found := false
 	if c.ForEach(func(ifc Option) bool {
 		aos := ifc.GetAllOptionStrings()
 		for i := range aos {
 			if strings.HasPrefix(input, aos[i]) {
 				value = input[len(aos[i]):]
-				I.Ln("value", value)
+				T.Ln("value", value)
 				found = true
 				opt = ifc
 				return false
@@ -340,31 +341,39 @@ func (c *Config) processCommandlineArgs(args []string) (cm *Command, e error) {
 	var commands map[int]Command
 	commands = make(map[int]Command)
 	var commandsStart, commandsEnd int
+	var found bool
 	for i := range args {
+		T.Ln("checking for commands:",args[i])
 		if i == 0 {
+			commandsStart++
+			commandsEnd++
 			continue
 		}
 		var depth, dist int
-		var found bool
-		if found, depth, dist, cm, e = c.Commands.Find(args[i], depth, dist); E.Chk(e) || !found {
+		if found, depth, dist, cm, e = c.Commands.Find(args[i], depth, dist); E.Chk(e) {
 			continue
 		}
 		if found {
 			if commandsStart == 0 {
 				commandsStart = i
 			}
-			commandsEnd = i
+			commandsEnd++
+			T.Ln("commandStart", commandsStart, commandsEnd, args)
 			if oc, ok := commands[depth]; ok {
 				e = fmt.Errorf("second command found at same depth '%s' and '%s'", oc.Name, cm.Name)
 				return
 			}
-			D.Ln("found command", cm.Name, "argument number", i, "at depth", depth, "distance", dist)
+			T.Ln("found command", cm.Name, "argument number", i, "at depth", depth, "distance", dist)
 			commands[depth] = *cm
 		} else {
+			T.Ln("commandStart", commandsStart, commandsEnd, args)
+			commandsStart++
+			commandsEnd++
 			T.Ln("argument", args[i], "is not a command")
 		}
 	}
-	commandsEnd++
+	// commandsEnd++
+	T.Ln("commandStart", commandsStart, commandsEnd, args)
 	cmds := []int{}
 	if len(commands) == 0 {
 		commands[0] = c.Commands[0]
@@ -390,7 +399,7 @@ func (c *Config) processCommandlineArgs(args []string) (cm *Command, e error) {
 					e = fmt.Errorf("more than one command specified, %v", cms)
 					return
 				}
-				found := false
+				found = false
 				for j := range commands[cmds[i-1]].Commands {
 					if commands[cmds[i]].Name == commands[cmds[i-1]].Commands[j].Name {
 						found = true
@@ -405,6 +414,7 @@ func (c *Config) processCommandlineArgs(args []string) (cm *Command, e error) {
 	}
 	var options []Option
 	if commandsStart > 1 {
+		T.Ln("options found")
 		// we have options to check
 		for i := range args {
 			if i == 0 {
@@ -422,9 +432,13 @@ func (c *Config) processCommandlineArgs(args []string) (cm *Command, e error) {
 			if _, e = opt.ReadInput(val); E.Chk(e) {
 				return
 			}
-			I.Ln("found option:", opt.String())
+			T.Ln("found option:", opt.String())
 			options = append(options, opt)
 		}
+	}
+	if len(cmds) < 1 {
+		cmds = []int{0}
+		commands[0] = c.Commands[0]
 	}
 	I.S(commands[cmds[len(cmds)-1]], options, args[commandsEnd:])
 	return
