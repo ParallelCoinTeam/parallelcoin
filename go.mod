@@ -30,6 +30,7 @@ require (
 	github.com/onsi/gomega v1.9.0 // indirect
 	github.com/p9c/gel v0.1.2
 	github.com/p9c/log v0.0.6
+	github.com/p9c/opts v0.0.2
 	github.com/p9c/qu v0.0.3
 	github.com/programmer10110/gostreebog v0.0.0-20170704145444-a3e1d28291b2
 	github.com/spacemonkeygo/errors v0.0.0-20201030155909-2f5f890dbc62 // indirect

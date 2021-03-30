@@ -5,15 +5,15 @@
 package opts
 
 import (
+	"github.com/p9c/opts/binary"
+	"github.com/p9c/opts/duration"
+	"github.com/p9c/opts/float"
+	"github.com/p9c/opts/integer"
+	"github.com/p9c/opts/list"
+	"github.com/p9c/opts/meta"
+	"github.com/p9c/opts/text"
 	"github.com/p9c/pod/pkg/appdata"
 	"github.com/p9c/pod/pkg/chaincfg"
-	"github.com/p9c/pod/pkg/opts/binary"
-	"github.com/p9c/pod/pkg/opts/duration"
-	"github.com/p9c/pod/pkg/opts/float"
-	"github.com/p9c/pod/pkg/opts/integer"
-	"github.com/p9c/pod/pkg/opts/list"
-	"github.com/p9c/pod/pkg/opts/meta"
-	"github.com/p9c/pod/pkg/opts/text"
 	uberatomic "go.uber.org/atomic"
 	"math/rand"
 	"net"

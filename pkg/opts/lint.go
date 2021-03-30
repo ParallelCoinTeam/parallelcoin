@@ -2,7 +2,7 @@ package opts
 
 import (
 	"fmt"
-	"github.com/p9c/pod/pkg/opts/opt"
+	"github.com/p9c/opts/opt"
 )
 
 func (c *Config) getAllOptionStrings() (s map[string][]string, e error) {

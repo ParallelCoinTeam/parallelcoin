@@ -105,7 +105,7 @@ First, generate the C++ language bindings by compiling the `.proto`:
 
 ```bash
 $ protoc -I/path/to/btcwallet/rpc --cpp_out=. --grpc_out=. \
-  --plugin=protoc-gen-grpc=$(which grpc_cpp_plugin) \
+  --plugin=protoc-genopts-grpc=$(which grpc_cpp_plugin) \
   /path/to/btcwallet/rpc/api.proto
 ```
 
@@ -429,7 +429,7 @@ Generate Python stubs from the `.proto`:
 
 ```bash
 $ protoc -I /path/to/btcsuite/btcwallet/rpc --python_out=. --grpc_out=. \
-  --plugin=protoc-gen-grpc=$(which grpc_python_plugin) \
+  --plugin=protoc-genopts-grpc=$(which grpc_python_plugin) \
   /path/to/btcwallet/rpc/api.proto
 ```
 

@@ -1,13 +1,13 @@
 package opts
 
 import (
-	"github.com/p9c/pod/pkg/opts/binary"
-	"github.com/p9c/pod/pkg/opts/duration"
-	"github.com/p9c/pod/pkg/opts/float"
-	"github.com/p9c/pod/pkg/opts/integer"
-	"github.com/p9c/pod/pkg/opts/list"
-	"github.com/p9c/pod/pkg/opts/opt"
-	"github.com/p9c/pod/pkg/opts/text"
+	"github.com/p9c/opts/binary"
+	"github.com/p9c/opts/duration"
+	"github.com/p9c/opts/float"
+	"github.com/p9c/opts/integer"
+	"github.com/p9c/opts/list"
+	"github.com/p9c/opts/opt"
+	"github.com/p9c/opts/text"
 )
 
 // Config defines the configuration items used by pod along with the various components included in the suite
