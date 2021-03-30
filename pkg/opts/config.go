@@ -14,8 +14,6 @@ package opts
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/p9c/pod/pkg/apputil"
-	"github.com/p9c/pod/pkg/base58"
 	"github.com/p9c/opts/binary"
 	"github.com/p9c/opts/duration"
 	"github.com/p9c/opts/float"
@@ -23,6 +21,8 @@ import (
 	"github.com/p9c/opts/list"
 	"github.com/p9c/opts/opt"
 	"github.com/p9c/opts/text"
+	"github.com/p9c/pod/pkg/apputil"
+	"github.com/p9c/pod/pkg/base58"
 	"github.com/p9c/pod/pkg/util/hdkeychain"
 	"io/ioutil"
 	"os"
@@ -68,6 +68,8 @@ func (c *Config) Initialize() (e error) {
 	T.Ln("linting configuration items")
 	if _, e = findConflictingItems(aos); E.Chk(e) {
 	}
+	// generate and add the help commands to the help tree
+	c.getHelp()
 	// process the commandline
 	T.Ln("processing commandline arguments", os.Args[1:])
 	var cm *Command
