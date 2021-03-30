@@ -1,16 +1,21 @@
-package podcfg
+package opts
 
-// Commands are a slice of podcfg.Command entries
+import (
+	"github.com/p9c/pod/pkg/podcfg"
+)
+
+// Commands are a slice of Command entries
 type Commands []Command
 
 // Command is a specification for a command and can include any number of subcommands
 type Command struct {
 	Name        string
 	Description string
-	Entrypoint  func(c *Config) error
+	Entrypoint  func(c *podcfg.Config) error
 	Commands    Commands
 }
 
+// GetAllCommands returns all of the available command names
 func (c Commands) GetAllCommands() (o []string) {
 	for i := range c {
 		o = append(o, c[i].Commands.GetAllCommands()...)

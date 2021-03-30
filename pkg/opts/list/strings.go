@@ -1,46 +1,46 @@
-package podcfg
+package list
 
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/urfave/cli"
+	"github.com/p9c/pod/pkg/opts"
 	"strings"
 	"sync/atomic"
 )
 
-type Strings struct {
-	Metadata
+// Opt stores a string slice configuration value
+type Opt struct {
+	opts.Metadata
 	hook  []func(s []string)
 	value *atomic.Value
-	def   []string
+	Def   []string
 }
 
-// NewStrings  creates a new podcfg.Strings with default values set
-func NewStrings(m Metadata, def []string, hook ...func(s []string)) *Strings {
+// New  creates a new Opt with default values set
+func New(m opts.Metadata, def []string, hook ...func(s []string)) *Opt {
 	as := &atomic.Value{}
-	v := cli.StringSlice(def)
-	as.Store(&v)
-	return &Strings{value: as, Metadata: m, def: def, hook: hook}
+	as.Store(def)
+	return &Opt{value: as, Metadata: m, Def: def, hook: hook}
 }
 
 // SetName sets the name for the generator
-func (x *Strings) SetName(name string) {
+func (x *Opt) SetName(name string) {
 	x.Metadata.Option = strings.ToLower(name)
 	x.Metadata.Name = name
 }
 
 // Type returns the receiver wrapped in an interface for identifying its type
-func (x *Strings) Type() interface{} {
+func (x *Opt) Type() interface{} {
 	return x
 }
 
 // GetMetadata returns the metadata of the option type
-func (x *Strings) GetMetadata() *Metadata {
+func (x *Opt) GetMetadata() *opts.Metadata {
 	return &x.Metadata
 }
 
 // ReadInput sets the value from a string. For this option this means appending to the list
-func (x *Strings) ReadInput(input string) (o Option, e error) {
+func (x *Opt) ReadInput(input string) (o opts.Option, e error) {
 	if input == "" {
 		e = fmt.Errorf("string option %s %v may not be empty", x.Name(), x.Metadata.Aliases)
 		return
@@ -59,7 +59,7 @@ func (x *Strings) ReadInput(input string) (o Option, e error) {
 }
 
 // LoadInput sets the value from a string. For this option this means appending to the list
-func (x *Strings) LoadInput(input string) (o Option, e error) {
+func (x *Opt) LoadInput(input string) (o opts.Option, e error) {
 	if input == "" {
 		e = fmt.Errorf("string option %s %v may not be empty", x.Name(), x.Metadata.Aliases)
 		return
@@ -78,56 +78,55 @@ func (x *Strings) LoadInput(input string) (o Option, e error) {
 }
 
 // Name returns the name of the option
-func (x *Strings) Name() string {
+func (x *Opt) Name() string {
 	return x.Metadata.Option
 }
 
 // AddHooks appends callback hooks to be run when the value is changed
-func (x *Strings) AddHooks(hook ...func(b []string)) {
+func (x *Opt) AddHooks(hook ...func(b []string)) {
 	x.hook = append(x.hook, hook...)
 }
 
 // SetHooks sets a new slice of hooks
-func (x *Strings) SetHooks(hook ...func(b []string)) {
+func (x *Opt) SetHooks(hook ...func(b []string)) {
 	x.hook = hook
 }
 
 // V returns the stored value
-func (x *Strings) V() *cli.StringSlice {
-	return x.value.Load().(*cli.StringSlice)
+func (x *Opt) V() []string {
+	return x.value.Load().([]string)
 }
 
 // Len returns the length of the slice of strings
-func (x *Strings) Len() int {
+func (x *Opt) Len() int {
 	return len(x.S())
 }
 
 // Set the slice of strings stored
-func (x *Strings) Set(ss []string) *Strings {
-	sss := cli.StringSlice(ss)
-	x.value.Store(&sss)
+func (x *Opt) Set(ss []string) *Opt {
+	x.value.Store(ss)
 	return x
 }
 
 // S returns the value as a slice of string
-func (x *Strings) S() []string {
-	return *x.value.Load().(*cli.StringSlice)
+func (x *Opt) S() []string {
+	return x.value.Load().([]string)
 }
 
 // String returns a string representation of the value
-func (x *Strings) String() string {
+func (x *Opt) String() string {
 	return fmt.Sprint(x.Metadata.Option, ": ", x.S())
 }
 
 // MarshalJSON returns the json representation of
-func (x *Strings) MarshalJSON() (b []byte, e error) {
-	xs := x.value.Load().(*cli.StringSlice)
+func (x *Opt) MarshalJSON() (b []byte, e error) {
+	xs := x.value.Load().([]string)
 	return json.Marshal(xs)
 }
 
 // UnmarshalJSON decodes a JSON representation of
-func (x *Strings) UnmarshalJSON(data []byte) (e error) {
-	v := &cli.StringSlice{}
+func (x *Opt) UnmarshalJSON(data []byte) (e error) {
+	var v []string
 	e = json.Unmarshal(data, &v)
 	x.value.Store(v)
 	return

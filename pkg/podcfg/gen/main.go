@@ -3,6 +3,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/opts"
 	"github.com/p9c/pod/pkg/podcfg"
 	"go/format"
 	"io/ioutil"
@@ -16,9 +17,9 @@ import (
 func main() {
 	c := podcfg.GetConfigs()
 	var o string
-	var cc podcfg.ConfigSlice
+	var cc opts.ConfigSlice
 	for i := range c {
-		cc = append(cc, podcfg.ConfigSliceElement{Opt: c[i], Name: i})
+		cc = append(cc, opts.ConfigSliceElement{Opt: c[i], Name: i})
 	}
 	sort.Sort(cc)
 	for i := range cc {
@@ -50,7 +51,7 @@ var configBase = `package podcfg
 type Config struct {
 	// ShowAll is a flag to make the json encoder explicitly define all fields and not just the ones different to the
 	// defaults
-	ShowAll bool
+	ShowAll binary
 	// Map is the same data but addressible using its name as found inside the various configuration types, the key is
 	// converted to lower case for CLI args
 	Map            map[string]Option

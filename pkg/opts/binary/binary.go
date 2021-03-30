@@ -1,46 +1,48 @@
-package podcfg
+package binary
 
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/p9c/pod/pkg/opts"
 	uberatomic "go.uber.org/atomic"
 	"strings"
 )
 
-type Bool struct {
-	Metadata
+// Opt stores an boolean configuration value
+type Opt struct {
+	opts.Metadata
 	hook  []func(b bool)
 	value *uberatomic.Bool
-	def   bool
+	Def   bool
 }
 
-// NewBool creates a new podcfg.Bool with default values set
-func NewBool(m Metadata, def bool, hook ...func(b bool)) *Bool {
-	return &Bool{value: uberatomic.NewBool(def), Metadata: m, def: def, hook: hook}
+// New creates a new Opt with default values set
+func New(m opts.Metadata, def bool, hook ...func(b bool)) *Opt {
+	return &Opt{value: uberatomic.NewBool(def), Metadata: m, Def: def, hook: hook}
 }
 
 // SetName sets the name for the generator
-func (x *Bool) SetName(name string) {
+func (x *Opt) SetName(name string) {
 	x.Metadata.Option = strings.ToLower(name)
 	x.Metadata.Name = name
 }
 
 // Type returns the receiver wrapped in an interface for identifying its type
-func (x *Bool) Type() interface{} {
+func (x *Opt) Type() interface{} {
 	return x
 }
 
 // GetMetadata returns the metadata of the option type
-func (x *Bool) GetMetadata() *Metadata {
+func (x *Opt) GetMetadata() *opts.Metadata {
 	return &x.Metadata
 }
 
 // ReadInput sets the value from a string.
 // The value can be right up against the keyword or separated by a '='.
-func (x *Bool) ReadInput(input string) (o Option, e error) {
+func (x *Opt) ReadInput(input string) (o opts.Option, e error) {
 	// if the input is empty, the user intends the opposite of the default
 	if input == "" {
-		x.value.Store(!x.def)
+		x.value.Store(!x.Def)
 		return
 	}
 	if strings.HasPrefix(input, "=") {
@@ -60,71 +62,71 @@ func (x *Bool) ReadInput(input string) (o Option, e error) {
 }
 
 // LoadInput sets the value from a string (this is the same as the above but differs for Strings)
-func (x *Bool) LoadInput(input string) (o Option, e error) {
+func (x *Opt) LoadInput(input string) (o opts.Option, e error) {
 	return x.ReadInput(input)
 }
 
 // Name returns the name of the option
-func (x *Bool) Name() string {
+func (x *Opt) Name() string {
 	return x.Metadata.Option
 }
 
 // AddHooks appends callback hooks to be run when the value is changed
-func (x *Bool) AddHooks(hook ...func(b bool)) {
+func (x *Opt) AddHooks(hook ...func(b bool)) {
 	x.hook = append(x.hook, hook...)
 }
 
 // SetHooks sets a new slice of hooks
-func (x *Bool) SetHooks(hook ...func(b bool)) {
+func (x *Opt) SetHooks(hook ...func(b bool)) {
 	x.hook = hook
 }
 
 // True returns whether the value is set to true (it returns the value)
-func (x *Bool) True() bool {
+func (x *Opt) True() bool {
 	return x.value.Load()
 }
 
 // False returns whether the value is false (it returns the inverse of the value)
-func (x *Bool) False() bool {
+func (x *Opt) False() bool {
 	return !x.value.Load()
 }
 
 // Flip changes the value to its opposite
-func (x *Bool) Flip() {
+func (x *Opt) Flip() {
 	x.value.Toggle()
 }
 
 // Set changes the value currently stored
-func (x *Bool) Set(b bool) *Bool {
+func (x *Opt) Set(b bool) *Opt {
 	x.value.Store(b)
 	return x
 }
 
 // String returns a string form of the value
-func (x *Bool) String() string {
+func (x *Opt) String() string {
 	return fmt.Sprint(x.Metadata.Option, ": ", x.True())
 }
 
 // T sets the value to true
-func (x *Bool) T() *Bool {
+func (x *Opt) T() *Opt {
 	x.value.Store(true)
 	return x
 }
 
 // F sets the value to false
-func (x *Bool) F() *Bool {
+func (x *Opt) F() *Opt {
 	x.value.Store(false)
 	return x
 }
 
-// MarshalJSON returns the json representation of a Bool
-func (x *Bool) MarshalJSON() (b []byte, e error) {
+// MarshalJSON returns the json representation of a Opt
+func (x *Opt) MarshalJSON() (b []byte, e error) {
 	v := x.value.Load()
 	return json.Marshal(&v)
 }
 
-// UnmarshalJSON decodes a JSON representation of a Bool
-func (x *Bool) UnmarshalJSON(data []byte) (e error) {
+// UnmarshalJSON decodes a JSON representation of a Opt
+func (x *Opt) UnmarshalJSON(data []byte) (e error) {
 	v := x.value.Load()
 	e = json.Unmarshal(data, &v)
 	x.value.Store(v)

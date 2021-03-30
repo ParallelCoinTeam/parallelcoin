@@ -2,11 +2,12 @@ package podcfg
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/opts"
 )
 
 func (c *Config) getAllOptionStrings() (s map[string][]string, e error) {
 	s = make(map[string][]string)
-	if c.ForEach(func(ifc Option) bool {
+	if c.ForEach(func(ifc opts.Option) bool {
 		md := ifc.GetMetadata()
 		if _, ok := s[ifc.Name()]; ok {
 			e = fmt.Errorf("conflicting option names: %v %v", ifc.GetAllOptionStrings(), s[ifc.Name()])

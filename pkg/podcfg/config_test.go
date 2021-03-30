@@ -3,6 +3,13 @@ package podcfg
 import (
 	"encoding/json"
 	"github.com/davecgh/go-spew/spew"
+	"github.com/p9c/pod/pkg/opts"
+	bool2 "github.com/p9c/pod/pkg/opts/binary"
+	"github.com/p9c/pod/pkg/opts/duration"
+	"github.com/p9c/pod/pkg/opts/float"
+	"github.com/p9c/pod/pkg/opts/integer"
+	"github.com/p9c/pod/pkg/opts/list"
+	"github.com/p9c/pod/pkg/opts/text"
 	"math/rand"
 	"testing"
 )
@@ -10,25 +17,25 @@ import (
 func TestForEach(t *testing.T) {
 	c := GetDefaultConfig()
 	c.ForEach(
-		func(ifc Option) bool {
+		func(ifc opts.Option) bool {
 			switch ii := ifc.(type) {
-			case *Bool:
-				t.Log("case *Bool")
+			case *bool2.Opt:
+				t.Log("case *Opt")
 				t.Log(spew.Sdump(ii.Metadata))
-			case *Strings:
-				t.Log("case *Strings")
+			case *list.Opt:
+				t.Log("case *Opt")
 				t.Log(spew.Sdump(ii.Metadata))
-			case *Float:
-				t.Log("case *Float")
+			case *float.Opt:
+				t.Log("case *Opt")
 				t.Log(spew.Sdump(ii.Metadata))
-			case *Int:
-				t.Log("case *Int")
+			case *integer.Opt:
+				t.Log("case *Opt")
 				t.Log(spew.Sdump(ii.Metadata))
-			case *String:
-				t.Log("case *String")
+			case *text.Opt:
+				t.Log("case *Opt")
 				t.Log(spew.Sdump(ii.Metadata))
-			case *Duration:
-				t.Log("case *Duration")
+			case *duration.Opt:
+				t.Log("case *Opt")
 				t.Log(spew.Sdump(ii.Metadata))
 			default:
 				// t.Log(spew.Sdump(ii))
@@ -108,7 +115,7 @@ func TestDefaultConfig(t *testing.T) {
 	c := GetDefaultConfig()
 	// I.S(c)
 	var e error
-	var cm *Command
+	var cm *opts.Command
 	var depth, dist int
 	var found bool
 	if found, depth, dist, cm, e = c.Commands.Find("drophistory", depth, dist); !E.Chk(e) || found {

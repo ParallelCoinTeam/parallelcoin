@@ -17,8 +17,8 @@ var emptyhash = hex.EncodeToString(eh[:])
 
 //
 // // Filters saves the logger per-package logging configuration
-// func Filters(dataDir string) func(pkgs Pk.Package) (success bool) {
-// 	return func(pkgs Pk.Package) (success bool) {
+// func Filters(dataDir string) func(pkgs Pk.Package) (success binary) {
+// 	return func(pkgs Pk.Package) (success binary) {
 // 		if filterJSON, e := json.MarshalIndent(pkgs, "", "  "); e == nil {
 // 			F.Ln("Saving log filter:\n```", string(filterJSON), "\n```")
 // 			apputil.EnsureDir(dataDir)

@@ -1,10 +1,4 @@
-// Package podcfg implements a concurrent/parallel active application configuration system for multi-process
-// applications to share a configuration as well as keep in sync with each other.
-//
-// This file contains all of the data types stored in a podcfg.Config and the various accessors and methods relevant to
-// them. There is a basic byte slice-as-string type which is intended to eventually cover proper security practices for
-// storing password information.
-package podcfg
+package opts
 
 type (
 	// Option is an interface to simplify concurrent-safe access to a variety of types of configuration item
@@ -43,7 +37,7 @@ func (m Metadata) GetAllOptionStrings() (opts []string) {
 // Configs is the source location for the Config items, which is used to generate the Config struct
 type Configs map[string]Option
 type ConfigSliceElement struct {
-	Opt Option
+	Opt  Option
 	Name string
 }
 type ConfigSlice []ConfigSliceElement
