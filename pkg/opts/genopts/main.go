@@ -56,7 +56,7 @@ import (
 )
 
 // Config defines the configuration items used by pod along with the various components included in the suite
-//go:generate go run gen/main.go
+//go:generate go run genopts/main.go
 type Config struct {
 	// ShowAll is a flag to make the json encoder explicitly define all fields and not just the ones different to the
 	// defaults
