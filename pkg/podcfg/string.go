@@ -33,17 +33,22 @@ func (x *String) GetMetadata() *Metadata {
 }
 
 // ReadInput sets the value from a string
-func (x *String) ReadInput(s string) (o Option, e error) {
-	if s == "" {
+func (x *String) ReadInput(input string) (o Option, e error) {
+	if input == "" {
 		e = fmt.Errorf("string option %s %v may not be empty", x.Name(), x.Metadata.Aliases)
 		return
 	}
-	if strings.HasPrefix(s, "=") {
+	if strings.HasPrefix(input, "=") {
 		// the following removes leading and trailing characters
-		s = strings.Join(strings.Split(s, "=")[1:], "=")
+		input = strings.Join(strings.Split(input, "=")[1:], "=")
 	}
-	x.Set(s)
+	x.Set(input)
 	return x, e
+}
+
+// LoadInput sets the value from a string (this is the same as the above but differs for Strings)
+func (x *String) LoadInput(input string) (o Option, e error) {
+	return x.ReadInput(input)
 }
 
 // Name returns the name of the option

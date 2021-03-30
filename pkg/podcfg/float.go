@@ -31,21 +31,26 @@ func (x *Float) GetMetadata() *Metadata {
 }
 
 // ReadInput sets the value from a string
-func (x *Float) ReadInput(s string) (o Option, e error) {
-	if s == "" {
+func (x *Float) ReadInput(input string) (o Option, e error) {
+	if input == "" {
 		e = fmt.Errorf("floating point number option %s %v may not be empty", x.Name(), x.Metadata.Aliases)
 		return
 	}
-	if strings.HasPrefix(s, "=") {
+	if strings.HasPrefix(input, "=") {
 		// the following removes leading and trailing characters
-		s = strings.Join(strings.Split(s, "=")[1:], "=")
+		input = strings.Join(strings.Split(input, "=")[1:], "=")
 	}
 	var v float64
-	if v, e = strconv.ParseFloat(s, 64); E.Chk(e) {
+	if v, e = strconv.ParseFloat(input, 64); E.Chk(e) {
 		return
 	}
 	x.value.Store(v)
 	return x, e
+}
+
+// LoadInput sets the value from a string (this is the same as the above but differs for Strings)
+func (x *Float) LoadInput(input string) (o Option, e error) {
+	return x.ReadInput(input)
 }
 
 // Name returns the name of the option

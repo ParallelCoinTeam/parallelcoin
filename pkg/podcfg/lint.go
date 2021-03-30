@@ -34,9 +34,9 @@ func findConflictingItems(valOpts map[string][]string) (o []string, e error) {
 			b := valOpts[j]
 			for ii := range a {
 				for jj := range b {
-					if ii == jj {
-						continue
-					}
+					// if ii == jj {
+					// 	continue
+					// }
 					// W.Ln(i == j, s[i] == s[j])
 					// I.Ln(s[i], s[j])
 					ss, ls = shortestString(a[ii], b[jj])

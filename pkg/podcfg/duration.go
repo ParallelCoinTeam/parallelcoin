@@ -31,20 +31,25 @@ func (x *Duration) GetMetadata() *Metadata {
 }
 
 // ReadInput sets the value from a string
-func (x *Duration) ReadInput(s string) (o Option, e error) {
-	if s == "" {
+func (x *Duration) ReadInput(input string) (o Option, e error) {
+	if input == "" {
 		e = fmt.Errorf("integer number option %s %v may not be empty", x.Name(), x.Metadata.Aliases)
 		return
 	}
-	if strings.HasPrefix(s, "=") {
+	if strings.HasPrefix(input, "=") {
 		// the following removes leading and trailing characters
-		s = strings.Join(strings.Split(s, "=")[1:], "=")
+		input = strings.Join(strings.Split(input, "=")[1:], "=")
 	}
 	var v time.Duration
-	if v, e = time.ParseDuration(s); !E.Chk(e) {
+	if v, e = time.ParseDuration(input); !E.Chk(e) {
 		x.value.Store(v)
 	}
 	return
+}
+
+// LoadInput sets the value from a string (this is the same as the above but differs for Strings)
+func (x *Duration) LoadInput(input string) (o Option, e error) {
+	return x.ReadInput(input)
 }
 
 // Name returns the name of the option

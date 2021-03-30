@@ -31,26 +31,31 @@ func (x *Bool) GetMetadata() *Metadata {
 
 // ReadInput sets the value from a string.
 // The value can be right up against the keyword or separated by a ':' or '='.
-func (x *Bool) ReadInput(s string) (opt Option, e error) {
+func (x *Bool) ReadInput(input string) (o Option, e error) {
 	// if the input is empty, the user intends the opposite of the default
-	if s == "" {
+	if input == "" {
 		x.value.Store(!x.def)
 		return
 	}
-	if strings.HasPrefix(s, "=") {
+	if strings.HasPrefix(input, "=") {
 		// the following removes leading and trailing characters
-		s = strings.Join(strings.Split(s, "=")[1:], "=")
+		input = strings.Join(strings.Split(input, "=")[1:], "=")
 	}
-	s = strings.ToLower(s)
-	switch s {
+	input = strings.ToLower(input)
+	switch input {
 	case "t", "true", "+":
 		x.value.Store(true)
 	case "f", "false", "-":
 		x.value.Store(false)
 	default:
-		e = fmt.Errorf("input on option %s: '%s' is not valid for a boolean flag", x.Name(), s)
+		e = fmt.Errorf("input on option %s: '%s' is not valid for a boolean flag", x.Name(), input)
 	}
 	return
+}
+
+// LoadInput sets the value from a string (this is the same as the above but differs for Strings)
+func (x *Bool) LoadInput(input string) (o Option, e error) {
+	return x.ReadInput(input)
 }
 
 // Name returns the name of the option

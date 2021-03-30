@@ -14,10 +14,12 @@ package podcfg
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/p9c/pod/pkg/apputil"
 	"github.com/p9c/pod/pkg/base58"
 	"github.com/p9c/pod/pkg/util/hdkeychain"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"reflect"
 	"sort"
 	"strings"
@@ -32,130 +34,23 @@ const (
 	PARSER            = "json"
 )
 
-// Config defines the configuration items used by pod along with the various components included in the suite
-type Config struct {
-	// ShowAll is a flag to make the json encoder explicitly define all fields and not just the ones different to the
-	// defaults
-	ShowAll bool
-	// Map is the same data but addressible using its name as found inside the various configuration types, the key is
-	// the same as the .Name field field in the various data types
-	Map            map[string]interface{}
-	Commands       Commands
-	RunningCommand *Command
-	// These are just the definitions, the things put in them are more useful than doc comments
-	AddCheckpoints         *Strings
-	AddPeers               *Strings
-	AddrIndex              *Bool
-	AutoListen             *Bool
-	AutoPorts              *Bool
-	BanDuration            *Duration
-	BanThreshold           *Int
-	BlockMaxSize           *Int
-	BlockMaxWeight         *Int
-	BlockMinSize           *Int
-	BlockMinWeight         *Int
-	BlockPrioritySize      *Int
-	BlocksOnly             *Bool
-	CAFile                 *String
-	ConfigFile             *String
-	ConnectPeers           *Strings
-	Controller             *Bool
-	CPUProfile             *String
-	DarkTheme              *Bool
-	DataDir                *String
-	DbType                 *String
-	DisableBanning         *Bool
-	DisableCheckpoints     *Bool
-	DisableDNSSeed         *Bool
-	DisableListen          *Bool
-	DisableRPC             *Bool
-	Discovery              *Bool
-	ExternalIPs            *Strings
-	FreeTxRelayLimit       *Float
-	Generate               *Bool
-	GenThreads             *Int
-	Hilite                 *Strings
-	LAN                    *Bool
-	Language               *String
-	LimitPass              *String
-	LimitUser              *String
-	LogDir                 *String
-	LogFilter              *Strings
-	LogLevel               *String
-	MaxOrphanTxs           *Int
-	MaxPeers               *Int
-	MulticastPass          *String
-	MiningAddrs            *Strings
-	MinRelayTxFee          *Float
-	Network                *String
-	NoCFilters             *Bool
-	NodeOff                *Bool
-	NoInitialLoad          *Bool
-	NoPeerBloomFilters     *Bool
-	NoRelayPriority        *Bool
-	OneTimeTLSKey          *Bool
-	Onion                  *Bool
-	OnionProxy             *String
-	OnionProxyPass         *String
-	OnionProxyUser         *String
-	P2PConnect             *Strings
-	P2PListeners           *Strings
-	Password               *String
-	PipeLog                *Bool
-	Profile                *String
-	Proxy                  *String
-	ProxyPass              *String
-	ProxyUser              *String
-	RejectNonStd           *Bool
-	RelayNonStd            *Bool
-	RPCCert                *String
-	RPCConnect             *String
-	RPCKey                 *String
-	RPCListeners           *Strings
-	RPCMaxClients          *Int
-	RPCMaxConcurrentReqs   *Int
-	RPCMaxWebsockets       *Int
-	RPCQuirks              *Bool
-	RunAsService           *Bool
-	ServerPass             *String
-	ServerTLS              *Bool
-	ServerUser             *String
-	SigCacheMaxSize        *Int
-	Solo                   *Bool
-	TLS                    *Bool
-	TLSSkipVerify          *Bool
-	TorIsolation           *Bool
-	TrickleInterval        *Duration
-	TxIndex                *Bool
-	UPNP                   *Bool
-	UserAgentComments      *Strings
-	Username               *String
-	UUID                   *Int
-	Wallet                 *Bool
-	WalletFile             *String
-	WalletOff              *Bool
-	WalletPass             *String
-	WalletRPCListeners     *Strings
-	WalletRPCMaxClients    *Int
-	WalletRPCMaxWebsockets *Int
-	WalletServer           *String
-	Whitelists             *Strings
-}
-
 // Initialize loads in configuration from disk and from environment on top of the default base
 //
 // the several places configuration is sourced from are overlaid in the following order:
 // default -> config file -> environment variables -> commandline flags
 func (c *Config) Initialize() (e error) {
+	T.Ln("initializing configuration...")
 	// first lint the configuration
 	var aos map[string][]string
 	if aos, e = c.getAllOptionStrings(); E.Chk(e) {
 		return
 	}
-	// this function will panic if there is potential for ambiguity in the commandline configuration args
+	// this function will panic if there is potential for ambiguity in the commandline configuration args.
+	T.Ln("linting configuration items")
 	if _, e = findConflictingItems(aos); E.Chk(e) {
 	}
 	// process the commandline
+	T.Ln("processing commandline arguments", os.Args[1:])
 	var cm *Command
 	var opts []Option
 	var optVals []string
@@ -164,40 +59,86 @@ func (c *Config) Initialize() (e error) {
 	}
 	_ = opts
 	c.RunningCommand = cm
-	// if the user sets the datadir on the commandline we need to load it from that path
+	// if the user sets the configfile directly, or the datadir on the commandline we need to load it from that path
+	T.Ln("checking from where to load the configuration file")
 	datadir := c.DataDir.V()
-	var configFile string
+	var configPath string
 	for i := range opts {
-		if opts[i].Name() == "configFile" {
+		if opts[i].Name() == "configfile" {
 			if _, e = opts[i].ReadInput(optVals[i]); E.Chk(e) {
-				configFile = optVals[i]
+				configPath = optVals[i]
+			}
+		} else if opts[i].Name() == "datadir" {
+			if _, e = opts[i].ReadInput(optVals[i]); E.Chk(e) {
+				datadir = optVals[i]
 			}
 		}
 	}
-	_ = datadir
-	_ = configFile
 	// load the configuration file into the config
-	readFrom := c.ConfigFile.V()
-	if configFile != "" {
-		readFrom = configFile
+	resolvedConfigPath := c.ConfigFile.V()
+	if configPath != "" {
+		T.Ln("loading config from", configPath)
+		resolvedConfigPath = configPath
+	} else {
+		if datadir != "" {
+			resolvedConfigPath = filepath.Join(datadir, PodConfigFilename)
+			T.Ln("loading config from", resolvedConfigPath)
+		}
 	}
-	var cf []byte
-	if cf, e = ioutil.ReadFile(readFrom); E.Chk(e) {
-		// todo: what to do if file doesn't exist? save new one? Also shouldn't this load stuff be in its own function?
-	}
-	if e = json.Unmarshal(cf, c); E.Chk(e){
+	var configExists bool
+	if e = c.loadConfig(resolvedConfigPath); !D.Chk(e) {
+		configExists = true
 	}
 	// read the environment variables into the config
-	
+	if e = c.loadEnvironment(); D.Chk(e) {
+	}
 	// read in the commandline options
 	for i := range opts {
 		if _, e = opts[i].ReadInput(optVals[i]); E.Chk(e) {
 		}
 	}
-	var j []byte
-	// c.ShowAll=true
-	if j, e = json.MarshalIndent(c, "", "    "); !E.Chk(e) {
-		I.Ln("\n" + string(j))
+	if !configExists || c.Save.True() {
+		// save the configuration file
+		var j []byte
+		// c.ShowAll=true
+		if j, e = json.MarshalIndent(c, "", "    "); !E.Chk(e) {
+			I.F("saving config\n%s\n", string(j))
+			apputil.EnsureDir(resolvedConfigPath)
+			if e = ioutil.WriteFile(resolvedConfigPath, j, 0660); E.Chk(e) {
+			}
+		}
+		
+	}
+	return
+}
+
+// loadEnvironment scans the environment variables for values relevant to pod
+func (c *Config) loadEnvironment() (e error) {
+	env := os.Environ()
+	c.ForEach(func(o Option) bool {
+		varName := "POD_" + strings.ToUpper(o.Name())
+		for i := range env {
+			if strings.HasPrefix(env[i], varName) {
+				envVal := strings.Split(env[i], varName)[1]
+				if _, e = o.LoadInput(envVal); D.Chk(e) {
+				}
+			}
+		}
+		return true
+	},
+	)
+	
+	return
+}
+
+// loadConfig loads the config from a file and unmarshals it into the config
+func (c *Config) loadConfig(path string) (e error) {
+	e = fmt.Errorf("no config found at %s", path)
+	var cf []byte
+	if !apputil.FileExists(path) {
+	} else if cf, e = ioutil.ReadFile(path); !D.Chk(e) {
+		if e = json.Unmarshal(cf, c); D.Chk(e) {
+		}
 	}
 	return
 }
@@ -313,9 +254,10 @@ func (c *Config) UnmarshalJSON(data []byte) (e error) {
 		switch ii := iii.(type) {
 		case *Bool:
 			if i, ok := ifc[ii.Option]; ok {
-				if i.(bool) != ii.def {
+				var ir bool
+				if ir, ok = i.(bool); ir != ii.def {
 					// I.Ln(ii.Option+":", i.(bool), "default:", ii.def, "prev:", c.Map[ii.Option].(*Bool).True())
-					c.Map[ii.Option].(*Bool).Set(i.(bool))
+					ii.Set(ir)
 				}
 			}
 		case *Strings:
@@ -323,34 +265,38 @@ func (c *Config) UnmarshalJSON(data []byte) (e error) {
 			if d, ok := ifc[ii.Option]; ok {
 				if ds, ok2 := d.([]interface{}); ok2 {
 					for i := range ds {
-						if ds[i] != ii.def[i] {
+						if len(ii.def) >= len(ds) {
+							if ds[i] != ii.def[i] {
+								matched = false
+								break
+							}
+						} else {
 							matched = false
-							break
 						}
 					}
 					if matched {
 						return true
 					}
 					// I.Ln(ii.Option+":", ds, "default:", ii.def, "prev:", c.Map[ii.Option].(*Strings).S())
-					c.Map[ii.Option].(*Strings).Set(ifcToStrings(ds))
+					ii.Set(ifcToStrings(ds))
 				}
 			}
 		case *Float:
 			if d, ok := ifc[ii.Option]; ok {
 				// I.Ln(ii.Option+":", d.(float64), "default:", ii.def, "prev:", c.Map[ii.Option].(*Float).V())
-				c.Map[ii.Option].(*Float).Set(d.(float64))
+				ii.Set(d.(float64))
 			}
 		case *Int:
 			if d, ok := ifc[ii.Option]; ok {
 				// I.Ln(ii.Option+":", int64(d.(float64)), "default:", ii.def, "prev:", c.Map[ii.Option].(*Int).V())
-				c.Map[ii.Option].(*Int).Set(int(d.(float64)))
+				ii.Set(int(d.(float64)))
 			}
 		case *String:
 			if d, ok := ifc[ii.Option]; ok {
 				if ds, ok2 := d.(string); ok2 {
 					if ds != ii.def {
 						// I.Ln(ii.Option+":", d.(string), "default:", ii.def, "prev:", c.Map[ii.Option].(*String).V())
-						c.Map[ii.Option].(*String).Set(d.(string))
+						ii.Set(d.(string))
 					}
 				}
 			}
@@ -359,7 +305,7 @@ func (c *Config) UnmarshalJSON(data []byte) (e error) {
 				var parsed time.Duration
 				parsed, e = time.ParseDuration(d.(string))
 				// I.Ln(ii.Option+":", parsed, "default:", ii.def.String(), "prev:", c.Map[ii.Option].(*Duration).V())
-				c.Map[ii.Option].(*Duration).Set(parsed)
+				ii.Set(parsed)
 			}
 		default:
 		}

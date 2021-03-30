@@ -34,16 +34,40 @@ func (x *Strings) GetMetadata() *Metadata {
 }
 
 // ReadInput sets the value from a string. For this option this means appending to the list
-func (x *Strings) ReadInput(s string) (o Option, e error) {
-	if s == "" {
+func (x *Strings) ReadInput(input string) (o Option, e error) {
+	if input == "" {
 		e = fmt.Errorf("string option %s %v may not be empty", x.Name(), x.Metadata.Aliases)
 		return
 	}
-	if strings.HasPrefix(s, "=") {
-		// the following removes leading and trailing characters
-		s = strings.Join(strings.Split(s, "=")[1:], "=")
+	if strings.HasPrefix(input, "=") {
+		input = strings.Join(strings.Split(input, "=")[1:], "=")
 	}
-	x.Set(append(x.S(), s))
+	// if value has a comma in it, it's a list of items, so split them and join them
+	slice := x.S()
+	if strings.Contains(input, ",") {
+		x.Set(append(slice, strings.Split(input, ",")...))
+	} else {
+		x.Set(append(slice, input))
+	}
+	return x, e
+}
+
+// LoadInput sets the value from a string. For this option this means appending to the list
+func (x *Strings) LoadInput(input string) (o Option, e error) {
+	if input == "" {
+		e = fmt.Errorf("string option %s %v may not be empty", x.Name(), x.Metadata.Aliases)
+		return
+	}
+	if strings.HasPrefix(input, "=") {
+		input = strings.Join(strings.Split(input, "=")[1:], "=")
+	}
+	var slice []string
+	// if value has a comma in it, it's a list of items, so split them and join them
+	if strings.Contains(input, ",") {
+		x.Set(append(slice, strings.Split(input, ",")...))
+	} else {
+		x.Set(append(slice, input))
+	}
 	return x, e
 }
 

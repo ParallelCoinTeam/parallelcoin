@@ -290,7 +290,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		Controller: NewBool(Metadata{
 			Option:  "controller",
-			Aliases: []string{"CT"},
+			Aliases: []string{"CN"},
 			Group:   "node",
 			Label:   "Enable Controller",
 			Description:
@@ -409,7 +409,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		DisableRPC: NewBool(Metadata{
 			Option:  "norpc",
-			Aliases: []string{"NR"},
+			Aliases: []string{"NRPC"},
 			Group:   "rpc",
 			Label:   "Disable RPC",
 			Description:
@@ -449,7 +449,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		FreeTxRelayLimit: NewFloat(Metadata{
 			Option:  "limitfreerelay",
-			Aliases: []string{"LFR"},
+			Aliases: []string{"LR"},
 			Group:   "policy",
 			Label:   "Free Tx Relay Limit",
 			Description:
@@ -462,7 +462,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		Generate: NewBool(Metadata{
 			Option:  "generate",
-			Aliases: []string{"M"},
+			Aliases: []string{"GB"},
 			Group:   "mining",
 			Label:   "Generate Blocks",
 			Description:
@@ -475,7 +475,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		GenThreads: NewInt(Metadata{
 			Option:  "genthreads",
-			Aliases: []string{"G"},
+			Aliases: []string{"GT"},
 			Group:   "mining",
 			Label:   "Generate Threads",
 			Description:
@@ -602,7 +602,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		MaxOrphanTxs: NewInt(Metadata{
 			Option:  "maxorphantx",
-			Aliases: []string{"MOT"},
+			Aliases: []string{"MO"},
 			Group:   "policy",
 			Label:   "Max Orphan Txs",
 			Description:
@@ -723,7 +723,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		NoPeerBloomFilters: NewBool(Metadata{
 			Option:  "nopeerbloomfilters",
-			Aliases: []string{"NBF"},
+			Aliases: []string{"NPBF"},
 			Group:   "node",
 			Label:   "No Peer Bloom Filters",
 			Description:
@@ -736,7 +736,7 @@ func GetDefaultConfig() (c *Config) {
 		),
 		NoRelayPriority: NewBool(Metadata{
 			Option:  "norelaypriority",
-			Aliases: []string{"NRP"},
+			Aliases: []string{"NRPR"},
 			Group:   "policy",
 			Label:   "No Relay Priority",
 			Description:
@@ -761,8 +761,8 @@ func GetDefaultConfig() (c *Config) {
 			false,
 		),
 		Onion: NewBool(Metadata{
-			Option:  "onion",
-			Aliases: []string{"ON"},
+			Option:  "onionEnabled",
+			Aliases: []string{"OE"},
 			Group:   "proxy",
 			Label:   "Onion Enabled",
 			Description:
@@ -774,8 +774,8 @@ func GetDefaultConfig() (c *Config) {
 			false,
 		),
 		OnionProxy: NewString(Metadata{
-			Option:  "onionproxy",
-			Aliases: []string{"OP"},
+			Option:  "onionenabled",
+			Aliases: []string{"OA"},
 			Group:   "proxy",
 			Label:   "Onion Proxy Address",
 			Description:
@@ -885,8 +885,8 @@ func GetDefaultConfig() (c *Config) {
 			"",
 		),
 		Proxy: NewString(Metadata{
-			Option:  "proxy",
-			Aliases: []string{"PX"},
+			Option:  "proxyaddress",
+			Aliases: []string{"PA"},
 			Group:   "proxy",
 			Label:   "Proxy",
 			Description:
@@ -1065,10 +1065,22 @@ func GetDefaultConfig() (c *Config) {
 		),
 		RunAsService: NewBool(Metadata{
 			Option:  "runasservice",
-			Aliases: []string{"RAS"},
+			Aliases: []string{"RS"},
 			Label:   "Run As Service",
 			Description:
 			"shuts down on lock timeout",
+			Widget: "toggle",
+			// Hook:        "restart",
+			OmitEmpty: true,
+		},
+			false,
+		),
+		Save: NewBool(Metadata{
+			Option:  "save",
+			Aliases: []string{"SV"},
+			Label:   "Save Configuration",
+			Description:
+			"save options given on commandline",
 			Widget: "toggle",
 			// Hook:        "restart",
 			OmitEmpty: true,
@@ -1177,7 +1189,7 @@ func GetDefaultConfig() (c *Config) {
 			// Hook:        "restart",
 			OmitEmpty: true,
 		},
-			true,
+			false,
 		),
 		TrickleInterval: NewDuration(Metadata{
 			Option:  "trickleinterval",
@@ -1216,7 +1228,7 @@ func GetDefaultConfig() (c *Config) {
 			// Hook:        "restart",
 			OmitEmpty: true,
 		},
-			true,
+			false,
 		),
 		UserAgentComments: NewStrings(Metadata{
 			Option:  "uacomment",

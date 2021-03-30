@@ -9,7 +9,8 @@ package podcfg
 type (
 	// Option is an interface to simplify concurrent-safe access to a variety of types of configuration item
 	Option interface {
-		ReadInput(string) (o Option, e error)
+		LoadInput(input string) (o Option, e error)
+		ReadInput(input string) (o Option, e error)
 		GetMetadata() *Metadata
 		Name() string
 		String() string
