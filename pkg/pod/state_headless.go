@@ -7,19 +7,20 @@ import (
 	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/chainclient"
 	"github.com/p9c/pod/pkg/control"
+	"github.com/p9c/pod/pkg/opts"
 	"github.com/p9c/pod/pkg/podcfg"
 	"math/rand"
 	"runtime"
 	"strings"
 	"sync"
 	"time"
-
+	
 	"github.com/p9c/qu"
-
+	
 	"go.uber.org/atomic"
-
+	
 	"github.com/urfave/cli"
-
+	
 	"github.com/p9c/pod/cmd/node/state"
 	"github.com/p9c/pod/pkg/chainrpc"
 	"github.com/p9c/pod/pkg/util/lang"
@@ -40,7 +41,7 @@ type State struct {
 	// AppContext is the urfave/cli app context
 	AppContext *cli.Context
 	// Config is the pod all-in-one server config
-	Config *podcfg.Config
+	Config *opts.Config
 	// ConfigMap
 	ConfigMap map[string]interface{}
 	// StateCfg is a reference to the main node state configuration struct

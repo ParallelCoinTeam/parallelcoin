@@ -42,7 +42,7 @@ type rescanOptions struct {
 	quit         qu.C
 }
 
-// RescanOption is a functional option argument to any of the rescan and notification subscription methods. These are
+// RescanOption is a functional opt argument to any of the rescan and notification subscription methods. These are
 // always processed in order, with later options overriding earlier ones.
 type RescanOption func(ro *rescanOptions)
 
@@ -919,7 +919,7 @@ type updateOptions struct {
 	disableDisconnectedNtfns bool
 }
 
-// UpdateOption is a functional option argument for the Rescan.Update method.
+// UpdateOption is a functional opt argument for the Rescan.Update method.
 type UpdateOption func(uo *updateOptions)
 
 func defaultUpdateOptions() *updateOptions {
@@ -1005,7 +1005,7 @@ type SpendReport struct {
 	Output *wire.TxOut
 }
 
-// GetUtxo gets the appropriate TxOut or errors if it's spent. The option WatchOutPoints (with a single outpoint) is
+// GetUtxo gets the appropriate TxOut or errors if it's spent. The opt WatchOutPoints (with a single outpoint) is
 // required. StartBlock can be used to give a hint about which block the transaction is in, and TxIdx can be used to
 // give a hint of which transaction in the block matches it (coinbase is 0, first normal transaction is 1, etc.).
 //

@@ -5,6 +5,7 @@ import (
 	"github.com/p9c/gel"
 	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/fork"
+	"github.com/p9c/pod/pkg/opts"
 	"github.com/p9c/pod/pkg/podcfg"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/qu"
@@ -198,7 +199,7 @@ func (wg *WalletGUI) createWalletInputsAreValid() bool {
 func (wg *WalletGUI) createWalletAction() {
 	// wg.NodeRunCommandChan <- "stop"
 	D.Ln("clicked submit wallet")
-	wg.cx.Config.WalletFile.Set(filepath.Join(wg.cx.Config.DataDir.V(), wg.cx.ActiveNet.Name, podcfg.DbName))
+	wg.cx.Config.WalletFile.Set(filepath.Join(wg.cx.Config.DataDir.V(), wg.cx.ActiveNet.Name, opts.DbName))
 	dbDir := wg.cx.Config.WalletFile.V()
 	loader := wallet.NewLoader(wg.cx.ActiveNet, dbDir, 250)
 	// seed, _ := hex.DecodeString(wg.inputs["walletSeed"].GetText())

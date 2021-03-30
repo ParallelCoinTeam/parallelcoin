@@ -2,8 +2,9 @@ package walletmain
 
 import (
 	"fmt"
-	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/log"
+	"github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/opts"
 	"github.com/p9c/pod/pkg/podcfg"
 	walletrpc2 "github.com/p9c/pod/pkg/walletrpc"
 	
@@ -265,7 +266,7 @@ func rpcClientConnectLoop(
 // services. This function uses the RPC options from the global config and there
 // is no recovery in case the server is not available or if there is an
 // authentication error. Instead, all requests to the client will simply error.
-func StartChainRPC(config *podcfg.Config, activeNet *chaincfg.Params, certs []byte, quit qu.C) (
+func StartChainRPC(config *opts.Config, activeNet *chaincfg.Params, certs []byte, quit qu.C) (
 	*chainclient.RPCClient,
 	error,
 ) {

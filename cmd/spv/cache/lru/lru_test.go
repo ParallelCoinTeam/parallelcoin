@@ -304,7 +304,7 @@ func TestReplacingElementValueBiggerSize(t *testing.T) {
 }
 
 // TestConcurrencySimple is a very simple test that checks concurrent access to
-// the lru cache. When running the test, "-race" option should be passed to
+// the lru cache. When running the test, "-race" opt should be passed to
 // "go test" command.
 func TestConcurrencySimple(t *testing.T) {
 
@@ -345,7 +345,7 @@ func TestConcurrencySimple(t *testing.T) {
 
 // TestConcurrencySmallCache is a test that checks concurrent access to the
 // lru cache when the cache is smaller than the number of elements we want to
-// put and retrieve. When running the test, "-race" option should be passed to
+// put and retrieve. When running the test, "-race" opt should be passed to
 // "go test" command.
 func TestConcurrencySmallCache(t *testing.T) {
 
@@ -386,7 +386,7 @@ func TestConcurrencySmallCache(t *testing.T) {
 
 // TestConcurrencyBigCache is a test that checks concurrent access to the
 // lru cache when the cache is bigger than the number of elements we want to
-// put and retrieve. When running the test, "-race" option should be passed to
+// put and retrieve. When running the test, "-race" opt should be passed to
 // "go test" command.
 func TestConcurrencyBigCache(t *testing.T) {
 

@@ -8,7 +8,7 @@ import (
 	"github.com/p9c/pod/pkg/amt"
 	"github.com/p9c/pod/pkg/btcaddr"
 	"github.com/p9c/pod/pkg/chaincfg"
-	"github.com/p9c/pod/pkg/podcfg"
+	"github.com/p9c/pod/pkg/opts"
 	"sort"
 	"strings"
 	"sync"
@@ -93,7 +93,7 @@ type Wallet struct {
 	// reorganizeToHash chainhash.Hash
 	// reorganizing     bool
 	NtfnServer  *NotificationServer
-	PodConfig   *podcfg.Config
+	PodConfig   *opts.Config
 	chainParams *chaincfg.Params
 	wg          sync.WaitGroup
 	started     bool
@@ -1060,7 +1060,7 @@ func (w *Wallet) walletLocker() {
 	var timeout <-chan time.Time
 	holdChan := make(heldUnlock)
 	quit := w.quitChan()
-	// this flips to false once the first unlock has been done, for runasservice option which shuts down on lock
+	// this flips to false once the first unlock has been done, for runasservice opt which shuts down on lock
 	// first := true
 	var e error
 out:
@@ -3206,7 +3206,7 @@ func Open(
 	cbs *waddrmgr.OpenCallbacks,
 	params *chaincfg.Params,
 	recoveryWindow uint32,
-	podConfig *podcfg.Config,
+	podConfig *opts.Config,
 	quit qu.C,
 ) (*Wallet, error) {
 	// debug.PrintStack()

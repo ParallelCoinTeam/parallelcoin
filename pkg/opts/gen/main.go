@@ -4,18 +4,16 @@ package main
 import (
 	"fmt"
 	"github.com/p9c/pod/pkg/opts"
-	"github.com/p9c/pod/pkg/podcfg"
 	"go/format"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"reflect"
 	"sort"
-	"strings"
 )
 
 func main() {
-	c := podcfg.GetConfigs()
+	c := opts.GetConfigs()
 	var o string
 	var cc opts.ConfigSlice
 	for i := range c {
@@ -24,8 +22,9 @@ func main() {
 	sort.Sort(cc)
 	for i := range cc {
 		t := reflect.TypeOf(cc[i].Opt).String()
-		split := strings.Split(t, "podcfg.")[1]
-		o += fmt.Sprintf("\t%s\t*%s\n", cc[i].Name, split)
+		// W.Ln(t)
+		// split := strings.Split(t, "podcfg.")[1]
+		o += fmt.Sprintf("\t%s\t%s\n", cc[i].Name, t)
 	}
 	var e error
 	var out []byte
@@ -44,17 +43,27 @@ func main() {
 	}
 }
 
-var configBase = `package podcfg
+var configBase = `package opts
+
+import (
+	"github.com/p9c/pod/pkg/opts/binary"
+	"github.com/p9c/pod/pkg/opts/duration"
+	"github.com/p9c/pod/pkg/opts/float"
+	"github.com/p9c/pod/pkg/opts/integer"
+	"github.com/p9c/pod/pkg/opts/list"
+	"github.com/p9c/pod/pkg/opts/opt"
+	"github.com/p9c/pod/pkg/opts/text"
+)
 
 // Config defines the configuration items used by pod along with the various components included in the suite
 //go:generate go run gen/main.go
 type Config struct {
 	// ShowAll is a flag to make the json encoder explicitly define all fields and not just the ones different to the
 	// defaults
-	ShowAll binary
+	ShowAll bool
 	// Map is the same data but addressible using its name as found inside the various configuration types, the key is
 	// converted to lower case for CLI args
-	Map            map[string]Option
+	Map            map[string]opt.Option
 	Commands       Commands
 	RunningCommand *Command
 %s}

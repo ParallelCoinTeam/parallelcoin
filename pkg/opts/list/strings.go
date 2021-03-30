@@ -3,30 +3,31 @@ package list
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/p9c/pod/pkg/opts"
+	"github.com/p9c/pod/pkg/opts/meta"
+	"github.com/p9c/pod/pkg/opts/opt"
 	"strings"
 	"sync/atomic"
 )
 
 // Opt stores a string slice configuration value
 type Opt struct {
-	opts.Metadata
+	meta.Data
 	hook  []func(s []string)
 	value *atomic.Value
 	Def   []string
 }
 
 // New  creates a new Opt with default values set
-func New(m opts.Metadata, def []string, hook ...func(s []string)) *Opt {
+func New(m meta.Data, def []string, hook ...func(s []string)) *Opt {
 	as := &atomic.Value{}
 	as.Store(def)
-	return &Opt{value: as, Metadata: m, Def: def, hook: hook}
+	return &Opt{value: as, Data: m, Def: def, hook: hook}
 }
 
 // SetName sets the name for the generator
 func (x *Opt) SetName(name string) {
-	x.Metadata.Option = strings.ToLower(name)
-	x.Metadata.Name = name
+	x.Data.Option = strings.ToLower(name)
+	x.Data.Name = name
 }
 
 // Type returns the receiver wrapped in an interface for identifying its type
@@ -34,15 +35,15 @@ func (x *Opt) Type() interface{} {
 	return x
 }
 
-// GetMetadata returns the metadata of the option type
-func (x *Opt) GetMetadata() *opts.Metadata {
-	return &x.Metadata
+// GetMetadata returns the metadata of the opt type
+func (x *Opt) GetMetadata() *meta.Data {
+	return &x.Data
 }
 
-// ReadInput sets the value from a string. For this option this means appending to the list
-func (x *Opt) ReadInput(input string) (o opts.Option, e error) {
+// ReadInput sets the value from a string. For this opt this means appending to the list
+func (x *Opt) ReadInput(input string) (o opt.Option, e error) {
 	if input == "" {
-		e = fmt.Errorf("string option %s %v may not be empty", x.Name(), x.Metadata.Aliases)
+		e = fmt.Errorf("string opt %s %v may not be empty", x.Name(), x.Data.Aliases)
 		return
 	}
 	if strings.HasPrefix(input, "=") {
@@ -58,10 +59,10 @@ func (x *Opt) ReadInput(input string) (o opts.Option, e error) {
 	return x, e
 }
 
-// LoadInput sets the value from a string. For this option this means appending to the list
-func (x *Opt) LoadInput(input string) (o opts.Option, e error) {
+// LoadInput sets the value from a string. For this opt this means appending to the list
+func (x *Opt) LoadInput(input string) (o opt.Option, e error) {
 	if input == "" {
-		e = fmt.Errorf("string option %s %v may not be empty", x.Name(), x.Metadata.Aliases)
+		e = fmt.Errorf("string opt %s %v may not be empty", x.Name(), x.Data.Aliases)
 		return
 	}
 	if strings.HasPrefix(input, "=") {
@@ -77,9 +78,9 @@ func (x *Opt) LoadInput(input string) (o opts.Option, e error) {
 	return x, e
 }
 
-// Name returns the name of the option
+// Name returns the name of the opt
 func (x *Opt) Name() string {
-	return x.Metadata.Option
+	return x.Data.Option
 }
 
 // AddHooks appends callback hooks to be run when the value is changed
@@ -115,7 +116,7 @@ func (x *Opt) S() []string {
 
 // String returns a string representation of the value
 func (x *Opt) String() string {
-	return fmt.Sprint(x.Metadata.Option, ": ", x.S())
+	return fmt.Sprint(x.Data.Option, ": ", x.S())
 }
 
 // MarshalJSON returns the json representation of

@@ -6,7 +6,7 @@ import (
 	"crypto/x509"
 	js "encoding/json"
 	"fmt"
-	"github.com/p9c/pod/pkg/podcfg"
+	"github.com/p9c/pod/pkg/opts"
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -20,7 +20,7 @@ import (
 
 // newHTTPClient returns a new HTTP client that is configured according to the proxy and TLS settings in the associated
 // connection configuration.
-func newHTTPClient(cfg *podcfg.Config) (client *http.Client, e error) {
+func newHTTPClient(cfg *opts.Config) (client *http.Client, e error) {
 	// Configure proxy if needed.
 	var dial func(network, addr string) (net.Conn, error)
 	if cfg.Proxy.V() != "" {

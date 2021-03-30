@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"github.com/p9c/pod/pkg/apputil"
+	"github.com/p9c/pod/pkg/opts"
 	"github.com/urfave/cli"
 	"io/ioutil"
 	"lukechampine.com/blake3"
@@ -44,7 +45,7 @@ var emptyhash = hex.EncodeToString(eh[:])
 // applies in the GUI.
 //
 // todo: maybe to not do this if gui is not the app?
-func Save(c *Config) (success bool) {
+func Save(c *opts.Config) (success bool) {
 	lockPath := filepath.Join(c.DataDir.V(), "pod.json.lock")
 	// wait if there is a lock on the file
 	for apputil.FileExists(lockPath) {

@@ -3,28 +3,29 @@ package binary
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/p9c/pod/pkg/opts"
+	"github.com/p9c/pod/pkg/opts/meta"
+	"github.com/p9c/pod/pkg/opts/opt"
 	uberatomic "go.uber.org/atomic"
 	"strings"
 )
 
 // Opt stores an boolean configuration value
 type Opt struct {
-	opts.Metadata
+	meta.Data
 	hook  []func(b bool)
 	value *uberatomic.Bool
 	Def   bool
 }
 
 // New creates a new Opt with default values set
-func New(m opts.Metadata, def bool, hook ...func(b bool)) *Opt {
-	return &Opt{value: uberatomic.NewBool(def), Metadata: m, Def: def, hook: hook}
+func New(m meta.Data, def bool, hook ...func(b bool)) *Opt {
+	return &Opt{value: uberatomic.NewBool(def), Data: m, Def: def, hook: hook}
 }
 
 // SetName sets the name for the generator
 func (x *Opt) SetName(name string) {
-	x.Metadata.Option = strings.ToLower(name)
-	x.Metadata.Name = name
+	x.Data.Option = strings.ToLower(name)
+	x.Data.Name = name
 }
 
 // Type returns the receiver wrapped in an interface for identifying its type
@@ -32,14 +33,14 @@ func (x *Opt) Type() interface{} {
 	return x
 }
 
-// GetMetadata returns the metadata of the option type
-func (x *Opt) GetMetadata() *opts.Metadata {
-	return &x.Metadata
+// GetMetadata returns the metadata of the opt type
+func (x *Opt) GetMetadata() *meta.Data {
+	return &x.Data
 }
 
 // ReadInput sets the value from a string.
 // The value can be right up against the keyword or separated by a '='.
-func (x *Opt) ReadInput(input string) (o opts.Option, e error) {
+func (x *Opt) ReadInput(input string) (o opt.Option, e error) {
 	// if the input is empty, the user intends the opposite of the default
 	if input == "" {
 		x.value.Store(!x.Def)
@@ -56,19 +57,19 @@ func (x *Opt) ReadInput(input string) (o opts.Option, e error) {
 	case "f", "false", "-":
 		x.value.Store(false)
 	default:
-		e = fmt.Errorf("input on option %s: '%s' is not valid for a boolean flag", x.Name(), input)
+		e = fmt.Errorf("input on opt %s: '%s' is not valid for a boolean flag", x.Name(), input)
 	}
 	return
 }
 
 // LoadInput sets the value from a string (this is the same as the above but differs for Strings)
-func (x *Opt) LoadInput(input string) (o opts.Option, e error) {
+func (x *Opt) LoadInput(input string) (o opt.Option, e error) {
 	return x.ReadInput(input)
 }
 
-// Name returns the name of the option
+// Name returns the name of the opt
 func (x *Opt) Name() string {
-	return x.Metadata.Option
+	return x.Data.Option
 }
 
 // AddHooks appends callback hooks to be run when the value is changed
@@ -104,7 +105,7 @@ func (x *Opt) Set(b bool) *Opt {
 
 // String returns a string form of the value
 func (x *Opt) String() string {
-	return fmt.Sprint(x.Metadata.Option, ": ", x.True())
+	return fmt.Sprint(x.Data.Option, ": ", x.True())
 }
 
 // T sets the value to true

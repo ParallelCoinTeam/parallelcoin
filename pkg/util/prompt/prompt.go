@@ -234,7 +234,7 @@ func PublicPass(
 		break
 	}
 	fmt.Println(
-		"NOTE: Use the --walletpass option to configure your " +
+		"NOTE: Use the --walletpass opt to configure your " +
 			"public passphrase.",
 	)
 	return pubPass, nil

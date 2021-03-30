@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/gookit/color"
 	"github.com/p9c/log"
+	"github.com/p9c/pod/pkg/opts"
 	"github.com/p9c/pod/pkg/pod"
-	"github.com/p9c/pod/pkg/podcfg"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -37,7 +37,7 @@ func ShellHandle(cx *pod.State) func(c *cli.Context) (e error) {
 		dbFilename := filepath.Join(
 			cx.Config.DataDir.V(),
 			cx.ActiveNet.Name,
-			podcfg.DbName,
+			opts.DbName,
 		)
 		if !apputil.FileExists(dbFilename) && !cx.IsGUI {
 			// log.SetLevel("off", false)

@@ -5,14 +5,14 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"github.com/p9c/log"
 	"github.com/p9c/pod/pkg/amt"
 	"github.com/p9c/pod/pkg/btcaddr"
 	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/fork"
 	"github.com/p9c/pod/pkg/forkhash"
-	"github.com/p9c/log"
+	"github.com/p9c/pod/pkg/opts"
 	"github.com/p9c/pod/pkg/pod"
-	"github.com/p9c/pod/pkg/podcfg"
 	"io/ioutil"
 	"net"
 	"os"
@@ -48,14 +48,14 @@ const (
 
 var funcName = "loadConfig"
 
-func initDictionary(cfg *podcfg.Config) {
+func initDictionary(cfg *opts.Config) {
 	if cfg.Language == nil || cfg.Language.V() == "" {
 		cfg.Language.Set(Lang("en"))
 	}
 	T.Ln("lang set to", *cfg.Language)
 }
 
-func initDataDir(cfg *podcfg.Config) {
+func initDataDir(cfg *opts.Config) {
 	if cfg.DataDir == nil || cfg.DataDir.V() == "" {
 		D.Ln("setting default data dir")
 		cfg.DataDir.Set(appdata.Dir("pod", false))
@@ -65,19 +65,19 @@ func initDataDir(cfg *podcfg.Config) {
 
 func initWalletFile(cx *pod.State) {
 	if cx.Config.WalletFile == nil || cx.Config.WalletFile.V() == "" {
-		cx.Config.WalletFile.Set(filepath.Join(cx.Config.DataDir.V(), cx.ActiveNet.Name, podcfg.DbName))
+		cx.Config.WalletFile.Set(filepath.Join(cx.Config.DataDir.V(), cx.ActiveNet.Name, opts.DbName))
 	}
 	T.Ln("wallet file set to", *cx.Config.WalletFile, *cx.Config.Network)
 }
 
-func initConfigFile(cfg *podcfg.Config) {
+func initConfigFile(cfg *opts.Config) {
 	if cfg.ConfigFile.V() == "" {
 		cfg.ConfigFile.Set(filepath.Join(cfg.DataDir.V(), podConfigFilename))
 	}
 	T.Ln("using config file:", *cfg.ConfigFile)
 }
 
-func initLogDir(cfg *podcfg.Config) {
+func initLogDir(cfg *opts.Config) {
 	if cfg.LogDir.V() != "" {
 		// logi.L.SetLogPaths(*cfg.LogDir, "pod")
 		interrupt.AddHandler(
@@ -243,7 +243,7 @@ func GetFreePort() (int, error) {
 	return port, nil
 }
 
-func initTLSStuffs(cfg *podcfg.Config, st *state.Config) {
+func initTLSStuffs(cfg *opts.Config, st *state.Config) {
 	isNew := false
 	if cfg.RPCCert.V() == "" {
 		cfg.RPCCert.Set(filepath.Join(cfg.DataDir.V(), "rpc.cert"))
@@ -329,7 +329,7 @@ func initTLSStuffs(cfg *podcfg.Config, st *state.Config) {
 	}
 }
 
-func initLogLevel(cfg *podcfg.Config) {
+func initLogLevel(cfg *opts.Config) {
 	loglevel := cfg.LogLevel.V()
 	switch loglevel {
 	case "trace", "debug", "info", "warn", "error", "fatal", "off":
@@ -341,9 +341,9 @@ func initLogLevel(cfg *podcfg.Config) {
 	log.SetLogLevel(cfg.LogLevel.V())
 }
 
-func normalizeAddresses(cfg *podcfg.Config) {
+func normalizeAddresses(cfg *opts.Config) {
 	T.Ln("normalising addresses")
-	port := podcfg.DefaultPort
+	port := opts.DefaultPort
 	nrm := normalize.StringSliceAddresses
 	nrm(cfg.AddPeers.V(), port)
 	nrm(cfg.ConnectPeers.V(), port)
@@ -352,7 +352,7 @@ func normalizeAddresses(cfg *podcfg.Config) {
 	// nrm(cfg.RPCListeners, port)
 }
 
-func setRelayReject(cfg *podcfg.Config) {
+func setRelayReject(cfg *opts.Config) {
 	relayNonStd := *cfg.RelayNonStd
 	switch {
 	case cfg.RelayNonStd.True() && cfg.RejectNonStd.True():
@@ -370,7 +370,7 @@ func setRelayReject(cfg *podcfg.Config) {
 	*cfg.RelayNonStd = relayNonStd
 }
 
-func validateDBtype(cfg *podcfg.Config) {
+func validateDBtype(cfg *opts.Config) {
 	// Validate database type.
 	T.Ln("validating database type")
 	if !node.ValidDbType(cfg.DbType.V()) {
@@ -383,7 +383,7 @@ func validateDBtype(cfg *podcfg.Config) {
 	}
 }
 
-func validateProfilePort(cfg *podcfg.Config) {
+func validateProfilePort(cfg *opts.Config) {
 	// Validate profile port number
 	T.Ln("validating profile port number")
 	if cfg.Profile.V() != "" {
@@ -396,20 +396,20 @@ func validateProfilePort(cfg *podcfg.Config) {
 		}
 	}
 }
-func validateBanDuration(cfg *podcfg.Config) {
+func validateBanDuration(cfg *opts.Config) {
 	// Don't allow ban durations that are too short.
 	T.Ln("validating ban duration")
 	if cfg.BanDuration.V() < time.Second {
 		e := fmt.Errorf(
-			"%s: The banduration option may not be less than 1s -- parsed [%v]",
+			"%s: The banduration opt may not be less than 1s -- parsed [%v]",
 			funcName, *cfg.BanDuration,
 		)
 		I.Ln(funcName, e)
-		cfg.BanDuration.Set(podcfg.DefaultBanDuration)
+		cfg.BanDuration.Set(opts.DefaultBanDuration)
 	}
 }
 
-func validateWhitelists(cfg *podcfg.Config, st *state.Config) {
+func validateWhitelists(cfg *opts.Config, st *state.Config) {
 	// Validate any given whitelisted IP addresses and networks.
 	T.Ln("validating whitelists")
 	if cfg.Whitelists.Len() > 0 {
@@ -446,7 +446,7 @@ func validateWhitelists(cfg *podcfg.Config, st *state.Config) {
 	}
 }
 
-func validatePeerLists(cfg *podcfg.Config) {
+func validatePeerLists(cfg *opts.Config) {
 	T.Ln("checking addpeer and connectpeer lists")
 	if cfg.AddPeers.Len() > 0 && cfg.ConnectPeers.Len() > 0 {
 		e := fmt.Errorf(
@@ -457,7 +457,7 @@ func validatePeerLists(cfg *podcfg.Config) {
 		// os.Exit(1)
 	}
 }
-func configListener(cfg *podcfg.Config, params *chaincfg.Params) {
+func configListener(cfg *opts.Config, params *chaincfg.Params) {
 	// --proxy or --connect without --listen disables listening.
 	T.Ln("checking proxy/connect for disabling listening")
 	if (cfg.Proxy.V() != "" ||
@@ -473,7 +473,7 @@ func configListener(cfg *podcfg.Config, params *chaincfg.Params) {
 	}
 }
 
-func validateUsers(cfg *podcfg.Config) {
+func validateUsers(cfg *opts.Config) {
 	// Chk to make sure limited and admin users don't have the same username
 	T.Ln("checking admin and limited username is different")
 	if !cfg.Username.Empty() &&
@@ -493,7 +493,7 @@ func validateUsers(cfg *podcfg.Config) {
 	}
 }
 
-func configRPC(cfg *podcfg.Config, params *chaincfg.Params) {
+func configRPC(cfg *opts.Config, params *chaincfg.Params) {
 	// The RPC server is disabled if no username or password is provided.
 	T.Ln("checking rpc server has a login enabled")
 	if (cfg.Username.Empty() || cfg.Password.Empty()) &&
@@ -506,7 +506,7 @@ func configRPC(cfg *podcfg.Config, params *chaincfg.Params) {
 	T.Ln("checking rpc server has listeners set")
 	if cfg.DisableRPC.False() && cfg.RPCListeners.Len() == 0 {
 		D.Ln("looking up default listener")
-		addrs, e := net.LookupHost(podcfg.DefaultRPCListener)
+		addrs, e := net.LookupHost(opts.DefaultRPCListener)
 		if e != nil {
 			E.Ln(e)
 			// os.Exit(1)
@@ -521,7 +521,7 @@ func configRPC(cfg *podcfg.Config, params *chaincfg.Params) {
 	}
 	T.Ln("checking rpc max concurrent requests")
 	if cfg.RPCMaxConcurrentReqs.V() < 0 {
-		str := "%s: The rpcmaxwebsocketconcurrentrequests option may not be" +
+		str := "%s: The rpcmaxwebsocketconcurrentrequests opt may not be" +
 			" less than 0 -- parsed [%d]"
 		e := fmt.Errorf(str, funcName, *cfg.RPCMaxConcurrentReqs)
 		_, _ = fmt.Fprintln(os.Stderr, e)
@@ -534,7 +534,7 @@ func configRPC(cfg *podcfg.Config, params *chaincfg.Params) {
 	cfg.ConnectPeers.Set(nrms(cfg.ConnectPeers.S(), params.DefaultPort))
 }
 
-func validatePolicies(cfg *podcfg.Config, stateConfig *state.Config) {
+func validatePolicies(cfg *opts.Config, stateConfig *state.Config) {
 	var e error
 	// Validate the the minrelaytxfee.
 	T.Ln("checking min relay tx fee")
@@ -547,30 +547,30 @@ func validatePolicies(cfg *podcfg.Config, stateConfig *state.Config) {
 	}
 	// Limit the max block size to a sane value.
 	T.Ln("checking max block size")
-	if cfg.BlockMaxSize.V() < podcfg.BlockMaxSizeMin ||
-		cfg.BlockMaxSize.V() > podcfg.BlockMaxSizeMax {
-		str := "%s: The blockmaxsize option must be in between %d and %d -- parsed [%d]"
+	if cfg.BlockMaxSize.V() < opts.BlockMaxSizeMin ||
+		cfg.BlockMaxSize.V() > opts.BlockMaxSizeMax {
+		str := "%s: The blockmaxsize opt must be in between %d and %d -- parsed [%d]"
 		e = fmt.Errorf(
-			str, funcName, podcfg.BlockMaxSizeMin,
-			podcfg.BlockMaxSizeMax, *cfg.BlockMaxSize,
+			str, funcName, opts.BlockMaxSizeMin,
+			opts.BlockMaxSizeMax, *cfg.BlockMaxSize,
 		)
 		_, _ = fmt.Fprintln(os.Stderr, e)
 	}
 	// Limit the max block weight to a sane value.
 	T.Ln("checking max block weight")
-	if cfg.BlockMaxWeight.V() < podcfg.BlockMaxWeightMin ||
-		cfg.BlockMaxWeight.V() > podcfg.BlockMaxWeightMax {
-		str := "%s: The blockmaxweight option must be in between %d and %d -- parsed [%d]"
+	if cfg.BlockMaxWeight.V() < opts.BlockMaxWeightMin ||
+		cfg.BlockMaxWeight.V() > opts.BlockMaxWeightMax {
+		str := "%s: The blockmaxweight opt must be in between %d and %d -- parsed [%d]"
 		e = fmt.Errorf(
-			str, funcName, podcfg.BlockMaxWeightMin,
-			podcfg.BlockMaxWeightMax, *cfg.BlockMaxWeight,
+			str, funcName, opts.BlockMaxWeightMin,
+			opts.BlockMaxWeightMax, *cfg.BlockMaxWeight,
 		)
 		_, _ = fmt.Fprintln(os.Stderr, e)
 	}
 	// Limit the max orphan count to a sane vlue.
 	T.Ln("checking max orphan limit")
 	if cfg.MaxOrphanTxs.V() < 0 {
-		str := "%s: The maxorphantx option may not be less than 0 -- parsed [%d]"
+		str := "%s: The maxorphantx opt may not be less than 0 -- parsed [%d]"
 		e = fmt.Errorf(str, funcName, *cfg.MaxOrphanTxs)
 		_, _ = fmt.Fprintln(os.Stderr, e)
 	}
@@ -603,13 +603,13 @@ func validatePolicies(cfg *podcfg.Config, stateConfig *state.Config) {
 	switch {
 	// If the max block size isn't set, but the max weight is, then we'll set the
 	// limit for the max block size to a safe limit so weight takes precedence.
-	case cfg.BlockMaxSize.V() == podcfg.DefaultBlockMaxSize &&
-		cfg.BlockMaxWeight.V() != podcfg.DefaultBlockMaxWeight:
+	case cfg.BlockMaxSize.V() == opts.DefaultBlockMaxSize &&
+		cfg.BlockMaxWeight.V() != opts.DefaultBlockMaxWeight:
 		cfg.BlockMaxSize.Set(blockchain.MaxBlockBaseSize - 1000)
 		// If the max block weight isn't set, but the block size is, then we'll scale
 		// the set weight accordingly based on the max block size value.
-	case cfg.BlockMaxSize.V() != podcfg.DefaultBlockMaxSize &&
-		cfg.BlockMaxWeight.V() == podcfg.DefaultBlockMaxWeight:
+	case cfg.BlockMaxSize.V() != opts.DefaultBlockMaxSize &&
+		cfg.BlockMaxWeight.V() == opts.DefaultBlockMaxWeight:
 		cfg.BlockMaxWeight.Set(cfg.BlockMaxSize.V() * blockchain.WitnessScaleFactor)
 	}
 	// Look for illegal characters in the user agent comments.
@@ -636,7 +636,7 @@ func validatePolicies(cfg *podcfg.Config, stateConfig *state.Config) {
 		_, _ = fmt.Fprintln(os.Stderr, e)
 	}
 }
-func validateOnions(cfg *podcfg.Config) {
+func validateOnions(cfg *opts.Config) {
 	// --onionproxy and not --onion are contradictory
 	// TODO: this is kinda stupid hm? switch *and* toggle by presence of flag value, one should be enough
 	if cfg.Onion.True() && !cfg.OnionProxy.Empty() {
@@ -659,7 +659,7 @@ func validateOnions(cfg *podcfg.Config) {
 }
 
 func validateMiningStuff(
-	cfg *podcfg.Config, state *state.Config,
+	cfg *opts.Config, state *state.Config,
 	params *chaincfg.Params,
 ) {
 	if state == nil {
@@ -701,7 +701,7 @@ func validateMiningStuff(
 	}
 }
 
-func setDiallers(cfg *podcfg.Config, stateConfig *state.Config) {
+func setDiallers(cfg *opts.Config, stateConfig *state.Config) {
 	// Setup dial and DNS resolution (lookup) functions depending on the specified
 	// options. The default is to use the standard net.DialTimeout function as well
 	// as the system DNS resolver. When a proxy is specified, the dial function is

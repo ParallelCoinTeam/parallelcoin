@@ -9,6 +9,7 @@ import (
 	"github.com/p9c/pod/pkg/opts/float"
 	"github.com/p9c/pod/pkg/opts/integer"
 	"github.com/p9c/pod/pkg/opts/list"
+	"github.com/p9c/pod/pkg/opts/meta"
 	"github.com/p9c/pod/pkg/opts/text"
 	uberatomic "go.uber.org/atomic"
 	"math/rand"
@@ -18,75 +19,16 @@ import (
 	"time"
 )
 
-func GetCommands() (c opts.Commands) {
-	c = opts.Commands{
-		{Name: "gui", Description:
-		"ParallelCoin GUI Wallet/Miner/Explorer",
-			Entrypoint: func(c *Config) error { return nil },
-		},
-		{Name: "version", Description:
-		"print version and exit",
-			Entrypoint: func(c *Config) error { return nil },
-		},
-		{Name: "ctl", Description:
-		"command line wallet and chain RPC client",
-			Entrypoint: func(c *Config) error { return nil },
-		},
-		{Name: "node", Description:
-		"ParallelCoin blockchain node",
-			Entrypoint: func(c *Config) error { return nil },
-			Commands: []opts.Command{
-				{Name: "dropaddrindex", Description:
-				"drop the address database index",
-					Entrypoint: func(c *Config) error { return nil },
-				},
-				{Name: "droptxindex", Description:
-				"drop the transaction database index",
-					Entrypoint: func(c *Config) error { return nil },
-				},
-				{Name: "dropcfindex", Description:
-				"drop the cfilter database index",
-					Entrypoint: func(c *Config) error { return nil },
-				},
-				{Name: "dropindexes", Description:
-				"drop all of the indexes",
-					Entrypoint: func(c *Config) error { return nil },
-				},
-				{Name: "resetchain", Description:
-				"deletes the current blockchain cache to force redownload",
-					Entrypoint: func(c *Config) error { return nil },
-				},
-			},
-		},
-		{Name: "wallet", Description:
-		"run the wallet server (requires a chain node to function)",
-			Entrypoint: func(c *Config) error { return nil },
-			Commands: []opts.Command{
-				{Name: "drophistory", Description:
-				"reset the wallet transaction history",
-					Entrypoint: func(c *Config) error { return nil },
-				},
-			},
-		},
-		{Name: "kopach", Description:
-		"standalone multicast miner for easy mining farm deployment",
-			Entrypoint: func(c *Config) error { return nil },
-		},
-		{Name: "worker", Description:
-		"single thread worker process, normally started by kopach",
-			Entrypoint: func(c *Config) error { return nil },
-		},
-	}
-	return
-}
-
-func GetConfigs() (c opts.Configs) {
+// GetDefaultConfig returns a Config struct pristine factory fresh
+func GetDefaultConfig() (c *opts.Config) {
 	network := "mainnet"
 	rand.Seed(time.Now().Unix())
 	var datadir = &atomic.Value{}
-	datadir.Store([]byte(appdata.Dir(Name, false)))
-	c = opts.Configs{
-		"AddCheckpoints": list.New(opts.Metadata{
+	datadir.Store([]byte(appdata.Dir(opts.Name, false)))
+	c = &opts.Config{
+		Commands: opts.GetCommands(),
+		AddCheckpoints: list.New(meta.Data{
+			Option:  "addcheckpoint",
 			Aliases: []string{"AC"},
 			Group:   "debug",
 			Label:   "Add Checkpoints",
@@ -98,7 +40,8 @@ func GetConfigs() (c opts.Configs) {
 		},
 			[]string{},
 		),
-		"AddPeers": list.New(opts.Metadata{
+		AddPeers: list.New(meta.Data{
+			Option:  "addpeer",
 			Aliases: []string{"AP"},
 			Group:   "node",
 			Label:   "Add Peers",
@@ -112,7 +55,8 @@ func GetConfigs() (c opts.Configs) {
 			[]string{},
 			// []string{"127.0.0.1:12345", "127.0.0.1:12345", "127.0.0.1:12345", "127.0.0.1:12344"},
 		),
-		"AddrIndex": binary.New(opts.Metadata{
+		AddrIndex: binary.New(meta.Data{
+			Option:  "addrindex",
 			Aliases: []string{"AI"},
 			Group:   "node",
 			Label:   "Address Index",
@@ -124,9 +68,10 @@ func GetConfigs() (c opts.Configs) {
 		},
 			false,
 		),
-		"AutoPorts": binary.New(opts.Metadata{
-			Group: "debug",
-			Label: "Automatic Ports",
+		AutoPorts: binary.New(meta.Data{
+			Option: "autoports",
+			Group:  "debug",
+			Label:  "Automatic Ports",
 			Description:
 			"RPC and controller ports are randomized, use with controller for automatic peer discovery",
 			Widget: "toggle",
@@ -135,7 +80,8 @@ func GetConfigs() (c opts.Configs) {
 		},
 			false,
 		),
-		"AutoListen": binary.New(opts.Metadata{
+		AutoListen: binary.New(meta.Data{
+			Option:  "autolisten",
 			Aliases: []string{"AL"},
 			Group:   "node",
 			Label:   "Automatic Listeners",
@@ -147,7 +93,8 @@ func GetConfigs() (c opts.Configs) {
 		},
 			true,
 		),
-		"BanDuration": duration.New(opts.Metadata{
+		BanDuration: duration.New(meta.Data{
+			Option:  "banduration",
 			Aliases: []string{"BD"},
 			Group:   "debug",
 			Label:   "Ban Opt",
@@ -159,7 +106,8 @@ func GetConfigs() (c opts.Configs) {
 		},
 			time.Hour*24,
 		),
-		"BanThreshold": integer.New(opts.Metadata{
+		BanThreshold: integer.New(meta.Data{
+			Option:  "banthreshold",
 			Aliases: []string{"BT"},
 			Group:   "debug",
 			Label:   "Ban Threshold",
@@ -169,9 +117,10 @@ func GetConfigs() (c opts.Configs) {
 			// Hook:        "restart",
 			OmitEmpty: true,
 		},
-			DefaultBanThreshold,
+			opts.DefaultBanThreshold,
 		),
-		"BlockMaxSize": integer.New(opts.Metadata{
+		BlockMaxSize: integer.New(meta.Data{
+			Option:  "blockmaxsize",
 			Aliases: []string{"BMXS"},
 			Group:   "mining",
 			Label:   "Block Max Size",
@@ -181,9 +130,10 @@ func GetConfigs() (c opts.Configs) {
 			// Hook:        "restart",
 			OmitEmpty: true,
 		},
-			BlockMaxSizeMax,
+			opts.BlockMaxSizeMax,
 		),
-		"BlockMaxWeight": integer.New(opts.Metadata{
+		BlockMaxWeight: integer.New(meta.Data{
+			Option:  "blockmaxweight",
 			Aliases: []string{"BMXW"},
 			Group:   "mining",
 			Label:   "Block Max Weight",
@@ -193,9 +143,10 @@ func GetConfigs() (c opts.Configs) {
 			// Hook:        "restart",
 			OmitEmpty: true,
 		},
-			BlockMaxWeightMax,
+			opts.BlockMaxWeightMax,
 		),
-		"BlockMinSize": integer.New(opts.Metadata{
+		BlockMinSize: integer.New(meta.Data{
+			Option:  "blockminsize",
 			Aliases: []string{"BMS"},
 			Group:   "mining",
 			Label:   "Block Min Size",
@@ -205,9 +156,10 @@ func GetConfigs() (c opts.Configs) {
 			// Hook:        "restart",
 			OmitEmpty: true,
 		},
-			BlockMaxSizeMin,
+			opts.BlockMaxSizeMin,
 		),
-		"BlockMinWeight": integer.New(opts.Metadata{
+		BlockMinWeight: integer.New(meta.Data{
+			Option:  "blockminweight",
 			Aliases: []string{"BMW"},
 			Group:   "mining",
 			Label:   "Block Min Weight",
@@ -217,9 +169,10 @@ func GetConfigs() (c opts.Configs) {
 			// Hook:        "restart",
 			OmitEmpty: true,
 		},
-			BlockMaxWeightMin,
+			opts.BlockMaxWeightMin,
 		),
-		"BlockPrioritySize": integer.New(opts.Metadata{
+		BlockPrioritySize: integer.New(meta.Data{
+			Option:  "blockprioritysize",
 			Aliases: []string{"BPS"},
 			Group:   "mining",
 			Label:   "Block Priority Size",
@@ -229,9 +182,10 @@ func GetConfigs() (c opts.Configs) {
 			// Hook:        "restart",
 			OmitEmpty: true,
 		},
-			DefaultBlockPrioritySize,
+			opts.DefaultBlockPrioritySize,
 		),
-		"BlocksOnly": binary.New(opts.Metadata{
+		BlocksOnly: binary.New(meta.Data{
+			Option:  "blocksonly",
 			Aliases: []string{"BO"},
 			Group:   "node",
 			Label:   "Blocks Only",
@@ -243,7 +197,8 @@ func GetConfigs() (c opts.Configs) {
 		},
 			false,
 		),
-		"CAFile": text.New(opts.Metadata{
+		CAFile: text.New(meta.Data{
+			Option:  "cafile",
 			Aliases: []string{"CA"},
 			Group:   "tls",
 			Label:   "Certificate Authority File",
@@ -256,7 +211,8 @@ func GetConfigs() (c opts.Configs) {
 		},
 			filepath.Join(string(datadir.Load().([]byte)), "ca.cert"),
 		),
-		"ConfigFile": text.New(opts.Metadata{
+		ConfigFile: text.New(meta.Data{
+			Option:  "configfile",
 			Aliases: []string{"CF"},
 			Label:   "Configuration File",
 			Description:
@@ -266,9 +222,10 @@ func GetConfigs() (c opts.Configs) {
 			// Hook:        "restart",
 			OmitEmpty: true,
 		},
-			filepath.Join(string(datadir.Load().([]byte)), PodConfigFilename),
+			filepath.Join(string(datadir.Load().([]byte)), opts.PodConfigFilename),
 		),
-		"ConnectPeers": list.New(opts.Metadata{
+		ConnectPeers: list.New(meta.Data{
+			Option: "connect",
 			// Aliases: []string{"cp"},
 			Group: "node",
 			Label: "Connect Peers",
@@ -281,7 +238,8 @@ func GetConfigs() (c opts.Configs) {
 		},
 			[]string{},
 		),
-		"Controller": binary.New(opts.Metadata{
+		Controller: binary.New(meta.Data{
+			Option:  "controller",
 			Aliases: []string{"CN"},
 			Group:   "node",
 			Label:   "Enable Controller",
@@ -293,7 +251,8 @@ func GetConfigs() (c opts.Configs) {
 		},
 			false,
 		),
-		"CPUProfile": text.New(opts.Metadata{
+		CPUProfile: text.New(meta.Data{
+			Option:  "cpuprofile",
 			Aliases: []string{"CP"},
 			Group:   "debug",
 			Label:   "CPU Profile",
@@ -306,7 +265,8 @@ func GetConfigs() (c opts.Configs) {
 		},
 			"",
 		),
-		"DarkTheme": binary.New(opts.Metadata{
+		DarkTheme: binary.New(meta.Data{
+			Option:  "darktheme",
 			Aliases: []string{"DT"},
 			Group:   "config",
 			Label:   "Dark Theme",
@@ -318,9 +278,10 @@ func GetConfigs() (c opts.Configs) {
 		},
 			false,
 		),
-		"DataDir": &text.Opt{
+		DataDir: &text.Opt{
 			Value: datadir,
-			Metadata: opts.Metadata{
+			Data: meta.Data{
+				Option:  "datadir",
 				Aliases: []string{"DD"},
 				Label:   "Data Directory",
 				Description:
@@ -329,9 +290,10 @@ func GetConfigs() (c opts.Configs) {
 				Widget:    "string",
 				OmitEmpty: true,
 			},
-			Def: appdata.Dir(Name, false),
+			Def: appdata.Dir(opts.Name, false),
 		},
-		"DbType": text.New(opts.Metadata{
+		DbType: text.New(meta.Data{
+			Option:  "dbtype",
 			Aliases: []string{"DB"},
 			Group:   "debug",
 			Label:   "Database Type",
@@ -341,9 +303,10 @@ func GetConfigs() (c opts.Configs) {
 			// Hook:        "restart",
 			OmitEmpty: true,
 		},
-			DefaultDbType,
+			opts.DefaultDbType,
 		),
-		"DisableBanning": binary.New(opts.Metadata{
+		DisableBanning: binary.New(meta.Data{
+			Option:  "nobanning",
 			Aliases: []string{"NB"},
 			Group:   "debug",
 			Label:   "Disable Banning",
@@ -355,7 +318,8 @@ func GetConfigs() (c opts.Configs) {
 		},
 			false,
 		),
-		"DisableCheckpoints": binary.New(opts.Metadata{
+		DisableCheckpoints: binary.New(meta.Data{
+			Option:  "nocheckpoints",
 			Aliases: []string{"NCP"},
 			Group:   "debug",
 			Label:   "Disable Checkpoints",
@@ -367,7 +331,8 @@ func GetConfigs() (c opts.Configs) {
 		},
 			false,
 		),
-		"DisableDNSSeed": binary.New(opts.Metadata{
+		DisableDNSSeed: binary.New(meta.Data{
+			Option:  "nodnsseed",
 			Aliases: []string{"NDS"},
 			Group:   "node",
 			Label:   "Disable DNS Seed",
@@ -379,7 +344,8 @@ func GetConfigs() (c opts.Configs) {
 		},
 			false,
 		),
-		"DisableListen": binary.New(opts.Metadata{
+		DisableListen: binary.New(meta.Data{
+			Option:  "nolisten",
 			Aliases: []string{"NL"},
 			Group:   "node",
 			Label:   "Disable Listen",
@@ -391,7 +357,8 @@ func GetConfigs() (c opts.Configs) {
 		},
 			false,
 		),
-		"DisableRPC": binary.New(opts.Metadata{
+		DisableRPC: binary.New(meta.Data{
+			Option:  "norpc",
 			Aliases: []string{"NRPC"},
 			Group:   "rpc",
 			Label:   "Disable RPC",
@@ -403,7 +370,8 @@ func GetConfigs() (c opts.Configs) {
 		},
 			false,
 		),
-		"Discovery": binary.New(opts.Metadata{
+		Discovery: binary.New(meta.Data{
+			Option:  "discover",
 			Aliases: []string{"DI"},
 			Group:   "node",
 			Label:   "Disovery",
@@ -415,7 +383,8 @@ func GetConfigs() (c opts.Configs) {
 		},
 			false,
 		),
-		"ExternalIPs": list.New(opts.Metadata{
+		ExternalIPs: list.New(meta.Data{
+			Option:  "externalip",
 			Aliases: []string{"EI"},
 			Group:   "node",
 			Label:   "External IP Addresses",
@@ -428,7 +397,8 @@ func GetConfigs() (c opts.Configs) {
 		},
 			[]string{},
 		),
-		"FreeTxRelayLimit": float.NewFloat(opts.Metadata{
+		FreeTxRelayLimit: float.NewFloat(meta.Data{
+			Option:  "limitfreerelay",
 			Aliases: []string{"LR"},
 			Group:   "policy",
 			Label:   "Free Tx Relay Limit",
@@ -438,9 +408,10 @@ func GetConfigs() (c opts.Configs) {
 			// Hook:        "restart",
 			OmitEmpty: true,
 		},
-			DefaultFreeTxRelayLimit,
+			opts.DefaultFreeTxRelayLimit,
 		),
-		"Generate": binary.New(opts.Metadata{
+		Generate: binary.New(meta.Data{
+			Option:  "generate",
 			Aliases: []string{"GB"},
 			Group:   "mining",
 			Label:   "Generate Blocks",
@@ -452,7 +423,8 @@ func GetConfigs() (c opts.Configs) {
 		},
 			false,
 		),
-		"GenThreads": integer.New(opts.Metadata{
+		GenThreads: integer.New(meta.Data{
+			Option:  "genthreads",
 			Aliases: []string{"GT"},
 			Group:   "mining",
 			Label:   "Generate Threads",
@@ -464,7 +436,8 @@ func GetConfigs() (c opts.Configs) {
 		},
 			-1,
 		),
-		"Hilite": list.New(opts.Metadata{
+		Hilite: list.New(meta.Data{
+			Option:  "highlight",
 			Aliases: []string{"HL"},
 			Group:   "debug",
 			Label:   "Hilite",
@@ -477,9 +450,10 @@ func GetConfigs() (c opts.Configs) {
 		},
 			[]string{},
 		),
-		"LAN": binary.New(opts.Metadata{
-			Group: "debug",
-			Label: "LAN Testnet Mode",
+		LAN: binary.New(meta.Data{
+			Option: "lan",
+			Group:  "debug",
+			Label:  "LAN Testnet Mode",
 			Description:
 			"run without any connection to nodes on the internet (does not apply on mainnet)",
 			Widget: "toggle",
@@ -488,7 +462,8 @@ func GetConfigs() (c opts.Configs) {
 		},
 			false,
 		),
-		"Locale": text.New(opts.Metadata{
+		Locale: text.New(meta.Data{
+			Option:  "locale",
 			Aliases: []string{"LC"},
 			Group:   "config",
 			Label:   "Language",
@@ -500,7 +475,8 @@ func GetConfigs() (c opts.Configs) {
 		},
 			"en",
 		),
-		"LimitPass": text.New(opts.Metadata{
+		LimitPass: text.New(meta.Data{
+			Option:  "limitpass",
 			Aliases: []string{"LP"},
 			Group:   "rpc",
 			Label:   "Limit Password",
@@ -510,9 +486,10 @@ func GetConfigs() (c opts.Configs) {
 			// Hook:        "restart",
 			OmitEmpty: true,
 		},
-			genPassword(),
+			opts.genPassword(),
 		),
-		"LimitUser": text.New(opts.Metadata{
+		LimitUser: text.New(meta.Data{
+			Option:  "limituser",
 			Aliases: []string{"LU"},
 			Group:   "rpc",
 			Label:   "Limit Username",
@@ -524,7 +501,8 @@ func GetConfigs() (c opts.Configs) {
 		},
 			"limit",
 		),
-		"LogDir": text.New(opts.Metadata{
+		LogDir: text.New(meta.Data{
+			Option:  "logdir",
 			Aliases: []string{"LD"},
 			Group:   "config",
 			Label:   "Log Directory",
@@ -537,7 +515,8 @@ func GetConfigs() (c opts.Configs) {
 		},
 			string(datadir.Load().([]byte)),
 		),
-		"LogFilter": list.New(opts.Metadata{
+		LogFilter: list.New(meta.Data{
+			Option:  "logfilter",
 			Aliases: []string{"LF"},
 			Group:   "debug",
 			Label:   "Log Filter",
@@ -550,7 +529,8 @@ func GetConfigs() (c opts.Configs) {
 		},
 			[]string{},
 		),
-		"LogLevel": text.New(opts.Metadata{
+		LogLevel: text.New(meta.Data{
+			Option:  "loglevel",
 			Aliases: []string{"LL"},
 			Group:   "config",
 			Label:   "Log Level",
@@ -570,7 +550,8 @@ func GetConfigs() (c opts.Configs) {
 		},
 			"info",
 		),
-		"MaxOrphanTxs": integer.New(opts.Metadata{
+		MaxOrphanTxs: integer.New(meta.Data{
+			Option:  "maxorphantx",
 			Aliases: []string{"MO"},
 			Group:   "policy",
 			Label:   "Max Orphan Txs",
@@ -580,9 +561,10 @@ func GetConfigs() (c opts.Configs) {
 			// Hook:        "restart",
 			OmitEmpty: true,
 		},
-			DefaultMaxOrphanTransactions,
+			opts.DefaultMaxOrphanTransactions,
 		),
-		"MaxPeers": integer.New(opts.Metadata{
+		MaxPeers: integer.New(meta.Data{
+			Option:  "maxpeers",
 			Aliases: []string{"MP"},
 			Group:   "node",
 			Label:   "Max Peers",
@@ -592,9 +574,10 @@ func GetConfigs() (c opts.Configs) {
 			// Hook:        "restart",
 			OmitEmpty: true,
 		},
-			DefaultMaxPeers,
+			opts.DefaultMaxPeers,
 		),
-		"MulticastPass": text.New(opts.Metadata{
+		MulticastPass: text.New(meta.Data{
+			Option:  "minerpass",
 			Aliases: []string{"PM"},
 			Group:   "config",
 			Label:   "Multicast Pass",
@@ -606,7 +589,8 @@ func GetConfigs() (c opts.Configs) {
 		},
 			"pa55word",
 		),
-		"MinRelayTxFee": float.NewFloat(opts.Metadata{
+		MinRelayTxFee: float.NewFloat(meta.Data{
+			Option:  "minrelaytxfee",
 			Aliases: []string{"MRTF"},
 			Group:   "policy",
 			Label:   "Min Relay Transaction Fee",
@@ -616,9 +600,10 @@ func GetConfigs() (c opts.Configs) {
 			// Hook:        "restart",
 			OmitEmpty: true,
 		},
-			DefaultMinRelayTxFee.ToDUO(),
+			opts.DefaultMinRelayTxFee.ToDUO(),
 		),
-		"Network": text.New(opts.Metadata{
+		Network: text.New(meta.Data{
+			Option:  "network",
 			Aliases: []string{"NW"},
 			Group:   "node",
 			Label:   "Network",
@@ -635,7 +620,8 @@ func GetConfigs() (c opts.Configs) {
 		},
 			network,
 		),
-		"NoCFilters": binary.New(opts.Metadata{
+		NoCFilters: binary.New(meta.Data{
+			Option:  "nocfilters",
 			Aliases: []string{"NCF"},
 			Group:   "node",
 			Label:   "No CFilters",
@@ -647,7 +633,8 @@ func GetConfigs() (c opts.Configs) {
 		},
 			false,
 		),
-		"NodeOff": binary.New(opts.Metadata{
+		NodeOff: binary.New(meta.Data{
+			Option:  "nodeoff",
 			Aliases: []string{"NO"},
 			Group:   "debug",
 			Label:   "Node Off",
@@ -659,7 +646,8 @@ func GetConfigs() (c opts.Configs) {
 		},
 			false,
 		),
-		"NoInitialLoad": binary.New(opts.Metadata{
+		NoInitialLoad: binary.New(meta.Data{
+			Option:  "noinitialload",
 			Aliases: []string{"NIL"},
 			Label:   "No Initial Load",
 			Description:
@@ -670,7 +658,8 @@ func GetConfigs() (c opts.Configs) {
 		},
 			false,
 		),
-		"NoPeerBloomFilters": binary.New(opts.Metadata{
+		NoPeerBloomFilters: binary.New(meta.Data{
+			Option:  "nopeerbloomfilters",
 			Aliases: []string{"NPBF"},
 			Group:   "node",
 			Label:   "No Peer Bloom Filters",
@@ -682,7 +671,8 @@ func GetConfigs() (c opts.Configs) {
 		},
 			false,
 		),
-		"NoRelayPriority": binary.New(opts.Metadata{
+		NoRelayPriority: binary.New(meta.Data{
+			Option:  "norelaypriority",
 			Aliases: []string{"NRPR"},
 			Group:   "policy",
 			Label:   "No Relay Priority",
@@ -694,7 +684,8 @@ func GetConfigs() (c opts.Configs) {
 		},
 			false,
 		),
-		"OneTimeTLSKey": binary.New(opts.Metadata{
+		OneTimeTLSKey: binary.New(meta.Data{
+			Option:  "onetimetlskey",
 			Aliases: []string{"OTK"},
 			Group:   "wallet",
 			Label:   "One Time TLS Key",
@@ -706,7 +697,8 @@ func GetConfigs() (c opts.Configs) {
 		},
 			false,
 		),
-		"OnionEnabled": binary.New(opts.Metadata{
+		OnionEnabled: binary.New(meta.Data{
+			Option:  "onionEnabled",
 			Aliases: []string{"OE"},
 			Group:   "proxy",
 			Label:   "Onion Enabled",
@@ -718,7 +710,8 @@ func GetConfigs() (c opts.Configs) {
 		},
 			false,
 		),
-		"OnionProxy": text.New(opts.Metadata{
+		OnionProxy: text.New(meta.Data{
+			Option:  "onionenabled",
 			Aliases: []string{"OA"},
 			Group:   "proxy",
 			Label:   "Onion Proxy Address",
@@ -731,7 +724,8 @@ func GetConfigs() (c opts.Configs) {
 		},
 			"",
 		),
-		"OnionProxyPass": text.New(opts.Metadata{
+		OnionProxyPass: text.New(meta.Data{
+			Option:  "onionproxypass",
 			Aliases: []string{"OPW"},
 			Group:   "proxy",
 			Label:   "Onion Proxy Password",
@@ -743,7 +737,8 @@ func GetConfigs() (c opts.Configs) {
 		},
 			"",
 		),
-		"OnionProxyUser": text.New(opts.Metadata{
+		OnionProxyUser: text.New(meta.Data{
+			Option:  "onionproxyuser",
 			Aliases: []string{"OU"},
 			Group:   "proxy",
 			Label:   "Onion Proxy Username",
@@ -755,7 +750,8 @@ func GetConfigs() (c opts.Configs) {
 		},
 			"",
 		),
-		"P2PConnect": list.New(opts.Metadata{
+		P2PConnect: list.New(meta.Data{
+			Option:  "p2pconnect",
 			Aliases: []string{"P2P"},
 			Group:   "node",
 			Label:   "P2P Connect",
@@ -768,7 +764,8 @@ func GetConfigs() (c opts.Configs) {
 		},
 			[]string{},
 		),
-		"P2PListeners": list.New(opts.Metadata{
+		P2PListeners: list.New(meta.Data{
+			Option:  "listen",
 			Aliases: []string{"LA"},
 			Group:   "node",
 			Label:   "P2PListeners",
@@ -784,7 +781,8 @@ func GetConfigs() (c opts.Configs) {
 			),
 			},
 		),
-		"Password": text.New(opts.Metadata{
+		Password: text.New(meta.Data{
+			Option:  "password",
 			Aliases: []string{"PW"},
 			Group:   "rpc",
 			Label:   "Password",
@@ -795,9 +793,10 @@ func GetConfigs() (c opts.Configs) {
 			// Hook:        "restart",
 			OmitEmpty: true,
 		},
-			genPassword(),
+			opts.genPassword(),
 		),
-		"PipeLog": binary.New(opts.Metadata{
+		PipeLog: binary.New(meta.Data{
+			Option:  "pipelog",
 			Aliases: []string{"PL"},
 			Label:   "Pipe Logger",
 			Description:
@@ -808,7 +807,8 @@ func GetConfigs() (c opts.Configs) {
 		},
 			false,
 		),
-		"Profile": text.New(opts.Metadata{
+		Profile: text.New(meta.Data{
+			Option:  "profile",
 			Aliases: []string{"PR"},
 			Group:   "debug",
 			Label:   "Profile",
@@ -821,7 +821,8 @@ func GetConfigs() (c opts.Configs) {
 		},
 			"",
 		),
-		"ProxyAddress": text.New(opts.Metadata{
+		ProxyAddress: text.New(meta.Data{
+			Option:  "proxyaddress",
 			Aliases: []string{"PA"},
 			Group:   "proxy",
 			Label:   "Proxy",
@@ -834,7 +835,8 @@ func GetConfigs() (c opts.Configs) {
 		},
 			"",
 		),
-		"ProxyPass": text.New(opts.Metadata{
+		ProxyPass: text.New(meta.Data{
+			Option:  "proxypass",
 			Aliases: []string{"PPW"},
 			Group:   "proxy",
 			Label:   "Proxy Pass",
@@ -845,9 +847,10 @@ func GetConfigs() (c opts.Configs) {
 			// Hook:        "restart",
 			OmitEmpty: true,
 		},
-			genPassword(),
+			opts.genPassword(),
 		),
-		"ProxyUser": text.New(opts.Metadata{
+		ProxyUser: text.New(meta.Data{
+			Option:  "proxyuser",
 			Aliases: []string{"PU"},
 			Group:   "proxy",
 			Label:   "ProxyUser",
@@ -859,7 +862,8 @@ func GetConfigs() (c opts.Configs) {
 		},
 			"proxyuser",
 		),
-		"RejectNonStd": binary.New(opts.Metadata{
+		RejectNonStd: binary.New(meta.Data{
+			Option:  "rejectnonstd",
 			Aliases: []string{"REJ"},
 			Group:   "node",
 			Label:   "Reject Non Std",
@@ -871,7 +875,8 @@ func GetConfigs() (c opts.Configs) {
 		},
 			false,
 		),
-		"RelayNonStd": binary.New(opts.Metadata{
+		RelayNonStd: binary.New(meta.Data{
+			Option:  "relaynonstd",
 			Aliases: []string{"RNS"},
 			Group:   "node",
 			Label:   "Relay Nonstandard Transactions",
@@ -883,7 +888,8 @@ func GetConfigs() (c opts.Configs) {
 		},
 			false,
 		),
-		"RPCCert": text.New(opts.Metadata{
+		RPCCert: text.New(meta.Data{
+			Option:  "rpccert",
 			Aliases: []string{"RC"},
 			Group:   "rpc",
 			Label:   "RPC Cert",
@@ -896,7 +902,8 @@ func GetConfigs() (c opts.Configs) {
 		},
 			filepath.Join(string(datadir.Load().([]byte)), "rpc.cert"),
 		),
-		"RPCConnect": text.New(opts.Metadata{
+		RPCConnect: text.New(meta.Data{
+			Option:  "rpcconnect",
 			Aliases: []string{"RA"},
 			Group:   "wallet",
 			Label:   "RPC Connect",
@@ -908,8 +915,10 @@ func GetConfigs() (c opts.Configs) {
 			OmitEmpty: true,
 		},
 			net.JoinHostPort("127.0.0.1", chaincfg.MainNetParams.DefaultPort),
+		
 		),
-		"RPCKey": text.New(opts.Metadata{
+		RPCKey: text.New(meta.Data{
+			Option:  "rpckey",
 			Aliases: []string{"RK"},
 			Group:   "rpc",
 			Label:   "RPC Key",
@@ -922,7 +931,8 @@ func GetConfigs() (c opts.Configs) {
 		},
 			filepath.Join(string(datadir.Load().([]byte)), "rpc.key"),
 		),
-		"RPCListeners": list.New(opts.Metadata{
+		RPCListeners: list.New(meta.Data{
+			Option:  "rpclisten",
 			Aliases: []string{"RL"},
 			Group:   "rpc",
 			Label:   "RPC Listeners",
@@ -933,10 +943,13 @@ func GetConfigs() (c opts.Configs) {
 			// Hook:        "restart",
 			OmitEmpty: true,
 		},
-			[]string{net.JoinHostPort("127.0.0.1", chaincfg.MainNetParams.DefaultPort),
+			[]string{net.JoinHostPort("127.0.0.1",
+				chaincfg.MainNetParams.DefaultPort,
+			),
 			},
 		),
-		"RPCMaxClients": integer.New(opts.Metadata{
+		RPCMaxClients: integer.New(meta.Data{
+			Option:  "rpcmaxclients",
 			Aliases: []string{"RMXC"},
 			Group:   "rpc",
 			Label:   "Maximum RPC Clients",
@@ -946,9 +959,10 @@ func GetConfigs() (c opts.Configs) {
 			// Hook:        "restart",
 			OmitEmpty: true,
 		},
-			DefaultMaxRPCClients,
+			opts.DefaultMaxRPCClients,
 		),
-		"RPCMaxConcurrentReqs": integer.New(opts.Metadata{
+		RPCMaxConcurrentReqs: integer.New(meta.Data{
+			Option:  "rpcmaxconcurrentreqs",
 			Aliases: []string{"RMCR"},
 			Group:   "rpc",
 			Label:   "Maximum RPC Concurrent Reqs",
@@ -958,9 +972,10 @@ func GetConfigs() (c opts.Configs) {
 			// Hook:        "restart",
 			OmitEmpty: true,
 		},
-			DefaultMaxRPCConcurrentReqs,
+			opts.DefaultMaxRPCConcurrentReqs,
 		),
-		"RPCMaxWebsockets": integer.New(opts.Metadata{
+		RPCMaxWebsockets: integer.New(meta.Data{
+			Option:  "rpcmaxwebsockets",
 			Aliases: []string{"RMWS"},
 			Group:   "rpc",
 			Label:   "Maximum RPC Websockets",
@@ -970,9 +985,10 @@ func GetConfigs() (c opts.Configs) {
 			// Hook:        "restart",
 			OmitEmpty: true,
 		},
-			DefaultMaxRPCWebsockets,
+			opts.DefaultMaxRPCWebsockets,
 		),
-		"RPCQuirks": binary.New(opts.Metadata{
+		RPCQuirks: binary.New(meta.Data{
+			Option:  "rpcquirks",
 			Aliases: []string{"RQ"},
 			Group:   "rpc",
 			Label:   "RPC Quirks",
@@ -984,7 +1000,8 @@ func GetConfigs() (c opts.Configs) {
 		},
 			false,
 		),
-		"RunAsService": binary.New(opts.Metadata{
+		RunAsService: binary.New(meta.Data{
+			Option:  "runasservice",
 			Aliases: []string{"RS"},
 			Label:   "Run As Service",
 			Description:
@@ -995,7 +1012,8 @@ func GetConfigs() (c opts.Configs) {
 		},
 			false,
 		),
-		"Save": binary.New(opts.Metadata{
+		Save: binary.New(meta.Data{
+			Option:  "save",
 			Aliases: []string{"SV"},
 			Label:   "Save Configuration",
 			Description:
@@ -1006,7 +1024,8 @@ func GetConfigs() (c opts.Configs) {
 		},
 			false,
 		),
-		"ServerPass": text.New(opts.Metadata{
+		ServerPass: text.New(meta.Data{
+			Option:  "serverpass",
 			Aliases: []string{"SPW"},
 			Group:   "rpc",
 			Label:   "Server Pass",
@@ -1017,9 +1036,10 @@ func GetConfigs() (c opts.Configs) {
 			// Hook:        "restart",
 			OmitEmpty: true,
 		},
-			genPassword(),
+			opts.genPassword(),
 		),
-		"ServerTLS": binary.New(opts.Metadata{
+		ServerTLS: binary.New(meta.Data{
+			Option:  "servertls",
 			Aliases: []string{"ST"},
 			Group:   "wallet",
 			Label:   "Server TLS",
@@ -1031,7 +1051,8 @@ func GetConfigs() (c opts.Configs) {
 		},
 			true,
 		),
-		"ServerUser": text.New(opts.Metadata{
+		ServerUser: text.New(meta.Data{
+			Option:  "serveruser",
 			Aliases: []string{"SU"},
 			Group:   "rpc",
 			Label:   "Server User",
@@ -1043,7 +1064,8 @@ func GetConfigs() (c opts.Configs) {
 		},
 			"client",
 		),
-		"SigCacheMaxSize": integer.New(opts.Metadata{
+		SigCacheMaxSize: integer.New(meta.Data{
+			Option:  "sigcachemaxsize",
 			Aliases: []string{"SCM"},
 			Group:   "node",
 			Label:   "Signature Cache Max Size",
@@ -1053,11 +1075,12 @@ func GetConfigs() (c opts.Configs) {
 			// Hook:        "restart",
 			OmitEmpty: true,
 		},
-			DefaultSigCacheMaxSize,
+			opts.DefaultSigCacheMaxSize,
 		),
-		"Solo": binary.New(opts.Metadata{
-			Group: "mining",
-			Label: "Solo Generate",
+		Solo: binary.New(meta.Data{
+			Option: "solo",
+			Group:  "mining",
+			Label:  "Solo Generate",
 			Description:
 			"mine even if not connected to a network",
 			Widget: "toggle",
@@ -1066,7 +1089,8 @@ func GetConfigs() (c opts.Configs) {
 		},
 			false,
 		),
-		"ClientTLS": binary.New(opts.Metadata{
+		ClientTLS: binary.New(meta.Data{
+			Option:  "clienttls",
 			Aliases: []string{"CT"},
 			Group:   "tls",
 			Label:   "TLS",
@@ -1078,7 +1102,8 @@ func GetConfigs() (c opts.Configs) {
 		},
 			true,
 		),
-		"TLSSkipVerify": binary.New(opts.Metadata{
+		TLSSkipVerify: binary.New(meta.Data{
+			Option:  "tlsskipverify",
 			Aliases: []string{"TSV"},
 			Group:   "tls",
 			Label:   "TLS Skip Verify",
@@ -1090,7 +1115,8 @@ func GetConfigs() (c opts.Configs) {
 		},
 			false,
 		),
-		"TorIsolation": binary.New(opts.Metadata{
+		TorIsolation: binary.New(meta.Data{
+			Option:  "torisolation",
 			Aliases: []string{"TI"},
 			Group:   "proxy",
 			Label:   "Tor Isolation",
@@ -1102,7 +1128,8 @@ func GetConfigs() (c opts.Configs) {
 		},
 			false,
 		),
-		"TrickleInterval": duration.New(opts.Metadata{
+		TrickleInterval: duration.New(meta.Data{
+			Option:  "trickleinterval",
 			Aliases: []string{"TKI"},
 			Group:   "policy",
 			Label:   "Trickle Interval",
@@ -1112,9 +1139,10 @@ func GetConfigs() (c opts.Configs) {
 			// Hook:        "restart",
 			OmitEmpty: true,
 		},
-			DefaultTrickleInterval,
+			opts.DefaultTrickleInterval,
 		),
-		"TxIndex": binary.New(opts.Metadata{
+		TxIndex: binary.New(meta.Data{
+			Option:  "txindex",
 			Aliases: []string{"TXI"},
 			Group:   "node",
 			Label:   "Tx Index",
@@ -1126,7 +1154,8 @@ func GetConfigs() (c opts.Configs) {
 		},
 			false,
 		),
-		"UPNP": binary.New(opts.Metadata{
+		UPNP: binary.New(meta.Data{
+			Option:  "upnp",
 			Aliases: []string{"UP"},
 			Group:   "node",
 			Label:   "UPNP",
@@ -1138,7 +1167,8 @@ func GetConfigs() (c opts.Configs) {
 		},
 			false,
 		),
-		"UserAgentComments": list.New(opts.Metadata{
+		UserAgentComments: list.New(meta.Data{
+			Option:  "uacomment",
 			Aliases: []string{"UA"},
 			Group:   "policy",
 			Label:   "User Agent Comments",
@@ -1150,7 +1180,8 @@ func GetConfigs() (c opts.Configs) {
 		},
 			[]string{},
 		),
-		"Username": text.New(opts.Metadata{
+		Username: text.New(meta.Data{
+			Option:  "username",
 			Aliases: []string{"UN"},
 			Group:   "rpc",
 			Label:   "Username",
@@ -1162,8 +1193,9 @@ func GetConfigs() (c opts.Configs) {
 		},
 			"username",
 		),
-		"UUID": &integer.Opt{Metadata: opts.Metadata{
-			Label: "UUID",
+		UUID: &integer.Opt{Data: meta.Data{
+			Option: "uuid",
+			Label:  "UUID",
 			Description:
 			"instance unique id (64bit random value)",
 			Widget:    "string",
@@ -1171,7 +1203,7 @@ func GetConfigs() (c opts.Configs) {
 		},
 			Value: uberatomic.NewInt64(rand.Int63()),
 		},
-		"UseWallet": binary.New(opts.Metadata{
+		UseWallet: binary.New(meta.Data{
 			Aliases: []string{"WC"},
 			Group:   "debug",
 			Label:   "Connect to Wallet",
@@ -1182,7 +1214,8 @@ func GetConfigs() (c opts.Configs) {
 		},
 			false,
 		),
-		"WalletFile": text.New(opts.Metadata{
+		WalletFile: text.New(meta.Data{
+			Option:  "walletfile",
 			Aliases: []string{"WF"},
 			Group:   "config",
 			Label:   "Wallet File",
@@ -1193,9 +1226,10 @@ func GetConfigs() (c opts.Configs) {
 			// Hook:        "restart",
 			OmitEmpty: true,
 		},
-			filepath.Join(string(datadir.Load().([]byte)), "mainnet", DbName),
+			filepath.Join(string(datadir.Load().([]byte)), "mainnet", opts.DbName),
 		),
-		"WalletOff": binary.New(opts.Metadata{
+		WalletOff: binary.New(meta.Data{
+			Option:  "walletoff",
 			Aliases: []string{"WO"},
 			Group:   "debug",
 			Label:   "Wallet Off",
@@ -1207,7 +1241,8 @@ func GetConfigs() (c opts.Configs) {
 		},
 			false,
 		),
-		"WalletPass": text.New(opts.Metadata{
+		WalletPass: text.New(meta.Data{
+			Option:  "walletpass",
 			Aliases: []string{"WPW"},
 			Label:   "Wallet Pass",
 			Description:
@@ -1219,7 +1254,8 @@ func GetConfigs() (c opts.Configs) {
 		},
 			"",
 		),
-		"WalletRPCListeners": list.New(opts.Metadata{
+		WalletRPCListeners: list.New(meta.Data{
+			Option:  "walletrpclisten",
 			Aliases: []string{"WRL"},
 			Group:   "wallet",
 			Label:   "Wallet RPC Listeners",
@@ -1235,7 +1271,8 @@ func GetConfigs() (c opts.Configs) {
 			),
 			},
 		),
-		"WalletRPCMaxClients": integer.New(opts.Metadata{
+		WalletRPCMaxClients: integer.New(meta.Data{
+			Option:  "walletrpcmaxclients",
 			Aliases: []string{"WRMC"},
 			Group:   "wallet",
 			Label:   "Legacy RPC Max Clients",
@@ -1245,9 +1282,10 @@ func GetConfigs() (c opts.Configs) {
 			// Hook:        "restart",
 			OmitEmpty: true,
 		},
-			DefaultRPCMaxClients,
+			opts.DefaultRPCMaxClients,
 		),
-		"WalletRPCMaxWebsockets": integer.New(opts.Metadata{
+		WalletRPCMaxWebsockets: integer.New(meta.Data{
+			Option:  "walletrpcmaxwebsockets",
 			Aliases: []string{"WRMWS"},
 			Group:   "wallet",
 			Label:   "Legacy RPC Max Websockets",
@@ -1257,9 +1295,10 @@ func GetConfigs() (c opts.Configs) {
 			// Hook:        "restart",
 			OmitEmpty: true,
 		},
-			DefaultRPCMaxWebsockets,
+			opts.DefaultRPCMaxWebsockets,
 		),
-		"WalletServer": text.New(opts.Metadata{
+		WalletServer: text.New(meta.Data{
+			Option:  "walletserver",
 			Aliases: []string{"WS"},
 			Group:   "wallet",
 			Label:   "Wallet Server",
@@ -1274,7 +1313,8 @@ func GetConfigs() (c opts.Configs) {
 				chaincfg.MainNetParams.WalletRPCServerPort,
 			),
 		),
-		"Whitelists": list.New(opts.Metadata{
+		Whitelists: list.New(meta.Data{
+			Option:  "whitelists",
 			Aliases: []string{"WL"},
 			Group:   "debug",
 			Label:   "Whitelists",
@@ -1288,8 +1328,7 @@ func GetConfigs() (c opts.Configs) {
 			[]string{},
 		),
 	}
-	for i := range c {
-		c[i].SetName(i)
-	}
+	// check sanity of configuration
+	// I.S(c.getAllOptionStrings())
 	return
 }

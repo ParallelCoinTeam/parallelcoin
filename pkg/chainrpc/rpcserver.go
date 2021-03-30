@@ -12,10 +12,10 @@ import (
 	"github.com/p9c/pod/pkg/amt"
 	"github.com/p9c/pod/pkg/bits"
 	"github.com/p9c/pod/pkg/block"
+	"github.com/p9c/pod/pkg/btcaddr"
 	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/fork"
-	"github.com/p9c/pod/pkg/btcaddr"
-	"github.com/p9c/pod/pkg/podcfg"
+	"github.com/p9c/pod/pkg/opts"
 	"io"
 	"io/ioutil"
 	"math/big"
@@ -71,7 +71,7 @@ type GBTWorkState struct {
 	TimeSource    blockchain.MedianTimeSource
 	Algo          string
 	StateCfg      *state.Config
-	Config        *podcfg.Config
+	Config        *opts.Config
 }
 
 // ParsedRPCCmd represents a JSON-RPC request object that has been parsed into a known concrete command along with any
@@ -101,7 +101,7 @@ type RetrievedTx struct {
 type Server struct {
 	Cfg                             ServerConfig
 	StateCfg                        *state.Config
-	Config                          *podcfg.Config
+	Config                          *opts.Config
 	NtfnMgr                         *WSNtfnMgr
 	StatusLines                     map[int]string
 	StatusLock                      sync.RWMutex
@@ -121,7 +121,7 @@ type Server struct {
 // ServerConfig is a descriptor containing the RPC server configuration.
 type ServerConfig struct {
 	// Cx passes through the context variable for setting up a server
-	Cfg *podcfg.Config
+	Cfg *opts.Config
 	// Listeners defines a slice of listeners for which the RPC server will take ownership of and accept connections.
 	//
 	// Since the RPC server takes ownership of these listeners, they will be closed when the RPC server is stopped.
@@ -2056,7 +2056,7 @@ func NewGbtWorkState(
 // NewRPCServer returns a new instance of the RPCServer struct.
 func NewRPCServer(
 	config *ServerConfig, statecfg *state.Config,
-	podcfg *podcfg.Config,
+	podcfg *opts.Config,
 ) (*Server, error) {
 	rpc := Server{
 		Cfg:                    *config,

@@ -2,7 +2,7 @@ package walletrpc
 
 import (
 	"encoding/binary"
-	"github.com/p9c/pod/pkg/podcfg"
+	"github.com/p9c/pod/pkg/opts"
 	"github.com/p9c/pod/pkg/wallet"
 	"path/filepath"
 	
@@ -12,7 +12,7 @@ import (
 	"github.com/p9c/pod/pkg/wtxmgr"
 )
 
-func DropWalletHistory(w *wallet.Wallet, cfg *podcfg.Config) func(c *cli.Context) (e error) {
+func DropWalletHistory(w *wallet.Wallet, cfg *opts.Config) func(c *cli.Context) (e error) {
 	return func(c *cli.Context) (e error) {
 		var (
 			// Namespace keys.

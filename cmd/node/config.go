@@ -450,7 +450,7 @@ func loadConfig() (
 	}
 	// Don't allow ban durations that are too short.
 	if cfg.BanDuration < time.Second {
-		str := "%s: The banduration option may not be less than 1s -- parsed [%v]"
+		str := "%s: The banduration opt may not be less than 1s -- parsed [%v]"
 		e := fmt.Errorf(str, funcName, cfg.BanDuration)
 		fmt.Fprintln(os.Stderr, e)
 		fmt.Fprintln(os.Stderr, usageMessage)
@@ -548,7 +548,7 @@ func loadConfig() (
 			}
 		}
 		if cfg.RPCMaxConcurrentReqs < 0 {
-			str := "%s: The rpcmaxwebsocketconcurrentrequests option may not be less than 0 -- parsed [%d]"
+			str := "%s: The rpcmaxwebsocketconcurrentrequests opt may not be less than 0 -- parsed [%d]"
 			e := fmt.Errorf(str, funcName, cfg.RPCMaxConcurrentReqs)
 			fmt.Fprintln(os.Stderr, e)
 			fmt.Fprintln(os.Stderr, usageMessage)
@@ -567,7 +567,7 @@ func loadConfig() (
 	// Limit the max block size to a sane value.
 	if cfg.BlockMaxSize < BlockMaxSizeMin || cfg.BlockMaxSize >
 		BlockMaxSizeMax {
-		str := "%s: The blockmaxsize option must be in between %d " +
+		str := "%s: The blockmaxsize opt must be in between %d " +
 			"and %d -- parsed [%d]"
 		e := fmt.Errorf(str, funcName, BlockMaxSizeMin,
 			BlockMaxSizeMax, cfg.BlockMaxSize)
@@ -578,7 +578,7 @@ func loadConfig() (
 	// Limit the max block weight to a sane value.
 	if cfg.BlockMaxWeight < BlockMaxWeightMin ||
 		cfg.BlockMaxWeight > BlockMaxWeightMax {
-		str := "%s: The blockmaxweight option must be in between %d " +
+		str := "%s: The blockmaxweight opt must be in between %d " +
 			"and %d -- parsed [%d]"
 		e := fmt.Errorf(str, funcName, BlockMaxWeightMin,
 			BlockMaxWeightMax, cfg.BlockMaxWeight)
@@ -588,7 +588,7 @@ func loadConfig() (
 	}
 	// Limit the max orphan count to a sane vlue.
 	if cfg.MaxOrphanTxs < 0 {
-		str := "%s: The maxorphantx option may not be less than 0 " +
+		str := "%s: The maxorphantx opt may not be less than 0 " +
 			"-- parsed [%d]"
 		e := fmt.Errorf(str, funcName, cfg.MaxOrphanTxs)
 		fmt.Fprintln(os.Stderr, e)

@@ -3,7 +3,7 @@ package walletmain
 import (
 	"bufio"
 	"github.com/p9c/pod/pkg/chaincfg"
-	"github.com/p9c/pod/pkg/podcfg"
+	"github.com/p9c/pod/pkg/opts"
 	"os"
 	"path/filepath"
 	"time"
@@ -31,7 +31,7 @@ func CreateSimulationWallet(activenet *chaincfg.Params, cfg *Config) (e error) {
 	pubPass := []byte(wallet.InsecurePubPassphrase)
 	netDir := NetworkDir(*cfg.AppDataDir, activenet)
 	// Create the wallet.
-	dbPath := filepath.Join(netDir, podcfg.WalletDbName)
+	dbPath := filepath.Join(netDir, opts.WalletDbName)
 	I.Ln("Creating the wallet...")
 	// Create the wallet database backed by bolt db.
 	db, e := walletdb.Create("bdb", dbPath)
@@ -53,7 +53,7 @@ func CreateSimulationWallet(activenet *chaincfg.Params, cfg *Config) (e error) {
 
 // CreateWallet prompts the user for information needed to generate a new wallet and generates the wallet accordingly.
 // The new wallet will reside at the provided path.
-func CreateWallet(activenet *chaincfg.Params, config *podcfg.Config) (e error) {
+func CreateWallet(activenet *chaincfg.Params, config *opts.Config) (e error) {
 	dbDir := *config.WalletFile
 	loader := wallet.NewLoader(activenet, dbDir.V(), 250)
 	D.Ln("WalletPage", loader.ChainParams.Name)

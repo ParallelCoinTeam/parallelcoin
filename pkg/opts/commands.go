@@ -1,9 +1,5 @@
 package opts
 
-import (
-	"github.com/p9c/pod/pkg/podcfg"
-)
-
 // Commands are a slice of Command entries
 type Commands []Command
 
@@ -11,7 +7,7 @@ type Commands []Command
 type Command struct {
 	Name        string
 	Description string
-	Entrypoint  func(c *podcfg.Config) error
+	Entrypoint  func(c *Config) error
 	Commands    Commands
 }
 

@@ -1,4 +1,4 @@
-// Package podcfg is a configuration system to fit with the all-in-one philosophy guiding the design of the parallelcoin
+// Package opts is a configuration system to fit with the all-in-one philosophy guiding the design of the parallelcoin
 // pod.
 //
 // The configuration is stored by each component of the connected applications, so all data is stored in concurrent-safe
@@ -9,19 +9,19 @@
 // that differ from the defaults, similar to 'omitempty' in struct tags but where 'empty' is the default value instead
 // of the default zero created by Go's memory allocator. This enables easy compositing of multiple sources.
 //
-package podcfg
+package opts
 
 import (
 	"encoding/json"
 	"fmt"
 	"github.com/p9c/pod/pkg/apputil"
 	"github.com/p9c/pod/pkg/base58"
-	"github.com/p9c/pod/pkg/opts"
 	"github.com/p9c/pod/pkg/opts/binary"
 	"github.com/p9c/pod/pkg/opts/duration"
 	"github.com/p9c/pod/pkg/opts/float"
 	"github.com/p9c/pod/pkg/opts/integer"
 	"github.com/p9c/pod/pkg/opts/list"
+	"github.com/p9c/pod/pkg/opts/opt"
 	"github.com/p9c/pod/pkg/opts/text"
 	"github.com/p9c/pod/pkg/util/hdkeychain"
 	"io/ioutil"
@@ -41,6 +41,18 @@ const (
 	PARSER            = "json"
 )
 
+// Configs is the source location for the Config items, which is used to generate the Config struct
+type Configs map[string]opt.Option
+type ConfigSliceElement struct {
+	Opt  opt.Option
+	Name string
+}
+type ConfigSlice []ConfigSliceElement
+
+func (c ConfigSlice) Len() int           { return len(c) }
+func (c ConfigSlice) Less(i, j int) bool { return c[i].Name < c[j].Name }
+func (c ConfigSlice) Swap(i, j int)      { c[i], c[j] = c[j], c[i] }
+
 // Initialize loads in configuration from disk and from environment on top of the default base
 //
 // the several places configuration is sourced from are overlaid in the following order:
@@ -58,25 +70,25 @@ func (c *Config) Initialize() (e error) {
 	}
 	// process the commandline
 	T.Ln("processing commandline arguments", os.Args[1:])
-	var cm *opts.Command
-	var opts []opts.Option
+	var cm *Command
+	var options []opt.Option
 	var optVals []string
-	if cm, opts, optVals, e = c.processCommandlineArgs(os.Args[1:]); E.Chk(e) {
+	if cm, options, optVals, e = c.processCommandlineArgs(os.Args[1:]); E.Chk(e) {
 		return
 	}
-	_ = opts
+	_ = options
 	c.RunningCommand = cm
 	// if the user sets the configfile directly, or the datadir on the commandline we need to load it from that path
 	T.Ln("checking from where to load the configuration file")
 	datadir := c.DataDir.V()
 	var configPath string
-	for i := range opts {
-		if opts[i].Name() == "configfile" {
-			if _, e = opts[i].ReadInput(optVals[i]); E.Chk(e) {
+	for i := range options {
+		if options[i].Name() == "configfile" {
+			if _, e = options[i].ReadInput(optVals[i]); E.Chk(e) {
 				configPath = optVals[i]
 			}
-		} else if opts[i].Name() == "datadir" {
-			if _, e = opts[i].ReadInput(optVals[i]); E.Chk(e) {
+		} else if options[i].Name() == "datadir" {
+			if _, e = options[i].ReadInput(optVals[i]); E.Chk(e) {
 				datadir = optVals[i]
 			}
 		}
@@ -99,9 +111,9 @@ func (c *Config) Initialize() (e error) {
 	// read the environment variables into the config
 	if e = c.loadEnvironment(); D.Chk(e) {
 	}
-	// read in the commandline opts
-	for i := range opts {
-		if _, e = opts[i].ReadInput(optVals[i]); E.Chk(e) {
+	// read in the commandline options
+	for i := range options {
+		if _, e = options[i].ReadInput(optVals[i]); E.Chk(e) {
 		}
 	}
 	if !configExists || c.Save.True() {
@@ -122,7 +134,7 @@ func (c *Config) Initialize() (e error) {
 // loadEnvironment scans the environment variables for values relevant to pod
 func (c *Config) loadEnvironment() (e error) {
 	env := os.Environ()
-	c.ForEach(func(o opts.Option) bool {
+	c.ForEach(func(o opt.Option) bool {
 		varName := "POD_" + strings.ToUpper(o.Name())
 		for i := range env {
 			if strings.HasPrefix(env[i], varName) {
@@ -152,12 +164,12 @@ func (c *Config) loadConfig(path string) (e error) {
 
 // ForEach iterates the configuration items in their defined order, running a function with the configuration item in
 // the field
-func (c *Config) ForEach(fn func(ifc opts.Option) bool) bool {
+func (c *Config) ForEach(fn func(ifc opt.Option) bool) bool {
 	t := reflect.ValueOf(c)
 	t = t.Elem()
 	for i := 0; i < t.NumField(); i++ {
 		// asserting to an Option ensures we skip the ancillary fields
-		if iff, ok := t.Field(i).Interface().(opts.Option); ok {
+		if iff, ok := t.Field(i).Interface().(opt.Option); ok {
 			if !fn(iff) {
 				return false
 			}
@@ -167,16 +179,16 @@ func (c *Config) ForEach(fn func(ifc opts.Option) bool) bool {
 }
 
 // GetOption searches for a match amongst the opts
-func (c *Config) GetOption(input string) (opt opts.Option, value string, e error) {
-	T.Ln("checking arg for option:", input)
+func (c *Config) GetOption(input string) (op opt.Option, value string, e error) {
+	T.Ln("checking arg for opt:", input)
 	found := false
-	if c.ForEach(func(ifc opts.Option) bool {
+	if c.ForEach(func(ifc opt.Option) bool {
 		aos := ifc.GetAllOptionStrings()
 		for i := range aos {
 			if strings.HasPrefix(input, aos[i]) {
 				value = input[len(aos[i]):]
 				found = true
-				opt = ifc
+				op = ifc
 				return false
 			}
 		}
@@ -185,7 +197,7 @@ func (c *Config) GetOption(input string) (opt opts.Option, value string, e error
 	) {
 	}
 	if !found {
-		e = fmt.Errorf("option not found")
+		e = fmt.Errorf("opt not found")
 	}
 	return
 }
@@ -196,16 +208,16 @@ func (c *Config) GetOption(input string) (opt opts.Option, value string, e error
 func (c *Config) MarshalJSON() (b []byte, e error) {
 	outMap := make(map[string]interface{})
 	c.ForEach(
-		func(ifc opts.Option) bool {
+		func(ifc opt.Option) bool {
 			switch ii := ifc.(type) {
 			case *binary.Opt:
-				if ii.True() == ii.Def && ii.Metadata.OmitEmpty && !c.ShowAll {
+				if ii.True() == ii.Def && ii.Data.OmitEmpty && !c.ShowAll {
 					return true
 				}
 				outMap[ii.Option] = ii.True()
 			case *list.Opt:
 				v := ii.S()
-				if len(v) == len(ii.Def) && ii.Metadata.OmitEmpty && !c.ShowAll {
+				if len(v) == len(ii.Def) && ii.Data.OmitEmpty && !c.ShowAll {
 					foundMismatch := false
 					for i := range v {
 						if v[i] != ii.Def[i] {
@@ -219,12 +231,12 @@ func (c *Config) MarshalJSON() (b []byte, e error) {
 				}
 				outMap[ii.Option] = v
 			case *float.Opt:
-				if ii.Value.Load() == ii.Def && ii.Metadata.OmitEmpty && !c.ShowAll {
+				if ii.Value.Load() == ii.Def && ii.Data.OmitEmpty && !c.ShowAll {
 					return true
 				}
 				outMap[ii.Option] = ii.Value.Load()
 			case *integer.Opt:
-				if ii.Value.Load() == ii.Def && ii.Metadata.OmitEmpty && !c.ShowAll {
+				if ii.Value.Load() == ii.Def && ii.Data.OmitEmpty && !c.ShowAll {
 					return true
 				}
 				outMap[ii.Option] = ii.Value.Load()
@@ -232,12 +244,12 @@ func (c *Config) MarshalJSON() (b []byte, e error) {
 				v := string(ii.Value.Load().([]byte))
 				// fmt.Printf("def: '%s'", v)
 				// spew.Dump(ii.def)
-				if v == ii.Def && ii.Metadata.OmitEmpty && !c.ShowAll {
+				if v == ii.Def && ii.Data.OmitEmpty && !c.ShowAll {
 					return true
 				}
 				outMap[ii.Option] = v
 			case *duration.Opt:
-				if ii.Value.Load() == ii.Def && ii.Metadata.OmitEmpty && !c.ShowAll {
+				if ii.Value.Load() == ii.Def && ii.Data.OmitEmpty && !c.ShowAll {
 					return true
 				}
 				outMap[ii.Option] = fmt.Sprint(ii.Value.Load())
@@ -257,7 +269,7 @@ func (c *Config) UnmarshalJSON(data []byte) (e error) {
 		return
 	}
 	// I.S(ifc)
-	c.ForEach(func(iii opts.Option) bool {
+	c.ForEach(func(iii opt.Option) bool {
 		switch ii := iii.(type) {
 		case *binary.Opt:
 			if i, ok := ifc[ii.Option]; ok {
@@ -311,7 +323,7 @@ func (c *Config) UnmarshalJSON(data []byte) (e error) {
 			if d, ok := ifc[ii.Option]; ok {
 				var parsed time.Duration
 				parsed, e = time.ParseDuration(d.(string))
-				// I.Ln(ii.Option+":", parsed, "default:", ii.def.Opt(), "prev:", c.Map[ii.Option].(*Opt).V())
+				// I.Ln(ii.Option+":", parsed, "default:", ii.Opt(), "prev:", c.Map[ii.Option].(*Opt).V())
 				ii.Set(parsed)
 			}
 		default:
@@ -322,11 +334,11 @@ func (c *Config) UnmarshalJSON(data []byte) (e error) {
 	return
 }
 
-func (c *Config) processCommandlineArgs(args []string) (cm *opts.Command, opt []opts.Option, optVals []string, e error) {
+func (c *Config) processCommandlineArgs(args []string) (cm *Command, op []opt.Option, optVals []string, e error) {
 	// first we will locate all the commands specified to mark the 3 sections, opt, commands, and the remainder is
 	// arbitrary for the app
-	var commands map[int]opts.Command
-	commands = make(map[int]opts.Command)
+	var commands map[int]Command
+	commands = make(map[int]Command)
 	var commandsStart, commandsEnd int
 	var found bool
 	for i := range args {
@@ -412,16 +424,16 @@ func (c *Config) processCommandlineArgs(args []string) (cm *opts.Command, opt []
 				break
 			}
 			var val string
-			var o opts.Option
+			var o opt.Option
 			if o, val, e = c.GetOption(args[i]); E.Chk(e) {
-				e = fmt.Errorf("argument %d: '%s' lacks a valid option prefix", i, args[i])
+				e = fmt.Errorf("argument %d: '%s' lacks a valid opt prefix", i, args[i])
 				return
 			}
 			// if _, e = opt.ReadInput(val); E.Chk(e) {
 			// 	return
 			// }
-			T.Ln("found option:", o.String())
-			opt = append(opt, o)
+			T.Ln("found opt:", o.String())
+			op = append(op, o)
 			optVals = append(optVals, val)
 		}
 	}
@@ -429,7 +441,7 @@ func (c *Config) processCommandlineArgs(args []string) (cm *opts.Command, opt []
 		cmds = []int{0}
 		commands[0] = c.Commands[0]
 	}
-	I.S(commands[cmds[len(cmds)-1]], opt, args[commandsEnd:])
+	I.S(commands[cmds[len(cmds)-1]], op, args[commandsEnd:])
 	return
 }
 

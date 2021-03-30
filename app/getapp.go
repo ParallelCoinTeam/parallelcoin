@@ -2,8 +2,8 @@ package app
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/opts"
 	"github.com/p9c/pod/pkg/pod"
-	"github.com/p9c/pod/pkg/podcfg"
 	walletrpc2 "github.com/p9c/pod/pkg/walletrpc"
 	"github.com/p9c/pod/version"
 	"os"
@@ -469,7 +469,7 @@ func getApp(cx *pod.State) (a *cli.App) {
 			au.Int(
 				"maxpeers",
 				"Max number of inbound and outbound peers",
-				podcfg.DefaultMaxPeers,
+				opts.DefaultMaxPeers,
 				cx.Config.MaxPeers.Ptr(),
 			),
 			au.Bool(
@@ -487,7 +487,7 @@ func getApp(cx *pod.State) (a *cli.App) {
 				"banthreshold",
 				"Maximum allowed ban score before disconnecting and"+
 					" banning misbehaving peers.",
-				podcfg.DefaultBanThreshold,
+				opts.DefaultBanThreshold,
 				cx.Config.BanThreshold.Ptr(),
 			),
 			au.StringSlice(
@@ -510,20 +510,20 @@ func getApp(cx *pod.State) (a *cli.App) {
 			au.Int(
 				"rpcmaxclients",
 				"Max number of RPC clients for standard connections",
-				podcfg.DefaultMaxRPCClients,
+				opts.DefaultMaxRPCClients,
 				cx.Config.RPCMaxClients.Ptr(),
 			),
 			au.Int(
 				"rpcmaxwebsockets",
 				"Max number of RPC websocket connections",
-				podcfg.DefaultMaxRPCWebsockets,
+				opts.DefaultMaxRPCWebsockets,
 				cx.Config.RPCMaxWebsockets.Ptr(),
 			),
 			au.Int(
 				"rpcmaxconcurrentreqs",
 				"Max number of RPC requests that may be"+
 					" processed concurrently",
-				podcfg.DefaultMaxRPCConcurrentReqs,
+				opts.DefaultMaxRPCConcurrentReqs,
 				cx.Config.RPCMaxConcurrentReqs.Ptr(),
 			),
 			au.Bool(
@@ -565,7 +565,7 @@ func getApp(cx *pod.State) (a *cli.App) {
 			au.String(
 				"dbtype",
 				"Database backend to use for the Block Chain",
-				podcfg.DefaultDbType,
+				opts.DefaultDbType,
 				cx.Config.DbType.Ptr(),
 			),
 			au.String(
@@ -597,7 +597,7 @@ func getApp(cx *pod.State) (a *cli.App) {
 				"limitfreerelay",
 				"Limit relay of transactions with no transaction"+
 					" fee to the given amount in thousands of bytes per minute",
-				podcfg.DefaultFreeTxRelayLimit,
+				opts.DefaultFreeTxRelayLimit,
 				cx.Config.FreeTxRelayLimit.Ptr(),
 			),
 			au.Bool(
@@ -610,13 +610,13 @@ func getApp(cx *pod.State) (a *cli.App) {
 				"trickleinterval",
 				"Minimum time between attempts to send new"+
 					" inventory to a connected peer",
-				podcfg.DefaultTrickleInterval,
+				opts.DefaultTrickleInterval,
 				cx.Config.TrickleInterval.Ptr(),
 			),
 			au.Int(
 				"maxorphantx",
 				"Max number of orphan transactions to keep in memory",
-				podcfg.DefaultMaxOrphanTransactions,
+				opts.DefaultMaxOrphanTransactions,
 				cx.Config.MaxOrphanTxs.Ptr(),
 			),
 			au.Bool(
@@ -668,28 +668,28 @@ func getApp(cx *pod.State) (a *cli.App) {
 				"blockminsize",
 				"Minimum block size in bytes to be used when"+
 					" creating a block",
-				podcfg.BlockMaxSizeMin,
+				opts.BlockMaxSizeMin,
 				cx.Config.BlockMinSize.Ptr(),
 			),
 			au.Int(
 				"blockmaxsize",
 				"Maximum block size in bytes to be used when"+
 					" creating a block",
-				podcfg.BlockMaxSizeMax,
+				opts.BlockMaxSizeMax,
 				cx.Config.BlockMaxSize.Ptr(),
 			),
 			au.Int(
 				"blockminweight",
 				"Minimum block weight to be used when creating"+
 					" a block",
-				podcfg.BlockMaxWeightMin,
+				opts.BlockMaxWeightMin,
 				cx.Config.BlockMinWeight.Ptr(),
 			),
 			au.Int(
 				"blockmaxweight",
 				"Maximum block weight to be used when creating"+
 					" a block",
-				podcfg.BlockMaxWeightMax,
+				opts.BlockMaxWeightMax,
 				cx.Config.BlockMaxWeight.Ptr(),
 			),
 			au.Int(
@@ -719,7 +719,7 @@ func getApp(cx *pod.State) (a *cli.App) {
 				"sigcachemaxsize",
 				"The maximum number of entries in the"+
 					" signature verification cache",
-				podcfg.DefaultSigCacheMaxSize,
+				opts.DefaultSigCacheMaxSize,
 				cx.Config.SigCacheMaxSize.Ptr(),
 			),
 			au.Bool(

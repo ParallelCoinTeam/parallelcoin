@@ -333,7 +333,7 @@ parser.WriteHelp(os.Stderr)
 		// Chk deprecated aliases.  The new options receive priority when both
 		// are changed from the default.
 		if cfg.DataDir.ExplicitlySet() {
-fmt.Fprintln(os.Stderr, "datadir option has been replaced by "+
+fmt.Fprintln(os.Stderr, "datadir opt has been replaced by "+
 					"appdata -- please update your config")
 				if !cfg.AppDataDir.ExplicitlySet() {
 cfg.AppDataDir.value = cfg.DataDir.value
@@ -535,7 +535,7 @@ fmt.Fprintln(os.Stderr, e)
 			}
 			if !keystoreExists {
 // e = fmt.Errorf("The wallet does not exist.  Run with the " +
-				// "--create option to initialize and create it...")
+				// "--create opt to initialize and create it...")
 				// Ensure the data directory for the network exists.
 				fmt.Println("Existing wallet not found in", cfg.ConfigFile.value)
 				if e := checkCreateDir(netDir); E.Chk(e) {
@@ -551,7 +551,7 @@ fmt.Fprintln(os.Stderr, "Unable to create wallet:", e)
 				os.Exit(0)
 			} else {
 e = fmt.Errorf("The wallet is in legacy format.  Run with the " +
-						"--create option to import it.")
+						"--create opt to import it.")
 				}
 				fmt.Fprintln(os.Stderr, e)
 				return nil, nil, e
@@ -583,7 +583,7 @@ fmt.Fprintf(os.Stderr,
 		// }
 		if cfg.EnableClientTLS {
 // if _, ok := localhostListeners[RPCHost]; !ok {
-// 	str := "%s: the --noclienttls option may not be used " +
+// 	str := "%s: the --noclienttls opt may not be used " +
 					// 		"when connecting RPC to non localhost " +
 					// 		"addresses: %s"
 					// 	e := fmt.Errorf(str, funcName, cfg.RPCConnect)
@@ -683,7 +683,7 @@ str := "%s: RPC listen interface '%s' is " +
 								}
 				// host, _, e = net.SplitHostPort(addr)
 				// if _, ok := localhostListeners[host]; !ok {
-// 	str := "%s: the --noservertls option may not be used " +
+// 	str := "%s: the --noservertls opt may not be used " +
 					// 		"when binding RPC to non localhost " +
 				// 		"addresses: %s"
 				// 	e := fmt.Errorf(str, funcName, addr)

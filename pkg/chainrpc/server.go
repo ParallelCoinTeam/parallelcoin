@@ -7,13 +7,13 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"github.com/p9c/log"
 	"github.com/p9c/pod/pkg/amt"
 	block2 "github.com/p9c/pod/pkg/block"
 	"github.com/p9c/pod/pkg/control/peersummary"
 	"github.com/p9c/pod/pkg/fork"
-	"github.com/p9c/log"
 	"github.com/p9c/pod/pkg/mining"
-	"github.com/p9c/pod/pkg/podcfg"
+	"github.com/p9c/pod/pkg/opts"
 	"math"
 	"net"
 	"os"
@@ -162,7 +162,7 @@ type (
 		// CFCheckptCaches stores a cached slice of filter headers for cfcheckpt messages for each filter type.
 		CFCheckptCaches                 map[wire.FilterType][]CFHeaderKV
 		CFCheckptCachesMtx              sync.RWMutex
-		Config                          *podcfg.Config
+		Config                          *opts.Config
 		ActiveNet                       *chaincfg.Params
 		StateCfg                        *state.Config
 		GenThreads                      uint32
@@ -2440,7 +2440,7 @@ func AddLocalAddress(addrMgr *addrmgr.AddrManager, addr string, services wire.Se
 // AddrStringToNetAddr takes an address in the form of 'host:port' and returns a net.Addr which maps to the original
 // address with any host names resolved to IP addresses. It also handles tor addresses properly by returning a net.Addr
 // that encapsulates the address.
-func AddrStringToNetAddr(config *podcfg.Config, stateCfg *state.Config, addr string) (net.Addr, error) {
+func AddrStringToNetAddr(config *opts.Config, stateCfg *state.Config, addr string) (net.Addr, error) {
 	host, strPort, e := net.SplitHostPort(addr)
 	if e != nil {
 		return nil, e
@@ -2533,7 +2533,7 @@ func GetHasServices(advertised, desired wire.ServiceFlag) bool {
 // InitListeners initializes the configured net listeners and adds any bound addresses to the address manager. Returns
 // the listeners and a upnp.NAT interface, which is non-nil if UPnP is in use.
 func InitListeners(
-	config *podcfg.Config, activeNet *chaincfg.Params,
+	config *opts.Config, activeNet *chaincfg.Params,
 	aMgr *addrmgr.AddrManager, listenAddrs []string, services wire.ServiceFlag,
 ) (listeners []net.Listener, nat upnp.NAT,e  error) {
 	// Listen for TCP connections at the configured addresses
@@ -2715,7 +2715,7 @@ func NewPeerConfig(sp *NodePeer) *peer.Config {
 
 type Context struct {
 	// Config is the pod all-in-one server config
-	Config *podcfg.Config
+	Config *opts.Config
 	// StateCfg is a reference to the main node state configuration struct
 	StateCfg *state.Config
 	// ActiveNet is the active net parameters
@@ -3210,7 +3210,7 @@ func RandomUint16Number(max uint16) uint16 {
 
 // SetupRPCListeners returns a slice of listeners that are configured for use with the RPC server depending on the
 // configuration settings for listen addresses and TLS.
-func SetupRPCListeners(config *podcfg.Config, urls []string) ([]net.Listener, error) {
+func SetupRPCListeners(config *opts.Config, urls []string) ([]net.Listener, error) {
 	// Setup TLS if not disabled.
 	listenFunc := net.Listen
 	if config.TLS.True() {
@@ -3261,7 +3261,7 @@ func FileExists(name string) bool {
 	return true
 }
 
-func GetBlkTemplateGenerator(node *Node, cfg *podcfg.Config, stateCfg *state.Config) *mining.BlkTmplGenerator {
+func GetBlkTemplateGenerator(node *Node, cfg *opts.Config, stateCfg *state.Config) *mining.BlkTmplGenerator {
 	D.Ln("getting a block template generator")
 	return mining.NewBlkTmplGenerator(
 		&mining.Policy{

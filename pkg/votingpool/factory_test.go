@@ -306,7 +306,7 @@ var (
 // Manager and removes the directory used to store the database.
 func TstCreatePool(t *testing.T) (tearDownFunc func(), db walletdb.DB, pool *Pool) {
 	// This should be moved somewhere else eventually as not all of our tests call this function, but right now the only
-	// option would be to have the t.Parallel() call in each of our tests.
+	// opt would be to have the t.Parallel() call in each of our tests.
 	t.Parallel()
 	// Create a new wallet DB and addr manager.
 	dir, e := ioutil.TempDir("", "pool_test")

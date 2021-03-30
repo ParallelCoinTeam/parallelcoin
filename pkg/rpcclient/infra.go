@@ -43,7 +43,7 @@ var (
 	// ErrClientDisconnect is an error to describe the condition where the client
 	// has been disconnected from the RPC server.
 	//
-	// When the DisableAutoReconnect option is not set, any outstanding futures when
+	// When the DisableAutoReconnect opt is not set, any outstanding futures when
 	// a client disconnect occurs will return this error as will any new requests.
 	ErrClientDisconnect = errors.New("the client has been disconnected")
 	// ErrClientShutdown is an error to describe the condition where the client is
@@ -1026,7 +1026,7 @@ type ConnConfig struct {
 	// websocket extensions, so this flag can be set to true to use basic HTTP POST
 	// requests instead.
 	HTTPPostMode bool
-	// EnableBCInfoHacks is an option provided to enable compatibility hacks when
+	// EnableBCInfoHacks is an opt provided to enable compatibility hacks when
 	// connecting to blockchain.info RPC server
 	EnableBCInfoHacks bool
 }

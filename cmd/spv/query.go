@@ -60,7 +60,7 @@ type filterCacheKey struct {
 	filterType filterdb.FilterType
 }
 
-// QueryOption is a functional option argument to any of the network query methods, such as GetBlock and GetCFilter
+// QueryOption is a functional opt argument to any of the network query methods, such as GetBlock and GetCFilter
 // (when that resorts to a network query). These are always processed in order, with later options overriding earlier
 // ones.
 type QueryOption func(*queryOptions)
@@ -82,7 +82,7 @@ func (qo *queryOptions) applyQueryOptions(options ...QueryOption) {
 	}
 }
 
-// Timeout is a query option that lets the query know how long to wait for each peer we ask the query to answer it
+// Timeout is a query opt that lets the query know how long to wait for each peer we ask the query to answer it
 // before moving on.
 func Timeout(timeout time.Duration) QueryOption {
 	return func(qo *queryOptions) {
@@ -90,7 +90,7 @@ func Timeout(timeout time.Duration) QueryOption {
 	}
 }
 
-// NumRetries is a query option that lets the query know the maximum number of times each peer should be queried. The
+// NumRetries is a query opt that lets the query know the maximum number of times each peer should be queried. The
 // default is one.
 func NumRetries(numRetries uint8) QueryOption {
 	return func(qo *queryOptions) {
@@ -98,7 +98,7 @@ func NumRetries(numRetries uint8) QueryOption {
 	}
 }
 
-// PeerConnectTimeout is a query option that lets the query know how long to wait for the underlying chain service to
+// PeerConnectTimeout is a query opt that lets the query know how long to wait for the underlying chain service to
 // connect to a peer before giving up on a query in case we don't have any peers.
 func PeerConnectTimeout(timeout time.Duration) QueryOption {
 	return func(qo *queryOptions) {
@@ -106,7 +106,7 @@ func PeerConnectTimeout(timeout time.Duration) QueryOption {
 	}
 }
 
-// Encoding is a query option that allows the caller to set a message encoding for the query messages.
+// Encoding is a query opt that allows the caller to set a message encoding for the query messages.
 func Encoding(encoding wire.MessageEncoding) QueryOption {
 	return func(qo *queryOptions) {
 		qo.encoding = encoding
@@ -157,7 +157,7 @@ const (
 //
 // * queryBatch allows a batch of queries to be distributed among all peers, recirculating upon timeout.
 //
-// TODO(aakselrod): maybe abstract the query scheduler into a functional option and provide some presets (including the
+// TODO(aakselrod): maybe abstract the query scheduler into a functional opt and provide some presets (including the
 //  ones below) prior to factoring out the query API into its own package?
 
 // queryChainServiceBatch is a helper function that sends a batch of queries to the entire pool of peers of the given
@@ -165,8 +165,8 @@ const (
 //
 // It continues to update its view of the connected peers in case peers connect or disconnect during the query.
 //
-// The package-level QueryTimeout parameter, overridable by the Timeout option, determines how long a peer waits for a
-// query before moving onto the next one. The NumRetries option and the QueryNumRetries package-level variable are
+// The package-level QueryTimeout parameter, overridable by the Timeout opt, determines how long a peer waits for a
+// query before moving onto the next one. The NumRetries opt and the QueryNumRetries package-level variable are
 // ignored; the query continues until it either completes or the passed quit channel is closed. For memory efficiency,
 // we attempt to get responses as close to ordered as we can, so that the caller can cache as few responses as possible
 // before committing to storage.
@@ -385,7 +385,7 @@ func queryChainServiceBatch(
 }
 
 // queryAllPeers is a helper function that sends a query to all peers and waits for a timeout specified by the
-// QueryTimeout package-level variable or the Timeout functional option. The NumRetries option is set to 1 by default
+// QueryTimeout package-level variable or the Timeout functional opt. The NumRetries opt is set to 1 by default
 // unless overridden by the caller.
 func (s *ChainService) queryAllPeers(
 // queryMsg is the message to broadcast to all peers.
@@ -489,7 +489,7 @@ checkResponses:
 
 // queryChainServicePeers is a helper function that sends a query to one or more peers of the given ChainService, and
 // waits for an answer. The timeout for queries is set by the QueryTimeout package-level variable or the Timeout
-// functional option.
+// functional opt.
 func queryChainServicePeers(
 // s is the ChainService to use.
 	s *ChainService,

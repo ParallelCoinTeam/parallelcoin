@@ -1,12 +1,12 @@
-package podcfg
+package opts
 
 import (
-	"github.com/p9c/pod/pkg/opts"
 	"github.com/p9c/pod/pkg/opts/binary"
 	"github.com/p9c/pod/pkg/opts/duration"
 	"github.com/p9c/pod/pkg/opts/float"
 	"github.com/p9c/pod/pkg/opts/integer"
 	"github.com/p9c/pod/pkg/opts/list"
+	"github.com/p9c/pod/pkg/opts/opt"
 	"github.com/p9c/pod/pkg/opts/text"
 )
 
@@ -18,9 +18,9 @@ type Config struct {
 	ShowAll bool
 	// Map is the same data but addressible using its name as found inside the various configuration types, the key is
 	// converted to lower case for CLI args
-	Map                    map[string]opts.Option
-	Commands               opts.Commands
-	RunningCommand         *opts.Command
+	Map                    map[string]opt.Option
+	Commands               Commands
+	RunningCommand         *Command
 	AddCheckpoints         *list.Opt
 	AddPeers               *list.Opt
 	AddrIndex              *binary.Opt

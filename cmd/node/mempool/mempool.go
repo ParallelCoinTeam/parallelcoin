@@ -4,10 +4,10 @@ import (
 	"container/list"
 	"errors"
 	"fmt"
+	"github.com/p9c/log"
 	"github.com/p9c/pod/pkg/amt"
 	"github.com/p9c/pod/pkg/chaincfg"
-	"github.com/p9c/log"
-	"github.com/p9c/pod/pkg/podcfg"
+	"github.com/p9c/pod/pkg/opts"
 	"math"
 	"sync"
 	"sync/atomic"
@@ -792,7 +792,7 @@ func (mp *TxPool) maybeAcceptTransaction(
 		serializedSize,
 		mp.cfg.Policy.MinRelayTxFee,
 	)
-	if serializedSize >= (podcfg.DefaultBlockPrioritySize-1000) && txFee < minFee {
+	if serializedSize >= (opts.DefaultBlockPrioritySize-1000) && txFee < minFee {
 		str := fmt.Sprintf(
 			"transaction %v has %d fees which is under the required amount of %d",
 			txHash, txFee, minFee,

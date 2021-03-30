@@ -3,7 +3,7 @@ package wallet
 import (
 	"errors"
 	"github.com/p9c/pod/pkg/chaincfg"
-	"github.com/p9c/pod/pkg/podcfg"
+	"github.com/p9c/pod/pkg/opts"
 	"os"
 	"path/filepath"
 	"sync"
@@ -53,7 +53,7 @@ func (ld *Loader) CreateNewWallet(
 	pubPassphrase, privPassphrase, seed []byte,
 	bday time.Time,
 	noStart bool,
-	podConfig *podcfg.Config,
+	podConfig *opts.Config,
 	quit qu.C,
 ) (*Wallet, error) {
 	ld.Mutex.Lock()
@@ -114,7 +114,7 @@ func (ld *Loader) LoadedWallet() (*Wallet, bool) {
 func (ld *Loader) OpenExistingWallet(
 	pubPassphrase []byte,
 	canConsolePrompt bool,
-	podConfig *podcfg.Config,
+	podConfig *opts.Config,
 	quit qu.C,
 ) (*Wallet, error) {
 	defer ld.Mutex.Unlock()

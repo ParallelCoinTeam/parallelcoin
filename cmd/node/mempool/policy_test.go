@@ -3,9 +3,9 @@ package mempool
 import (
 	"bytes"
 	"github.com/p9c/pod/pkg/amt"
-	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/btcaddr"
-	"github.com/p9c/pod/pkg/podcfg"
+	"github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/opts"
 	"testing"
 	"time"
 	
@@ -35,13 +35,13 @@ func TestCalcMinRequiredTxRelayFee(t *testing.T) {
 		{
 			"100 bytes with default minimum relay fee",
 			100,
-			podcfg.DefaultMinRelayTxFee,
+			opts.DefaultMinRelayTxFee,
 			100,
 		},
 		{
 			"max standard tx size with default minimum relay fee",
 			maxStandardTxWeight / 4,
-			podcfg.DefaultMinRelayTxFee,
+			opts.DefaultMinRelayTxFee,
 			100000,
 		},
 		{
@@ -509,7 +509,7 @@ func TestCheckTransactionStandard(t *testing.T) {
 		// Ensure standardness is as expected.
 		err := checkTransactionStandard(
 			util.NewTx(&test.tx),
-			test.height, pastMedianTime, podcfg.DefaultMinRelayTxFee, 1,
+			test.height, pastMedianTime, opts.DefaultMinRelayTxFee, 1,
 		)
 		if err == nil && test.isStandard {
 			// Test passes since function returned standard for a transaction
