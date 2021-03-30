@@ -22,6 +22,12 @@ func NewString(m Metadata, def string) *String {
 	return &String{value: v, Metadata: m, def: def}
 }
 
+// SetName sets the name for the generator
+func (x *String) SetName(name string) {
+	x.Metadata.Option = strings.ToLower(name)
+	x.Metadata.Name = name
+}
+
 // Type returns the receiver wrapped in an interface for identifying its type
 func (x *String) Type() interface{} {
 	return x

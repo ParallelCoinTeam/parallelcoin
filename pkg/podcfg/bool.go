@@ -19,6 +19,12 @@ func NewBool(m Metadata, def bool, hook ...func(b bool)) *Bool {
 	return &Bool{value: uberatomic.NewBool(def), Metadata: m, def: def, hook: hook}
 }
 
+// SetName sets the name for the generator
+func (x *Bool) SetName(name string) {
+	x.Metadata.Option = strings.ToLower(name)
+	x.Metadata.Name = name
+}
+
 // Type returns the receiver wrapped in an interface for identifying its type
 func (x *Bool) Type() interface{} {
 	return x
@@ -30,7 +36,7 @@ func (x *Bool) GetMetadata() *Metadata {
 }
 
 // ReadInput sets the value from a string.
-// The value can be right up against the keyword or separated by a ':' or '='.
+// The value can be right up against the keyword or separated by a '='.
 func (x *Bool) ReadInput(input string) (o Option, e error) {
 	// if the input is empty, the user intends the opposite of the default
 	if input == "" {

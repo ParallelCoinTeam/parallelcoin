@@ -20,6 +20,12 @@ func NewInt(m Metadata, def int64) *Int {
 	return &Int{value: uberatomic.NewInt64(def), Metadata: m, def: def}
 }
 
+// SetName sets the name for the generator
+func (x *Int) SetName(name string) {
+	x.Metadata.Option = strings.ToLower(name)
+	x.Metadata.Name = name
+}
+
 // Type returns the receiver wrapped in an interface for identifying its type
 func (x *Int) Type() interface{} {
 	return x

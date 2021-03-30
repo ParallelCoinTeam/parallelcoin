@@ -20,6 +20,12 @@ func NewFloat(m Metadata, def float64) *Float {
 	return &Float{value: uberatomic.NewFloat64(def), Metadata: m, def: def}
 }
 
+// SetName sets the name for the generator
+func (x *Float) SetName(name string) {
+	x.Metadata.Option = strings.ToLower(name)
+	x.Metadata.Name = name
+}
+
 // Type returns the receiver wrapped in an interface for identifying its type
 func (x *Float) Type() interface{} {
 	return x

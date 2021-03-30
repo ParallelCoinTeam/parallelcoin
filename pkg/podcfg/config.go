@@ -430,7 +430,7 @@ func (c *Config) processCommandlineArgs(args []string) (cm *Command, options []O
 func (c *Config) ReadCAFile() []byte {
 	// Read certificate file if TLS is not disabled.
 	var certs []byte
-	if c.TLS.True() {
+	if c.ClientTLS.True() {
 		var e error
 		if certs, e = ioutil.ReadFile(c.CAFile.V()); E.Chk(e) {
 			// If there's an error reading the CA file, continue with nil certs and without the client connection.

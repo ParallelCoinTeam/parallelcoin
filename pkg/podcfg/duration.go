@@ -20,6 +20,12 @@ func NewDuration(m Metadata, def time.Duration) *Duration {
 	return &Duration{value: uberatomic.NewDuration(def), Metadata: m, def: def}
 }
 
+// SetName sets the name for the generator
+func (x *Duration) SetName(name string) {
+	x.Metadata.Option = strings.ToLower(name)
+	x.Metadata.Name = name
+}
+
 // Type returns the receiver wrapped in an interface for identifying its type
 func (x *Duration) Type() interface{} {
 	return x
