@@ -461,7 +461,7 @@ func (c *Config) processCommandlineArgs(args []string) (cm *cmds.Command, op []o
 		cmds = []int{0}
 		commands[0] = c.Commands[0]
 	}
-	I.S(commands[cmds[len(cmds)-1]], op, args[commandsEnd:])
+	// I.S(commands[cmds[len(cmds)-1]], op, args[commandsEnd:])
 	return
 }
 

@@ -16,6 +16,12 @@ import (
 	"unicode/utf8"
 )
 
+type details struct {
+	name, option, desc, def string
+	aliases                 []string
+	documentation           string
+}
+
 // getHelp walks the command tree and gathers the options and creates a set of help functions for all commands and
 // options in the set
 func (c *Config) getHelp() {
@@ -25,6 +31,61 @@ func (c *Config) getHelp() {
 		Entrypoint:  helpFunction,
 		Commands:    nil,
 	}
+	// first add all the options
+	c.ForEach(func(ifc opt.Option) bool {
+		o := fmt.Sprintf("Parallelcoin Pod All-in-One Suite\n\n")
+		var dt details
+		switch ii := ifc.(type) {
+		case *binary.Opt:
+			dt = details{ii.GetMetadata().Name, ii.Option, ii.Description, fmt.Sprint(ii.Def), ii.Aliases,
+				ii.Documentation,
+			}
+		case *list.Opt:
+			dt = details{ii.GetMetadata().Name, ii.Option, ii.Description, fmt.Sprint(ii.Def), ii.Aliases,
+				ii.Documentation,
+			}
+		case *float.Opt:
+			dt = details{ii.GetMetadata().Name, ii.Option, ii.Description, fmt.Sprint(ii.Def), ii.Aliases,
+				ii.Documentation,
+			}
+		case *integer.Opt:
+			dt = details{ii.GetMetadata().Name, ii.Option, ii.Description, fmt.Sprint(ii.Def), ii.Aliases,
+				ii.Documentation,
+			}
+		case *text.Opt:
+			dt = details{ii.GetMetadata().Name, ii.Option, ii.Description, fmt.Sprint(ii.Def), ii.Aliases,
+				ii.Documentation,
+			}
+		case *duration.Opt:
+			dt = details{ii.GetMetadata().Name, ii.Option, ii.Description, fmt.Sprint(ii.Def), ii.Aliases,
+				ii.Documentation,
+			}
+		}
+		cm.Commands = append(cm.Commands, cmds.Command{
+			Name:        dt.option,
+			Description: dt.desc,
+			Entrypoint: func(ifc interface{}) (e error) {
+				o += fmt.Sprintf("Help information about %s\n\n\toption name:\n\t\t%s\n\taliases:\n\t\t%s\n\tdescription:\n\t\t%s\n\tdefault:\n\t\t%v\n",
+					dt.name, dt.option, dt.aliases, dt.desc, dt.def,
+				)
+				if dt.documentation != "" {
+					o += "\tdocumentation:\n\t\t" + dt.documentation + "\n\n"
+				}
+				fmt.Fprint(os.Stderr, o)
+				return
+			},
+			Commands: nil,
+		},
+		)
+		return true
+	},
+	)
+	// next add all the commands
+	c.Commands.ForEach(func(cm cmds.Command) bool {
+		
+		return true
+	}, 0, 0,
+	)
 	c.Commands = append(c.Commands, cm)
 	return
 }
@@ -79,13 +140,13 @@ func helpFunction(ifc interface{}) error {
 	sort.Strings(cats)
 	for i := range cats {
 		if cats[i] != "" {
-			o += "\n"+cats[i] + "\n"
+			o += "\n" + cats[i] + "\n"
 		}
 		o += descs[cats[i]]
 	}
 	// for i := range cats {
 	// }
-	o += fmt.Sprintf("\nadd the name of the command or option after 'help' or append it after " +
+	o += fmt.Sprintf("\nadd the name of the command or option after 'help' or append it after "+
 		"'help' in the commandline to get more detail - eg: %s help upnp\n\n", os.Args[0],
 	)
 	fmt.Fprintf(os.Stderr, o)
