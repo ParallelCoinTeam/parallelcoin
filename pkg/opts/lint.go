@@ -19,7 +19,6 @@ func (c *Config) getAllOptionStrings() (s map[string][]string, e error) {
 	) {
 	}
 	s["commandslist"] = c.Commands.GetAllCommands()
-	// I.S(s["commandslist"])
 	return
 }
 
@@ -27,7 +26,6 @@ func findConflictingItems(valOpts map[string][]string) (o []string, e error) {
 	var ss, ls string
 	for i := range valOpts {
 		for j := range valOpts {
-			// W.Ln(s[i], s[j], i==j, s[i]==s[j])
 			if i == j {
 				continue
 			}
@@ -35,13 +33,7 @@ func findConflictingItems(valOpts map[string][]string) (o []string, e error) {
 			b := valOpts[j]
 			for ii := range a {
 				for jj := range b {
-					// if ii == jj {
-					// 	continue
-					// }
-					// W.Ln(i == j, s[i] == s[j])
-					// I.Ln(s[i], s[j])
 					ss, ls = shortestString(a[ii], b[jj])
-					// I.Ln("these should not be the same string", ss, ls)
 					if ss == ls[:len(ss)] {
 						E.F("conflict between %s and %s, ", ss, ls)
 						o = append(o, ss, ls)

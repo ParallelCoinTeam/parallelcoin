@@ -4,11 +4,11 @@ package pod
 
 import (
 	"fmt"
+	"github.com/p9c/opts/opt"
 	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/chainclient"
 	"github.com/p9c/pod/pkg/control"
 	"github.com/p9c/pod/pkg/opts"
-	"github.com/p9c/pod/pkg/podcfg"
 	"math/rand"
 	"runtime"
 	"strings"
@@ -43,7 +43,7 @@ type State struct {
 	// Config is the pod all-in-one server config
 	Config *opts.Config
 	// ConfigMap
-	ConfigMap map[string]interface{}
+	ConfigMap map[string]opt.Option
 	// StateCfg is a reference to the main node state configuration struct
 	StateCfg *state.Config
 	// ActiveNet is the active net parameters
@@ -89,7 +89,7 @@ type State struct {
 
 // GetNewContext returns a fresh new context
 func GetNewContext() (s *State, e error) {
-	config := podcfg.GetDefaultConfig()
+	config := opts.GetDefaultConfig()
 	if e = config.Initialize(); E.Chk(e){
 		return
 	}

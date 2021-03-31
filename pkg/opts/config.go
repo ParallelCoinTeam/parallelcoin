@@ -15,6 +15,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/p9c/opts/binary"
+	"github.com/p9c/opts/cmds"
 	"github.com/p9c/opts/duration"
 	"github.com/p9c/opts/float"
 	"github.com/p9c/opts/integer"
@@ -72,13 +73,12 @@ func (c *Config) Initialize() (e error) {
 	c.getHelp()
 	// process the commandline
 	T.Ln("processing commandline arguments", os.Args[1:])
-	var cm *Command
+	var cm *cmds.Command
 	var options []opt.Option
 	var optVals []string
 	if cm, options, optVals, e = c.processCommandlineArgs(os.Args[1:]); E.Chk(e) {
 		return
 	}
-	_ = options
 	c.RunningCommand = cm
 	// if the user sets the configfile directly, or the datadir on the commandline we need to load it from that path
 	T.Ln("checking from where to load the configuration file")
@@ -119,6 +119,7 @@ func (c *Config) Initialize() (e error) {
 		}
 	}
 	if !configExists || c.Save.True() {
+		c.Save.F()
 		// save the configuration file
 		var j []byte
 		// c.ShowAll=true
@@ -178,6 +179,23 @@ func (c *Config) ForEach(fn func(ifc opt.Option) bool) bool {
 		}
 	}
 	return true
+}
+
+// GetDefaultConfig returns a Config struct pristine factory fresh
+func GetDefaultConfig() (c *Config) {
+	c = &Config{Commands: GetCommands(), Map: GetConfigs()}
+	// I.S(c.Map)
+	t := reflect.ValueOf(c)
+	t = t.Elem()
+	for i := range c.Map {
+		tf := t.FieldByName(i)
+		if tf.IsValid() && tf.CanSet() && tf.CanAddr() {
+			val := reflect.ValueOf(c.Map[i])
+			tf.Set(val)
+		}
+	}
+	// I.S(c)
+	return
 }
 
 // GetOption searches for a match amongst the opts
@@ -336,19 +354,19 @@ func (c *Config) UnmarshalJSON(data []byte) (e error) {
 	return
 }
 
-func (c *Config) processCommandlineArgs(args []string) (cm *Command, op []opt.Option, optVals []string, e error) {
+func (c *Config) processCommandlineArgs(args []string) (cm *cmds.Command, op []opt.Option, optVals []string, e error) {
+	// I.S(c.Commands)
 	// first we will locate all the commands specified to mark the 3 sections, opt, commands, and the remainder is
 	// arbitrary for the app
-	var commands map[int]Command
-	commands = make(map[int]Command)
+	commands := make(map[int]cmds.Command)
 	var commandsStart, commandsEnd int
 	var found bool
 	for i := range args {
-		if i == 0 {
-			// commandsStart = i
-			// commandsEnd = i
-			continue
-		}
+		// if i == 0 {
+		// 	// commandsStart = i
+		// 	// commandsEnd = i
+		// 	continue
+		// }
 		T.Ln("checking for commands:", args[i])
 		T.Ln("commandStart", commandsStart, commandsEnd, args[commandsStart:commandsEnd])
 		var depth, dist int

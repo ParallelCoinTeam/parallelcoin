@@ -2,6 +2,7 @@ package opts
 
 import (
 	"github.com/p9c/opts/binary"
+	"github.com/p9c/opts/cmds"
 	"github.com/p9c/opts/duration"
 	"github.com/p9c/opts/float"
 	"github.com/p9c/opts/integer"
@@ -19,8 +20,8 @@ type Config struct {
 	// Map is the same data but addressible using its name as found inside the various configuration types, the key is
 	// converted to lower case for CLI args
 	Map                    map[string]opt.Option
-	Commands               Commands
-	RunningCommand         *Command
+	Commands               cmds.Commands
+	RunningCommand         *cmds.Command
 	AddCheckpoints         *list.Opt
 	AddPeers               *list.Opt
 	AddrIndex              *binary.Opt
@@ -73,9 +74,9 @@ type Config struct {
 	NodeOff                *binary.Opt
 	OneTimeTLSKey          *binary.Opt
 	OnionEnabled           *binary.Opt
-	OnionProxy             *text.Opt
 	OnionProxyPass         *text.Opt
 	OnionProxyUser         *text.Opt
+	OnionProxyddress       *text.Opt
 	P2PConnect             *list.Opt
 	P2PListeners           *list.Opt
 	Password               *text.Opt

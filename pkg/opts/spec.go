@@ -6,6 +6,7 @@ package opts
 
 import (
 	"github.com/p9c/opts/binary"
+	"github.com/p9c/opts/cmds"
 	"github.com/p9c/opts/duration"
 	"github.com/p9c/opts/float"
 	"github.com/p9c/opts/integer"
@@ -22,63 +23,63 @@ import (
 	"time"
 )
 
-func GetCommands() (c Commands) {
-	c = Commands{
+func GetCommands() (c cmds.Commands) {
+	c = cmds.Commands{
 		{Name: "gui", Description:
 		"ParallelCoin GUI Wallet/Miner/Explorer",
-			Entrypoint: func(c *Config) error { return nil },
+			Entrypoint: func(c interface{}) error { return nil },
 		},
 		{Name: "version", Description:
 		"print version and exit",
-			Entrypoint: func(c *Config) error { return nil },
+			Entrypoint: func(c interface{}) error { return nil },
 		},
 		{Name: "ctl", Description:
 		"command line wallet and chain RPC client",
-			Entrypoint: func(c *Config) error { return nil },
+			Entrypoint: func(c interface{}) error { return nil },
 		},
 		{Name: "node", Description:
 		"ParallelCoin blockchain node",
-			Entrypoint: func(c *Config) error { return nil },
-			Commands: []Command{
+			Entrypoint: func(c interface{}) error { return nil },
+			Commands: []cmds.Command{
 				{Name: "dropaddrindex", Description:
 				"drop the address database index",
-					Entrypoint: func(c *Config) error { return nil },
+					Entrypoint: func(c interface{}) error { return nil },
 				},
 				{Name: "droptxindex", Description:
 				"drop the transaction database index",
-					Entrypoint: func(c *Config) error { return nil },
+					Entrypoint: func(c interface{}) error { return nil },
 				},
 				{Name: "dropcfindex", Description:
 				"drop the cfilter database index",
-					Entrypoint: func(c *Config) error { return nil },
+					Entrypoint: func(c interface{}) error { return nil },
 				},
 				{Name: "dropindexes", Description:
 				"drop all of the indexes",
-					Entrypoint: func(c *Config) error { return nil },
+					Entrypoint: func(c interface{}) error { return nil },
 				},
 				{Name: "resetchain", Description:
 				"deletes the current blockchain cache to force redownload",
-					Entrypoint: func(c *Config) error { return nil },
+					Entrypoint: func(c interface{}) error { return nil },
 				},
 			},
 		},
 		{Name: "wallet", Description:
 		"run the wallet server (requires a chain node to function)",
-			Entrypoint: func(c *Config) error { return nil },
-			Commands: []Command{
+			Entrypoint: func(c interface{}) error { return nil },
+			Commands: []cmds.Command{
 				{Name: "drophistory", Description:
 				"reset the wallet transaction history",
-					Entrypoint: func(c *Config) error { return nil },
+					Entrypoint: func(c interface{}) error { return nil },
 				},
 			},
 		},
 		{Name: "kopach", Description:
 		"standalone multicast miner for easy mining farm deployment",
-			Entrypoint: func(c *Config) error { return nil },
+			Entrypoint: func(c interface{}) error { return nil },
 		},
 		{Name: "worker", Description:
 		"single thread worker process, normally started by kopach",
-			Entrypoint: func(c *Config) error { return nil },
+			Entrypoint: func(c interface{}) error { return nil },
 		},
 	}
 	return
@@ -559,7 +560,7 @@ func GetConfigs() (c Configs) {
 			Group:   "config",
 			Label:   "Log Level",
 			Description:
-			"maximum log level to output\n(fatal error check warning info debug trace - what is selected includes all items to the left of the one in that list)",
+			"maximum log level to output",
 			Widget: "radio",
 			Options: []string{"off",
 				"fatal",
@@ -722,8 +723,8 @@ func GetConfigs() (c Configs) {
 		},
 			false,
 		),
-		"OnionProxy": text.New(meta.Data{
-			Aliases: []string{"OA"},
+		"OnionProxyddress": text.New(meta.Data{
+			Aliases: []string{"OPA"},
 			Group:   "proxy",
 			Label:   "Onion Proxy Address",
 			Description:

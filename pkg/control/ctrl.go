@@ -21,7 +21,6 @@ import (
 	"github.com/p9c/pod/pkg/fork"
 	"github.com/p9c/pod/pkg/mining"
 	"github.com/p9c/pod/pkg/opts"
-	"github.com/p9c/pod/pkg/podcfg"
 	rav "github.com/p9c/pod/pkg/ring"
 	"github.com/p9c/pod/pkg/rpcclient"
 	"github.com/p9c/pod/pkg/transport"
@@ -172,7 +171,7 @@ func (s *State) startWallet() (e error) {
 			Endpoint:     "ws",
 			User:         s.cfg.Username.V(),
 			Pass:         s.cfg.Password.V(),
-			TLS:          s.cfg.TLS.True(),
+			TLS:          s.cfg.ServerTLS.True(),
 			Certificates: certs,
 		}, nil, s.quit,
 	); E.Chk(e) {
@@ -463,42 +462,42 @@ func (s *State) GetNewAddressFromWallet() (addr btcaddr.Address, e error) {
 	}
 	return
 }
-
-// GetNewAddressFromMiningAddrs tries to get an address from the mining
-// addresses list in the configuration file
-func (s *State) GetNewAddressFromMiningAddrs() (addr btcaddr.Address, e error) {
-	if s.cfg.MiningAddrs == nil {
-		e = errors.New("mining addresses is nil")
-		I.Ln(e)
-		return
-	}
-	if len(s.cfg.MiningAddrs.S()) < 1 {
-		e = errors.New("no mining addresses")
-		I.Ln(e)
-		return
-	}
-	// Choose a payment address at random.
-	rand.Seed(time.Now().UnixNano())
-	p2a := rand.Intn(len(s.cfg.MiningAddrs.S()))
-	addr = s.stateCfg.ActiveMiningAddrs[p2a]
-	// remove the address from the state
-	if p2a == 0 {
-		s.stateCfg.ActiveMiningAddrs = s.stateCfg.ActiveMiningAddrs[1:]
-	} else {
-		s.stateCfg.ActiveMiningAddrs = append(
-			s.stateCfg.ActiveMiningAddrs[:p2a],
-			s.stateCfg.ActiveMiningAddrs[p2a+1:]...,
-		)
-	}
-	// update the config
-	var ma cli.StringSlice
-	for i := range s.stateCfg.ActiveMiningAddrs {
-		ma = append(ma, s.stateCfg.ActiveMiningAddrs[i].String())
-	}
-	s.cfg.MiningAddrs.Set(ma)
-	podcfg.Save(s.cfg)
-	return
-}
+//
+// // GetNewAddressFromMiningAddrs tries to get an address from the mining
+// // addresses list in the configuration file
+// func (s *State) GetNewAddressFromMiningAddrs() (addr btcaddr.Address, e error) {
+// 	if s.cfg.MiningAddrs == nil {
+// 		e = errors.New("mining addresses is nil")
+// 		I.Ln(e)
+// 		return
+// 	}
+// 	if len(s.cfg.MiningAddrs.S()) < 1 {
+// 		e = errors.New("no mining addresses")
+// 		I.Ln(e)
+// 		return
+// 	}
+// 	// Choose a payment address at random.
+// 	rand.Seed(time.Now().UnixNano())
+// 	p2a := rand.Intn(len(s.cfg.MiningAddrs.S()))
+// 	addr = s.stateCfg.ActiveMiningAddrs[p2a]
+// 	// remove the address from the state
+// 	if p2a == 0 {
+// 		s.stateCfg.ActiveMiningAddrs = s.stateCfg.ActiveMiningAddrs[1:]
+// 	} else {
+// 		s.stateCfg.ActiveMiningAddrs = append(
+// 			s.stateCfg.ActiveMiningAddrs[:p2a],
+// 			s.stateCfg.ActiveMiningAddrs[p2a+1:]...,
+// 		)
+// 	}
+// 	// update the config
+// 	var ma cli.StringSlice
+// 	for i := range s.stateCfg.ActiveMiningAddrs {
+// 		ma = append(ma, s.stateCfg.ActiveMiningAddrs[i].String())
+// 	}
+// 	s.cfg.MiningAddrs.Set(ma)
+// 	podcfg.Save(s.cfg)
+// 	return
+// }
 
 var handlersMulticast = transport.Handlers{
 	string(sol.Magic): processSolMsg,

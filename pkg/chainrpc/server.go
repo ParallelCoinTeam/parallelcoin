@@ -2459,7 +2459,7 @@ func AddrStringToNetAddr(config *opts.Config, stateCfg *state.Config, addr strin
 	}
 	// Tor addresses cannot be resolved to an IP, so just return an onion address instead.
 	if strings.HasSuffix(host, ".onion") {
-		if !config.Onion.True() {
+		if !config.OnionEnabled.True() {
 			return nil, errors.New("tor has been disabled")
 		}
 		return &OnionAddr{Addr: addr}, nil
@@ -2699,7 +2699,7 @@ func NewPeerConfig(sp *NodePeer) *peer.Config {
 		},
 		NewestBlock:       sp.GetNewestBlock,
 		HostToNetAddress:  sp.Server.AddrManager.HostToNetAddress,
-		Proxy:             sp.Server.Config.Proxy.V(),
+		Proxy:             sp.Server.Config.ProxyAddress.V(),
 		UserAgentName:     UserAgentName,
 		UserAgentVersion:  UserAgentVersion,
 		UserAgentComments: sp.Server.Config.UserAgentComments.S(),
@@ -3108,8 +3108,8 @@ func NewServerPeer(s *Node, localIP net.IP, isPersistent bool) *NodePeer {
 	if s.Config.P2PConnect.V() != nil ||
 		len(s.Config.P2PConnect.S()) < 1 ||
 		s.Config.DisableListen.True() ||
-		s.Config.Proxy.V() != "" ||
-		s.Config.OnionProxy.V() != "" {
+		s.Config.ProxyAddress.V() != "" ||
+		s.Config.OnionProxyddress.V() != "" {
 		// return an empty IP address if we are not listening (this also is done on
 		// proxy connections to not leak info)
 	} else {
@@ -3213,7 +3213,7 @@ func RandomUint16Number(max uint16) uint16 {
 func SetupRPCListeners(config *opts.Config, urls []string) ([]net.Listener, error) {
 	// Setup TLS if not disabled.
 	listenFunc := net.Listen
-	if config.TLS.True() {
+	if config.ServerTLS.True() {
 		// Generate the TLS cert and key file if both don't already exist.
 		if !FileExists(config.RPCKey.V()) && !FileExists(config.RPCCert.V()) {
 			e := GenCertPair(config.RPCCert.V(), config.RPCKey.V())

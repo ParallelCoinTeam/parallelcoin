@@ -5,6 +5,7 @@ import (
 	"github.com/p9c/pod/pkg/pod"
 )
 
+// Main is the entrypoint for the pod suite
 func Main() int {
 	log.SetLogLevel("trace")
 	var e error
@@ -12,6 +13,8 @@ func Main() int {
 	if cx, e = pod.GetNewContext(); F.Chk(e) {
 		return 1
 	}
-	_ = cx
+	if e = cx.Config.RunningCommand.Entrypoint(cx.Config); E.Chk(e) {
+		return 1
+	}
 	return 0
 }
