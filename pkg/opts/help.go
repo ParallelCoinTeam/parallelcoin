@@ -11,6 +11,7 @@ import (
 	"github.com/p9c/opts/opt"
 	"github.com/p9c/opts/text"
 	"os"
+	"sort"
 	"strings"
 	"unicode/utf8"
 )
@@ -31,9 +32,9 @@ func (c *Config) getHelp() {
 func helpFunction(ifc interface{}) error {
 	c := assertToConfig(ifc)
 	var o string
-	o+=fmt.Sprintf( "Parallelcoin Pod All-in-One Suite\n\n")
-	o+=fmt.Sprintf( "Usage:\n\t%s [options] [commands] [command parameters]\n\n", os.Args[0])
-	o+=fmt.Sprintf("Commands:\n" )
+	o += fmt.Sprintf("Parallelcoin Pod All-in-One Suite\n\n")
+	o += fmt.Sprintf("Usage:\n\t%s [options] [commands] [command parameters]\n\n", os.Args[0])
+	o += fmt.Sprintf("Commands:\n")
 	for i := range c.Commands {
 		oo := fmt.Sprintf("\t%s", c.Commands[i].Name)
 		nrunes := utf8.RuneCountInString(oo)
@@ -45,12 +46,14 @@ func helpFunction(ifc interface{}) error {
 	o += fmt.Sprintf("\teg: addcheckpoints=deadbeefcafe,someothercheckpoint AP127.0.0.1:11047\n")
 	o += fmt.Sprintf("\tfor items that take multiple string values, you can repeat the option with further\n")
 	o += fmt.Sprintf("\tinstances of the option or separate the items with (only) commas as the above example\n\n")
+	// items := make(map[string][]opt.Option)
+	descs := make(map[string]string)
 	c.ForEach(func(ifc opt.Option) bool {
 		meta := ifc.GetMetadata()
 		oo := fmt.Sprintf("\t%s %v", meta.Option, meta.Aliases)
 		nrunes := utf8.RuneCountInString(oo)
 		var def string
-		switch ii:=ifc.(type) {
+		switch ii := ifc.(type) {
 		case *binary.Opt:
 			def = fmt.Sprint(ii.Def)
 		case *list.Opt:
@@ -64,12 +67,27 @@ func helpFunction(ifc interface{}) error {
 		case *duration.Opt:
 			def = fmt.Sprint(ii.Def)
 		}
-		o += oo + fmt.Sprintf(strings.Repeat(" ", 32-nrunes)+"%s, default: %s\n", meta.Description, def)
+		descs[meta.Group] += oo + fmt.Sprintf(strings.Repeat(" ", 32-nrunes)+"%s, default: %s\n", meta.Description, def)
 		return true
 	},
 	)
-	o += fmt.Sprintf("\nadd the name of the command or option after 'help' in the commandline to " +
-		"get more detail - eg: %s help upnp\n\n", os.Args[0])
+	var cats []string
+	for i := range descs {
+		cats = append(cats, i)
+	}
+	// I.S(cats)
+	sort.Strings(cats)
+	for i := range cats {
+		if cats[i] != "" {
+			o += "\n"+cats[i] + "\n"
+		}
+		o += descs[cats[i]]
+	}
+	// for i := range cats {
+	// }
+	o += fmt.Sprintf("\nadd the name of the command or option after 'help' or append it after " +
+		"'help' in the commandline to get more detail - eg: %s help upnp\n\n", os.Args[0],
+	)
 	fmt.Fprintf(os.Stderr, o)
 	return nil
 }
