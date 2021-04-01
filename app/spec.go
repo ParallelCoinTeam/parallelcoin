@@ -28,7 +28,7 @@ func GetCommands() (c cmds.Commands) {
 	c = cmds.Commands{
 		{Name: "gui", Description:
 		"ParallelCoin GUI Wallet/Miner/Explorer",
-			Entrypoint: func(c interface{}) error { return nil },
+			Entrypoint: nodeHandle,
 		},
 		{Name: "version", Description:
 		"print version and exit",
@@ -980,7 +980,7 @@ func GetConfigs() (c opts.Configs) {
 			Documentation: "<placeholder for detailed documentation>",
 			OmitEmpty:     true,
 		},
-			net.JoinHostPort("127.0.0.1", chaincfg.MainNetParams.DefaultPort),
+			net.JoinHostPort("127.0.0.1", chaincfg.MainNetParams.RPCClientPort),
 		),
 		"RPCKey": text.New(meta.Data{
 			Aliases: []string{"RK"},
@@ -1008,7 +1008,7 @@ func GetConfigs() (c opts.Configs) {
 			Documentation: "<placeholder for detailed documentation>",
 			OmitEmpty:     true,
 		},
-			[]string{net.JoinHostPort("127.0.0.1", chaincfg.MainNetParams.DefaultPort),
+			[]string{net.JoinHostPort("127.0.0.1", chaincfg.MainNetParams.RPCClientPort),
 			},
 		),
 		"RPCMaxClients": integer.New(meta.Data{

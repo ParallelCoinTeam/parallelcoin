@@ -56,20 +56,20 @@ func nodeHandle(ifc interface{}) (e error) {
 			}
 		}
 	}
-	if cx.Config.NodeOff.False() {
-		go func() {
-			if e := node.Main(cx); opts.E.Chk(e) {
-				opts.E.Ln("error starting node ", e)
-			}
-		}()
-		opts.I.Ln("starting node")
-		if cx.Config.DisableRPC.False() {
-			cx.RPCServer = <-cx.NodeChan
-			cx.NodeReady.Q()
-			cx.Node.Store(true)
-			opts.I.Ln("node started")
-		}
+	// if cx.Config.NodeOff.False() {
+	// go func() {
+	if e := node.Main(cx); opts.E.Chk(e) {
+		opts.E.Ln("error starting node ", e)
 	}
+	// }()
+	opts.I.Ln("starting node")
+	if cx.Config.DisableRPC.False() {
+		cx.RPCServer = <-cx.NodeChan
+		cx.NodeReady.Q()
+		cx.Node.Store(true)
+		opts.I.Ln("node started")
+	}
+	// }
 	cx.WaitWait()
 	opts.I.Ln("node is now fully shut down")
 	cx.WaitGroup.Wait()

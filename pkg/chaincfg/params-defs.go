@@ -144,6 +144,8 @@ type Params struct {
 	Net wire.BitcoinNet
 	// DefaultPort defines the default peer-to-peer port for the network.
 	DefaultPort string
+	RPCClientPort       string
+	WalletRPCServerPort string
 	// DNSSeeds defines a list of DNS seeds for the network that are used
 	// as one method to discover peers.
 	DNSSeeds []DNSSeed
@@ -219,6 +221,4 @@ type Params struct {
 	// PowLimit defines the highest allowed proof of work value for a scrypt block as a uint256.
 	ScryptPowLimit      *big.Int
 	ScryptPowLimitBits  uint32
-	RPCClientPort       string
-	WalletRPCServerPort string
 }

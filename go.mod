@@ -25,7 +25,7 @@ require (
 	github.com/niubaoshu/gotiny v0.0.3
 	github.com/p9c/gel v0.1.5
 	github.com/p9c/log v0.0.6
-	github.com/p9c/opts v0.0.5
+	github.com/p9c/opts v0.0.6
 	github.com/p9c/qu v0.0.3
 	github.com/programmer10110/gostreebog v0.0.0-20170704145444-a3e1d28291b2
 	github.com/templexxx/reedsolomon v1.1.3

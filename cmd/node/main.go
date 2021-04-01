@@ -142,7 +142,7 @@ func Main(cx *pod.State) (e error) {
 		mempoolUpdateHook,
 	)
 	if e != nil {
-		E.F("unable to start server on %v: %v", *cx.Config.P2PListeners, e)
+		E.F("unable to start server on %v: %v", cx.Config.P2PListeners.S(), e)
 		return e
 	}
 	server.Start()
@@ -152,6 +152,7 @@ func Main(cx *pod.State) (e error) {
 	// 	// chainrpc.RunAPI(server.RPCServers[0], cx.NodeKill)
 	// 	// D.Ln("propagating rpc server handle (node has started)")
 	// }
+	// I.S(server.RPCServers)
 	if len(server.RPCServers) > 0 {
 		cx.RPCServer = server.RPCServers[0]
 		D.Ln("sending back node")

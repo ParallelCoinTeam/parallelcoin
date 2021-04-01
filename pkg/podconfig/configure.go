@@ -11,9 +11,7 @@ import (
 func Configure(cx *pod.State, initial bool) {
 	commandName := cx.Config.RunningCommand.Name
 	initLogLevel(cx.Config)
-	D.Ln("running Configure", commandName, *cx.Config.WalletPass)
-	D.Ln("DATADIR", *cx.Config.DataDir)
-	D.Ln("set log level")
+	D.Ln("running Configure", commandName, "DATADIR", cx.Config.DataDir.V())
 	// spv.DisableDNSSeed = cx.Config.DisableDNSSeed.True()
 	initDictionary(cx.Config)
 	initParams(cx)

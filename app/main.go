@@ -28,7 +28,7 @@ func Main() int {
 		RunningCommand.
 		Name,
 	)
-	if e = cx.Config.RunningCommand.Entrypoint(cx.Config); E.Chk(e) {
+	if e = cx.Config.RunningCommand.Entrypoint(cx); E.Chk(e) {
 		return 1
 	}
 	return 0
@@ -41,7 +41,7 @@ func GetDefaultConfig() (c *opts.Config) {
 		Map:      GetConfigs(),
 	}
 	c.RunningCommand = c.Commands[0]
-	I.S(c.Commands[0])
+	// I.S(c.Commands[0])
 	// I.S(c.Map)
 	t := reflect.ValueOf(c)
 	t = t.Elem()

@@ -431,7 +431,7 @@ func (n *Node) Start() {
 		n.WG.Add(1)
 		go n.UPNPUpdateThread()
 	}
-	if !n.Config.DisableRPC.True() {
+	if n.Config.DisableRPC.False() {
 		n.WG.Add(1)
 		// Start the rebroadcastHandler, which ensures user tx received by the RPC server are rebroadcast until being
 		// included in a block.
@@ -2741,15 +2741,14 @@ func NewNode(listenAddrs []string, db database.DB, interruptChan qu.C, cx *Conte
 		services &^= wire.SFNodeCF
 	}
 	aMgr := addrmgr.New(cx.Config.DataDir.V()+string(os.PathSeparator)+cx.ActiveNet.Name, Lookup(cx.StateCfg))
-	var listeners []net.Listener
+	var lstn []net.Listener
 	var nat upnp.NAT
-	if !cx.Config.DisableListen.True() {
+	if cx.Config.DisableListen.False() {
 		var e error
-		listeners, nat, e = InitListeners(cx.Config, cx.ActiveNet, aMgr, listenAddrs, services)
-		if e != nil {
+		if lstn, nat, e = InitListeners(cx.Config, cx.ActiveNet, aMgr, listenAddrs, services); E.Chk(e) {
 			return nil, e
 		}
-		if len(listeners) == 0 {
+		if len(lstn) == 0 {
 			return nil, errors.New("no valid listen address")
 		}
 	}
@@ -2795,7 +2794,7 @@ func NewNode(listenAddrs []string, db database.DB, interruptChan qu.C, cx *Conte
 	//
 	// If the addrindex is run first, it may not have the transactions from the current block indexed.
 	var indexes []indexers.Indexer
-	D.Ln("txindex", *cx.Config.TxIndex, "addrindex", *cx.Config.AddrIndex)
+	D.Ln("txindex", cx.Config.TxIndex.True(), "addrindex", cx.Config.AddrIndex.True())
 	if cx.Config.TxIndex.True() || cx.Config.AddrIndex.True() {
 		// Enable transaction index if address index is enabled since it requires it.
 		if !cx.Config.TxIndex.True() {
@@ -3001,7 +3000,7 @@ func NewNode(listenAddrs []string, db database.DB, interruptChan qu.C, cx *Conte
 	cMgr, e :=
 		connmgr.New(
 			&connmgr.Config{
-				Listeners:      listeners,
+				Listeners:      lstn,
 				OnAccept:       s.InboundPeerConnected,
 				RetryDuration:  ConnectionRetryInterval,
 				TargetOutbound: uint32(targetOutbound),
@@ -3031,7 +3030,7 @@ func NewNode(listenAddrs []string, db database.DB, interruptChan qu.C, cx *Conte
 			},
 		)
 	}
-	if !cx.Config.DisableRPC.True() {
+	if cx.Config.DisableRPC.False() {
 		// Setup listeners for the configured RPC listen addresses and TLS settings.
 		listeners := map[string][]string{
 			fork.SHA256d: cx.Config.RPCListeners.S(),
