@@ -3109,7 +3109,7 @@ func NewServerPeer(s *Node, localIP net.IP, isPersistent bool) *NodePeer {
 		len(s.Config.P2PConnect.S()) < 1 ||
 		s.Config.DisableListen.True() ||
 		s.Config.ProxyAddress.V() != "" ||
-		s.Config.OnionProxyddress.V() != "" {
+		s.Config.OnionProxyAddress.V() != "" {
 		// return an empty IP address if we are not listening (this also is done on
 		// proxy connections to not leak info)
 	} else {

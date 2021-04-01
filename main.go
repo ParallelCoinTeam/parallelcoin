@@ -10,11 +10,12 @@
 package main
 
 import (
+	"github.com/p9c/pod/cmd/app"
 	_ "net/http/pprof"
 	
 	"github.com/p9c/pod/cmd"
 )
 
 func main() {
-	cmd.Main()
+	cmd.ConfigAndRun(app.Main)
 }

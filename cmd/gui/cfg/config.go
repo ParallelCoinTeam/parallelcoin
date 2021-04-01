@@ -2,7 +2,6 @@ package cfg
 
 import (
 	"fmt"
-	"github.com/p9c/pod/pkg/podcfg"
 	"sort"
 	"strconv"
 	"time"

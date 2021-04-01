@@ -165,10 +165,10 @@ func OpenRPCKeyPair(config *opts.Config) (tls.Certificate, error) {
 	keyExists := !os.IsNotExist(e)
 	switch {
 	case config.OneTimeTLSKey.True() && keyExists:
-		e := fmt.Errorf(
-			"one time TLS keys are enabled, "+
-				"but TLS key `%s` already exists", *config.RPCKey,
-		)
+		if e = fmt.Errorf(
+			"one time TLS keys are enabled, but TLS key `%s` already exists", config.RPCKey.V(),
+		); E.Chk(e) {
+		}
 		return tls.Certificate{}, e
 	case config.OneTimeTLSKey.True():
 		return GenerateRPCKeyPair(config, false)
@@ -186,7 +186,7 @@ func startRPCServers(cx *pod.State, walletLoader *wallet.Loader) (*walletrpc2.Se
 		keyPair      tls.Certificate
 		e            error
 	)
-	if !cx.Config.TLS.True() {
+	if cx.Config.ClientTLS.False() {
 		I.Ln("server TLS is disabled - only legacy RPC may be used")
 	} else {
 		keyPair, e = OpenRPCKeyPair(cx.Config)

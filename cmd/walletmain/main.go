@@ -5,7 +5,6 @@ import (
 	"github.com/p9c/log"
 	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/opts"
-	"github.com/p9c/pod/pkg/podcfg"
 	walletrpc2 "github.com/p9c/pod/pkg/walletrpc"
 	
 	// This enables pprof
@@ -161,7 +160,7 @@ func rpcClientConnectLoop(
 	T.Ln("rpcClientConnectLoop", log.Caller("which was started at:", 2))
 	// var certs []byte
 	// if !cx.PodConfig.UseSPV {
-	certs := podcfg.ReadCAFile(cx.Config)
+	certs := cx.Config.ReadCAFile()
 	// }
 	for {
 		var (
@@ -271,7 +270,8 @@ func StartChainRPC(config *opts.Config, activeNet *chaincfg.Params, certs []byte
 	error,
 ) {
 	D.Ln(
-		">>>>>>>>>>>>>>> attempting RPC client connection to %v, TLS: %s", *config.RPCConnect, fmt.Sprint(*config.TLS),
+		">>>>>>>>>>>>>>> attempting RPC client connection to %v, TLS: %s", *config.RPCConnect,
+		fmt.Sprint(*config.ClientTLS),
 	)
 	rpcC, e := chainclient.NewRPCClient(
 		activeNet,
@@ -279,7 +279,7 @@ func StartChainRPC(config *opts.Config, activeNet *chaincfg.Params, certs []byte
 		config.Username.V(),
 		config.Password.V(),
 		certs,
-		config.TLS.True(),
+		config.ClientTLS.True(),
 		0,
 		quit,
 	)

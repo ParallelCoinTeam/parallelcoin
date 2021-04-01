@@ -4,10 +4,11 @@ import (
 	"crypto/rand"
 	"fmt"
 	"github.com/niubaoshu/gotiny"
-	"github.com/p9c/pod/pkg/control/p2padvt"
 	"github.com/p9c/log"
+	"github.com/p9c/opts/meta"
+	"github.com/p9c/opts/text"
+	"github.com/p9c/pod/pkg/control/p2padvt"
 	"github.com/p9c/pod/pkg/pod"
-	"github.com/p9c/pod/pkg/podcfg"
 	"github.com/p9c/pod/pkg/transport"
 	"github.com/tyler-smith/go-bip39"
 	"net"
@@ -75,23 +76,23 @@ type WalletGUI struct {
 	ChainClient, WalletClient *rpcclient.Client
 	WalletWatcher             qu.C
 	*gel.Window
-	Size                         *int
-	MainApp                      *gel.App
-	invalidate                   qu.C
-	unlockPage                   *gel.App
-	loadingPage                  *gel.App
-	config                       *cfg.Config
-	configs                      cfg.GroupsMap
-	unlockPassword               *gel.Password
-	sidebarButtons               []*gel.Clickable
-	buttonBarButtons             []*gel.Clickable
-	statusBarButtons             []*gel.Clickable
-	receiveAddressbookClickables []*gel.Clickable
-	sendAddressbookClickables    []*gel.Clickable
-	quitClickable                *gel.Clickable
-	bools                        BoolMap
-	lists                        ListMap
-	checkables                   CheckableMap
+	Size                                     *int
+	MainApp                                  *gel.App
+	invalidate                               qu.C
+	unlockPage                               *gel.App
+	loadingPage                              *gel.App
+	config                                   *cfg.Config
+	configs                                  cfg.GroupsMap
+	unlockPassword                           *gel.Password
+	sidebarButtons                           []*gel.Clickable
+	buttonBarButtons                         []*gel.Clickable
+	statusBarButtons                         []*gel.Clickable
+	receiveAddressbookClickables             []*gel.Clickable
+	sendAddressbookClickables                []*gel.Clickable
+	quitClickable                            *gel.Clickable
+	bools                                    BoolMap
+	lists                                    ListMap
+	checkables                               CheckableMap
 	clickables                               ClickableMap
 	inputs                                   Inputs
 	passwords                                Passwords
@@ -268,8 +269,8 @@ func (wg *WalletGUI) Run() (e error) {
 	// wg.th = gel.NewTheme(p9fonts.Collection(), wg.quit)
 	// wg.Window = gel.NewWindow(wg.th)
 	wg.Window = gel.NewWindowP9(wg.quit)
-	wg.Dark = wg.cx.Config.DarkTheme.Ptr()
-	wg.Colors.SetTheme(*wg.Dark)
+	wg.Dark = wg.cx.Config.DarkTheme
+	wg.Colors.SetDarkTheme(wg.Dark.True())
 	*wg.noWallet = true
 	wg.GetButtons()
 	wg.lists = wg.GetLists()
@@ -547,21 +548,26 @@ func (wg *WalletGUI) GetInputs() Inputs {
 
 // GetPasswords returns the passwords used in the wallet GUI
 func (wg *WalletGUI) GetPasswords() (passwords Passwords) {
-	pass := ""
-	passConfirm := ""
 	passwords = Passwords{
 		"passEditor": wg.Password(
 			"password (minimum 8 characters length)",
-			&pass,
+			text.New(meta.Data{}, ""),
 			"DocText",
 			"DocBg",
 			"PanelBg",
 			func(pass string) {},
 		),
-		"confirmPassEditor": wg.Password("confirm", &passConfirm, "DocText", "DocBg", "PanelBg", func(pass string) {}),
+		"confirmPassEditor": wg.Password(
+			"confirm",
+			text.New(meta.Data{}, ""),
+			"DocText",
+			"DocBg",
+			"PanelBg",
+			func(pass string) {},
+		),
 		"publicPassEditor": wg.Password(
 			"public password (optional)",
-			wg.cx.Config.WalletPass.Ptr(),
+			wg.cx.Config.WalletPass,
 			"Primary",
 			"DocText",
 			"PanelBg",
@@ -591,7 +597,7 @@ func (wg *WalletGUI) GetIncDecs() IncDecMap {
 							wg.miner.Stop()
 						}
 						wg.cx.Config.GenThreads.Set(n)
-						podcfg.Save(wg.cx.Config)
+						_ = wg.cx.Config.WriteToFile(wg.cx.Config.ConfigFile.V())
 						// if wg.miner.Running() {
 						// 	D.Ln("restarting miner")
 						// 	wg.miner.Stop()

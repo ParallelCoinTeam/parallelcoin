@@ -2,10 +2,11 @@ package chainrpc
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/connmgr"
 	"net"
 	"strings"
 	"time"
-
+	
 	"github.com/p9c/pod/cmd/node/state"
 )
 
@@ -35,7 +36,7 @@ var Dial = func(stateCfg *state.Config) func(addr net.Addr) (net.Conn, error) {
 // options. For example, addresses will be resolved using tor when the --proxy flag was specified unless --noonion was
 // also specified in which case the normal system DNS resolver will be used. Any attempt to resolve a tor address (.
 // onion) will return an error since they are not intended to be resolved outside of the tor proxy.
-var Lookup = func(stateCfg *state.Config) func(host string) ([]net.IP, error) {
+var Lookup = func(stateCfg *state.Config) connmgr.LookupFunc {
 	return func(host string) ([]net.IP, error) {
 		if strings.HasSuffix(host, ".onion") {
 			return nil, fmt.Errorf("attempt to resolve tor address %s", host)

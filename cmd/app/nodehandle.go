@@ -14,11 +14,6 @@ import (
 	"github.com/p9c/pod/cmd/node"
 )
 
-func rpcNodeHandle(cx *pod.State) func(c *cli.Context) (e error) {
-	// *cx.Config.DisableController = true
-	return nodeHandle(cx)
-}
-
 func nodeHandle(cx *pod.State) func(c *cli.Context) (e error) {
 	return func(c *cli.Context) (e error) {
 		log.AppColorizer = color.Bit24(128, 128, 255, false).Sprint
@@ -46,7 +41,7 @@ func nodeHandle(cx *pod.State) func(c *cli.Context) (e error) {
 		}
 		// config.Configure(cx, c.Command.Name, true)
 		// D.Ln("starting shell")
-		if cx.Config.TLS.True() || cx.Config.ServerTLS.True() {
+		if cx.Config.ClientTLS.True() || cx.Config.ServerTLS.True() {
 			// generate the tls certificate if configured
 			if apputil.FileExists(cx.Config.RPCCert.V()) &&
 				apputil.FileExists(cx.Config.RPCKey.V()) &&

@@ -13,6 +13,7 @@ func Main() int {
 	if cx, e = pod.GetNewContext(); F.Chk(e) {
 		return 1
 	}
+	T.Ln("running command", cx.Config.RunningCommand.Name)
 	if e = cx.Config.RunningCommand.Entrypoint(cx.Config); E.Chk(e) {
 		return 1
 	}

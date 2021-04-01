@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/p9c/log"
 	"github.com/p9c/pod/pkg/fork"
-	"github.com/p9c/pod/pkg/podcfg"
 	"io/ioutil"
 	prand "math/rand"
 	"os"

@@ -28,14 +28,6 @@ func KopachWorkerHandle(cx *pod.State) func(c *cli.Context) (e error) {
 		}
 		D.Ln("miner worker starting")
 		w, conn := worker.New(os.Args[2], cx.KillAll, uint64(cx.Config.UUID.V()))
-		// interrupt.AddHandler(
-		// 	func() {
-		// 		D.Ln("KopachWorkerHandle interrupt")
-		// 		// if e := conn.Close(); E.Chk(e) {
-		// 		// }
-		// 		// quit.Q()
-		// 	},
-		// )
 		e = rpc.Register(w)
 		if e != nil {
 			D.Ln(e)
@@ -44,9 +36,6 @@ func KopachWorkerHandle(cx *pod.State) func(c *cli.Context) (e error) {
 		D.Ln("starting up worker IPC")
 		rpc.ServeConn(conn)
 		D.Ln("stopping worker IPC")
-		// if e := conn.Close(); E.Chk(e) {
-		// }
-		// quit.Quit()
 		D.Ln("finished")
 		return nil
 	}

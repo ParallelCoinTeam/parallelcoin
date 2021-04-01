@@ -6,7 +6,6 @@ import (
 	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/fork"
 	"github.com/p9c/pod/pkg/opts"
-	"github.com/p9c/pod/pkg/podcfg"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/qu"
 	"golang.org/x/exp/shiny/materialdesign/icons"
@@ -207,7 +206,7 @@ func (wg *WalletGUI) createWalletAction() {
 	pass := wg.passwords["passEditor"].GetPassword()
 	wg.cx.Config.WalletPass.Set(pass)
 	D.Ln("password", string(pass))
-	podcfg.Save(wg.cx.Config)
+	_ = wg.cx.Config.WriteToFile(wg.cx.Config.ConfigFile.V())
 	w, e := loader.CreateNewWallet(
 		[]byte(pass),
 		[]byte(pass),
@@ -229,7 +228,7 @@ func (wg *WalletGUI) createWalletAction() {
 	wg.cx.Config.GenThreads.Set(1)
 	wg.cx.Config.NodeOff.F()
 	wg.cx.Config.WalletOff.F()
-	podcfg.Save(wg.cx.Config)
+	_ = wg.cx.Config.WriteToFile(wg.cx.Config.ConfigFile.V())
 	// // we are going to assume the config is not manually misedited
 	// if apputil.FileExists(*wg.cx.Config.ConfigFile) {
 	// 	b, e := ioutil.ReadFile(*wg.cx.Config.ConfigFile)
@@ -293,5 +292,5 @@ func (wg *WalletGUI) createWalletTestnetToggle(b bool) {
 	wg.cx.Config.WalletRPCListeners.Set(cli.StringSlice{address})
 	wg.cx.Config.WalletServer.Set(address)
 	wg.cx.Config.NodeOff.F()
-	podcfg.Save(wg.cx.Config)
+	_ = wg.cx.Config.WriteToFile(wg.cx.Config.ConfigFile.V())
 }

@@ -63,8 +63,7 @@ type Config struct {
 }
 
 // A bunch of constants
-const (
-)
+const ()
 
 /*
 // cleanAndExpandPath expands environement variables and leading ~ in the

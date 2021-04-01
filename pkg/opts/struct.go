@@ -74,9 +74,9 @@ type Config struct {
 	NodeOff                *binary.Opt
 	OneTimeTLSKey          *binary.Opt
 	OnionEnabled           *binary.Opt
+	OnionProxyAddress      *text.Opt
 	OnionProxyPass         *text.Opt
 	OnionProxyUser         *text.Opt
-	OnionProxyddress       *text.Opt
 	P2PConnect             *list.Opt
 	P2PListeners           *list.Opt
 	Password               *text.Opt

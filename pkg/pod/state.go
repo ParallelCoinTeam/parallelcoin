@@ -50,8 +50,6 @@ type State struct {
 	ActiveNet *chaincfg.Params
 	// Language libraries
 	Language *lang.Lexicon
-	// // DataDir is the default data dir
-	// DataDir string
 	// Node is the run state of the node
 	Node atomic.Bool
 	// NodeReady is closed when it is ready then always returns
@@ -80,11 +78,10 @@ type State struct {
 	Controller *control.State
 	// OtherNodesCounter is the count of nodes connected automatically on the LAN
 	OtherNodesCounter atomic.Int32
-	// IsGUI indicates if we have the possibility of terminal input
-	IsGUI        bool
-	waitChangers []string
-	waitCounter  int
-	Syncing      *atomic.Bool
+	waitChangers      []string
+	waitCounter       int
+	Syncing           *atomic.Bool
+	IsGUI             bool
 }
 
 // GetNewContext returns a fresh new context
@@ -106,7 +103,7 @@ func GetNewContext() (s *State, e error) {
 		// Language:         lang.ExportLanguage(appLang),
 		// DataDir:          appdata.Dir(appName, false),
 		NodeChan: make(chan *chainrpc.Server),
-		Syncing:  atomic.NewBool(false),
+		Syncing:  atomic.NewBool(true),
 	}
 	return
 }

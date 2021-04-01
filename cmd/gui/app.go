@@ -2,7 +2,6 @@ package gui
 
 import (
 	"fmt"
-	"github.com/p9c/pod/pkg/podcfg"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -22,21 +21,6 @@ import (
 func (wg *WalletGUI) GetAppWidget() (a *gel.App) {
 	a = wg.App(&wg.Window.Width, uberatomic.NewString("home"), wg.invalidate, Break1).SetMainDirection(l.W)
 	wg.MainApp = a
-	wg.MainApp.SetThemeHook(
-		func() {
-			D.Ln("theme hook")
-			// D.Ln(wg.bools)
-			wg.cx.Config.DarkTheme.Set(*wg.Dark)
-			a := wg.configs["config"]["DarkTheme"].Slot.(*bool)
-			*a = *wg.Dark
-			if wgb, ok := wg.config.Bools["DarkTheme"]; ok {
-				wgb.Value(*wg.Dark)
-			}
-			podcfg.Save(wg.cx.Config)
-			wg.RecentTransactions(10, "recent")
-			wg.RecentTransactions(-1, "history")
-		},
-	)
 	wg.config = cfg.New(wg.cx, wg.Window)
 	wg.configs = wg.config.Config()
 	a.Pages(
@@ -565,7 +549,7 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 						func() {
 							go func() {
 								wg.cx.Config.Discovery.Flip()
-								podcfg.Save(wg.cx.Config)
+								_ = wg.cx.Config.WriteToFile(wg.cx.Config.ConfigFile.V())
 								I.Ln("discover enabled:", *wg.cx.Config.Discovery)
 							}()
 						},
@@ -647,7 +631,7 @@ func (wg *WalletGUI) RunStatusPanel(gtx l.Context) l.Dimensions {
 										wg.miner.Start()
 										wg.cx.Config.Generate.T()
 									}
-									podcfg.Save(wg.cx.Config)
+									_ = wg.cx.Config.WriteToFile(wg.cx.Config.ConfigFile.V())
 								}
 							}()
 						},

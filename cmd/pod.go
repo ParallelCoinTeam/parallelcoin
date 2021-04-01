@@ -9,13 +9,12 @@ import (
 	"runtime/debug"
 	"runtime/trace"
 	
-	"github.com/p9c/pod/cmd/app"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/util/limits"
 )
 
-// Main is the main entry point for pod
-func Main() {
+// ConfigAndRun is the main entry point for pod
+func ConfigAndRun(entrypoint func() int) {
 	runtime.GOMAXPROCS(runtime.NumCPU() * 3)
 	debug.SetGCPercent(10)
 	var e error
@@ -56,7 +55,7 @@ func Main() {
 			}
 		}
 	}
-	res := app.Main()
+	res := entrypoint()
 	D.Ln("returning value", res, os.Args)
 	if os.Getenv("POD_TRACE") == "on" {
 		D.Ln("stopping trace")

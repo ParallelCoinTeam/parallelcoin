@@ -2,8 +2,6 @@ package normalize
 
 import (
 	"net"
-	
-	"github.com/urfave/cli"
 )
 
 // address returns addr with the passed default port appended if there is not
@@ -40,7 +38,7 @@ func removeDuplicateAddresses(addrs []string) (result []string) {
 }
 
 // StringSliceAddresses normalizes a slice of addresses
-func StringSliceAddresses(a *cli.StringSlice, port string) {
-	variable := []string(*a)
-	*a = Addresses(variable, port)
+func StringSliceAddresses(a []string, port string) {
+	variable := a
+	a = Addresses(variable, port)
 }

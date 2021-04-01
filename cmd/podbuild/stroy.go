@@ -37,10 +37,10 @@ type command struct {
 var ldFlags []string
 
 func main() {
-	// fmt.Println(version.GetVersion())
 	var e error
 	var ok bool
 	var home string
+	var list []string
 	if home, ok = os.LookupEnv("HOME"); !ok {
 		panic(e)
 	}
@@ -52,11 +52,9 @@ func main() {
 		} else {
 			datadir = filepath.Join(home, folderName)
 		}
-		if list, ok := commands[os.Args[1]]; ok {
+		if list, ok = commands[os.Args[1]]; ok {
 			writeVersionFile()
-			// Infos(list)
 			for i := range list {
-				// inf(list[i])
 				// inject the data directory
 				var split []string
 				out := strings.ReplaceAll(list[i], "%datadir", datadir)
@@ -72,19 +70,9 @@ func main() {
 						),
 					)
 				}
-				// Infos(split)
-				// add ldflags to commands that have this
-				// for i := range split {
-				// 	split[i] =
-				// 		I.F("'%s'", split[i])
-				// }
-				fmt.Printf(
-					`executing item %d of list '%v' '%v' '%v'
-
-`, i, os.Args[1],
-					split[0], split[1:],
+				fmt.Printf("executing item %d of list '%v' '%v' '%v'",
+					i, os.Args[1], split[0], split[1:],
 				)
-				// inf(split)
 				var cmd *exec.Cmd
 				scriptPath := filepath.Join(appdata.Dir("stroy", false), "stroy.sh")
 				apputil.EnsureDir(scriptPath)
@@ -131,7 +119,6 @@ func main() {
 }
 
 func writeVersionFile() bool {
-	// `-X 'package_path.variable_name=new_value'`
 	BuildTime = time.Now().Format(time.RFC3339)
 	var cwd string
 	var e error
@@ -146,7 +133,6 @@ func writeVersionFile() bool {
 	if rr, e = repo.Remotes(); e != nil {
 		return false
 	}
-	// spew.Dump(rr)
 	for i := range rr {
 		rs := rr[i].String()
 		if strings.HasPrefix(rs, "origin") {
@@ -165,28 +151,6 @@ func writeVersionFile() bool {
 			
 		}
 	}
-	// var rl object.CommitIter
-	// var rbr *config.Branch
-	// if rbr, e = repo.Branch("l0k1"); e != nil {
-	// }
-	// var rbr storer.ReferenceIter
-	// if rbr, e = repo.Branches(); e != nil{
-	// 	return false
-	// }
-	// spew.Dump(rbr)
-	// if rl, e = repo.Log(&git.LogOptions{
-	// 	From:     plumbing.Hash{},
-	// 	Order:    0,
-	// 	FileName: nil,
-	// 	All:      false,
-	// }); e != nil {
-	// 	return false
-	// }
-	// if e = rl.ForEach(func(cmt *object.Commit) (e error) {
-	// 	spew.Dump(cmt)
-	// 	return nil
-	// }); e != nil {
-	// }
 	var rh *plumbing.Reference
 	if rh, e = repo.Head(); e != nil {
 		return false
@@ -194,47 +158,15 @@ func writeVersionFile() bool {
 	rhs := rh.Strings()
 	GitRef = rhs[0]
 	GitCommit = rhs[1]
-	// fmt.Println(rhs)
-	// var rhco *object.Commit
-	// if rhco, e = repo.CommitObject(rh.Hash()); e != nil {
-	// }
-	// // var dateS string
-	// rhcoS := rhco.String()
-	// sS := strings.Split(rhcoS, "Date:")
-	// sSs := strings.TrimSpace(strings.Split(sS[1], "\n")[0])
-	// fmt.Println(sSs)
-	// var ti time.Time
-	// if ti, e = time.Parse("Mon Jan 02 15:04:05 2006 -0700", sSs); e != nil {
-	// }
-	// fmt.Printf("time %v\n", ti)
-	// fmt.Println(sSs)
-	// fmt.Println(dateS)
-	// inf(rh.Type(), rh.Target(), rh.Strings(), rh.String(), rh.Name())
-	// var rb storer.ReferenceIter
-	// if rb, e = repo.Branches(); e != nil {
-	// 	return false
-	// }
-	// if e = rb.ForEach(func(pr *plumbing.Reference) (e error) {
-	// 	inf(pr.String(), pr.Hash(), pr.Name(), pr.Strings(), pr.Target(), pr.Type())
-	// 	return nil
-	// }); e != nil {
-	// 	return false
-	// }
 	var rt storer.ReferenceIter
 	if rt, e = repo.Tags(); e != nil {
 		return false
 	}
-	// latest := time.Time{}
-	// biggest := ""
-	// allTags := []string{}
 	var maxVersion int
 	var maxString string
 	var maxIs bool
 	if e = rt.ForEach(
 		func(pr *plumbing.Reference) (e error) {
-			// var rcoh *object.Commit
-			// if rcoh, e = repo.CommitObject(pr.Hash()); e != nil {
-			// }
 			prs := strings.Split(pr.String(), "/")[2]
 			if strings.HasPrefix(prs, "v") {
 				var va [3]int
@@ -247,10 +179,7 @@ func writeVersionFile() bool {
 				if pr.Hash() == rh.Hash() {
 					maxIs = true
 				}
-				// allTags = append(allTags, prs)
 			}
-			// fmt.Println(pr.String(), pr.Hash(), pr.Name(), pr.Strings(),
-			// 	pr.Target(), pr.Type())
 			return nil
 		},
 	); e != nil {
@@ -259,10 +188,7 @@ func writeVersionFile() bool {
 	if !maxIs {
 		maxString += "+"
 	}
-	// fmt.Println(maxVersion, maxString)
 	Tag = maxString
-	// txsort.Ints(versionsI)
-	// if runtime.GOOS == "windows" {
 	_, file, _, _ := runtime.Caller(0)
 	fmt.Fprintln(os.Stderr, "file", file)
 	urlSplit := strings.Split(URL, "/")
@@ -319,25 +245,6 @@ func Get() string {
 	if e = ioutil.WriteFile("version/version.go", []byte(versionFileOut), 0666); e != nil {
 		fmt.Fprintln(os.Stderr, e)
 	}
-	// ldFlags = []string{
-	// 	`"-X main.URL=` + URL + ``,
-	// 	`-X main.GitCommit=` + GitCommit + ``,
-	// 	`-X main.BuildTime=` + BuildTime + ``,
-	// 	`-X main.GitRef=` + GitRef + ``,
-	// 	`-X main.Tag=` + Tag + ``,
-	// 	`-X main.PathBase=`+PathBase+`"`,
-	// }
-	// } else {
-	// 	ldFlags = []string{
-	// 		`"-X 'main.URL=` + URL + ``,
-	// 		`-X 'main.GitCommit=` + GitCommit + `'`,
-	// 		`-X 'main.BuildTime=` + BuildTime + `'`,
-	// 		`-X 'main.GitRef=` + GitRef + `'`,
-	// 		`-X 'main.Tag=` + Tag + `'"`,
-	// 	}
-	// }
-	
-	// Infos(ldFlags)
 	return true
 }
 

@@ -3,6 +3,7 @@ package gui
 import (
 	"crypto/cipher"
 	"encoding/json"
+	"github.com/p9c/opts/text"
 	"github.com/p9c/pod/pkg/amt"
 	"github.com/p9c/pod/pkg/btcaddr"
 	"github.com/p9c/pod/pkg/chaincfg"
@@ -157,15 +158,15 @@ func (s *State) Save(filename string, pass *string) (e error) {
 	return
 }
 
-func (s *State) Load(filename string, pass *string) (e error) {
+func (s *State) Load(filename string, pass []byte) (e error) {
 	D.Ln("loading state...")
 	var data []byte
 	var ciph cipher.AEAD
 	if data, e = ioutil.ReadFile(filename); E.Chk(e) {
 		return
 	}
-	D.Ln("cipher:", *pass)
-	if ciph, e = gcm.GetCipher(*pass); E.Chk(e) {
+	D.Ln("cipher:", string(pass))
+	if ciph, e = gcm.GetCipher(pass); E.Chk(e) {
 		return
 	}
 	ns := ciph.NonceSize()

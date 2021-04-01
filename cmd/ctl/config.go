@@ -2,9 +2,7 @@ package ctl
 
 import (
 	"fmt"
-	"path/filepath"
 	
-	"github.com/p9c/pod/pkg/appdata"
 	"github.com/p9c/pod/pkg/btcjson"
 )
 
@@ -12,24 +10,22 @@ import (
 // websockets and consequently notifications.
 const unusableFlags = btcjson.UFWebsocketOnly | btcjson.UFNotification
 
-var (
-	// DefaultConfigFile is
-	DefaultConfigFile = filepath.Join(PodCtlHomeDir, "conf.json")
-	// DefaultRPCCertFile is
-	DefaultRPCCertFile = filepath.Join(NodeHomeDir, "rpc.cert")
-	// DefaultRPCServer is
-	DefaultRPCServer = "127.0.0.1:11048"
-	// DefaultWallet is
-	DefaultWallet = "127.0.0.1:11046"
-	// DefaultWalletCertFile is
-	DefaultWalletCertFile = filepath.Join(SPVHomeDir, "rpc.cert")
-	// NodeHomeDir is
-	NodeHomeDir = appdata.Dir("pod", false)
-	// PodCtlHomeDir is
-	PodCtlHomeDir = appdata.Dir("pod/ctl", false)
-	// SPVHomeDir is
-	SPVHomeDir = appdata.Dir("pod/spv", false)
-)
+// var (
+// 	// DefaultConfigFile is
+// 	DefaultConfigFile = filepath.Join(PodCtlHomeDir, "conf.json")
+// 	// DefaultRPCCertFile is
+// 	DefaultRPCCertFile = filepath.Join(NodeHomeDir, "rpc.cert")
+// 	// DefaultRPCServer is
+// 	DefaultRPCServer = "127.0.0.1:11048"
+// 	// DefaultWallet is
+// 	DefaultWallet = "127.0.0.1:11046"
+// 	// DefaultWalletCertFile is
+// 	DefaultWalletCertFile = filepath.Join(SPVHomeDir, "rpc.cert")
+// 	// NodeHomeDir is
+// 	NodeHomeDir = appdata.Dir("pod", false)
+// 	// PodCtlHomeDir is
+// 	PodCtlHomeDir = appdata.Dir("pod/ctl", false)
+// )
 
 // ListCommands categorizes and lists all of the usable commands along with their one-line usage.
 func ListCommands() {

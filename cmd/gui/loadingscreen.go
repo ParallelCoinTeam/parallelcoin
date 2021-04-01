@@ -2,7 +2,6 @@ package gui
 
 import (
 	l "gioui.org/layout"
-	"github.com/p9c/pod/pkg/podcfg"
 	"golang.org/x/exp/shiny/materialdesign/icons"
 	
 	"github.com/p9c/gel"
@@ -11,19 +10,6 @@ import (
 
 func (wg *WalletGUI) getLoadingPage() (a *gel.App) {
 	a = wg.App(&wg.Window.Width, wg.State.activePage, wg.invalidate, Break1).SetMainDirection(l.Center + 1)
-	a.SetThemeHook(
-		func() {
-			D.Ln("theme hook")
-			// D.Ln(wg.bools)
-			wg.cx.Config.DarkTheme.Set(*wg.Dark)
-			a := wg.configs["config"]["DarkTheme"].Slot.(*bool)
-			*a = *wg.Dark
-			if wgb, ok := wg.config.Bools["DarkTheme"]; ok {
-				wgb.Value(*wg.Dark)
-			}
-			podcfg.Save(wg.cx.Config)
-		},
-	)
 	a.Pages(
 		map[string]l.Widget{
 			"loading": wg.Page(

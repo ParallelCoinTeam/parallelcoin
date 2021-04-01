@@ -55,10 +55,9 @@ func (c ConfigSlice) Less(i, j int) bool { return c[i].Name < c[j].Name }
 func (c ConfigSlice) Swap(i, j int)      { c[i], c[j] = c[j], c[i] }
 
 // Initialize loads in configuration from disk and from environment on top of the default base
-//
-// the several places configuration is sourced from are overlaid in the following order:
-// default -> config file -> environment variables -> commandline flags
 func (c *Config) Initialize() (e error) {
+	// the several places configuration is sourced from are overlaid in the following order:
+	// default -> config file -> environment variables -> commandline flags
 	T.Ln("initializing configuration...")
 	// first lint the configuration
 	var aos map[string][]string
@@ -165,8 +164,21 @@ func (c *Config) loadConfig(path string) (e error) {
 	return
 }
 
-// ForEach iterates the configuration items in their defined order, running a function with the configuration item in
-// the field
+// WriteToFile writes the current config to a file as json
+func (c *Config) WriteToFile(filename string) (e error) {
+	// always load first and ensure written changes propagated or if one is manually running components independently
+	if e = c.loadConfig(filename); E.Chk(e) {
+	}
+	var j []byte
+	if j, e = json.MarshalIndent(c, "", "  "); E.Chk(e) {
+		return
+	}
+	if e = ioutil.WriteFile(filename, j, 0660); E.Chk(e) {
+	}
+	return
+}
+
+// ForEach iterates the options in defined order with a closure that takes an opt.Option
 func (c *Config) ForEach(fn func(ifc opt.Option) bool) bool {
 	t := reflect.ValueOf(c)
 	t = t.Elem()
@@ -222,9 +234,7 @@ func (c *Config) GetOption(input string) (op opt.Option, value string, e error) 
 	return
 }
 
-// MarshalJSON implements the json marshaller for the config. This marshaller only saves what is different from the
-// defaults, and when it is unmarshalled, only the fields stored are altered, thus allowing stacking several sources
-// such as environment variables, command line flags and the config file itself.
+// MarshalJSON implements the json marshaller for the config. It only stores non-default values so can be composited.
 func (c *Config) MarshalJSON() (b []byte, e error) {
 	outMap := make(map[string]interface{})
 	c.ForEach(
@@ -281,8 +291,7 @@ func (c *Config) MarshalJSON() (b []byte, e error) {
 	return json.Marshal(&outMap)
 }
 
-// UnmarshalJSON implements the Unmarshaller interface with a specific goal to be well suited to compositing multiple
-// layers on top of the default base from multiple sources
+// UnmarshalJSON implements the Unmarshaller interface so it only writes to fields with those non-default values set.
 func (c *Config) UnmarshalJSON(data []byte) (e error) {
 	ifc := make(map[string]interface{})
 	if e = json.Unmarshal(data, &ifc); E.Chk(e) {

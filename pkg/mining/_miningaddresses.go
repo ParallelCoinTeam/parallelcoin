@@ -3,7 +3,6 @@ package mining
 import (
 	"github.com/p9c/pod/pkg/btcaddr"
 	"github.com/p9c/pod/pkg/opts"
-	"github.com/p9c/pod/pkg/podcfg"
 	
 	"github.com/p9c/pod/cmd/node/state"
 	wm "github.com/p9c/pod/pkg/waddrmgr"

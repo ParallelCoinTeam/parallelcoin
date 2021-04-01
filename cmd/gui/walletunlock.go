@@ -4,7 +4,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/p9c/pod/pkg/podcfg"
+	"github.com/p9c/pod/pkg/opts"
 	"io/ioutil"
 	"path/filepath"
 	"time"
@@ -28,7 +28,7 @@ func (wg *WalletGUI) unlockWallet(pass string) {
 	wg.cx.Config.WalletOff.F()
 	// wg.cx.Config.Unlock()
 	// load config into a fresh variable
-	cfg := podcfg.GetDefaultConfig()
+	cfg := opts.GetDefaultConfig()
 	var cfgFile []byte
 	var e error
 	if cfgFile, e = ioutil.ReadFile(wg.cx.Config.ConfigFile.V()); E.Chk(e) {
@@ -47,7 +47,7 @@ func (wg *WalletGUI) unlockWallet(pass string) {
 			filename := filepath.Join(wg.cx.Config.DataDir.V(), "state.json")
 			// if log.FileExists(filename) {
 			I.Ln("#### loading state data...")
-			if e = wg.State.Load(filename, wg.cx.Config.WalletPass.Ptr()); !E.Chk(e) {
+			if e = wg.State.Load(filename, wg.cx.Config.WalletPass.Bytes()); !E.Chk(e) {
 				D.Ln("#### loaded state data")
 			}
 			// it is as though it is loaded if it didn't exist
@@ -55,7 +55,8 @@ func (wg *WalletGUI) unlockWallet(pass string) {
 			// the entered password matches the stored hash
 			wg.cx.Config.NodeOff.F()
 			wg.cx.Config.WalletOff.F()
-			podcfg.Save(wg.cx.Config)
+			if e = wg.cx.Config.WriteToFile(wg.cx.Config.ConfigFile.V()); E.Chk(e) {
+			}
 			wg.WalletWatcher = wg.Watcher()
 			// }
 			//
@@ -106,12 +107,14 @@ func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gel.App) {
 			D.Ln("theme hook")
 			// D.Ln(wg.bools)
 			wg.cx.Config.DarkTheme.Set(*wg.Dark)
-			a := wg.configs["config"]["DarkTheme"].Slot.(*bool)
-			*a = *wg.Dark
+			b := wg.configs["config"]["DarkTheme"].Slot.(*bool)
+			*b = *wg.Dark
 			if wgb, ok := wg.config.Bools["DarkTheme"]; ok {
 				wgb.Value(*wg.Dark)
 			}
-			podcfg.Save(wg.cx.Config)
+			var e error
+			if e = wg.cx.Config.WriteToFile(wg.cx.Config.ConfigFile.V()); E.Chk(e) {
+			}
 		},
 	)
 	a.Pages(

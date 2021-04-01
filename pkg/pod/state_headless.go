@@ -8,7 +8,6 @@ import (
 	"github.com/p9c/pod/pkg/chainclient"
 	"github.com/p9c/pod/pkg/control"
 	"github.com/p9c/pod/pkg/opts"
-	"github.com/p9c/pod/pkg/podcfg"
 	"math/rand"
 	"runtime"
 	"strings"
@@ -126,24 +125,27 @@ func (cx *State) PrintWaitChangers() string {
 }
 
 // GetNewContext returns a fresh new context
-func GetNewContext(appName, appLang, subtext string) *State {
-	config, configMap := podcfg.New()
+func GetNewContext() (s *State, e error) {
+	config := opts.GetDefaultConfig()
+	if e = config.Initialize(); E.Chk(e){
+		return
+	}
 	chainClientReady := qu.T()
 	rand.Seed(time.Now().UnixNano())
 	rand.Seed(rand.Int63())
-	cx := &State{
+	s = &State{
 		ChainClientReady: chainClientReady,
 		KillAll:          qu.T(),
 		App:              cli.NewApp(),
 		Config:           config,
-		ConfigMap:        configMap,
+		ConfigMap:        config.Map,
 		StateCfg:         new(state.Config),
-		Language:         lang.ExportLanguage(appLang),
+		// Language:         lang.ExportLanguage(appLang),
 		// DataDir:          appdata.Dir(appName, false),
 		NodeChan: make(chan *chainrpc.Server),
-		Syncing:  atomic.NewBool(false),
+		Syncing:  atomic.NewBool(true),
 	}
-	return cx
+	return
 }
 
 func GetContext(cx *State) *chainrpc.Context {

@@ -3,8 +3,8 @@ package chainclient
 import (
 	"errors"
 	"fmt"
-	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/btcaddr"
+	"github.com/p9c/pod/pkg/chaincfg"
 	"sync"
 	"time"
 	

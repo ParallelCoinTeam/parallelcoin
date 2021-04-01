@@ -1,5 +1,5 @@
 // Copyright (c) 2015-2016 The btcsuite developers
-package main
+package dropwtxmgr
 
 import (
 	"bufio"
@@ -67,9 +67,6 @@ func no(
 	default:
 		return false
 	}
-}
-func main() {
-	os.Exit(mainInt())
 }
 func mainInt() int {
 	fmt.Println("Database path:", opts.DbPath)

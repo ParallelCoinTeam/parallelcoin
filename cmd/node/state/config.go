@@ -3,6 +3,7 @@ package state
 import (
 	"github.com/p9c/pod/pkg/amt"
 	"github.com/p9c/pod/pkg/btcaddr"
+	"github.com/p9c/pod/pkg/connmgr"
 	"net"
 	"time"
 	
@@ -11,7 +12,7 @@ import (
 
 // Config stores current state of the node
 type Config struct {
-	Lookup              func(string) ([]net.IP, error)
+	Lookup              connmgr.LookupFunc
 	Oniondial           func(string, string, time.Duration) (net.Conn, error)
 	Dial                func(string, string, time.Duration) (net.Conn, error)
 	AddedCheckpoints    []chaincfg.Checkpoint
@@ -23,5 +24,4 @@ type Config struct {
 	DropTxIndex         bool
 	DropCfIndex         bool
 	Save                bool
-	// Miner               *worker.Worker
 }

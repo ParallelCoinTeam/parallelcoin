@@ -1,12 +1,10 @@
 package podconfig
 
 import (
-	"github.com/p9c/pod/cmd/spv"
 	"github.com/p9c/pod/pkg/apputil"
 	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/fork"
 	"github.com/p9c/pod/pkg/pod"
-	"github.com/p9c/pod/pkg/podcfg"
 )
 
 // Configure loads and sanitises the configuration from urfave/cli
@@ -15,7 +13,7 @@ func Configure(cx *pod.State, commandName string, initial bool) {
 	D.Ln("running Configure", commandName, *cx.Config.WalletPass)
 	D.Ln("DATADIR", *cx.Config.DataDir)
 	D.Ln("set log level")
-	spv.DisableDNSSeed = cx.Config.DisableDNSSeed.True()
+	// spv.DisableDNSSeed = cx.Config.DisableDNSSeed.True()
 	initDictionary(cx.Config)
 	initParams(cx)
 	initDataDir(cx.Config)
@@ -49,7 +47,9 @@ func Configure(cx *pod.State, commandName string, initial bool) {
 			return
 		}
 		D.Ln("saving configuration")
-		podcfg.Save(cx.Config)
+		var e error
+		if e = cx.Config.WriteToFile(cx.Config.ConfigFile.V()); E.Chk(e) {
+		}
 	}
 	if cx.ActiveNet.Name == chaincfg.TestNet3Params.Name {
 		fork.IsTestnet = true

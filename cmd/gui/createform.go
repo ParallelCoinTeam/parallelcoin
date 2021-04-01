@@ -6,7 +6,6 @@ import (
 	"gioui.org/text"
 	"github.com/p9c/gel"
 	p9icons "github.com/p9c/pod/pkg/icons/svg"
-	"github.com/p9c/pod/pkg/podcfg"
 	"github.com/tyler-smith/go-bip39"
 	"golang.org/x/exp/shiny/materialdesign/icons"
 	"strings"
@@ -397,7 +396,7 @@ func (wg *WalletGUI) cwfTestnetSettings() (out l.Widget) {
 								wg.cx.Config.MulticastPass.Set("pa55word")
 								wg.cx.Config.AutoListen.T()
 							}
-							podcfg.Save(wg.cx.Config)
+							_ = wg.cx.Config.WriteToFile(wg.cx.Config.ConfigFile.V())
 						},
 					),
 				).
@@ -432,7 +431,7 @@ func (wg *WalletGUI) cwfTestnetSettings() (out l.Widget) {
 								wg.cx.Config.MulticastPass.Set("pa55word")
 								wg.cx.Config.AutoListen.T()
 							}
-							podcfg.Save(wg.cx.Config)
+							_ = wg.cx.Config.WriteToFile(wg.cx.Config.ConfigFile.V())
 						},
 					),
 				).

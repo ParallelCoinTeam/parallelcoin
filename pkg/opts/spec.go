@@ -774,7 +774,7 @@ func GetConfigs() (c Configs) {
 		},
 			false,
 		),
-		"OnionProxyddress": text.New(meta.Data{
+		"OnionProxyAddress": text.New(meta.Data{
 			Aliases: []string{"OPA"},
 			Group:   "proxy",
 			Label:   "Onion Proxy Address",

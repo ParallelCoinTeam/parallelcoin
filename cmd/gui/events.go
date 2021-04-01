@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"github.com/p9c/pod/pkg/amt"
 	"github.com/p9c/pod/pkg/control/p2padvt"
-	"github.com/p9c/pod/pkg/podcfg"
 	"github.com/p9c/pod/pkg/transport"
 	"github.com/p9c/pod/pkg/wire"
 	"io/ioutil"
@@ -651,7 +650,7 @@ func (wg *WalletGUI) chainClient() (e error) {
 		return nil
 	}
 	if wg.ChainClient == nil { // || wg.ChainClient.Disconnected() {
-		certs := podcfg.ReadCAFile(wg.cx.Config)
+		certs := wg.cx.Config.ReadCAFile()
 		D.Ln(*wg.cx.Config.RPCConnect)
 		// wg.ChainMutex.Lock()
 		// defer wg.ChainMutex.Unlock()
@@ -661,7 +660,7 @@ func (wg *WalletGUI) chainClient() (e error) {
 				Endpoint:             "ws",
 				User:                 wg.cx.Config.Username.V(),
 				Pass:                 wg.cx.Config.Password.V(),
-				TLS:                  wg.cx.Config.TLS.True(),
+				TLS:                  wg.cx.Config.ClientTLS.True(),
 				Certificates:         certs,
 				DisableAutoReconnect: false,
 				DisableConnectOnNew:  false,
@@ -691,8 +690,8 @@ func (wg *WalletGUI) walletClient() (e error) {
 		return nil
 	}
 	// walletRPC := (*wg.cx.Config.WalletRPCListeners)[0]
-	certs := podcfg.ReadCAFile(wg.cx.Config)
-	I.Ln("config.tls", *wg.cx.Config.TLS)
+	certs := wg.cx.Config.ReadCAFile()
+	I.Ln("config.tls", *wg.cx.Config.ClientTLS)
 	wg.WalletMutex.Lock()
 	if wg.WalletClient, e = rpcclient.New(
 		&rpcclient.ConnConfig{
@@ -700,7 +699,7 @@ func (wg *WalletGUI) walletClient() (e error) {
 			Endpoint:             "ws",
 			User:                 wg.cx.Config.Username.V(),
 			Pass:                 wg.cx.Config.Password.V(),
-			TLS:                  wg.cx.Config.TLS.True(),
+			TLS:                  wg.cx.Config.ClientTLS.True(),
 			Certificates:         certs,
 			DisableAutoReconnect: false,
 			DisableConnectOnNew:  false,

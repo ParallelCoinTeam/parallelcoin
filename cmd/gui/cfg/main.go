@@ -12,6 +12,7 @@ func New(cx *pod.State, w *gel.Window) *Config {
 		cx:     cx,
 		quit:   cx.KillAll,
 	}
+	cfg.Theme = cx.App
 	return cfg.Init()
 }
 
@@ -32,7 +33,6 @@ type Config struct {
 }
 
 func (c *Config) Init() *Config {
-	// c.th = p9.NewTheme(p9fonts.Collection(), c.cx.KillAll)
 	c.Theme.Colors.SetTheme(*c.Theme.Dark)
 	c.enums = map[string]*gel.Enum{
 		// "runmode": ng.th.Enum().SetValue(ng.runMode),

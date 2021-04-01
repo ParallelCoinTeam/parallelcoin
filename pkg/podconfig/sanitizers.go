@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/p9c/log"
 	"github.com/p9c/pod/pkg/amt"
-	"github.com/p9c/pod/pkg/btcaddr"
 	"github.com/p9c/pod/pkg/chaincfg"
 	"github.com/p9c/pod/pkg/fork"
 	"github.com/p9c/pod/pkg/forkhash"
@@ -49,10 +48,10 @@ const (
 var funcName = "loadConfig"
 
 func initDictionary(cfg *opts.Config) {
-	if cfg.Language == nil || cfg.Language.V() == "" {
-		cfg.Language.Set(Lang("en"))
+	if cfg.Locale == nil || cfg.Locale.V() == "" {
+		cfg.Locale.Set(Lang("en"))
 	}
-	T.Ln("lang set to", *cfg.Language)
+	T.Ln("lang set to", *cfg.Locale)
 }
 
 func initDataDir(cfg *opts.Config) {
@@ -460,7 +459,7 @@ func validatePeerLists(cfg *opts.Config) {
 func configListener(cfg *opts.Config, params *chaincfg.Params) {
 	// --proxy or --connect without --listen disables listening.
 	T.Ln("checking proxy/connect for disabling listening")
-	if (cfg.Proxy.V() != "" ||
+	if (cfg.ProxyAddress.V() != "" ||
 		cfg.ConnectPeers.Len() > 0) &&
 		cfg.P2PListeners.Len() == 0 {
 		cfg.DisableListen.T()
@@ -523,7 +522,7 @@ func configRPC(cfg *opts.Config, params *chaincfg.Params) {
 	if cfg.RPCMaxConcurrentReqs.V() < 0 {
 		str := "%s: The rpcmaxwebsocketconcurrentrequests opt may not be" +
 			" less than 0 -- parsed [%d]"
-		e := fmt.Errorf(str, funcName, *cfg.RPCMaxConcurrentReqs)
+		e := fmt.Errorf(str, funcName, cfg.RPCMaxConcurrentReqs.V())
 		_, _ = fmt.Fprintln(os.Stderr, e)
 		// os.Exit(1)
 	}
@@ -552,7 +551,7 @@ func validatePolicies(cfg *opts.Config, stateConfig *state.Config) {
 		str := "%s: The blockmaxsize opt must be in between %d and %d -- parsed [%d]"
 		e = fmt.Errorf(
 			str, funcName, opts.BlockMaxSizeMin,
-			opts.BlockMaxSizeMax, *cfg.BlockMaxSize,
+			opts.BlockMaxSizeMax, cfg.BlockMaxSize.V(),
 		)
 		_, _ = fmt.Fprintln(os.Stderr, e)
 	}
@@ -563,7 +562,7 @@ func validatePolicies(cfg *opts.Config, stateConfig *state.Config) {
 		str := "%s: The blockmaxweight opt must be in between %d and %d -- parsed [%d]"
 		e = fmt.Errorf(
 			str, funcName, opts.BlockMaxWeightMin,
-			opts.BlockMaxWeightMax, *cfg.BlockMaxWeight,
+			opts.BlockMaxWeightMax, cfg.BlockMaxWeight.V(),
 		)
 		_, _ = fmt.Fprintln(os.Stderr, e)
 	}
@@ -571,7 +570,7 @@ func validatePolicies(cfg *opts.Config, stateConfig *state.Config) {
 	T.Ln("checking max orphan limit")
 	if cfg.MaxOrphanTxs.V() < 0 {
 		str := "%s: The maxorphantx opt may not be less than 0 -- parsed [%d]"
-		e = fmt.Errorf(str, funcName, *cfg.MaxOrphanTxs)
+		e = fmt.Errorf(str, funcName, cfg.MaxOrphanTxs.V())
 		_, _ = fmt.Fprintln(os.Stderr, e)
 	}
 	// Limit the block priority and minimum block txsizes to max block size.
@@ -639,21 +638,21 @@ func validatePolicies(cfg *opts.Config, stateConfig *state.Config) {
 func validateOnions(cfg *opts.Config) {
 	// --onionproxy and not --onion are contradictory
 	// TODO: this is kinda stupid hm? switch *and* toggle by presence of flag value, one should be enough
-	if cfg.Onion.True() && !cfg.OnionProxy.Empty() {
+	if cfg.OnionEnabled.True() && !cfg.OnionProxyAddress.Empty() {
 		E.Ln("onion enabled but no onionproxy has been configured")
 		T.Ln("halting to avoid exposing IP address")
 	}
 	// Tor stream isolation requires either proxy or onion proxy to be set.
 	if cfg.TorIsolation.True() &&
-		cfg.Proxy.Empty() &&
-		cfg.OnionProxy.Empty() {
+		cfg.ProxyAddress.Empty() &&
+		cfg.OnionProxyAddress.Empty() {
 		str := "%s: Tor stream isolation requires either proxy or onionproxy to be set"
 		e := fmt.Errorf(str, funcName)
 		_, _ = fmt.Fprintln(os.Stderr, e)
 		// os.Exit(1)
 	}
-	if cfg.Onion.False() {
-		cfg.OnionProxy.Set("")
+	if cfg.OnionEnabled.False() {
+		cfg.OnionProxyAddress.Set("")
 	}
 	
 }
@@ -665,35 +664,35 @@ func validateMiningStuff(
 	if state == nil {
 		panic("state is nil")
 	}
-	// Chk mining addresses are valid and saved parsed versions.
-	T.Ln("checking mining addresses")
-	aml := 99
-	if cfg.MiningAddrs != nil {
-		aml = cfg.MiningAddrs.Len()
-	} else {
-		D.Ln("MiningAddrs is nil")
-		return
-	}
-	state.ActiveMiningAddrs = make([]btcaddr.Address, 0, aml)
-	for _, strAddr := range cfg.MiningAddrs.S() {
-		addr, e := btcaddr.Decode(strAddr, params)
-		if e != nil {
-			E.Ln(e)
-			str := "%s: mining address '%s' failed to decode: %v"
-			e = fmt.Errorf(str, funcName, strAddr, e)
-			_, _ = fmt.Fprintln(os.Stderr, e)
-			// os.Exit(1)
-			continue
-		}
-		if !addr.IsForNet(params) {
-			str := "%s: mining address '%s' is on the wrong network"
-			e := fmt.Errorf(str, funcName, strAddr)
-			_, _ = fmt.Fprintln(os.Stderr, e)
-			// os.Exit(1)
-			continue
-		}
-		state.ActiveMiningAddrs = append(state.ActiveMiningAddrs, addr)
-	}
+	// // Chk mining addresses are valid and saved parsed versions.
+	// T.Ln("checking mining addresses")
+	// aml := 99
+	// if cfg.MiningAddrs != nil {
+	// 	aml = cfg.MiningAddrs.Len()
+	// } else {
+	// 	D.Ln("MiningAddrs is nil")
+	// 	return
+	// }
+	// state.ActiveMiningAddrs = make([]btcaddr.Address, 0, aml)
+	// for _, strAddr := range cfg.MiningAddrs.S() {
+	// 	addr, e := btcaddr.Decode(strAddr, params)
+	// 	if e != nil {
+	// 		E.Ln(e)
+	// 		str := "%s: mining address '%s' failed to decode: %v"
+	// 		e = fmt.Errorf(str, funcName, strAddr, e)
+	// 		_, _ = fmt.Fprintln(os.Stderr, e)
+	// 		// os.Exit(1)
+	// 		continue
+	// 	}
+	// 	if !addr.IsForNet(params) {
+	// 		str := "%s: mining address '%s' is on the wrong network"
+	// 		e := fmt.Errorf(str, funcName, strAddr)
+	// 		_, _ = fmt.Fprintln(os.Stderr, e)
+	// 		// os.Exit(1)
+	// 		continue
+	// 	}
+	// 	state.ActiveMiningAddrs = append(state.ActiveMiningAddrs, addr)
+	// }
 	if cfg.MulticastPass.Empty() {
 		D.Ln("--------------- generating new miner key")
 		cfg.MulticastPass.Set(hex.EncodeToString(forkhash.Argon2i(cfg.MulticastPass.Bytes())))
@@ -712,20 +711,20 @@ func setDiallers(cfg *opts.Config, stateConfig *state.Config) {
 	stateConfig.Dial = net.DialTimeout
 	stateConfig.Lookup = net.LookupIP
 	var e error
-	if !cfg.Proxy.Empty() {
+	if !cfg.ProxyAddress.Empty() {
 		T.Ln("we are loading a proxy!")
-		_, _, e = net.SplitHostPort(cfg.Proxy.V())
+		_, _, e = net.SplitHostPort(cfg.ProxyAddress.V())
 		if e != nil {
 			E.Ln(e)
 			str := "%s: Proxy address '%s' is invalid: %v"
-			e = fmt.Errorf(str, funcName, cfg.Proxy.V(), e)
+			e = fmt.Errorf(str, funcName, cfg.ProxyAddress.V(), e)
 			fmt.Fprintln(os.Stderr, e)
 			// os.Exit(1)
 		}
 		// Tor isolation flag means proxy credentials will be overridden unless there is
 		// also an onion proxy configured in which case that one will be overridden.
 		torIsolation := false
-		if cfg.TorIsolation.True() && cfg.OnionProxy.Empty() &&
+		if cfg.TorIsolation.True() && cfg.OnionProxyAddress.Empty() &&
 			(!cfg.ProxyUser.Empty() || !cfg.ProxyPass.Empty()) {
 			torIsolation = true
 			W.Ln(
@@ -734,7 +733,7 @@ func setDiallers(cfg *opts.Config, stateConfig *state.Config) {
 			)
 		}
 		proxy := &socks.Proxy{
-			Addr:         cfg.Proxy.V(),
+			Addr:         cfg.ProxyAddress.V(),
 			Username:     cfg.ProxyUser.V(),
 			Password:     cfg.ProxyPass.V(),
 			TorIsolation: torIsolation,
@@ -742,10 +741,10 @@ func setDiallers(cfg *opts.Config, stateConfig *state.Config) {
 		stateConfig.Dial = proxy.DialTimeout
 		// Treat the proxy as tor and perform DNS resolution through it unless the
 		// --noonion flag is set or there is an onion-specific proxy configured.
-		if cfg.Onion.True() &&
-			cfg.OnionProxy.Empty() {
+		if cfg.OnionEnabled.True() &&
+			cfg.OnionProxyAddress.Empty() {
 			stateConfig.Lookup = func(host string) ([]net.IP, error) {
-				return connmgr.TorLookupIP(host, cfg.Proxy.V())
+				return connmgr.TorLookupIP(host, cfg.ProxyAddress.V())
 			}
 		}
 	}
@@ -756,13 +755,12 @@ func setDiallers(cfg *opts.Config, stateConfig *state.Config) {
 	// selected above. This allows .onion address traffic to be routed through a
 	// different proxy than normal traffic.
 	T.Ln("setting up tor proxy if enabled")
-	if !cfg.OnionProxy.Empty() {
-		_, _, e = net.SplitHostPort(cfg.OnionProxy.V())
-		if e != nil {
-			E.Ln(e)
-			str := "%s: Onion proxy address '%s' is invalid: %v"
-			e = fmt.Errorf(str, funcName, cfg.OnionProxy.V(), e)
-			_, _ = fmt.Fprintln(os.Stderr, e)
+	if !cfg.OnionProxyAddress.Empty() {
+		if _, _, e = net.SplitHostPort(cfg.OnionProxyAddress.V()); E.Chk(e) {
+			e = fmt.Errorf("%s: Onion proxy address '%s' is invalid: %v",
+				funcName, cfg.OnionProxyAddress.V(), e,
+			)
+			// _, _ = fmt.Fprintln(os.Stderr, e)
 		}
 		// Tor isolation flag means onion proxy credentials will be overridden.
 		if cfg.TorIsolation.True() &&
@@ -777,7 +775,7 @@ func setDiallers(cfg *opts.Config, stateConfig *state.Config) {
 	stateConfig.Oniondial =
 		func(network, addr string, timeout time.Duration) (net.Conn, error) {
 			proxy := &socks.Proxy{
-				Addr:         cfg.OnionProxy.V(),
+				Addr:         cfg.OnionProxyAddress.V(),
 				Username:     cfg.OnionProxyUser.V(),
 				Password:     cfg.OnionProxyPass.V(),
 				TorIsolation: cfg.TorIsolation.True(),
@@ -789,15 +787,15 @@ func setDiallers(cfg *opts.Config, stateConfig *state.Config) {
 	// means that the proxy configured by --proxy is not a tor proxy, so override
 	// the DNS resolution to use the onion-specific proxy.
 	T.Ln("setting proxy lookup")
-	if !cfg.Proxy.Empty() {
+	if !cfg.ProxyAddress.Empty() {
 		stateConfig.Lookup = func(host string) ([]net.IP, error) {
-			return connmgr.TorLookupIP(host, cfg.OnionProxy.V())
+			return connmgr.TorLookupIP(host, cfg.OnionProxyAddress.V())
 		}
 	} else {
 		stateConfig.Oniondial = stateConfig.Dial
 	}
 	// Specifying --noonion means the onion address dial function results in an error.
-	if cfg.Onion.False() {
+	if cfg.OnionEnabled.False() {
 		stateConfig.Oniondial = func(a, b string, t time.Duration) (net.Conn, error) {
 			return nil, errors.New("tor has been disabled")
 		}
