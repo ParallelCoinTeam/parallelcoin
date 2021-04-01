@@ -7,7 +7,7 @@ So, there's a few things that you should do, which Loki thinks you will anyway r
 
 1. e is error
 
-being a vowel, `err` is a stolen name. But it also is 3 times as long. It is nearly universal among programmers that i, usually also j and k are iterator variables, and commonly also x, y, z, most cogently relevant when they are coordinates. So use e, not err
+being a verb, `err` is a stolen name. But it also is 3 times as long. It is nearly universal among programmers that i, usually also j and k are iterator variables, and commonly also x, y, z, most cogently relevant when they are coordinates. So use e, not err
 
 2. Use the logger, E.Chk for serious conditions or while debugging, non-blocking failures use D.Chk 
 
@@ -35,3 +35,10 @@ This is being partly repeated as it's very important. Regardless of programmer o
 
 So long as logs concern themselves primarily with metadata information and only expose data in `trace` level (with the `T` error type) and put the really heavy stuff like printing tree walks over thousands of nodes or other similarly very short operations, put them inside closures with `T.C(func()string{})`
 
+8. `gofmt` sort the imports, and avoid whenever possible a package name different from a folder, unless you can't avoid an import name conflict. A notable example is uber/atomic. 
+
+9. 120 characters wide
+
+We are living in the 21st century. It was already common as this century started that monitors were big enough to show 120 or more characters wide, 80 characters is just too narrow. Well, it would be even better if I figured out a way to make the Gio code not stack out to the right so deep but it's comfortable in 120 unless I have put too many things into one closure.
+
+10. Always put doc comments on exported functions. Put them on struct fields and variables also in the case that detailed information isn't already available elsewhere related to the item. Keep the doc comments to one line unless you really need to explain something that needs to be visible in the documentation. For the most part this means libraries and for the most part a lot of that is in independent repositories.
