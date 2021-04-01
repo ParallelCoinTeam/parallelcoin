@@ -3,8 +3,8 @@ package main
 
 import (
 	"fmt"
+	app2 "github.com/p9c/pod/app"
 	"github.com/p9c/pod/pkg/opts"
-	"github.com/p9c/pod/pkg/spec"
 	"go/format"
 	"io/ioutil"
 	"os"
@@ -14,7 +14,7 @@ import (
 )
 
 func main() {
-	c := spec.GetConfigs()
+	c := app2.GetConfigs()
 	var o string
 	var cc opts.ConfigSlice
 	for i := range c {
@@ -67,6 +67,6 @@ type Config struct {
 	// converted to lower case for CLI args
 	Map            map[string]opt.Option
 	Commands       cmds.Commands
-	RunningCommand *cmds.Command
+	RunningCommand cmds.Command
 %s}
 `

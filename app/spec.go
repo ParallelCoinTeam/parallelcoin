@@ -1,4 +1,4 @@
-package spec
+package app
 
 import (
 	"github.com/p9c/opts/binary"

@@ -9,13 +9,9 @@ import (
 	"github.com/p9c/pod/pkg/chainclient"
 	"github.com/p9c/pod/pkg/control"
 	"github.com/p9c/pod/pkg/opts"
-	"github.com/p9c/pod/pkg/spec"
-	"math/rand"
-	"reflect"
 	"runtime"
 	"strings"
 	"sync"
-	"time"
 	
 	"github.com/p9c/qu"
 	
@@ -82,53 +78,6 @@ type State struct {
 	waitCounter       int
 	Syncing           *atomic.Bool
 	IsGUI             bool
-}
-
-// GetDefaultConfig returns a Config struct pristine factory fresh
-func GetDefaultConfig() (c *opts.Config) {
-	c = &opts.Config{
-		Commands: spec.GetCommands(),
-		Map:      spec.GetConfigs(),
-	}
-	I.S(c.Commands[0])
-	// I.S(c.Map)
-	t := reflect.ValueOf(c)
-	t = t.Elem()
-	for i := range c.Map {
-		tf := t.FieldByName(i)
-		if tf.IsValid() && tf.CanSet() && tf.CanAddr() {
-			val := reflect.ValueOf(c.Map[i])
-			tf.Set(val)
-		}
-	}
-	// I.S(c)
-	return
-}
-
-// GetNewContext returns a fresh new context
-func GetNewContext() (s *State, e error) {
-	config := GetDefaultConfig()
-	if e = config.Initialize(); E.Chk(e){
-		// return
-		panic(e)
-	}
-	config.RunningCommand = &(config.Commands[0])
-	chainClientReady := qu.T()
-	rand.Seed(time.Now().UnixNano())
-	rand.Seed(rand.Int63())
-	s = &State{
-		ChainClientReady: chainClientReady,
-		KillAll:          qu.T(),
-		// App:              cli.NewApp(),
-		Config:           config,
-		ConfigMap:        config.Map,
-		StateCfg:         new(state.Config),
-		// Language:         lang.ExportLanguage(appLang),
-		// DataDir:          appdata.Dir(appName, false),
-		NodeChan: make(chan *chainrpc.Server),
-		Syncing:  atomic.NewBool(true),
-	}
-	return
 }
 
 func (cx *State) WaitAdd() {

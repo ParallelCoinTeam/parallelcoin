@@ -21,7 +21,7 @@ type Config struct {
 	// converted to lower case for CLI args
 	Map                    map[string]opt.Option
 	Commands               cmds.Commands
-	RunningCommand         *cmds.Command
+	RunningCommand         cmds.Command
 	AddCheckpoints         *list.Opt
 	AddPeers               *list.Opt
 	AddrIndex              *binary.Opt

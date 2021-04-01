@@ -5,7 +5,6 @@ import (
 	"bytes"
 	js "encoding/json"
 	"fmt"
-	"github.com/p9c/pod/pkg/pod"
 	"io"
 	"os"
 	"strings"
@@ -20,7 +19,7 @@ var HelpPrint = func() {
 }
 
 // Main is the entry point for the pod.Ctl component
-func Main(args []string, cx *pod.State) {
+func Main(args []string) {
 	// Ensure the specified method identifies a valid registered command and is one of the usable types.
 	method := args[0]
 	var usageFlags btcjson.UsageFlag

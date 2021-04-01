@@ -69,7 +69,11 @@ func (c *Config) Initialize() (e error) {
 	if cm, options, optVals, e = c.processCommandlineArgs(os.Args[1:]); E.Chk(e) {
 		return
 	}
-	c.RunningCommand = cm
+	if cm != nil {
+		c.RunningCommand = *cm
+	} else {
+		c.RunningCommand = c.Commands[0]
+	}
 	// if the user sets the configfile directly, or the datadir on the commandline we need to load it from that path
 	T.Ln("checking from where to load the configuration file")
 	datadir := c.DataDir.V()

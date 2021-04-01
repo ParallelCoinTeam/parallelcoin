@@ -1,0 +1,11 @@
+{
+    "addrindex": true,
+    "blockmaxsize": 100000,
+    "datadir": "~/.pode",
+    "generate": true,
+    "genthreads": 1,
+    "loglevel": "debug",
+    "network": "testnet",
+    "torisolation": true,
+    "uuid": 4841302696703121408
+}
