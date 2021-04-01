@@ -42,3 +42,11 @@ So long as logs concern themselves primarily with metadata information and only 
 We are living in the 21st century. It was already common as this century started that monitors were big enough to show 120 or more characters wide, 80 characters is just too narrow. Well, it would be even better if I figured out a way to make the Gio code not stack out to the right so deep but it's comfortable in 120 unless I have put too many things into one closure.
 
 10. Always put doc comments on exported functions. Put them on struct fields and variables also in the case that detailed information isn't already available elsewhere related to the item. Keep the doc comments to one line unless you really need to explain something that needs to be visible in the documentation. For the most part this means libraries and for the most part a lot of that is in independent repositories.
+
+11. Avoid pointers for other than structs and arrays (fixed length). Pointers require mutexes with concurrent code, which is the rule rather than the exception, and it is incredibly easy to put a lock inside a downstream function that has just locked it and the application freezes. 
+
+Instead, as a default option, use atomics and if necessary further processing or hook-calling from getters or setters. If it's a big struct, so much the better. Atomics are perfectly suited for independent threads with narrow responsibilities, and they also don't lock out threads from accessing other fields of the struct concurrently, which can become a bottleneck that invisibly creeps up on you.
+
+12. `if e = function(); E.Chk(e){}` is the prototype of how all functions handling errors should be invoked. It is more compact and doesn't noise up the call so much as the alternative fills up your screen.
+
+13. When considering whether to use an interface, ask whether a generator might be easier (and perhaps faster). The generics-loving vocal usually sub-2 years programmers who came from generics abusing languages like c#, java or c++, can just go away, Go14life. Automation > abbreviation.
