@@ -4,6 +4,7 @@ package main
 import (
 	"fmt"
 	"github.com/p9c/pod/pkg/opts"
+	"github.com/p9c/pod/pkg/spec"
 	"go/format"
 	"io/ioutil"
 	"os"
@@ -13,7 +14,7 @@ import (
 )
 
 func main() {
-	c := opts.GetConfigs()
+	c := spec.GetConfigs()
 	var o string
 	var cc opts.ConfigSlice
 	for i := range c {

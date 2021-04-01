@@ -6,7 +6,6 @@ import (
 	"crypto/x509"
 	js "encoding/json"
 	"fmt"
-	"github.com/p9c/pod/pkg/opts"
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -15,19 +14,25 @@ import (
 	"github.com/btcsuite/go-socks/socks"
 	
 	"github.com/p9c/pod/pkg/btcjson"
-	"github.com/p9c/pod/pkg/pod"
 )
 
 // newHTTPClient returns a new HTTP client that is configured according to the proxy and TLS settings in the associated
 // connection configuration.
-func newHTTPClient(cfg *opts.Config) (client *http.Client, e error) {
+func newHTTPClient(
+	proxyAddress,
+	proxyUser,
+	proxyPass,
+	rpcCert string,
+	tlsEnabled,
+	skipVerify bool,
+) (client *http.Client, e error) {
 	// Configure proxy if needed.
 	var dial func(network, addr string) (net.Conn, error)
-	if cfg.Proxy.V() != "" {
+	if proxyAddress != "" {
 		proxy := &socks.Proxy{
-			Addr:     cfg.Proxy.V(),
-			Username: cfg.ProxyUser.V(),
-			Password: cfg.ProxyPass.V(),
+			Addr:     proxyAddress,
+			Username: proxyUser,
+			Password: proxyPass,
 		}
 		dial = func(network, addr string) (c net.Conn, e error) {
 			if c, e = proxy.Dial(network, addr); E.Chk(e) {
@@ -38,16 +43,16 @@ func newHTTPClient(cfg *opts.Config) (client *http.Client, e error) {
 	}
 	// Configure TLS if needed.
 	var tlsConfig *tls.Config
-	if cfg.TLS.True() && cfg.RPCCert.V() != "" {
+	if tlsEnabled && rpcCert != "" {
 		var pem []byte
-		if pem, e = ioutil.ReadFile(cfg.RPCCert.V()); E.Chk(e) {
+		if pem, e = ioutil.ReadFile(rpcCert); E.Chk(e) {
 			return nil, e
 		}
 		pool := x509.NewCertPool()
 		pool.AppendCertsFromPEM(pem)
 		tlsConfig = &tls.Config{
 			RootCAs:            pool,
-			InsecureSkipVerify: cfg.TLSSkipVerify.True(),
+			InsecureSkipVerify: skipVerify,
 		}
 	}
 	// Create and return the new HTTP client potentially configured with a proxy and TLS.
@@ -63,18 +68,25 @@ func newHTTPClient(cfg *opts.Config) (client *http.Client, e error) {
 // sendPostRequest sends the marshalled JSON-RPC command using HTTP-POST mode to the server described in the passed
 // config struct. It also attempts to unmarshal the response as a JSON-RPC response and returns either the result field
 // or the error field depending on whether or not there is an error.
-func sendPostRequest(marshalledJSON []byte, cx *pod.State) ([]byte, error) {
+func sendPostRequest(marshalledJSON []byte, ctls, useWallet bool, nodeAddr, walletAddr, username, password string,
+	proxyAddress,
+	proxyUser,
+	proxyPass,
+	rpcCert string,
+	tlsEnabled,
+	skipVerify bool,
+) ([]byte, error) {
 	// Generate a request to the configured RPC server.
 	protocol := "http"
-	if cx.Config.TLS.True() {
+	if ctls {
 		protocol = "https"
 	}
-	serverAddr := *cx.Config.RPCConnect
-	if cx.Config.Wallet.True() {
-		serverAddr = *cx.Config.WalletServer
+	serverAddr := nodeAddr
+	if useWallet {
+		serverAddr = walletAddr
 		_, _ = fmt.Fprintln(os.Stderr, "ctl: using wallet server", serverAddr)
 	}
-	url := protocol + "://" + serverAddr.V()
+	url := protocol + "://" + serverAddr
 	bodyReader := bytes.NewReader(marshalledJSON)
 	var httpRequest *http.Request
 	var e error
@@ -84,10 +96,17 @@ func sendPostRequest(marshalledJSON []byte, cx *pod.State) ([]byte, error) {
 	httpRequest.Close = true
 	httpRequest.Header.Set("Content-Type", "application/json")
 	// Configure basic access authorization.
-	httpRequest.SetBasicAuth(cx.Config.Username.V(), cx.Config.Password.V())
+	httpRequest.SetBasicAuth(username, password)
 	// Create the new HTTP client that is configured according to the user - specified options and submit the request.
 	var httpClient *http.Client
-	if httpClient, e = newHTTPClient(cx.Config); E.Chk(e) {
+	if httpClient, e = newHTTPClient(
+		proxyAddress,
+		proxyUser,
+		proxyPass,
+		rpcCert,
+		tlsEnabled,
+		skipVerify,
+	); E.Chk(e) {
 		return nil, e
 	}
 	var httpResponse *http.Response

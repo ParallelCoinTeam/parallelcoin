@@ -23,8 +23,7 @@ import (
 	"github.com/p9c/opts/opt"
 	"github.com/p9c/opts/text"
 	"github.com/p9c/pod/pkg/apputil"
-	"github.com/p9c/pod/pkg/base58"
-	"github.com/p9c/pod/pkg/util/hdkeychain"
+	"github.com/p9c/pod/pkg/constant"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -32,14 +31,6 @@ import (
 	"sort"
 	"strings"
 	"time"
-)
-
-const (
-	Name              = "pod"
-	confExt           = ".json"
-	appLanguage       = "en"
-	PodConfigFilename = Name + confExt
-	PARSER            = "json"
 )
 
 // Configs is the source location for the Config items, which is used to generate the Config struct
@@ -61,7 +52,7 @@ func (c *Config) Initialize() (e error) {
 	T.Ln("initializing configuration...")
 	// first lint the configuration
 	var aos map[string][]string
-	if aos, e = c.getAllOptionStrings(); E.Chk(e) {
+	if aos, e = getAllOptionStrings(c); E.Chk(e) {
 		return
 	}
 	// this function will panic if there is potential for ambiguity in the commandline configuration args.
@@ -101,7 +92,7 @@ func (c *Config) Initialize() (e error) {
 		resolvedConfigPath = configPath
 	} else {
 		if datadir != "" {
-			resolvedConfigPath = filepath.Join(datadir, PodConfigFilename)
+			resolvedConfigPath = filepath.Join(datadir, constant.PodConfigFilename)
 			T.Ln("loading config from", resolvedConfigPath)
 		}
 	}
@@ -191,23 +182,6 @@ func (c *Config) ForEach(fn func(ifc opt.Option) bool) bool {
 		}
 	}
 	return true
-}
-
-// GetDefaultConfig returns a Config struct pristine factory fresh
-func GetDefaultConfig() (c *Config) {
-	c = &Config{Commands: GetCommands(), Map: GetConfigs()}
-	// I.S(c.Map)
-	t := reflect.ValueOf(c)
-	t = t.Elem()
-	for i := range c.Map {
-		tf := t.FieldByName(i)
-		if tf.IsValid() && tf.CanSet() && tf.CanAddr() {
-			val := reflect.ValueOf(c.Map[i])
-			tf.Set(val)
-		}
-	}
-	// I.S(c)
-	return
 }
 
 // GetOption searches for a match amongst the opts
@@ -488,14 +462,6 @@ func (c *Config) ReadCAFile() []byte {
 		I.Ln("chain server RPC TLS is disabled")
 	}
 	return certs
-}
-
-func genPassword() string {
-	s, e := hdkeychain.GenerateSeed(16)
-	if e != nil {
-		panic("can't do nothing without entropy! " + e.Error())
-	}
-	return base58.Encode(s)
 }
 
 func ifcToStrings(ifc []interface{}) (o []string) {

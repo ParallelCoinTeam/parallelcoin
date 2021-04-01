@@ -13,6 +13,7 @@ func GetCipher(password []byte) (gcm cipher.AEAD, e error) {
 	bytes := password
 	var c cipher.Block
 	if c, e = aes.NewCipher(argon2.IDKey(reverse(bytes), bytes, 1, 64*1024, 4, 32)); E.Chk(e) {
+		return
 	}
 	if gcm, e = cipher.NewGCM(c); E.Chk(e) {
 	}

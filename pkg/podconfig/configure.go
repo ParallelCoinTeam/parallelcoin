@@ -8,7 +8,8 @@ import (
 )
 
 // Configure loads and sanitises the configuration from urfave/cli
-func Configure(cx *pod.State, commandName string, initial bool) {
+func Configure(cx *pod.State, initial bool) {
+	commandName := cx.Config.RunningCommand.Name
 	initLogLevel(cx.Config)
 	D.Ln("running Configure", commandName, *cx.Config.WalletPass)
 	D.Ln("DATADIR", *cx.Config.DataDir)

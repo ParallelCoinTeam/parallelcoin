@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/constant"
 	"github.com/p9c/pod/pkg/opts"
 	"github.com/p9c/pod/pkg/pod"
 	walletrpc2 "github.com/p9c/pod/pkg/walletrpc"
@@ -30,10 +31,10 @@ func getApp(cx *pod.State) (a *cli.App) {
 		Version:     version.Get(),
 		Description: cx.Language.RenderText("goApp_DESCRIPTION"),
 		Copyright:   cx.Language.RenderText("goApp_COPYRIGHT"),
-		Action:      walletGUIHandle(cx),
+		Action:      GUIHandle(cx),
 		Before:      beforeFunc(cx),
 		After: func(c *cli.Context) (e error) {
-			D.Ln("subcommand completed", os.Args)
+			opts.D.Ln("subcommand completed", os.Args)
 			if interrupt.Restart {
 			}
 			return nil
@@ -47,7 +48,7 @@ func getApp(cx *pod.State) (a *cli.App) {
 				}, au.SubCommands(), nil, "v",
 			),
 			au.Command(
-				"gui", "start wallet GUI", walletGUIHandle(cx),
+				"gui", "start wallet GUI", GUIHandle(cx),
 				au.SubCommands(), nil,
 			),
 			au.Command(
@@ -115,7 +116,7 @@ func getApp(cx *pod.State) (a *cli.App) {
 						"resetchain",
 						"reset the chain",
 						func(c *cli.Context) (e error) {
-							podconfig.Configure(cx, "resetchain", true)
+							podconfig.Configure(cx, true)
 							dbName := blockdb.NamePrefix + "_" + cx.Config.DbType.V()
 							if cx.Config.DbType.V() == "sqlite" {
 								dbName += ".db"
@@ -126,7 +127,7 @@ func getApp(cx *pod.State) (a *cli.App) {
 									cx.ActiveNet.Name,
 								), dbName,
 							)
-							if e = os.RemoveAll(dbPath); E.Chk(e) {
+							if e = os.RemoveAll(dbPath); opts.E.Chk(e) {
 							}
 							return nodeHandle(cx)(c)
 						},
@@ -188,7 +189,7 @@ func getApp(cx *pod.State) (a *cli.App) {
 						"resetchain",
 						"reset the chain",
 						func(c *cli.Context) (e error) {
-							podconfig.Configure(cx, "resetchain", true)
+							podconfig.Configure(cx, true)
 							dbName := blockdb.NamePrefix + "_" + cx.Config.DbType.V()
 							if cx.Config.DbType.V() == "sqlite" {
 								dbName += ".db"
@@ -199,7 +200,7 @@ func getApp(cx *pod.State) (a *cli.App) {
 									cx.ActiveNet.Name,
 								), dbName,
 							)
-							if e = os.RemoveAll(dbPath); E.Chk(e) {
+							if e = os.RemoveAll(dbPath); opts.E.Chk(e) {
 							}
 							return nodeHandle(cx)(c)
 							// return nil
@@ -216,14 +217,14 @@ func getApp(cx *pod.State) (a *cli.App) {
 						"drophistory", "drop the transaction history in the wallet (for "+
 							"development and testing as well as clearing up transaction mess)",
 						func(c *cli.Context) (e error) {
-							podconfig.Configure(cx, "wallet", true)
-							I.Ln("dropping wallet history")
+							podconfig.Configure(cx, true)
+							opts.I.Ln("dropping wallet history")
 							go func() {
-								D.Ln("starting wallet")
-								if e = walletmain.Main(cx); E.Chk(e) {
+								opts.D.Ln("starting wallet")
+								if e = walletmain.Main(cx); opts.E.Chk(e) {
 									// os.Exit(1)
 								} else {
-									D.Ln("wallet started")
+									opts.D.Ln("wallet started")
 								}
 							}()
 							// D.Ln("waiting for walletChan")
@@ -469,7 +470,7 @@ func getApp(cx *pod.State) (a *cli.App) {
 			au.Int(
 				"maxpeers",
 				"Max number of inbound and outbound peers",
-				opts.DefaultMaxPeers,
+				constant.DefaultMaxPeers,
 				cx.Config.MaxPeers.Ptr(),
 			),
 			au.Bool(
@@ -487,7 +488,7 @@ func getApp(cx *pod.State) (a *cli.App) {
 				"banthreshold",
 				"Maximum allowed ban score before disconnecting and"+
 					" banning misbehaving peers.",
-				opts.DefaultBanThreshold,
+				constant.DefaultBanThreshold,
 				cx.Config.BanThreshold.Ptr(),
 			),
 			au.StringSlice(
@@ -510,20 +511,20 @@ func getApp(cx *pod.State) (a *cli.App) {
 			au.Int(
 				"rpcmaxclients",
 				"Max number of RPC clients for standard connections",
-				opts.DefaultMaxRPCClients,
+				constant.DefaultMaxRPCClients,
 				cx.Config.RPCMaxClients.Ptr(),
 			),
 			au.Int(
 				"rpcmaxwebsockets",
 				"Max number of RPC websocket connections",
-				opts.DefaultMaxRPCWebsockets,
+				constant.DefaultMaxRPCWebsockets,
 				cx.Config.RPCMaxWebsockets.Ptr(),
 			),
 			au.Int(
 				"rpcmaxconcurrentreqs",
 				"Max number of RPC requests that may be"+
 					" processed concurrently",
-				opts.DefaultMaxRPCConcurrentReqs,
+				constant.DefaultMaxRPCConcurrentReqs,
 				cx.Config.RPCMaxConcurrentReqs.Ptr(),
 			),
 			au.Bool(
@@ -565,7 +566,7 @@ func getApp(cx *pod.State) (a *cli.App) {
 			au.String(
 				"dbtype",
 				"Database backend to use for the Block Chain",
-				opts.DefaultDbType,
+				constant.DefaultDbType,
 				cx.Config.DbType.Ptr(),
 			),
 			au.String(
@@ -597,7 +598,7 @@ func getApp(cx *pod.State) (a *cli.App) {
 				"limitfreerelay",
 				"Limit relay of transactions with no transaction"+
 					" fee to the given amount in thousands of bytes per minute",
-				opts.DefaultFreeTxRelayLimit,
+				constant.DefaultFreeTxRelayLimit,
 				cx.Config.FreeTxRelayLimit.Ptr(),
 			),
 			au.Bool(
@@ -610,13 +611,13 @@ func getApp(cx *pod.State) (a *cli.App) {
 				"trickleinterval",
 				"Minimum time between attempts to send new"+
 					" inventory to a connected peer",
-				opts.DefaultTrickleInterval,
+				constant.DefaultTrickleInterval,
 				cx.Config.TrickleInterval.Ptr(),
 			),
 			au.Int(
 				"maxorphantx",
 				"Max number of orphan transactions to keep in memory",
-				opts.DefaultMaxOrphanTransactions,
+				constant.DefaultMaxOrphanTransactions,
 				cx.Config.MaxOrphanTxs.Ptr(),
 			),
 			au.Bool(
@@ -668,28 +669,28 @@ func getApp(cx *pod.State) (a *cli.App) {
 				"blockminsize",
 				"Minimum block size in bytes to be used when"+
 					" creating a block",
-				opts.BlockMaxSizeMin,
+				constant.BlockMaxSizeMin,
 				cx.Config.BlockMinSize.Ptr(),
 			),
 			au.Int(
 				"blockmaxsize",
 				"Maximum block size in bytes to be used when"+
 					" creating a block",
-				opts.BlockMaxSizeMax,
+				constant.BlockMaxSizeMax,
 				cx.Config.BlockMaxSize.Ptr(),
 			),
 			au.Int(
 				"blockminweight",
 				"Minimum block weight to be used when creating"+
 					" a block",
-				opts.BlockMaxWeightMin,
+				constant.BlockMaxWeightMin,
 				cx.Config.BlockMinWeight.Ptr(),
 			),
 			au.Int(
 				"blockmaxweight",
 				"Maximum block weight to be used when creating"+
 					" a block",
-				opts.BlockMaxWeightMax,
+				constant.BlockMaxWeightMax,
 				cx.Config.BlockMaxWeight.Ptr(),
 			),
 			au.Int(
@@ -719,7 +720,7 @@ func getApp(cx *pod.State) (a *cli.App) {
 				"sigcachemaxsize",
 				"The maximum number of entries in the"+
 					" signature verification cache",
-				opts.DefaultSigCacheMaxSize,
+				constant.DefaultSigCacheMaxSize,
 				cx.Config.SigCacheMaxSize.Ptr(),
 			),
 			au.Bool(

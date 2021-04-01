@@ -1,13 +1,9 @@
 package cfg
 
 import (
-	"fmt"
 	"sort"
-	"strconv"
-	"time"
 	
 	"gioui.org/text"
-	"github.com/urfave/cli"
 	"golang.org/x/exp/shiny/materialdesign/icons"
 	
 	l "gioui.org/layout"
@@ -77,127 +73,127 @@ func (l Lists) Swap(i, j int) {
 }
 
 func (c *Config) Config() GroupsMap {
-	schema := podcfg.GetConfigSchema(c.cx.Config)
+	// schema := podcfg.GetConfigSchema(c.cx.Config)
 	tabNames := make(GroupsMap)
-	// tabs := make(p9.WidgetMap)
-	for i := range schema.Groups {
-		for j := range schema.Groups[i].Fields {
-			sgf := schema.Groups[i].Fields[j]
-			if _, ok := tabNames[sgf.Group]; !ok {
-				tabNames[sgf.Group] = make(ItemMap)
-			}
-			tabNames[sgf.Group][sgf.Slug] = &Item{
-				slug:        sgf.Slug,
-				typ:         sgf.Type,
-				label:       sgf.Label,
-				description: sgf.Description,
-				widget:      sgf.Widget,
-				dataType:    sgf.Datatype,
-				options:     sgf.Options,
-				Slot:        c.cx.ConfigMap[sgf.Slug],
-			}
-			// D.S(sgf)
-			// create all the necessary widgets required before display
-			tgs := tabNames[sgf.Group][sgf.Slug]
-			switch sgf.Widget {
-			case "toggle":
-				c.Bools[sgf.Slug] = c.Bool(*tgs.Slot.(*bool)).SetOnChange(
-					func(b bool) {
-						D.Ln(sgf.Slug, "submitted", b)
-						bb := c.cx.ConfigMap[sgf.Slug].(*bool)
-						*bb = b
-						podcfg.Save(c.cx.Config)
-						if sgf.Slug == "DarkTheme" {
-							c.Theme.Colors.SetTheme(b)
-						}
-					},
-				)
-			case "integer":
-				c.inputs[sgf.Slug] = c.Input(
-					fmt.Sprint(*tgs.Slot.(*int)), sgf.Slug, "DocText", "DocBg", "PanelBg", func(txt string) {
-						D.Ln(sgf.Slug, "submitted", txt)
-						i := c.cx.ConfigMap[sgf.Slug].(*int)
-						if n, e := strconv.Atoi(txt); !E.Chk(e) {
-							*i = n
-						}
-						podcfg.Save(c.cx.Config)
-					}, nil,
-				)
-			case "time":
-				c.inputs[sgf.Slug] = c.Input(
-					fmt.Sprint(
-						*tgs.Slot.(*time.
-						Duration),
-					), sgf.Slug, "DocText", "DocBg", "PanelBg", func(txt string) {
-						D.Ln(sgf.Slug, "submitted", txt)
-						tt := c.cx.ConfigMap[sgf.Slug].(*time.Duration)
-						if d, e := time.ParseDuration(txt); !E.Chk(e) {
-							*tt = d
-						}
-						podcfg.Save(c.cx.Config)
-					}, nil,
-				)
-			case "float":
-				c.inputs[sgf.Slug] = c.Input(
-					strconv.FormatFloat(
-						*tgs.Slot.(
-						*float64), 'f', -1, 64,
-					), sgf.Slug, "DocText", "DocBg", "PanelBg", func(txt string) {
-						D.Ln(sgf.Slug, "submitted", txt)
-						ff := c.cx.ConfigMap[sgf.Slug].(*float64)
-						if f, e := strconv.ParseFloat(txt, 64); !E.Chk(e) {
-							*ff = f
-						}
-						podcfg.Save(c.cx.Config)
-					}, nil,
-				)
-			case "string":
-				c.inputs[sgf.Slug] = c.Input(
-					*tgs.Slot.(*string), sgf.Slug, "DocText", "DocBg", "PanelBg", func(txt string) {
-						D.Ln(sgf.Slug, "submitted", txt)
-						ss := c.cx.ConfigMap[sgf.Slug].(*string)
-						*ss = txt
-						podcfg.Save(c.cx.Config)
-					}, nil,
-				)
-			case "password":
-				c.passwords[sgf.Slug] = c.Password(
-					"password",
-					tgs.Slot.(*string), "DocText", "DocBg", "PanelBg",
-					func(txt string) {
-						D.Ln(sgf.Slug, "submitted", txt)
-						pp := c.cx.ConfigMap[sgf.Slug].(*string)
-						*pp = txt
-						podcfg.Save(c.cx.Config)
-					},
-				)
-			case "multi":
-				c.multis[sgf.Slug] = c.Multiline(
-					tgs.Slot.(*cli.StringSlice), "DocText", "DocBg", "PanelBg", 30, func(txt []string) {
-						D.Ln(sgf.Slug, "submitted", txt)
-						sss := c.cx.ConfigMap[sgf.Slug].(*cli.StringSlice)
-						*sss = txt
-						podcfg.Save(c.cx.Config)
-					},
-				)
-				// c.multis[sgf.Slug]
-			case "radio":
-				c.checkables[sgf.Slug] = c.Checkable()
-				for i := range sgf.Options {
-					c.checkables[sgf.Slug+sgf.Options[i]] = c.Checkable()
-				}
-				txt := *tabNames[sgf.Group][sgf.Slug].Slot.(*string)
-				c.enums[sgf.Slug] = c.Enum().SetValue(txt).SetOnChange(
-					func(value string) {
-						rr := c.cx.ConfigMap[sgf.Slug].(*string)
-						*rr = value
-						podcfg.Save(c.cx.Config)
-					},
-				)
-				c.lists[sgf.Slug] = c.List()
-			}
-		}
-	}
+	// // tabs := make(p9.WidgetMap)
+	// for i := range schema.Groups {
+	// 	for j := range schema.Groups[i].Fields {
+	// 		sgf := schema.Groups[i].Fields[j]
+	// 		if _, ok := tabNames[sgf.Group]; !ok {
+	// 			tabNames[sgf.Group] = make(ItemMap)
+	// 		}
+	// 		tabNames[sgf.Group][sgf.Slug] = &Item{
+	// 			slug:        sgf.Slug,
+	// 			typ:         sgf.Type,
+	// 			label:       sgf.Label,
+	// 			description: sgf.Description,
+	// 			widget:      sgf.Widget,
+	// 			dataType:    sgf.Datatype,
+	// 			options:     sgf.Options,
+	// 			Slot:        c.cx.ConfigMap[sgf.Slug],
+	// 		}
+	// 		// D.S(sgf)
+	// 		// create all the necessary widgets required before display
+	// 		tgs := tabNames[sgf.Group][sgf.Slug]
+	// 		switch sgf.Widget {
+	// 		case "toggle":
+	// 			c.Bools[sgf.Slug] = c.Bool(*tgs.Slot.(*bool)).SetOnChange(
+	// 				func(b bool) {
+	// 					D.Ln(sgf.Slug, "submitted", b)
+	// 					bb := c.cx.ConfigMap[sgf.Slug].(*bool)
+	// 					*bb = b
+	// 					podcfg.Save(c.cx.Config)
+	// 					if sgf.Slug == "DarkTheme" {
+	// 						c.Theme.Colors.SetTheme(b)
+	// 					}
+	// 				},
+	// 			)
+	// 		case "integer":
+	// 			c.inputs[sgf.Slug] = c.Input(
+	// 				fmt.Sprint(*tgs.Slot.(*int)), sgf.Slug, "DocText", "DocBg", "PanelBg", func(txt string) {
+	// 					D.Ln(sgf.Slug, "submitted", txt)
+	// 					i := c.cx.ConfigMap[sgf.Slug].(*int)
+	// 					if n, e := strconv.Atoi(txt); !E.Chk(e) {
+	// 						*i = n
+	// 					}
+	// 					podcfg.Save(c.cx.Config)
+	// 				}, nil,
+	// 			)
+	// 		case "time":
+	// 			c.inputs[sgf.Slug] = c.Input(
+	// 				fmt.Sprint(
+	// 					*tgs.Slot.(*time.
+	// 					Duration),
+	// 				), sgf.Slug, "DocText", "DocBg", "PanelBg", func(txt string) {
+	// 					D.Ln(sgf.Slug, "submitted", txt)
+	// 					tt := c.cx.ConfigMap[sgf.Slug].(*time.Duration)
+	// 					if d, e := time.ParseDuration(txt); !E.Chk(e) {
+	// 						*tt = d
+	// 					}
+	// 					podcfg.Save(c.cx.Config)
+	// 				}, nil,
+	// 			)
+	// 		case "float":
+	// 			c.inputs[sgf.Slug] = c.Input(
+	// 				strconv.FormatFloat(
+	// 					*tgs.Slot.(
+	// 					*float64), 'f', -1, 64,
+	// 				), sgf.Slug, "DocText", "DocBg", "PanelBg", func(txt string) {
+	// 					D.Ln(sgf.Slug, "submitted", txt)
+	// 					ff := c.cx.ConfigMap[sgf.Slug].(*float64)
+	// 					if f, e := strconv.ParseFloat(txt, 64); !E.Chk(e) {
+	// 						*ff = f
+	// 					}
+	// 					podcfg.Save(c.cx.Config)
+	// 				}, nil,
+	// 			)
+	// 		case "string":
+	// 			c.inputs[sgf.Slug] = c.Input(
+	// 				*tgs.Slot.(*string), sgf.Slug, "DocText", "DocBg", "PanelBg", func(txt string) {
+	// 					D.Ln(sgf.Slug, "submitted", txt)
+	// 					ss := c.cx.ConfigMap[sgf.Slug].(*string)
+	// 					*ss = txt
+	// 					podcfg.Save(c.cx.Config)
+	// 				}, nil,
+	// 			)
+	// 		case "password":
+	// 			c.passwords[sgf.Slug] = c.Password(
+	// 				"password",
+	// 				tgs.Slot.(*string), "DocText", "DocBg", "PanelBg",
+	// 				func(txt string) {
+	// 					D.Ln(sgf.Slug, "submitted", txt)
+	// 					pp := c.cx.ConfigMap[sgf.Slug].(*string)
+	// 					*pp = txt
+	// 					podcfg.Save(c.cx.Config)
+	// 				},
+	// 			)
+	// 		case "multi":
+	// 			c.multis[sgf.Slug] = c.Multiline(
+	// 				tgs.Slot.(*cli.StringSlice), "DocText", "DocBg", "PanelBg", 30, func(txt []string) {
+	// 					D.Ln(sgf.Slug, "submitted", txt)
+	// 					sss := c.cx.ConfigMap[sgf.Slug].(*cli.StringSlice)
+	// 					*sss = txt
+	// 					podcfg.Save(c.cx.Config)
+	// 				},
+	// 			)
+	// 			// c.multis[sgf.Slug]
+	// 		case "radio":
+	// 			c.checkables[sgf.Slug] = c.Checkable()
+	// 			for i := range sgf.Options {
+	// 				c.checkables[sgf.Slug+sgf.Options[i]] = c.Checkable()
+	// 			}
+	// 			txt := *tabNames[sgf.Group][sgf.Slug].Slot.(*string)
+	// 			c.enums[sgf.Slug] = c.Enum().SetValue(txt).SetOnChange(
+	// 				func(value string) {
+	// 					rr := c.cx.ConfigMap[sgf.Slug].(*string)
+	// 					*rr = value
+	// 					podcfg.Save(c.cx.Config)
+	// 				},
+	// 			)
+	// 			c.lists[sgf.Slug] = c.List()
+	// 		}
+	// 	}
+	// }
 	
 	// D.S(tabNames)
 	return tabNames // .Widget(c)

@@ -9,9 +9,9 @@ var (
 	// GitRef is the gitref, as in refs/heads/branchname
 	GitRef = "refs/heads/l0k1"
 	// GitCommit is the commit hash of the current HEAD
-	GitCommit = "fbe6499a2d963b64420441c8b20b3d1e50dca951"
+	GitCommit = "33fbeecfbc7fadc15400f11cb0612a74c7cbaba9"
 	// BuildTime stores the time when the current binary was built
-	BuildTime = "2021-04-01T06:24:10+02:00"
+	BuildTime = "2021-04-01T11:23:35+02:00"
 	// Tag lists the Tag on the podbuild, adding a + to the newest Tag if the commit is
 	// not that commit
 	Tag = "v1.9.25+"

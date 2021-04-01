@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/p9c/log"
 	"github.com/p9c/pod/pkg/fork"
+	"github.com/p9c/pod/pkg/opts"
 	"io/ioutil"
 	prand "math/rand"
 	"os"
@@ -24,14 +25,14 @@ import (
 
 func beforeFunc(cx *pod.State) func(c *cli.Context) (e error) {
 	return func(c *cli.Context) (e error) {
-		D.Ln("running beforeFunc")
+		opts.D.Ln("running beforeFunc")
 		cx.AppContext = c
 		// if user set datadir this is first thing to configure
 		if c.IsSet("datadir") {
 			cx.Config.DataDir.Set(c.String("datadir"))
-			D.Ln("datadir", *cx.Config.DataDir)
+			opts.D.Ln("datadir", *cx.Config.DataDir)
 		}
-		D.Ln(c.IsSet("D"), c.IsSet("datadir"))
+		opts.D.Ln(c.IsSet("D"), c.IsSet("datadir"))
 		// // propagate datadir path to interrupt for restart handling
 		// interrupt.DataDir = cx.DataDir
 		// if there is a delaystart requested, pause for 3 seconds
@@ -39,14 +40,14 @@ func beforeFunc(cx *pod.State) func(c *cli.Context) (e error) {
 			time.Sleep(time.Second * 3)
 		}
 		if c.IsSet("pipelog") {
-			D.Ln("pipe logger enabled")
+			opts.D.Ln("pipe logger enabled")
 			cx.Config.PipeLog.Set(c.Bool("pipelog"))
 			serve.Log(cx.KillAll, fmt.Sprint(os.Args))
 		}
 		if c.IsSet("walletfile") {
 			cx.Config.WalletFile.Set(c.String("walletfile"))
 		}
-		cx.Config.ConfigFile.Set(filepath.Join(cx.Config.DataDir.V(), PodConfigFilename))
+		cx.Config.ConfigFile.Set(filepath.Join(cx.Config.DataDir.V(), opts.PodConfigFilename))
 		// we are going to assume the config is not manually misedited
 		if apputil.FileExists(cx.Config.ConfigFile.V()) {
 			b, e := ioutil.ReadFile(cx.Config.ConfigFile.V())
@@ -54,29 +55,29 @@ func beforeFunc(cx *pod.State) func(c *cli.Context) (e error) {
 				cx.Config, cx.ConfigMap = podcfg.New()
 				e = json.Unmarshal(b, cx.Config)
 				if e != nil {
-					E.Ln("error unmarshalling config", e)
+					opts.E.Ln("error unmarshalling config", e)
 					// os.Exit(1)
 					return e
 				}
 			} else {
-				F.Ln("unexpected error reading configuration file:", e)
+				opts.F.Ln("unexpected error reading configuration file:", e)
 				// os.Exit(1)
 				return e
 			}
 		} else {
 			cx.Config.ConfigFile.Set("")
-			D.Ln("will save config after configuration")
+			opts.D.Ln("will save config after configuration")
 			cx.StateCfg.Save = true
 		}
 		if c.IsSet("loglevel") {
-			T.Ln("set loglevel", c.String("loglevel"))
+			opts.T.Ln("set loglevel", c.String("loglevel"))
 			cx.Config.LogLevel.Set(c.String("loglevel"))
 		}
 		log.SetLogLevel(cx.Config.LogLevel.V())
 		if cx.Config.PipeLog.False() {
 			// if/when running further instances of the same version no reason
 			// to print the version message again
-			D.Ln("\nrunning", os.Args, version.Get())
+			opts.D.Ln("\nrunning", os.Args, version.Get())
 		}
 		if c.IsSet("network") {
 			cx.Config.Network.Set(c.String("network"))
@@ -94,7 +95,7 @@ func beforeFunc(cx *pod.State) func(c *cli.Context) (e error) {
 			default:
 				if cx.Config.Network.V() != "mainnet" &&
 					cx.Config.Network.V() != "m" {
-					D.Ln("using mainnet for node")
+					opts.D.Ln("using mainnet for node")
 				}
 				cx.ActiveNet = &chaincfg.MainNetParams
 			}
@@ -265,7 +266,7 @@ func beforeFunc(cx *pod.State) func(c *cli.Context) (e error) {
 			// if LAN is turned on it means by default we are on testnet
 			cx.ActiveNet = &chaincfg.TestNet3Params
 			if cx.ActiveNet.Name != "mainnet" {
-				D.Ln("set lan", c.Bool("lan"))
+				opts.D.Ln("set lan", c.Bool("lan"))
 				cx.Config.LAN.Set(c.Bool("lan"))
 				cx.ActiveNet.DNSSeeds = []chaincfg.DNSSeed{}
 			} else {
@@ -283,7 +284,7 @@ func beforeFunc(cx *pod.State) func(c *cli.Context) (e error) {
 		}
 		if c.IsSet("minerpass") {
 			cx.Config.MulticastPass.Set(c.String("minerpass"))
-			D.Ln("--------- set minerpass", *cx.Config.MulticastPass)
+			opts.D.Ln("--------- set minerpass", *cx.Config.MulticastPass)
 			cx.StateCfg.Save = true
 		}
 		if c.IsSet("blockminsize") {
@@ -384,7 +385,7 @@ func beforeFunc(cx *pod.State) func(c *cli.Context) (e error) {
 			cx.Config.Controller.Set(c.Bool("controller"))
 		}
 		if c.IsSet("save") {
-			I.Ln("saving configuration")
+			opts.I.Ln("saving configuration")
 			cx.StateCfg.Save = true
 		}
 		// // if e = routeable.Discover(); E.Chk(e) {

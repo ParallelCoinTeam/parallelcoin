@@ -3,7 +3,6 @@ package gui
 import (
 	"crypto/cipher"
 	"encoding/json"
-	"github.com/p9c/opts/text"
 	"github.com/p9c/pod/pkg/amt"
 	"github.com/p9c/pod/pkg/btcaddr"
 	"github.com/p9c/pod/pkg/chaincfg"
@@ -18,7 +17,6 @@ import (
 	"github.com/p9c/pod/pkg/gcm"
 	"github.com/p9c/pod/pkg/transport"
 	"github.com/p9c/pod/pkg/util/atom"
-	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
 const ZeroAddress = "1111111111111111111114oLvT2"
@@ -128,7 +126,8 @@ func (s *State) IsReceivingAddress() bool {
 	return s.isAddress.Load()
 }
 
-func (s *State) Save(filename string, pass *string) (e error) {
+// Save the state to the specified file
+func (s *State) Save(filename string, pass []byte, debug bool) (e error) {
 	D.Ln("saving state...")
 	marshalled := s.Marshal()
 	var j []byte
@@ -137,7 +136,7 @@ func (s *State) Save(filename string, pass *string) (e error) {
 	}
 	// D.Ln(string(j))
 	var ciph cipher.AEAD
-	if ciph, e = gcm.GetCipher(*pass); E.Chk(e) {
+	if ciph, e = gcm.GetCipher(pass); E.Chk(e) {
 		return
 	}
 	var nonce []byte
@@ -148,16 +147,21 @@ func (s *State) Save(filename string, pass *string) (e error) {
 	var b []byte
 	_ = b
 	if b, e = ciph.Open(nil, nonce, crypted[len(nonce):], nil); E.Chk(e) {
-		interrupt.Request()
+		// since it was just created it should not fail to decrypt
+		panic(e)
+		// interrupt.Request()
 		return
 	}
-	if e = ioutil.WriteFile(filename, crypted, 0700); E.Chk(e) {
+	if e = ioutil.WriteFile(filename, crypted, 0600); E.Chk(e) {
 	}
-	if e = ioutil.WriteFile(filename+".clear", j, 0700); E.Chk(e) {
+	if debug {
+		if e = ioutil.WriteFile(filename+".clear", j, 0600); E.Chk(e) {
+		}
 	}
 	return
 }
 
+// Load in the configuration from the specified file and decrypt using the given password
 func (s *State) Load(filename string, pass []byte) (e error) {
 	D.Ln("loading state...")
 	var data []byte

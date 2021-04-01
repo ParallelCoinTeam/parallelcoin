@@ -105,7 +105,7 @@ func New(
 	if mc, e = transport.NewBroadcastChannel(
 		"controller",
 		s,
-		cfg.MulticastPass.V(),
+		cfg.MulticastPass.Bytes(),
 		transport.DefaultPort,
 		MaxDatagramSize,
 		handlersMulticast,

@@ -156,8 +156,8 @@ func (w *Wallet) SynchronizeRPC(chainClient chainclient.Interface) {
 	w.chainClient = chainClient
 	// If the chain client is a NeutrinoClient instance, set a birthday so we don't download all the filters as we go.
 	switch cc := chainClient.(type) {
-	case *chainclient.NeutrinoClient:
-		cc.SetStartTime(w.Manager.Birthday())
+	// case *chainclient.NeutrinoClient:
+	// 	cc.SetStartTime(w.Manager.Birthday())
 	case *chainclient.BitcoindClient:
 		cc.SetBirthday(w.Manager.Birthday())
 	}
@@ -414,19 +414,19 @@ func (w *Wallet) syncWithChain() (e error) {
 				}
 				return e
 			}
-			// If we're using the Neutrino backend, we can check if it's current or not. For other backends we'll assume
-			// it is current if the best height has reached the last checkpoint.
-			isCurrent := func(bestHeight int32) bool {
-				switch c := chainClient.(type) {
-				case *chainclient.NeutrinoClient:
-					return c.CS.IsCurrent()
-				}
-				return bestHeight >= checkHeight
-			}
+			// // If we're using the Neutrino backend, we can check if it's current or not. For other backends we'll assume
+			// // it is current if the best height has reached the last checkpoint.
+			// isCurrent := func(bestHeight int32) bool {
+			// 	switch c := chainClient.(type) {
+			// 	case *chainclient.NeutrinoClient:
+			// 		return c.CS.IsCurrent()
+			// 	}
+			// 	return bestHeight >= checkHeight
+			// }
 			// If we've found the best height the backend knows about, and the backend is still synchronizing, we'll
 			// wait. We can give it a little bit of time to synchronize further before updating the best height based on
 			// the backend. Once we see that the backend has advanced, we can catch up to it.
-			for height == bestHeight && !isCurrent(bestHeight) {
+			for height == bestHeight { // && !isCurrent(bestHeight) {
 				time.Sleep(100 * time.Millisecond)
 				_, bestHeight, e = chainClient.GetBestBlock()
 				if e != nil {
@@ -1972,11 +1972,11 @@ func (w *Wallet) GetTransactions(startBlock, endBlock *BlockIdentifier, cancel q
 				if e != nil {
 					return nil, e
 				}
-			case *chainclient.NeutrinoClient:
-				start, e = client.GetBlockHeight(startBlock.hash)
-				if e != nil {
-					return nil, e
-				}
+			// case *chainclient.NeutrinoClient:
+			// 	start, e = client.GetBlockHeight(startBlock.hash)
+			// 	if e != nil {
+			// 		return nil, e
+			// 	}
 			}
 		}
 	}
@@ -1990,11 +1990,11 @@ func (w *Wallet) GetTransactions(startBlock, endBlock *BlockIdentifier, cancel q
 			switch client := chainClient.(type) {
 			case *chainclient.RPCClient:
 				endResp = client.GetBlockVerboseTxAsync(endBlock.hash)
-			case *chainclient.NeutrinoClient:
-				end, e = client.GetBlockHeight(endBlock.hash)
-				if e != nil {
-					return nil, e
-				}
+			// case *chainclient.NeutrinoClient:
+			// 	end, e = client.GetBlockHeight(endBlock.hash)
+			// 	if e != nil {
+			// 		return nil, e
+			// 	}
 			}
 		}
 	}

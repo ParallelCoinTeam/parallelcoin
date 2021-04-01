@@ -25,9 +25,9 @@ func newHTTPClient(cfg *opts.Config) (*http.Client, func(), error) {
 	var dial func(ctx context.Context, network string, addr string) (net.Conn, error)
 	ctx, cancel := context.WithCancel(context.Background())
 	// Configure proxy if needed.
-	if cfg.Proxy.V() != "" {
+	if cfg.ProxyAddress.V() != "" {
 		proxy := &socks.Proxy{
-			Addr:     cfg.Proxy.V(),
+			Addr:     cfg.ProxyAddress.V(),
 			Username: cfg.ProxyUser.V(),
 			Password: cfg.ProxyPass.V(),
 		}
@@ -52,7 +52,7 @@ func newHTTPClient(cfg *opts.Config) (*http.Client, func(), error) {
 	}
 	// Configure TLS if needed.
 	var tlsConfig *tls.Config
-	if cfg.TLS.True() && cfg.RPCCert.V() != "" {
+	if cfg.ClientTLS.True() && cfg.RPCCert.V() != "" {
 		pem, e := ioutil.ReadFile(cfg.RPCCert.V())
 		if e != nil  {
 						cancel()
@@ -97,7 +97,7 @@ func newHTTPClient(cfg *opts.Config) (*http.Client, func(), error) {
 func sendPostRequest(marshalledJSON []byte, cx *pod.State, wallet bool) ([]byte, error) {
 	// Generate a request to the configured RPC server.
 	protocol := "http"
-	if cx.Config.TLS.True() {
+	if cx.Config.ClientTLS.True() {
 		protocol = "https"
 	}
 	serverAddr := cx.Config.RPCConnect.V()

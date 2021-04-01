@@ -3,6 +3,7 @@ package walletmain
 import (
 	"bufio"
 	"github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/constant"
 	"github.com/p9c/pod/pkg/opts"
 	"os"
 	"path/filepath"
@@ -24,14 +25,14 @@ const slash = string(os.PathSeparator)
 
 // CreateSimulationWallet is intended to be called from the rpcclient and used
 // to create a wallet for actors involved in simulations.
-func CreateSimulationWallet(activenet *chaincfg.Params, cfg *Config) (e error) {
+func CreateSimulationWallet(activenet *chaincfg.Params, cfg *opts.Config) (e error) {
 	// Simulation wallet password is 'password'.
 	privPass := []byte("password")
 	// Public passphrase is the default.
 	pubPass := []byte(wallet.InsecurePubPassphrase)
-	netDir := NetworkDir(*cfg.AppDataDir, activenet)
+	netDir := NetworkDir(cfg.DataDir.V(), activenet)
 	// Create the wallet.
-	dbPath := filepath.Join(netDir, opts.WalletDbName)
+	dbPath := filepath.Join(netDir, constant.WalletDbName)
 	I.Ln("Creating the wallet...")
 	// Create the wallet database backed by bolt db.
 	db, e := walletdb.Create("bdb", dbPath)

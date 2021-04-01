@@ -26,8 +26,6 @@ import (
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/qu"
 	
-	"github.com/urfave/cli"
-	
 	l "gioui.org/layout"
 	
 	"github.com/p9c/pod/pkg/pipe/consume"
@@ -39,12 +37,12 @@ import (
 	"github.com/p9c/pod/pkg/rpcclient"
 )
 
-func Main(cx *pod.State, c *cli.Context) (e error) {
+// Main is the entrypoint for the wallet GUI
+func Main(cx *pod.State) (e error) {
 	var size int
 	noWallet := true
 	wg := &WalletGUI{
 		cx:         cx,
-		c:          c,
 		invalidate: qu.Ts(16),
 		quit:       cx.KillAll,
 		Size:       &size,
@@ -65,7 +63,6 @@ type IncDecMap map[string]*gel.IncDec
 type WalletGUI struct {
 	wg                        sync.WaitGroup
 	cx                        *pod.State
-	c                         *cli.Context
 	quit                      qu.C
 	State                     *State
 	noWallet                  *bool
@@ -251,7 +248,7 @@ func (wg *WalletGUI) Run() (e error) {
 	if mc, e = transport.NewBroadcastChannel(
 		"controller",
 		wg,
-		wg.cx.Config.MulticastPass.V(),
+		wg.cx.Config.MulticastPass.Bytes(),
 		transport.DefaultPort,
 		16384,
 		handlersMulticast,

@@ -1,4 +1,4 @@
-package opts
+package constant
 
 import (
 	"github.com/p9c/pod/pkg/amt"

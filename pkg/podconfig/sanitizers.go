@@ -8,6 +8,7 @@ import (
 	"github.com/p9c/log"
 	"github.com/p9c/pod/pkg/amt"
 	"github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/constant"
 	"github.com/p9c/pod/pkg/fork"
 	"github.com/p9c/pod/pkg/forkhash"
 	"github.com/p9c/pod/pkg/opts"
@@ -64,7 +65,7 @@ func initDataDir(cfg *opts.Config) {
 
 func initWalletFile(cx *pod.State) {
 	if cx.Config.WalletFile == nil || cx.Config.WalletFile.V() == "" {
-		cx.Config.WalletFile.Set(filepath.Join(cx.Config.DataDir.V(), cx.ActiveNet.Name, opts.DbName))
+		cx.Config.WalletFile.Set(filepath.Join(cx.Config.DataDir.V(), cx.ActiveNet.Name, constant.DbName))
 	}
 	T.Ln("wallet file set to", *cx.Config.WalletFile, *cx.Config.Network)
 }
@@ -342,7 +343,7 @@ func initLogLevel(cfg *opts.Config) {
 
 func normalizeAddresses(cfg *opts.Config) {
 	T.Ln("normalising addresses")
-	port := opts.DefaultPort
+	port := constant.DefaultPort
 	nrm := normalize.StringSliceAddresses
 	nrm(cfg.AddPeers.V(), port)
 	nrm(cfg.ConnectPeers.V(), port)
@@ -404,7 +405,7 @@ func validateBanDuration(cfg *opts.Config) {
 			funcName, *cfg.BanDuration,
 		)
 		I.Ln(funcName, e)
-		cfg.BanDuration.Set(opts.DefaultBanDuration)
+		cfg.BanDuration.Set(constant.DefaultBanDuration)
 	}
 }
 
@@ -505,7 +506,7 @@ func configRPC(cfg *opts.Config, params *chaincfg.Params) {
 	T.Ln("checking rpc server has listeners set")
 	if cfg.DisableRPC.False() && cfg.RPCListeners.Len() == 0 {
 		D.Ln("looking up default listener")
-		addrs, e := net.LookupHost(opts.DefaultRPCListener)
+		addrs, e := net.LookupHost(constant.DefaultRPCListener)
 		if e != nil {
 			E.Ln(e)
 			// os.Exit(1)
@@ -546,23 +547,23 @@ func validatePolicies(cfg *opts.Config, stateConfig *state.Config) {
 	}
 	// Limit the max block size to a sane value.
 	T.Ln("checking max block size")
-	if cfg.BlockMaxSize.V() < opts.BlockMaxSizeMin ||
-		cfg.BlockMaxSize.V() > opts.BlockMaxSizeMax {
+	if cfg.BlockMaxSize.V() < constant.BlockMaxSizeMin ||
+		cfg.BlockMaxSize.V() > constant.BlockMaxSizeMax {
 		str := "%s: The blockmaxsize opt must be in between %d and %d -- parsed [%d]"
 		e = fmt.Errorf(
-			str, funcName, opts.BlockMaxSizeMin,
-			opts.BlockMaxSizeMax, cfg.BlockMaxSize.V(),
+			str, funcName, constant.BlockMaxSizeMin,
+			constant.BlockMaxSizeMax, cfg.BlockMaxSize.V(),
 		)
 		_, _ = fmt.Fprintln(os.Stderr, e)
 	}
 	// Limit the max block weight to a sane value.
 	T.Ln("checking max block weight")
-	if cfg.BlockMaxWeight.V() < opts.BlockMaxWeightMin ||
-		cfg.BlockMaxWeight.V() > opts.BlockMaxWeightMax {
+	if cfg.BlockMaxWeight.V() < constant.BlockMaxWeightMin ||
+		cfg.BlockMaxWeight.V() > constant.BlockMaxWeightMax {
 		str := "%s: The blockmaxweight opt must be in between %d and %d -- parsed [%d]"
 		e = fmt.Errorf(
-			str, funcName, opts.BlockMaxWeightMin,
-			opts.BlockMaxWeightMax, cfg.BlockMaxWeight.V(),
+			str, funcName, constant.BlockMaxWeightMin,
+			constant.BlockMaxWeightMax, cfg.BlockMaxWeight.V(),
 		)
 		_, _ = fmt.Fprintln(os.Stderr, e)
 	}
@@ -602,13 +603,13 @@ func validatePolicies(cfg *opts.Config, stateConfig *state.Config) {
 	switch {
 	// If the max block size isn't set, but the max weight is, then we'll set the
 	// limit for the max block size to a safe limit so weight takes precedence.
-	case cfg.BlockMaxSize.V() == opts.DefaultBlockMaxSize &&
-		cfg.BlockMaxWeight.V() != opts.DefaultBlockMaxWeight:
+	case cfg.BlockMaxSize.V() == constant.DefaultBlockMaxSize &&
+		cfg.BlockMaxWeight.V() != constant.DefaultBlockMaxWeight:
 		cfg.BlockMaxSize.Set(blockchain.MaxBlockBaseSize - 1000)
 		// If the max block weight isn't set, but the block size is, then we'll scale
 		// the set weight accordingly based on the max block size value.
-	case cfg.BlockMaxSize.V() != opts.DefaultBlockMaxSize &&
-		cfg.BlockMaxWeight.V() == opts.DefaultBlockMaxWeight:
+	case cfg.BlockMaxSize.V() != constant.DefaultBlockMaxSize &&
+		cfg.BlockMaxWeight.V() == constant.DefaultBlockMaxWeight:
 		cfg.BlockMaxWeight.Set(cfg.BlockMaxSize.V() * blockchain.WitnessScaleFactor)
 	}
 	// Look for illegal characters in the user agent comments.

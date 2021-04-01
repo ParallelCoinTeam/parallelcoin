@@ -68,7 +68,7 @@ func (c *Client) Stop() (e error) {
 
 // SendPass sends the multicast PSK to the workers so they can dispatch their
 // solutions
-func (c *Client) SendPass(pass string) (e error) {
+func (c *Client) SendPass(pass []byte) (e error) {
 	D.Ln("sending dispatch password")
 	var reply bool
 	e = c.Call("Worker.SendPass", pass, &reply)

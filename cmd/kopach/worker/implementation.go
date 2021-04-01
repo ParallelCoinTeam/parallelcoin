@@ -318,7 +318,7 @@ func (w *Worker) Stop(_ int, reply *bool) (e error) {
 
 // SendPass gives the encryption key configured in the kopach controller ( pod) configuration to allow workers to
 // dispatch their solutions
-func (w *Worker) SendPass(pass string, reply *bool) (e error) {
+func (w *Worker) SendPass(pass []byte, reply *bool) (e error) {
 	D.Ln("receiving dispatch password", pass)
 	rand.Seed(time.Now().UnixNano())
 	// sp := fmt.Sprint(rand.Intn(32767) + 1025)

@@ -9,7 +9,9 @@ import (
 	"github.com/p9c/pod/pkg/chainclient"
 	"github.com/p9c/pod/pkg/control"
 	"github.com/p9c/pod/pkg/opts"
+	"github.com/p9c/pod/pkg/spec"
 	"math/rand"
+	"reflect"
 	"runtime"
 	"strings"
 	"sync"
@@ -18,8 +20,6 @@ import (
 	"github.com/p9c/qu"
 	
 	"go.uber.org/atomic"
-	
-	"github.com/urfave/cli"
 	
 	"github.com/p9c/pod/cmd/node/state"
 	"github.com/p9c/pod/pkg/chainrpc"
@@ -36,10 +36,10 @@ type State struct {
 	sync.Mutex
 	WaitGroup sync.WaitGroup
 	KillAll   qu.C
-	// App is the heart of the application system, this creates and initialises it.
-	App *cli.App
-	// AppContext is the urfave/cli app context
-	AppContext *cli.Context
+	// // App is the heart of the application system, this creates and initialises it.
+	// App *cli.App
+	// // AppContext is the urfave/cli app context
+	// AppContext *cli.Context
 	// Config is the pod all-in-one server config
 	Config *opts.Config
 	// ConfigMap
@@ -84,19 +84,42 @@ type State struct {
 	IsGUI             bool
 }
 
+// GetDefaultConfig returns a Config struct pristine factory fresh
+func GetDefaultConfig() (c *opts.Config) {
+	c = &opts.Config{
+		Commands: spec.GetCommands(),
+		Map:      spec.GetConfigs(),
+	}
+	I.S(c.Commands[0])
+	// I.S(c.Map)
+	t := reflect.ValueOf(c)
+	t = t.Elem()
+	for i := range c.Map {
+		tf := t.FieldByName(i)
+		if tf.IsValid() && tf.CanSet() && tf.CanAddr() {
+			val := reflect.ValueOf(c.Map[i])
+			tf.Set(val)
+		}
+	}
+	// I.S(c)
+	return
+}
+
 // GetNewContext returns a fresh new context
 func GetNewContext() (s *State, e error) {
-	config := opts.GetDefaultConfig()
+	config := GetDefaultConfig()
 	if e = config.Initialize(); E.Chk(e){
-		return
+		// return
+		panic(e)
 	}
+	config.RunningCommand = &(config.Commands[0])
 	chainClientReady := qu.T()
 	rand.Seed(time.Now().UnixNano())
 	rand.Seed(rand.Int63())
 	s = &State{
 		ChainClientReady: chainClientReady,
 		KillAll:          qu.T(),
-		App:              cli.NewApp(),
+		// App:              cli.NewApp(),
 		Config:           config,
 		ConfigMap:        config.Map,
 		StateCfg:         new(state.Config),

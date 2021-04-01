@@ -10,7 +10,7 @@
 package main
 
 import (
-	"github.com/p9c/pod/cmd/app"
+	"github.com/p9c/pod/app"
 	_ "net/http/pprof"
 	
 	"github.com/p9c/pod/cmd"

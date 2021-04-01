@@ -114,8 +114,7 @@ func GetShards(data []byte) (shards [][]byte) {
 }
 
 // NewUnicastChannel sets up a listener and sender for a specified destination
-func NewUnicastChannel(
-	creator string, ctx interface{}, key, sender, receiver string, maxDatagramSize int,
+func NewUnicastChannel(creator string, ctx interface{}, key []byte, sender, receiver string, maxDatagramSize int,
 	handlers Handlers, quit qu.C,
 ) (channel *Channel, e error) {
 	channel = &Channel{
@@ -181,8 +180,7 @@ func Listen(
 // NewBroadcastChannel returns a broadcaster and listener with a given handler
 // on a multicast address and specified port. The handlers define the messages
 // that will be processed and any other messages are ignored
-func NewBroadcastChannel(
-	creator string, ctx interface{}, key string, port int, maxDatagramSize int, handlers Handlers,
+func NewBroadcastChannel(creator string, ctx interface{}, key []byte, port int, maxDatagramSize int, handlers Handlers,
 	quit qu.C,
 ) (channel *Channel, e error) {
 	channel = &Channel{
@@ -193,14 +191,10 @@ func NewBroadcastChannel(
 		Ready:           qu.T(),
 	}
 	if channel.sendCiph, e = gcm.GetCipher(key); E.Chk(e) {
-	}
-	if channel.sendCiph == nil {
-		panic("nil send cipher")
+		panic(e)
 	}
 	if channel.receiveCiph, e = gcm.GetCipher(key); E.Chk(e) {
-	}
-	if channel.receiveCiph == nil {
-		panic("nil receive cipher")
+		panic(e)
 	}
 	if channel.Receiver, e = ListenBroadcast(port, channel, maxDatagramSize, handlers, quit); E.Chk(e) {
 	}

@@ -1,6 +1,7 @@
 package app
 
 import (
+	"fmt"
 	"github.com/gookit/color"
 	"github.com/p9c/log"
 	"github.com/p9c/pod/pkg/pod"
@@ -22,21 +23,17 @@ func ctlHandleList(c *cli.Context) (e error) {
 	return nil
 }
 
-func ctlHandle(cx *pod.State) func(c *cli.Context) (e error) {
-	return func(c *cli.Context) (e error) {
-		log.AppColorizer = color.Bit24(128, 128, 255, false).Sprint
-		log.App = "   ctl"
-		cx.Config.LogLevel.Set("off")
-		podconfig.Configure(cx, "ctl", true)
-		args := c.Args()
-		if len(args) < 1 {
-			return cli.ShowSubcommandHelp(c)
-		}
-		ctl.HelpPrint = func() {
-			if e := cli.ShowSubcommandHelp(c); E.Chk(e) {
-			}
-		}
-		ctl.Main(args, cx)
-		return nil
+func ctlHandle(ifc interface{}) (e error) {
+	var cx *pod.State
+	var ok bool
+	if cx, ok = ifc.(*pod.State); !ok {
+		return fmt.Errorf("cannot run without a state")
 	}
+	log.AppColorizer = color.Bit24(128, 128, 255, false).Sprint
+	log.App = "   ctl"
+	cx.Config.LogLevel.Set("off")
+	podconfig.Configure(cx, true)
+	args := os.Args
+	ctl.Main(args, cx)
+	return nil
 }

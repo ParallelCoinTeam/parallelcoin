@@ -4,7 +4,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/p9c/pod/pkg/opts"
+	"github.com/p9c/pod/pkg/pod"
 	"io/ioutil"
 	"path/filepath"
 	"time"
@@ -28,7 +28,7 @@ func (wg *WalletGUI) unlockWallet(pass string) {
 	wg.cx.Config.WalletOff.F()
 	// wg.cx.Config.Unlock()
 	// load config into a fresh variable
-	cfg := opts.GetDefaultConfig()
+	cfg := pod.GetDefaultConfig()
 	var cfgFile []byte
 	var e error
 	if cfgFile, e = ioutil.ReadFile(wg.cx.Config.ConfigFile.V()); E.Chk(e) {
@@ -93,30 +93,30 @@ func (wg *WalletGUI) unlockWallet(pass string) {
 func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gel.App) {
 	a = wg.App(&wg.Window.Width, wg.State.activePage, wg.invalidate, Break1).SetMainDirection(l.Center + 1)
 	wg.unlockPage = a
-	password := ""
+	password := wg.cx.Config.WalletPass
 	exitButton := wg.WidgetPool.GetClickable()
 	unlockButton := wg.WidgetPool.GetClickable()
 	wg.unlockPassword = wg.Password(
-		"enter password", &password, "DocText",
+		"enter password", password, "DocText",
 		"DocBg", "PanelBg", func(pass string) {
 			wg.unlockWallet(pass)
 		},
 	)
-	wg.unlockPage.SetThemeHook(
-		func() {
-			D.Ln("theme hook")
-			// D.Ln(wg.bools)
-			wg.cx.Config.DarkTheme.Set(*wg.Dark)
-			b := wg.configs["config"]["DarkTheme"].Slot.(*bool)
-			*b = *wg.Dark
-			if wgb, ok := wg.config.Bools["DarkTheme"]; ok {
-				wgb.Value(*wg.Dark)
-			}
-			var e error
-			if e = wg.cx.Config.WriteToFile(wg.cx.Config.ConfigFile.V()); E.Chk(e) {
-			}
-		},
-	)
+	// wg.unlockPage.SetThemeHook(
+	// 	func() {
+	// 		D.Ln("theme hook")
+	// 		// D.Ln(wg.bools)
+	// 		wg.cx.Config.DarkTheme.Set(*wg.Dark)
+	// 		b := wg.configs["config"]["DarkTheme"].Slot.(*bool)
+	// 		*b = *wg.Dark
+	// 		if wgb, ok := wg.config.Bools["DarkTheme"]; ok {
+	// 			wgb.Value(*wg.Dark)
+	// 		}
+	// 		var e error
+	// 		if e = wg.cx.Config.WriteToFile(wg.cx.Config.ConfigFile.V()); E.Chk(e) {
+	// 		}
+	// 	},
+	// )
 	a.Pages(
 		map[string]l.Widget{
 			"home": wg.Page(

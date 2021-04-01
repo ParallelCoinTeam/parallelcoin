@@ -19,7 +19,6 @@ import (
 	"github.com/p9c/qu"
 	
 	"github.com/VividCortex/ewma"
-	"github.com/urfave/cli"
 	"go.uber.org/atomic"
 	
 	"github.com/p9c/pod/cmd/kopach/client"
@@ -84,10 +83,6 @@ type Worker struct {
 }
 
 func (w *Worker) Start() {
-	// if !*cx.Config.Generate {
-	// 	D.Ln("called start but not running generate")
-	// 	return
-	// }
 	D.Ln("starting up kopach workers")
 	w.workers = []*worker.Worker{}
 	w.clients = []*client.Client{}
@@ -99,7 +94,7 @@ func (w *Worker) Start() {
 	}
 	for i := range w.clients {
 		T.Ln("sending pass to worker", i)
-		e := w.clients[i].SendPass(w.cx.Config.MulticastPass.V())
+		e := w.clients[i].SendPass(w.cx.Config.MulticastPass.Bytes())
 		if e != nil {
 		}
 	}
@@ -129,130 +124,129 @@ func (w *Worker) Stop() {
 	w.quit.Q()
 }
 
-func Handle(cx *pod.State) func(c *cli.Context) (e error) {
-	return func(c *cli.Context) (e error) {
-		D.Ln("miner controller starting")
-		randomBytes := make([]byte, 4)
-		if _, e = rand.Read(randomBytes); E.Chk(e) {
-		}
-		w := &Worker{
-			id:            fmt.Sprintf("%x", randomBytes),
-			cx:            cx,
-			quit:          cx.KillAll,
-			sendAddresses: []*net.UDPAddr{},
-			StartChan:     qu.T(),
-			StopChan:      qu.T(),
-			SetThreads:    make(chan int),
-			solutions:     make([]SolutionData, 0, 2048),
-			Update:        qu.T(),
-			hashSampleBuf: rav.NewBufferUint64(1000),
-		}
-		w.lastSent.Store(time.Now().UnixNano())
-		w.active.Store(false)
-		D.Ln("opening broadcast channel listener")
-		w.conn, e = transport.NewBroadcastChannel(
-			"kopachmain", w, cx.Config.MulticastPass.V(),
-			transport.DefaultPort, control.MaxDatagramSize, handlers,
-			w.quit,
-		)
-		if e != nil {
-			return
-		}
-		// start up the workers
-		if cx.Config.Generate.True() {
-			w.Start()
-			interrupt.AddHandler(
-				func() {
-					w.Stop()
-				},
-			)
-		}
-		// controller watcher thread
-		go func() {
-			D.Ln("starting controller watcher")
-			ticker := time.NewTicker(time.Second)
-			logger := time.NewTicker(time.Second)
-		out:
-			for {
-				select {
-				case <-ticker.C:
-					// if the last message sent was 3 seconds ago the server is almost certainly disconnected or crashed
-					// so clear FirstSender
-					since := time.Now().Sub(time.Unix(0, w.lastSent.Load()))
-					wasSending := since > time.Second*6 && w.FirstSender.Load() != 0
-					if wasSending {
-						D.Ln("previous current controller has stopped broadcasting", since, w.FirstSender.Load())
-						// when this string is clear other broadcasts will be listened to
-						w.FirstSender.Store(0)
-						// pause the workers
-						for i := range w.clients {
-							D.Ln("sending pause to worker", i)
-							e := w.clients[i].Pause()
-							if e != nil {
-							}
-						}
-					}
-					if interrupt.Requested() {
-						w.StopChan <- struct{}{}
-						w.quit.Q()
-					}
-				case <-logger.C:
-					w.hashrate = w.HashReport()
-					if interrupt.Requested() {
-						w.StopChan <- struct{}{}
-						w.quit.Q()
-					}
-				case <-w.StartChan.Wait():
-					D.Ln("received signal on StartChan")
-					cx.Config.Generate.T()
-					if e = cx.Config.WriteToFile(cx.Config.ConfigFile.V()); E.Chk(e) {
-					}
-					w.Start()
-				case <-w.StopChan.Wait():
-					D.Ln("received signal on StopChan")
-					cx.Config.Generate.F()
-					if e = cx.Config.WriteToFile(cx.Config.ConfigFile.V()); E.Chk(e) {
-					}
-					w.Stop()
-				case s := <-w.PassChan:
-					D.Ln("received signal on PassChan", s)
-					cx.Config.MulticastPass.Set(s)
-					if e = cx.Config.WriteToFile(cx.Config.ConfigFile.V()); E.Chk(e) {
-					}
-					w.Stop()
-					w.Start()
-				case n := <-w.SetThreads:
-					D.Ln("received signal on SetThreads", n)
-					cx.Config.GenThreads.Set(n)
-					if e = cx.Config.WriteToFile(cx.Config.ConfigFile.V()); E.Chk(e) {
-					}
-					if cx.Config.Generate.True() {
-						// always sanitise
-						if n < 0 {
-							n = int(maxThreads)
-						}
-						if n > int(maxThreads) {
-							n = int(maxThreads)
-						}
-						w.Stop()
-						w.Start()
-					}
-				case <-w.quit.Wait():
-					D.Ln("stopping from quit")
-					interrupt.Request()
-					break out
-				}
-			}
-			D.Ln("finished kopach miner work loop")
-			log.LogChanDisabled.Store(true)
-		}()
-		D.Ln("listening on", control.UDP4MulticastAddress)
-		<-w.quit
-		I.Ln("kopach shutting down") // , interrupt.GoroutineDump())
-		// <-interrupt.HandlersDone
-		I.Ln("kopach finished shutdown")
+// Run the miner
+func Run(cx *pod.State) (e error) {
+	D.Ln("miner starting")
+	randomBytes := make([]byte, 4)
+	if _, e = rand.Read(randomBytes); E.Chk(e) {
+	}
+	w := &Worker{
+		id:            fmt.Sprintf("%x", randomBytes),
+		cx:            cx,
+		quit:          cx.KillAll,
+		sendAddresses: []*net.UDPAddr{},
+		StartChan:     qu.T(),
+		StopChan:      qu.T(),
+		SetThreads:    make(chan int),
+		solutions:     make([]SolutionData, 0, 2048),
+		Update:        qu.T(),
+		hashSampleBuf: rav.NewBufferUint64(1000),
+	}
+	w.lastSent.Store(time.Now().UnixNano())
+	w.active.Store(false)
+	D.Ln("opening broadcast channel listener")
+	w.conn, e = transport.NewBroadcastChannel(
+		"kopachmain", w, cx.Config.MulticastPass.Bytes(),
+		transport.DefaultPort, control.MaxDatagramSize, handlers,
+		w.quit,
+	)
+	if e != nil {
 		return
 	}
+	// start up the workers
+	if cx.Config.Generate.True() {
+		w.Start()
+		interrupt.AddHandler(
+			func() {
+				w.Stop()
+			},
+		)
+	}
+	// controller watcher thread
+	go func() {
+		D.Ln("starting controller watcher")
+		ticker := time.NewTicker(time.Second)
+		logger := time.NewTicker(time.Second)
+	out:
+		for {
+			select {
+			case <-ticker.C:
+				// if the last message sent was 3 seconds ago the server is almost certainly disconnected or crashed
+				// so clear FirstSender
+				since := time.Now().Sub(time.Unix(0, w.lastSent.Load()))
+				wasSending := since > time.Second*6 && w.FirstSender.Load() != 0
+				if wasSending {
+					D.Ln("previous current controller has stopped broadcasting", since, w.FirstSender.Load())
+					// when this string is clear other broadcasts will be listened to
+					w.FirstSender.Store(0)
+					// pause the workers
+					for i := range w.clients {
+						D.Ln("sending pause to worker", i)
+						e := w.clients[i].Pause()
+						if e != nil {
+						}
+					}
+				}
+				if interrupt.Requested() {
+					w.StopChan <- struct{}{}
+					w.quit.Q()
+				}
+			case <-logger.C:
+				w.hashrate = w.HashReport()
+				if interrupt.Requested() {
+					w.StopChan <- struct{}{}
+					w.quit.Q()
+				}
+			case <-w.StartChan.Wait():
+				D.Ln("received signal on StartChan")
+				cx.Config.Generate.T()
+				if e = cx.Config.WriteToFile(cx.Config.ConfigFile.V()); E.Chk(e) {
+				}
+				w.Start()
+			case <-w.StopChan.Wait():
+				D.Ln("received signal on StopChan")
+				cx.Config.Generate.F()
+				if e = cx.Config.WriteToFile(cx.Config.ConfigFile.V()); E.Chk(e) {
+				}
+				w.Stop()
+			case s := <-w.PassChan:
+				D.Ln("received signal on PassChan", s)
+				cx.Config.MulticastPass.Set(s)
+				if e = cx.Config.WriteToFile(cx.Config.ConfigFile.V()); E.Chk(e) {
+				}
+				w.Stop()
+				w.Start()
+			case n := <-w.SetThreads:
+				D.Ln("received signal on SetThreads", n)
+				cx.Config.GenThreads.Set(n)
+				if e = cx.Config.WriteToFile(cx.Config.ConfigFile.V()); E.Chk(e) {
+				}
+				if cx.Config.Generate.True() {
+					// always sanitise
+					if n < 0 {
+						n = int(maxThreads)
+					}
+					if n > int(maxThreads) {
+						n = int(maxThreads)
+					}
+					w.Stop()
+					w.Start()
+				}
+			case <-w.quit.Wait():
+				D.Ln("stopping from quit")
+				interrupt.Request()
+				break out
+			}
+		}
+		D.Ln("finished kopach miner work loop")
+		log.LogChanDisabled.Store(true)
+	}()
+	D.Ln("listening on", control.UDP4MulticastAddress)
+	<-w.quit
+	I.Ln("kopach shutting down") // , interrupt.GoroutineDump())
+	// <-interrupt.HandlersDone
+	I.Ln("kopach finished shutdown")
+	return
 }
 
 // these are the handlers for specific message types.

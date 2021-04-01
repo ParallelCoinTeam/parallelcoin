@@ -27,7 +27,7 @@ func main() {
 	var c *transport.Channel
 	var e error
 	if c, e = transport.NewBroadcastChannel(
-		"test", nil, "cipher",
+		"test", nil, []byte("cipher"),
 		1234, 8192, transport.Handlers{
 			TestMagic: func(
 				ctx interface{}, src net.Addr, dst string,

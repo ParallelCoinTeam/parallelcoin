@@ -5,7 +5,7 @@ import (
 	"github.com/p9c/opts/opt"
 )
 
-func (c *Config) getAllOptionStrings() (s map[string][]string, e error) {
+func getAllOptionStrings(c *Config) (s map[string][]string, e error) {
 	s = make(map[string][]string)
 	if c.ForEach(func(ifc opt.Option) bool {
 		md := ifc.GetMetadata()

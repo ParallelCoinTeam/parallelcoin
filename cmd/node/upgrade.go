@@ -1,7 +1,7 @@
 package node
 
 import (
-	"github.com/p9c/pod/pkg/opts"
+	"github.com/p9c/pod/pkg/constant"
 	"github.com/p9c/pod/pkg/pod"
 	"io"
 	"os"
@@ -123,7 +123,7 @@ func upgradeDBPaths(cx *pod.State) (e error) {
 func upgradeDataPaths() (e error) {
 	// No need to migrate if the old and new home paths are the same.
 	oldHomePath := oldPodHomeDir()
-	newHomePath := opts.DefaultHomeDir
+	newHomePath := constant.DefaultHomeDir
 	if oldHomePath == newHomePath {
 		return nil
 	}
@@ -139,8 +139,8 @@ func upgradeDataPaths() (e error) {
 			return e
 		}
 		// Move old pod.conf into new location if needed
-		oldConfPath := filepath.Join(oldHomePath, opts.DefaultConfigFilename)
-		newConfPath := filepath.Join(newHomePath, opts.DefaultConfigFilename)
+		oldConfPath := filepath.Join(oldHomePath, constant.DefaultConfigFilename)
+		newConfPath := filepath.Join(newHomePath, constant.DefaultConfigFilename)
 		if apputil.FileExists(oldConfPath) && !apputil.FileExists(newConfPath) {
 			e = os.Rename(oldConfPath, newConfPath)
 			if e != nil {
@@ -148,8 +148,8 @@ func upgradeDataPaths() (e error) {
 			}
 		}
 		// Move old data directory into new location if needed
-		oldDataPath := filepath.Join(oldHomePath, opts.DefaultDataDirname)
-		newDataPath := filepath.Join(newHomePath, opts.DefaultDataDirname)
+		oldDataPath := filepath.Join(oldHomePath, constant.DefaultDataDirname)
+		newDataPath := filepath.Join(newHomePath, constant.DefaultDataDirname)
 		if apputil.FileExists(oldDataPath) && !apputil.FileExists(newDataPath) {
 			e = os.Rename(oldDataPath, newDataPath)
 			if e != nil {
