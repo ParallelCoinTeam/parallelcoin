@@ -1,3 +1,7 @@
+## Current work in final stages of a big refactor on config is available here:
+
+[https://github.com/p9c/monorepo](https://github.com/p9c/monorepo)
+
 ![Logo](https://raw.githubusercontent.com/p9c/pod/l0k1/pkg/gui/logo/logo_small.svg) 
 ## ParallelCoin Pod
 
