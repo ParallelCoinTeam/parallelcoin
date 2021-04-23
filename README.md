@@ -1,8 +1,8 @@
 ## Current work in final stages of a big refactor on config is available here:
 
-[https://github.com/p9c/monorepo](https://github.com/p9c/monorepo)
+[https://github.com/p9c/matrjoska](https://github.com/p9c/matrjoska)
 
-![Logo](https://raw.githubusercontent.com/p9c/pod/l0k1/pkg/gui/logo/logo_small.svg) 
+![Logo](https://raw.githubusercontent.com/p9c/logo/main/logo_nocircle128x128.svg) 
 ## ParallelCoin Pod
 
 Fully integrated all-in-one cli client, full node, wallet server, miner and GUI wallet for ParallelCoin
