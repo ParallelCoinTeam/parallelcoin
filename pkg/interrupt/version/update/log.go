@@ -1,4 +1,4 @@
-package interrupt
+package main
 
 import (
 	"github.com/p9c/log"

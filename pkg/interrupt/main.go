@@ -22,7 +22,7 @@ type HandlerWithSource struct {
 }
 
 var (
-	Restart   bool // = true
+	Restart bool // = true
 	requested uberatomic.Bool
 	// ch is used to receive SIGINT (Ctrl+C) signals.
 	ch chan os.Signal

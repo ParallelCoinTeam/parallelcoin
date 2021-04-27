@@ -98,7 +98,6 @@ func (x *Opt) False() bool {
 
 // Flip changes the value to its opposite
 func (x *Opt) Flip() {
-	I.Ln("flipping", x.Name(), "to", !x.value.Load())
 	x.value.Toggle()
 }
 
@@ -114,7 +113,6 @@ func (x *Opt) runHooks(b bool) (e error) {
 // Set changes the value currently stored
 func (x *Opt) Set(b bool) (e error) {
 	if e = x.runHooks(b); E.Chk(e) {
-		I.Ln("setting", x.Name(), "to", b)
 		x.value.Store(b)
 	}
 	return

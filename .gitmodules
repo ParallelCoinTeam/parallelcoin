@@ -1,0 +1,22 @@
+[submodule "docs/whitepaper"]
+	path = docs/whitepaper
+	url = git@github.com:p9c/whitepaper.git
+[submodule "pkg/gel"]
+        path = pkg/gel
+        url = git@github.com:p9c/gel.git
+[submodule "pkg/qu"]
+        path = pkg/qu
+        url = git@github.com:p9c/qu.git
+[submodule "pkg/logo"]
+        path = pkg/logo
+        url = git@github.com:p9c/logo.git
+[submodule "pkg/opts"]
+        path = pkg/opts
+        url = git@github.com:p9c/opts.git
+[submodule "pkg/log"]
+        path = pkg/log
+        url = git@github.com:p9c/log.git
+[submodule "pkg/interrupt"]
+        path = pkg/interrupt
+        url = git@github.com:p9c/interrupt.git
+

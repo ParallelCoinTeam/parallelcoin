@@ -6,15 +6,15 @@ type (
 		Option        string
 		Aliases       []string
 		Group         string
-		Tags          []string
 		Label         string
 		Description   string
 		Documentation string
 		Type          string
-		Options       []string
-		OmitEmpty     bool
-		Name          string
-		DefaultPort   int
+		// Widget        string
+		Options     []string
+		OmitEmpty   bool
+		Name        string
+		DefaultPort int
 	}
 )
 
