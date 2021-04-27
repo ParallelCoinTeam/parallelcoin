@@ -5,14 +5,14 @@ type Commands []Command
 
 // Command is a specification for a command and can include any number of subcommands
 type Command struct {
-	Name          string
-	Description   string
-	Documentation string
-	Entrypoint    func(c interface{}) error
-	Commands      Commands
-	Colorizer     func(a ...interface{}) string
-	AppText       string
-	Parent        *Command
+	Name        string
+	Title       string
+	Description string
+	Entrypoint  func(c interface{}) error
+	Commands    Commands
+	Colorizer   func(a ...interface{}) string
+	AppText     string
+	Parent      *Command
 }
 
 func (c Commands) PopulateParents(parent *Command) {
@@ -40,7 +40,9 @@ var tabs = "\t\t\t\t\t"
 
 // Find the Command you are looking for. Note that the namespace is assumed to be flat, no duplicated names on different
 // levels, as it returns on the first one it finds, which goes depth-first recursive
-func (c Commands) Find(name string, hereDepth, hereDist int) (found bool, depth, dist int, cm *Command, e error) {
+func (c Commands) Find(
+	name string, hereDepth, hereDist int, skipFirst bool,
+) (found bool, depth, dist int, cm *Command, e error) {
 	if c == nil {
 		dist = hereDist
 		depth = hereDepth
@@ -54,16 +56,19 @@ func (c Commands) Find(name string, hereDepth, hereDist int) (found bool, depth,
 	dist = hereDist
 	for i := range c {
 		T.Ln(tabs[:depth]+"walking", c[i].Name, depth, dist)
+		dist++
 		if c[i].Name == name {
+			if skipFirst {
+				continue
+			}
+			dist--
 			T.Ln(tabs[:depth]+"found", name, "at depth", depth, "distance", dist)
 			found = true
 			cm = &c[i]
 			e = nil
 			return
-		} else {
-			dist++
 		}
-		if found, depth, dist, cm, e = c[i].Commands.Find(name, depth, dist); E.Chk(e) {
+		if found, depth, dist, cm, e = c[i].Commands.Find(name, depth, dist, false); E.Chk(e) {
 			T.Ln(tabs[:depth]+"error", c[i].Name)
 			return
 		}

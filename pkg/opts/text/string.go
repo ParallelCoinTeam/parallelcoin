@@ -121,8 +121,24 @@ func (x *Opt) Empty() bool {
 }
 
 // Bytes returns the raw bytes in the underlying storage
+// note that this returns a copy because anything done to the slice affects
+// all accesses afterwards, thus there is also a zero function
+// todo: make an option for the byte buffer to be MMU fenced to prevent
+//  elevated privilege processes from accessing this memory.
 func (x *Opt) Bytes() []byte {
-	return x.Value.Load().([]byte)
+	byt := x.Value.Load().([]byte)
+	o := make([]byte, len(byt))
+	copy(o,byt)
+	return o
+}
+
+// Zero the bytes
+func(x *Opt) Zero() {
+	byt := x.Value.Load().([]byte)
+	for i := range byt {
+		byt[i]=0
+	}
+	x.Value.Store(byt)
 }
 
 func (x *Opt) runHooks(s []byte) (e error) {
