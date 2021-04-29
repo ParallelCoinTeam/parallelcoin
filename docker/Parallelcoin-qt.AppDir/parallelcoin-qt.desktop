@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=parallelcoin-qt
+Exec=AppRun %F
+Icon=parallelcoin-qt
+Comment=parallelcoin qt wallet appimage binary
+Terminal=false
+Categories=Network;

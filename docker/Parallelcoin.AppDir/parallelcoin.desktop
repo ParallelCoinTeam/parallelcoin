@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=parallelcoind
+Exec=parallelcoind
+Type=Application
+Icon=parallelcoind
+Categories=Network;
