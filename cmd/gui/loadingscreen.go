@@ -10,7 +10,10 @@ import (
 )
 
 func (wg *WalletGUI) getLoadingPage() (a *gel.App) {
-	a = wg.App(wg.Window.Width, wg.State.activePage, Break1).SetMainDirection(l.Center + 1)
+	a = wg.App(wg.Window.Width, wg.State.activePage, Break1).
+		SetMainDirection(l.Center + 1).
+		SetLogo(&p9icons.ParallelCoin).
+		SetAppTitleText("Parallelcoin Wallet")
 	a.Pages(
 		map[string]l.Widget{
 			"loading": wg.Page(

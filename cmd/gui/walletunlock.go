@@ -94,7 +94,10 @@ func (wg *WalletGUI) unlockWallet(pass string) {
 }
 
 func (wg *WalletGUI) getWalletUnlockAppWidget() (a *gel.App) {
-	a = wg.App(wg.Window.Width, wg.State.activePage, Break1).SetMainDirection(l.Center + 1)
+	a = wg.App(wg.Window.Width, wg.State.activePage, Break1).
+		SetMainDirection(l.Center + 1).
+		SetLogo(&p9icons.ParallelCoin).
+		SetAppTitleText("Parallelcoin Wallet")
 	wg.unlockPage = a
 	password := wg.cx.Config.WalletPass
 	exitButton := wg.WidgetPool.GetClickable()

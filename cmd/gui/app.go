@@ -19,7 +19,10 @@ import (
 )
 
 func (wg *WalletGUI) GetAppWidget() (a *gel.App) {
-	a = wg.App(wg.Window.Width, uberatomic.NewString("home"), Break1).SetMainDirection(l.W)
+	a = wg.App(wg.Window.Width, uberatomic.NewString("home"), Break1).
+		SetMainDirection(l.W).
+		SetLogo(&p9icons.ParallelCoin).
+		SetAppTitleText("Parallelcoin Wallet")
 	wg.MainApp = a
 	wg.config = cfg.New(wg.Window, wg.quit)
 	wg.configs = wg.config.Config()
