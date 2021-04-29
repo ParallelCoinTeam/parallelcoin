@@ -1,6 +1,6 @@
 # ParallelCoin Pod
 
-> ParallelCoin's Omnibus Repositorie
+##### ParallelCoin's Omnibus Repositorie
  
 ## Current Status:
 
