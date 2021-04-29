@@ -1,4 +1,4 @@
-module github.com/p9c/matrjoska
+module github.com/p9c/pod
 
 go 1.12
 

@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/p9c/log"
-	"github.com/p9c/matrjoska/pkg/pipe"
+	"github.com/p9c/pod/pkg/pipe"
 
 	"os"
 	"time"

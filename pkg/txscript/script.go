@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"time"
 	
-	"github.com/p9c/matrjoska/pkg/chainhash"
-	"github.com/p9c/matrjoska/pkg/wire"
+	"github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 // Bip16Activation is the timestamp where BIP0016 is valid to use in the blockchain. To be used to determine if BIP0016

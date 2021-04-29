@@ -3,11 +3,11 @@ package block
 import (
 	"bytes"
 	"fmt"
-	"github.com/p9c/matrjoska/pkg/util"
+	"github.com/p9c/pod/pkg/util"
 	"io"
 	
-	"github.com/p9c/matrjoska/pkg/chainhash"
-	"github.com/p9c/matrjoska/pkg/wire"
+	"github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 // OutOfRangeError describes an error due to accessing an element that is out of range.

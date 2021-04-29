@@ -8,18 +8,18 @@ import (
 	"sync/atomic"
 	"time"
 
-	block2 "github.com/p9c/matrjoska/pkg/block"
+	block2 "github.com/p9c/pod/pkg/block"
 
 	"github.com/p9c/qu"
 
-	"github.com/p9c/matrjoska/pkg/blockchain"
-	"github.com/p9c/matrjoska/pkg/chaincfg"
-	"github.com/p9c/matrjoska/pkg/chainhash"
-	"github.com/p9c/matrjoska/pkg/database"
-	"github.com/p9c/matrjoska/pkg/mempool"
-	peerpkg "github.com/p9c/matrjoska/pkg/peer"
-	"github.com/p9c/matrjoska/pkg/util"
-	"github.com/p9c/matrjoska/pkg/wire"
+	"github.com/p9c/pod/pkg/blockchain"
+	"github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/database"
+	"github.com/p9c/pod/pkg/mempool"
+	peerpkg "github.com/p9c/pod/pkg/peer"
+	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 type (

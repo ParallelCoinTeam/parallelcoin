@@ -28,8 +28,8 @@ import (
 	"lukechampine.com/blake3"
 
 	"github.com/p9c/log"
-	"github.com/p9c/matrjoska/pkg/apputil"
-	"github.com/p9c/matrjoska/pkg/constant"
+	"github.com/p9c/pod/pkg/apputil"
+	"github.com/p9c/pod/pkg/constant"
 	"github.com/p9c/opts/binary"
 	"github.com/p9c/opts/cmds"
 	"github.com/p9c/opts/duration"

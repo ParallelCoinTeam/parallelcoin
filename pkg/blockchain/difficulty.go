@@ -2,13 +2,13 @@ package blockchain
 
 import (
 	"encoding/hex"
-	bits2 "github.com/p9c/matrjoska/pkg/bits"
-	"github.com/p9c/matrjoska/pkg/fork"
+	bits2 "github.com/p9c/pod/pkg/bits"
+	"github.com/p9c/pod/pkg/fork"
 	"math/big"
 	"strings"
 	"time"
 	
-	"github.com/p9c/matrjoska/pkg/chainhash"
+	"github.com/p9c/pod/pkg/chainhash"
 )
 
 var (

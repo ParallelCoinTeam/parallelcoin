@@ -3,7 +3,7 @@ package gui
 import (
 	"time"
 
-	"github.com/p9c/matrjoska/pkg/btcjson"
+	"github.com/p9c/pod/pkg/btcjson"
 
 	"github.com/p9c/qu"
 )

@@ -2,7 +2,7 @@ package peer_test
 
 import (
 	"errors"
-	"github.com/p9c/matrjoska/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/chaincfg"
 	"io"
 	"net"
 	"strconv"
@@ -13,9 +13,9 @@ import (
 	
 	"github.com/btcsuite/go-socks/socks"
 	
-	"github.com/p9c/matrjoska/pkg/chainhash"
-	"github.com/p9c/matrjoska/pkg/peer"
-	"github.com/p9c/matrjoska/pkg/wire"
+	"github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/peer"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 // conn mocks a network connection by implementing the net.Conn interface. It is used to test peer connection without

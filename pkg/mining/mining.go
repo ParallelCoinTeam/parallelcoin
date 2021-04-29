@@ -3,20 +3,20 @@ package mining
 import (
 	"container/heap"
 	"fmt"
-	"github.com/p9c/matrjoska/pkg/amt"
-	"github.com/p9c/matrjoska/pkg/bits"
-	block2 "github.com/p9c/matrjoska/pkg/block"
-	"github.com/p9c/matrjoska/pkg/btcaddr"
-	"github.com/p9c/matrjoska/pkg/chaincfg"
-	"github.com/p9c/matrjoska/pkg/fork"
+	"github.com/p9c/pod/pkg/amt"
+	"github.com/p9c/pod/pkg/bits"
+	block2 "github.com/p9c/pod/pkg/block"
+	"github.com/p9c/pod/pkg/btcaddr"
+	"github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/fork"
 	"math/rand"
 	"time"
 	
-	"github.com/p9c/matrjoska/pkg/blockchain"
-	"github.com/p9c/matrjoska/pkg/chainhash"
-	"github.com/p9c/matrjoska/pkg/txscript"
-	"github.com/p9c/matrjoska/pkg/util"
-	"github.com/p9c/matrjoska/pkg/wire"
+	"github.com/p9c/pod/pkg/blockchain"
+	"github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/txscript"
+	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 const (

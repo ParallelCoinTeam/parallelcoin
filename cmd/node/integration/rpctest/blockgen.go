@@ -7,15 +7,15 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/p9c/matrjoska/pkg/block"
-	"github.com/p9c/matrjoska/pkg/btcaddr"
+	"github.com/p9c/pod/pkg/block"
+	"github.com/p9c/pod/pkg/btcaddr"
 
-	"github.com/p9c/matrjoska/pkg/blockchain"
-	"github.com/p9c/matrjoska/pkg/chaincfg"
-	"github.com/p9c/matrjoska/pkg/chainhash"
-	"github.com/p9c/matrjoska/pkg/txscript"
-	"github.com/p9c/matrjoska/pkg/util"
-	"github.com/p9c/matrjoska/pkg/wire"
+	"github.com/p9c/pod/pkg/blockchain"
+	"github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/txscript"
+	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 // solveBlock attempts to find a nonce which makes the passed block header hash to a value less than the target

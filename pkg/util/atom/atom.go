@@ -1,14 +1,14 @@
 package atom
 
 import (
-	"github.com/p9c/matrjoska/pkg/btcaddr"
-	"github.com/p9c/matrjoska/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/btcaddr"
+	"github.com/p9c/pod/pkg/chaincfg"
 	"time"
 	
 	"go.uber.org/atomic"
 	
-	"github.com/p9c/matrjoska/pkg/btcjson"
-	"github.com/p9c/matrjoska/pkg/chainhash"
+	"github.com/p9c/pod/pkg/btcjson"
+	"github.com/p9c/pod/pkg/chainhash"
 )
 
 // import all the atomics from uber atomic

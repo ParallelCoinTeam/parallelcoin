@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"math/big"
 	
-	"github.com/p9c/matrjoska/pkg/wire"
+	"github.com/p9c/pod/pkg/wire"
 	
 	"go.uber.org/atomic"
 
-	ec "github.com/p9c/matrjoska/pkg/ecc"
+	ec "github.com/p9c/pod/pkg/ecc"
 )
 
 // ScriptFlags is a bitmask defining additional operations or tests that will be done when executing a script pair.

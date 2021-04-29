@@ -10,8 +10,8 @@ import (
 	"reflect"
 	"sort"
 
-	"github.com/p9c/matrjoska/pod/config"
-	"github.com/p9c/matrjoska/pod/podcfgs"
+	"github.com/p9c/pod/pod/config"
+	"github.com/p9c/pod/pod/podcfgs"
 )
 
 func main() {

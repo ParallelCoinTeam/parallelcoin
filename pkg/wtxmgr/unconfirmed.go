@@ -1,9 +1,9 @@
 package wtxmgr
 
 import (
-	"github.com/p9c/matrjoska/pkg/chainhash"
-	"github.com/p9c/matrjoska/pkg/walletdb"
-	"github.com/p9c/matrjoska/pkg/wire"
+	"github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/walletdb"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 // insertMemPoolTx inserts the unmined transaction record. It also marks previous outputs referenced by the inputs as

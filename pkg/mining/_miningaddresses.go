@@ -1,11 +1,11 @@
 package mining
 
 import (
-	"github.com/p9c/matrjoska/cmd/node/active"
-	"github.com/p9c/matrjoska/pkg/btcaddr"
-	wm "github.com/p9c/matrjoska/pkg/waddrmgr"
-	"github.com/p9c/matrjoska/cmd/wallet"
-	"github.com/p9c/matrjoska/pod/config"
+	"github.com/p9c/pod/cmd/node/active"
+	"github.com/p9c/pod/pkg/btcaddr"
+	wm "github.com/p9c/pod/pkg/waddrmgr"
+	"github.com/p9c/pod/cmd/wallet"
+	"github.com/p9c/pod/pod/config"
 )
 
 // RefillMiningAddresses adds new addresses to the mining address pool for the miner

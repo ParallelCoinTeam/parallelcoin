@@ -2,14 +2,14 @@ package wtxmgr
 
 import (
 	"bytes"
-	"github.com/p9c/matrjoska/pkg/amt"
-	"github.com/p9c/matrjoska/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/amt"
+	"github.com/p9c/pod/pkg/chaincfg"
 	"time"
 	
-	"github.com/p9c/matrjoska/pkg/blockchain"
-	"github.com/p9c/matrjoska/pkg/chainhash"
-	"github.com/p9c/matrjoska/pkg/walletdb"
-	"github.com/p9c/matrjoska/pkg/wire"
+	"github.com/p9c/pod/pkg/blockchain"
+	"github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/walletdb"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 type (

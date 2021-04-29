@@ -18,14 +18,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/p9c/matrjoska/pkg/block"
+	"github.com/p9c/pod/pkg/block"
 
 	"github.com/p9c/qu"
 
-	"github.com/p9c/matrjoska/pkg/chaincfg"
-	"github.com/p9c/matrjoska/pkg/chainhash"
-	"github.com/p9c/matrjoska/pkg/database"
-	"github.com/p9c/matrjoska/pkg/wire"
+	"github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/database"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 var (

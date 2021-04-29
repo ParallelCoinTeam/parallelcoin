@@ -9,7 +9,7 @@ import (
 	"os"
 	"testing"
 	
-	"github.com/p9c/matrjoska/pkg/walletdb/ci"
+	"github.com/p9c/pod/pkg/walletdb/ci"
 )
 
 // TestInterface performs all interfaces tests for this database driver.

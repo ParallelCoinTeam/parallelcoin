@@ -2,7 +2,7 @@
 
 package launchers
 
-import "github.com/p9c/matrjoska/pod/state"
+import "github.com/p9c/pod/pod/state"
 
 // Kopach runs the kopach miner
 func kopachHandle(ifc interface{}) (e error) {

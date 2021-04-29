@@ -9,11 +9,11 @@ import (
 
 	"github.com/p9c/qu"
 
-	"github.com/p9c/matrjoska/pkg/chaincfg"
-	"github.com/p9c/matrjoska/pkg/util/prompt"
-	"github.com/p9c/matrjoska/pkg/waddrmgr"
-	"github.com/p9c/matrjoska/pkg/walletdb"
-	"github.com/p9c/matrjoska/pod/config"
+	"github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/util/prompt"
+	"github.com/p9c/pod/pkg/waddrmgr"
+	"github.com/p9c/pod/pkg/walletdb"
+	"github.com/p9c/pod/pod/config"
 )
 
 // Loader implements the creating of new and opening of existing wallets, while providing a callback system for other

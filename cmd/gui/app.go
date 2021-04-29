@@ -14,8 +14,8 @@ import (
 	"github.com/p9c/gio/text"
 
 	"github.com/p9c/gel"
-	"github.com/p9c/matrjoska/cmd/gui/cfg"
-	"github.com/p9c/matrjoska/pkg/p9icons"
+	"github.com/p9c/pod/cmd/gui/cfg"
+	"github.com/p9c/pod/pkg/p9icons"
 )
 
 func (wg *WalletGUI) GetAppWidget() (a *gel.App) {

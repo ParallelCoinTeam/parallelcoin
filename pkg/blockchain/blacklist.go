@@ -1,10 +1,10 @@
 package blockchain
 
 import (
-	"github.com/p9c/matrjoska/pkg/btcaddr"
-	"github.com/p9c/matrjoska/pkg/fork"
-	"github.com/p9c/matrjoska/pkg/txscript"
-	"github.com/p9c/matrjoska/pkg/util"
+	"github.com/p9c/pod/pkg/btcaddr"
+	"github.com/p9c/pod/pkg/fork"
+	"github.com/p9c/pod/pkg/txscript"
+	"github.com/p9c/pod/pkg/util"
 )
 
 // ContainsBlacklisted returns true if one of the given addresses is found in the transaction

@@ -1,7 +1,7 @@
 package chaincfg
 
 import (
-	"github.com/p9c/matrjoska/pkg/wire"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 // RegressionTestParams defines the network parameters for the regression test Bitcoin network. Not to be confused with

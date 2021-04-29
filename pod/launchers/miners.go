@@ -8,14 +8,14 @@ import (
 	"os"
 
 	"github.com/p9c/log"
-	"github.com/p9c/matrjoska/cmd/kopach"
-	"github.com/p9c/matrjoska/cmd/kopach/worker"
-	"github.com/p9c/matrjoska/pod/state"
+	"github.com/p9c/pod/cmd/kopach"
+	"github.com/p9c/pod/cmd/kopach/worker"
+	"github.com/p9c/pod/pod/state"
 
 	"github.com/p9c/interrupt"
 
-	"github.com/p9c/matrjoska/pkg/chaincfg"
-	"github.com/p9c/matrjoska/pkg/fork"
+	"github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/fork"
 )
 
 // Kopach runs the kopach miner

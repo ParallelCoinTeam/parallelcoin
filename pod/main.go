@@ -11,14 +11,14 @@ import (
 	_ "github.com/p9c/gio/app/permission/storage"      // this enables the home folder appdata directory to work on android (and ios)
 
 	"github.com/p9c/log"
-	"github.com/p9c/matrjoska/pod/config"
-	"github.com/p9c/matrjoska/pod/podcfgs"
-	"github.com/p9c/matrjoska/pod/podhelp"
-	"github.com/p9c/matrjoska/pod/state"
-	"github.com/p9c/matrjoska/version"
+	"github.com/p9c/pod/pod/config"
+	"github.com/p9c/pod/pod/podcfgs"
+	"github.com/p9c/pod/pod/podhelp"
+	"github.com/p9c/pod/pod/state"
+	"github.com/p9c/pod/version"
 
 	// This ensures the database drivers get registered
-	_ "github.com/p9c/matrjoska/pkg/database/ffldb"
+	_ "github.com/p9c/pod/pkg/database/ffldb"
 
 	// _ "github.com/p9c/gio/app/permission/bluetooth"
 	// _ "github.com/p9c/gio/app/permission/camera"

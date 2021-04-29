@@ -6,14 +6,14 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/p9c/matrjoska/pkg/amt"
-	"github.com/p9c/matrjoska/pkg/btcaddr"
+	"github.com/p9c/pod/pkg/amt"
+	"github.com/p9c/pod/pkg/btcaddr"
 
 	"github.com/atotto/clipboard"
 
 	"github.com/p9c/gio/op/paint"
 
-	"github.com/p9c/matrjoska/pkg/qrcode"
+	"github.com/p9c/pod/pkg/qrcode"
 )
 
 func (wg *WalletGUI) GetNewReceivingAddress() {

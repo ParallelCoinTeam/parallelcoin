@@ -3,11 +3,11 @@ package txscript
 import (
 	"errors"
 	"fmt"
-	"github.com/p9c/matrjoska/pkg/btcaddr"
-	"github.com/p9c/matrjoska/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/btcaddr"
+	"github.com/p9c/pod/pkg/chaincfg"
 
-	"github.com/p9c/matrjoska/pkg/ecc"
-	"github.com/p9c/matrjoska/pkg/wire"
+	"github.com/p9c/pod/pkg/ecc"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 // RawTxInWitnessSignature returns the serialized ECDSA signature for the input idx of the given transaction, with the

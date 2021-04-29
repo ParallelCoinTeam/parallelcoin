@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/p9c/matrjoska/pkg/amt"
+	"github.com/p9c/pod/pkg/amt"
 	"io/ioutil"
 	"log"
 	"path/filepath"
@@ -12,8 +12,8 @@ import (
 	
 	"github.com/davecgh/go-spew/spew"
 	
-	"github.com/p9c/matrjoska/pkg/appdata"
-	"github.com/p9c/matrjoska/pkg/rpcclient"
+	"github.com/p9c/pod/pkg/appdata"
+	"github.com/p9c/pod/pkg/rpcclient"
 )
 
 func main() {

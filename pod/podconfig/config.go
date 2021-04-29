@@ -3,7 +3,7 @@ package podconfig
 import (
 	
 	// This ensures the database drivers get registered
-	// _ "github.com/p9c/matrjoska/pkg/database/ffldb"
+	// _ "github.com/p9c/pod/pkg/database/ffldb"
 )
 
 //

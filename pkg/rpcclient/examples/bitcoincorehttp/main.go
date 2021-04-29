@@ -5,7 +5,7 @@ import (
 	
 	"github.com/p9c/qu"
 	
-	"github.com/p9c/matrjoska/pkg/rpcclient"
+	"github.com/p9c/pod/pkg/rpcclient"
 )
 
 func main() {

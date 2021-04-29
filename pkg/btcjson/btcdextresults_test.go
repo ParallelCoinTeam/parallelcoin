@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 	
-	"github.com/p9c/matrjoska/pkg/btcjson"
+	"github.com/p9c/pod/pkg/btcjson"
 )
 
 // TestPodExtCustomResults ensures any results that have custom marshalling work as intended and unmarshal code of

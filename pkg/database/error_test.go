@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 	
-	"github.com/p9c/matrjoska/pkg/database"
+	"github.com/p9c/pod/pkg/database"
 )
 
 // TestErrorCodeStringer tests the stringized output for the ErrorCode type.

@@ -2,12 +2,12 @@ package wallet
 
 import (
 	"github.com/p9c/log"
-	"github.com/p9c/matrjoska/pkg/btcaddr"
-	"github.com/p9c/matrjoska/pkg/chainclient"
-	"github.com/p9c/matrjoska/pkg/txscript"
-	"github.com/p9c/matrjoska/pkg/waddrmgr"
-	"github.com/p9c/matrjoska/pkg/wire"
-	"github.com/p9c/matrjoska/pkg/wtxmgr"
+	"github.com/p9c/pod/pkg/btcaddr"
+	"github.com/p9c/pod/pkg/chainclient"
+	"github.com/p9c/pod/pkg/txscript"
+	"github.com/p9c/pod/pkg/waddrmgr"
+	"github.com/p9c/pod/pkg/wire"
+	"github.com/p9c/pod/pkg/wtxmgr"
 )
 
 // RescanProgressMsg reports the current progress made by a rescan for a set of

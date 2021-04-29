@@ -4,7 +4,7 @@ import (
 	uberatomic "go.uber.org/atomic"
 
 	"github.com/p9c/log"
-	"github.com/p9c/matrjoska/pkg/pipe"
+	"github.com/p9c/pod/pkg/pipe"
 
 	"github.com/p9c/interrupt"
 	"github.com/p9c/qu"

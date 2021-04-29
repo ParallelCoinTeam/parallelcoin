@@ -3,15 +3,15 @@ package peer_test
 import (
 	"fmt"
 	"github.com/p9c/log"
-	"github.com/p9c/matrjoska/version"
+	"github.com/p9c/pod/version"
 	"net"
 	"time"
 	
 	"github.com/p9c/qu"
 	
-	"github.com/p9c/matrjoska/pkg/chaincfg"
-	"github.com/p9c/matrjoska/pkg/peer"
-	"github.com/p9c/matrjoska/pkg/wire"
+	"github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/peer"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 var subsystem = log.AddLoggerSubsystem(version.PathBase)

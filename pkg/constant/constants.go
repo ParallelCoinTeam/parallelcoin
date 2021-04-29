@@ -1,10 +1,10 @@
 package constant
 
 import (
-	"github.com/p9c/matrjoska/pkg/amt"
-	"github.com/p9c/matrjoska/pkg/appdata"
-	"github.com/p9c/matrjoska/pkg/blockchain"
-	"github.com/p9c/matrjoska/pkg/peer"
+	"github.com/p9c/pod/pkg/amt"
+	"github.com/p9c/pod/pkg/appdata"
+	"github.com/p9c/pod/pkg/blockchain"
+	"github.com/p9c/pod/pkg/peer"
 	"time"
 )
 

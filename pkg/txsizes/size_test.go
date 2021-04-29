@@ -5,8 +5,8 @@ import (
 	"encoding/hex"
 	"testing"
 	
-	. "github.com/p9c/matrjoska/pkg/txsizes"
-	"github.com/p9c/matrjoska/pkg/wire"
+	. "github.com/p9c/pod/pkg/txsizes"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 const (

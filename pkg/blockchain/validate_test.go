@@ -1,16 +1,16 @@
 package blockchain
 
 import (
-	block2 "github.com/p9c/matrjoska/pkg/block"
+	block2 "github.com/p9c/pod/pkg/block"
 	"math"
 	"reflect"
 	"testing"
 	"time"
 	
-	"github.com/p9c/matrjoska/pkg/chaincfg"
-	"github.com/p9c/matrjoska/pkg/chainhash"
-	"github.com/p9c/matrjoska/pkg/util"
-	"github.com/p9c/matrjoska/pkg/wire"
+	"github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 // TestSequenceLocksActive tests the SequenceLockActive function to ensure it works as expected in all possible

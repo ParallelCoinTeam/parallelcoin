@@ -2,12 +2,12 @@
 package txauthor
 
 import (
-	"github.com/p9c/matrjoska/pkg/amt"
+	"github.com/p9c/pod/pkg/amt"
 	"testing"
 	
-	"github.com/p9c/matrjoska/pkg/txrules"
-	"github.com/p9c/matrjoska/pkg/txsizes"
-	"github.com/p9c/matrjoska/pkg/wire"
+	"github.com/p9c/pod/pkg/txrules"
+	"github.com/p9c/pod/pkg/txsizes"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 func p2pkhOutputs(amounts ...amt.Amount) []*wire.TxOut {

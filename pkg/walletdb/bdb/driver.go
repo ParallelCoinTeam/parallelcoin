@@ -3,7 +3,7 @@ package bdb
 import (
 	"fmt"
 	
-	"github.com/p9c/matrjoska/pkg/walletdb"
+	"github.com/p9c/pod/pkg/walletdb"
 )
 
 const (

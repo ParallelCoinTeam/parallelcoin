@@ -1,7 +1,7 @@
 package amt_test
 
 import (
-	"github.com/p9c/matrjoska/pkg/amt"
+	"github.com/p9c/pod/pkg/amt"
 	"math"
 	"testing"
 )

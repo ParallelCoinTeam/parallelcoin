@@ -18,8 +18,8 @@ import (
 
 	"github.com/btcsuite/go-socks/socks"
 
-	"github.com/p9c/matrjoska/pkg/btcjson"
-	"github.com/p9c/matrjoska/pod/config"
+	"github.com/p9c/pod/pkg/btcjson"
+	"github.com/p9c/pod/pod/config"
 )
 
 // Call uses settings in the context to call the method with the given parameters and returns the raw json bytes

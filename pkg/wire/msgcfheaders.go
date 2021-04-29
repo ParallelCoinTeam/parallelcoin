@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 	
-	"github.com/p9c/matrjoska/pkg/chainhash"
+	"github.com/p9c/pod/pkg/chainhash"
 )
 
 const (

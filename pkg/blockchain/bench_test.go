@@ -1,7 +1,7 @@
 package blockchain
 
 import (
-	"github.com/p9c/matrjoska/pkg/block"
+	"github.com/p9c/pod/pkg/block"
 	"testing"
 )
 

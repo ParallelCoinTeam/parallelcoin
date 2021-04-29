@@ -12,7 +12,7 @@ import (
 	"golang.org/x/exp/shiny/materialdesign/icons"
 
 	l "github.com/p9c/gio/layout"
-	ctl2 "github.com/p9c/matrjoska/cmd/ctl"
+	ctl2 "github.com/p9c/pod/cmd/ctl"
 
 	icons2 "golang.org/x/exp/shiny/materialdesign/icons"
 

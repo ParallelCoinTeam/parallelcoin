@@ -1,11 +1,11 @@
 package util_test
 
 import (
-	"github.com/p9c/matrjoska/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/chaincfg"
 	"testing"
 
-	"github.com/p9c/matrjoska/pkg/ecc"
-	"github.com/p9c/matrjoska/pkg/util"
+	"github.com/p9c/pod/pkg/ecc"
+	"github.com/p9c/pod/pkg/util"
 )
 
 func TestEncodeDecodeWIF(t *testing.T) {

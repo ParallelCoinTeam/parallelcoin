@@ -2,14 +2,14 @@ package wallet
 
 import (
 	"bytes"
-	"github.com/p9c/matrjoska/pkg/btcaddr"
+	"github.com/p9c/pod/pkg/btcaddr"
 	"strings"
 	
-	"github.com/p9c/matrjoska/pkg/chainclient"
-	"github.com/p9c/matrjoska/pkg/txscript"
-	wm "github.com/p9c/matrjoska/pkg/waddrmgr"
-	"github.com/p9c/matrjoska/pkg/walletdb"
-	tm "github.com/p9c/matrjoska/pkg/wtxmgr"
+	"github.com/p9c/pod/pkg/chainclient"
+	"github.com/p9c/pod/pkg/txscript"
+	wm "github.com/p9c/pod/pkg/waddrmgr"
+	"github.com/p9c/pod/pkg/walletdb"
+	tm "github.com/p9c/pod/pkg/wtxmgr"
 )
 
 func (w *Wallet) handleChainNotifications() {

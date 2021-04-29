@@ -56,9 +56,9 @@ import (
 
 	"github.com/p9c/qu"
 
-	"github.com/p9c/matrjoska/pkg/btcjson"
-	"github.com/p9c/matrjoska/pkg/chainclient"
-	"github.com/p9c/matrjoska/cmd/wallet"
+	"github.com/p9c/pod/pkg/btcjson"
+	"github.com/p9c/pod/pkg/chainclient"
+	"github.com/p9c/pod/cmd/wallet"
 )
 
 // API stores the channel, parameters and result values from calls via the channel

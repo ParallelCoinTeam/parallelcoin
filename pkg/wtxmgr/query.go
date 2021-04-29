@@ -2,10 +2,10 @@ package wtxmgr
 
 import (
 	"fmt"
-	"github.com/p9c/matrjoska/pkg/amt"
+	"github.com/p9c/pod/pkg/amt"
 	
-	"github.com/p9c/matrjoska/pkg/chainhash"
-	"github.com/p9c/matrjoska/pkg/walletdb"
+	"github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/walletdb"
 )
 
 // CreditRecord contains metadata regarding a transaction credit for a known transaction. Further details may be looked

@@ -12,10 +12,10 @@ import (
 	"github.com/p9c/interrupt"
 
 	"github.com/p9c/gel"
-	"github.com/p9c/matrjoska/cmd/wallet"
-	"github.com/p9c/matrjoska/pkg/chaincfg"
-	"github.com/p9c/matrjoska/pkg/constant"
-	"github.com/p9c/matrjoska/pkg/fork"
+	"github.com/p9c/pod/cmd/wallet"
+	"github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/constant"
+	"github.com/p9c/pod/pkg/fork"
 
 	l "github.com/p9c/gio/layout"
 )

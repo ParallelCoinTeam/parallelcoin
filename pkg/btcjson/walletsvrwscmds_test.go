@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 	
-	"github.com/p9c/matrjoska/pkg/btcjson"
+	"github.com/p9c/pod/pkg/btcjson"
 )
 
 // TestWalletSvrWsCmds tests all of the wallet server websocket-specific commands marshal and unmarshal into valid

@@ -4,10 +4,10 @@ package txrules
 
 import (
 	"errors"
-	"github.com/p9c/matrjoska/pkg/amt"
+	"github.com/p9c/pod/pkg/amt"
 	
-	"github.com/p9c/matrjoska/pkg/txscript"
-	"github.com/p9c/matrjoska/pkg/wire"
+	"github.com/p9c/pod/pkg/txscript"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 // DefaultRelayFeePerKb is the default minimum relay fee policy for a mempool.

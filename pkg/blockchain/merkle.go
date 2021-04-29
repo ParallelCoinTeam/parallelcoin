@@ -3,8 +3,8 @@ package blockchain
 import (
 	"math"
 	
-	"github.com/p9c/matrjoska/pkg/chainhash"
-	"github.com/p9c/matrjoska/pkg/util"
+	"github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/util"
 )
 
 // const (

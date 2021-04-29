@@ -10,7 +10,7 @@ import (
 
 	"github.com/p9c/qu"
 
-	"github.com/p9c/matrjoska/pkg/btcjson"
+	"github.com/p9c/pod/pkg/btcjson"
 )
 
 // API stores the channel, parameters and result values from calls via

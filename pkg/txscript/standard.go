@@ -2,8 +2,8 @@ package txscript
 
 import (
 	"fmt"
-	"github.com/p9c/matrjoska/pkg/btcaddr"
-	"github.com/p9c/matrjoska/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/btcaddr"
+	"github.com/p9c/pod/pkg/chaincfg"
 )
 
 // ScriptClass is an enumeration for the list of standard types of script.

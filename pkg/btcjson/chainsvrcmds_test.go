@@ -7,8 +7,8 @@ import (
 	"reflect"
 	"testing"
 	
-	"github.com/p9c/matrjoska/pkg/btcjson"
-	"github.com/p9c/matrjoska/pkg/wire"
+	"github.com/p9c/pod/pkg/btcjson"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 // TestChainSvrCmds tests all of the chain server commands marshal and unmarshal into valid results include handling of

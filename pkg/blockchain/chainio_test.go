@@ -6,8 +6,8 @@ import (
 	"reflect"
 	"testing"
 	
-	"github.com/p9c/matrjoska/pkg/database"
-	"github.com/p9c/matrjoska/pkg/wire"
+	"github.com/p9c/pod/pkg/database"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 // TestErrNotInMainChain ensures the functions related to errNotInMainChain work as expected.

@@ -12,11 +12,11 @@ import (
 	"github.com/niubaoshu/gotiny"
 
 	"github.com/p9c/log"
-	"github.com/p9c/matrjoska/pkg/chainrpc/p2padvt"
-	"github.com/p9c/matrjoska/pkg/chainrpc/templates"
-	"github.com/p9c/matrjoska/pkg/constant"
-	"github.com/p9c/matrjoska/pkg/pipe"
-	"github.com/p9c/matrjoska/pod/state"
+	"github.com/p9c/pod/pkg/chainrpc/p2padvt"
+	"github.com/p9c/pod/pkg/chainrpc/templates"
+	"github.com/p9c/pod/pkg/constant"
+	"github.com/p9c/pod/pkg/pipe"
+	"github.com/p9c/pod/pod/state"
 
 	"github.com/p9c/qu"
 
@@ -25,13 +25,13 @@ import (
 
 	"github.com/p9c/interrupt"
 
-	"github.com/p9c/matrjoska/cmd/kopach/client"
-	"github.com/p9c/matrjoska/pkg/chainhash"
-	"github.com/p9c/matrjoska/pkg/chainrpc/hashrate"
-	"github.com/p9c/matrjoska/pkg/chainrpc/job"
-	"github.com/p9c/matrjoska/pkg/chainrpc/pause"
-	rav "github.com/p9c/matrjoska/pkg/ring"
-	"github.com/p9c/matrjoska/pkg/transport"
+	"github.com/p9c/pod/cmd/kopach/client"
+	"github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/chainrpc/hashrate"
+	"github.com/p9c/pod/pkg/chainrpc/job"
+	"github.com/p9c/pod/pkg/chainrpc/pause"
+	rav "github.com/p9c/pod/pkg/ring"
+	"github.com/p9c/pod/pkg/transport"
 )
 
 var maxThreads = float32(runtime.NumCPU())

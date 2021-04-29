@@ -10,9 +10,9 @@ import (
 	
 	"golang.org/x/crypto/ripemd160"
 	
-	"github.com/p9c/matrjoska/pkg/chainhash"
-	ec "github.com/p9c/matrjoska/pkg/ecc"
-	"github.com/p9c/matrjoska/pkg/wire"
+	"github.com/p9c/pod/pkg/chainhash"
+	ec "github.com/p9c/pod/pkg/ecc"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 // An opcode defines the information related to a txscript opcode. opfunc, if present, is the function to call to

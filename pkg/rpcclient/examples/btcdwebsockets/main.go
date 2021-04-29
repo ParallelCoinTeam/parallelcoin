@@ -9,10 +9,10 @@ import (
 	
 	"github.com/p9c/qu"
 	
-	"github.com/p9c/matrjoska/pkg/appdata"
-	"github.com/p9c/matrjoska/pkg/rpcclient"
-	"github.com/p9c/matrjoska/pkg/util"
-	"github.com/p9c/matrjoska/pkg/wire"
+	"github.com/p9c/pod/pkg/appdata"
+	"github.com/p9c/pod/pkg/rpcclient"
+	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 func main() {

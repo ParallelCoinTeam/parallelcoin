@@ -3,7 +3,7 @@ package base58_test
 import (
 	"testing"
 	
-	"github.com/p9c/matrjoska/pkg/base58"
+	"github.com/p9c/pod/pkg/base58"
 )
 
 var checkEncodingStringTests = []struct {

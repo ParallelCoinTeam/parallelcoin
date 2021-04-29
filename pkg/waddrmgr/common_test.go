@@ -8,11 +8,11 @@ import (
 	"testing"
 	"time"
 	
-	"github.com/p9c/matrjoska/pkg/addrmgr"
-	"github.com/p9c/matrjoska/pkg/chaincfg"
-	"github.com/p9c/matrjoska/pkg/waddrmgr"
-	"github.com/p9c/matrjoska/pkg/walletdb"
-	_ "github.com/p9c/matrjoska/pkg/walletdb/bdb"
+	"github.com/p9c/pod/pkg/addrmgr"
+	"github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/waddrmgr"
+	"github.com/p9c/pod/pkg/walletdb"
+	_ "github.com/p9c/pod/pkg/walletdb/bdb"
 )
 
 var (

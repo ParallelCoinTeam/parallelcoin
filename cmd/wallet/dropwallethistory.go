@@ -4,9 +4,9 @@ import (
 	"encoding/binary"
 	"path/filepath"
 
-	"github.com/p9c/matrjoska/pkg/walletdb"
-	"github.com/p9c/matrjoska/pkg/wtxmgr"
-	"github.com/p9c/matrjoska/pod/config"
+	"github.com/p9c/pod/pkg/walletdb"
+	"github.com/p9c/pod/pkg/wtxmgr"
+	"github.com/p9c/pod/pod/config"
 )
 
 func DropWalletHistory(w *Wallet, cfg *config.Config) (e error) {

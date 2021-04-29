@@ -3,8 +3,8 @@ package txscript
 import (
 	"sync"
 	
-	"github.com/p9c/matrjoska/pkg/chainhash"
-	"github.com/p9c/matrjoska/pkg/ecc"
+	"github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/ecc"
 )
 
 // sigCacheEntry represents an entry in the SigCache. Entries within the SigCache are keyed according to the sigHash of

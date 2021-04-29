@@ -8,8 +8,8 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"github.com/p9c/matrjoska/pkg/ecc"
-	"github.com/p9c/matrjoska/pkg/chainhash"
+	"github.com/p9c/pod/pkg/ecc"
+	"github.com/p9c/pod/pkg/chainhash"
 )
 
 // This example demonstrates signing a message with a secp256k1 private key that

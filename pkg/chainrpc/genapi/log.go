@@ -4,7 +4,7 @@ package main
 
 import (
 	"github.com/p9c/log"
-	"github.com/p9c/matrjoska/version"
+	"github.com/p9c/pod/version"
 )
 
 var subsystem = log.AddLoggerSubsystem(version.PathBase)

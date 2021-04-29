@@ -3,12 +3,12 @@ package txscript
 import (
 	"bytes"
 	"encoding/hex"
-	"github.com/p9c/matrjoska/pkg/btcaddr"
-	"github.com/p9c/matrjoska/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/btcaddr"
+	"github.com/p9c/pod/pkg/chaincfg"
 	"reflect"
 	"testing"
 	
-	"github.com/p9c/matrjoska/pkg/wire"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 // mustParseShortForm parses the passed short form script and returns the resulting bytes. It panics if an error occurs.

@@ -1,13 +1,13 @@
 package util
 
 import (
-	"github.com/p9c/matrjoska/pkg/btcaddr"
+	"github.com/p9c/pod/pkg/btcaddr"
 	"golang.org/x/crypto/ripemd160"
 	
-	"github.com/p9c/matrjoska/pkg/appdata"
-	"github.com/p9c/matrjoska/pkg/base58"
-	"github.com/p9c/matrjoska/pkg/bech32"
-	ec "github.com/p9c/matrjoska/pkg/ecc"
+	"github.com/p9c/pod/pkg/appdata"
+	"github.com/p9c/pod/pkg/base58"
+	"github.com/p9c/pod/pkg/bech32"
+	ec "github.com/p9c/pod/pkg/ecc"
 )
 
 // TstAppDataDir makes the internal appDataDir function available to the test package.

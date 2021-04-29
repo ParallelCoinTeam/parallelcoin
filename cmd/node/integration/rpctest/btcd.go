@@ -8,7 +8,7 @@ import (
 	"runtime"
 	"sync"
 	
-	"github.com/p9c/matrjoska/pkg/util/gobin"
+	"github.com/p9c/pod/pkg/util/gobin"
 )
 
 var (

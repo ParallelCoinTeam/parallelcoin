@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"testing"
 	
-	"github.com/p9c/matrjoska/pkg/base58"
+	"github.com/p9c/pod/pkg/base58"
 )
 
 func BenchmarkBase58Encode(b *testing.B) {

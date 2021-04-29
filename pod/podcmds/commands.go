@@ -5,8 +5,8 @@ import (
 
 	"github.com/gookit/color"
 
-	"github.com/p9c/matrjoska/pod/launchers"
-	"github.com/p9c/matrjoska/version"
+	"github.com/p9c/pod/pod/launchers"
+	"github.com/p9c/pod/version"
 	"github.com/p9c/opts/cmds"
 )
 

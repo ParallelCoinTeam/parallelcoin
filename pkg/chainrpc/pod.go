@@ -6,9 +6,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/p9c/matrjoska/pkg/connmgr"
+	"github.com/p9c/pod/pkg/connmgr"
 
-	"github.com/p9c/matrjoska/cmd/node/active"
+	"github.com/p9c/pod/cmd/node/active"
 )
 
 // DefaultConnectTimeout is a reasonable 30 seconds

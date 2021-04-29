@@ -4,12 +4,12 @@ package mining
 // import (
 // 	"container/heap"
 // 	"fmt"
-// 	blockchain "github.com/p9c/matrjoska/pkg/chain"
-// 	"github.com/p9c/matrjoska/pkg/chain/fork"
-// 	chainhash "github.com/p9c/matrjoska/pkg/chain/hash"
-// 	txscript "github.com/p9c/matrjoska/pkg/chain/tx/script"
-// 	"github.com/p9c/matrjoska/pkg/chain/wire"
-// 	"github.com/p9c/matrjoska/pkg/util"
+// 	blockchain "github.com/p9c/pod/pkg/chain"
+// 	"github.com/p9c/pod/pkg/chain/fork"
+// 	chainhash "github.com/p9c/pod/pkg/chain/hash"
+// 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
+// 	"github.com/p9c/pod/pkg/chain/wire"
+// 	"github.com/p9c/pod/pkg/util"
 // 	"math/rand"
 // 	"time"
 // )

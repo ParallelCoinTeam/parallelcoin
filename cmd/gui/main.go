@@ -14,12 +14,12 @@ import (
 	"github.com/tyler-smith/go-bip39"
 
 	"github.com/p9c/log"
-	"github.com/p9c/matrjoska/pkg/chainrpc/p2padvt"
-	"github.com/p9c/matrjoska/pkg/pipe"
-	"github.com/p9c/matrjoska/pkg/transport"
-	"github.com/p9c/matrjoska/pod/state"
 	"github.com/p9c/opts/meta"
 	"github.com/p9c/opts/text"
+	"github.com/p9c/pod/pkg/chainrpc/p2padvt"
+	"github.com/p9c/pod/pkg/pipe"
+	"github.com/p9c/pod/pkg/transport"
+	"github.com/p9c/pod/pod/state"
 
 	uberatomic "go.uber.org/atomic"
 
@@ -30,14 +30,14 @@ import (
 	"github.com/p9c/interrupt"
 
 	"github.com/p9c/gel"
-	"github.com/p9c/matrjoska/pkg/btcjson"
+	"github.com/p9c/pod/pkg/btcjson"
 
 	l "github.com/p9c/gio/layout"
 
-	"github.com/p9c/matrjoska/cmd/gui/cfg"
-	"github.com/p9c/matrjoska/pkg/apputil"
-	"github.com/p9c/matrjoska/pkg/rpcclient"
-	"github.com/p9c/matrjoska/pkg/util/rununit"
+	"github.com/p9c/pod/cmd/gui/cfg"
+	"github.com/p9c/pod/pkg/apputil"
+	"github.com/p9c/pod/pkg/rpcclient"
+	"github.com/p9c/pod/pkg/util/rununit"
 )
 
 // Main is the entrypoint for the wallet GUI

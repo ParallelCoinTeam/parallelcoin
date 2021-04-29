@@ -4,11 +4,11 @@ import (
 	"crypto/sha256"
 	"encoding/binary"
 	"fmt"
-	"github.com/p9c/matrjoska/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/chaincfg"
 	"time"
 	
-	"github.com/p9c/matrjoska/pkg/chainhash"
-	"github.com/p9c/matrjoska/pkg/walletdb"
+	"github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/walletdb"
 )
 
 const (

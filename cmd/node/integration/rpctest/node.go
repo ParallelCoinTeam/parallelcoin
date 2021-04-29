@@ -9,8 +9,8 @@ import (
 	"runtime"
 	"time"
 	
-	rpc "github.com/p9c/matrjoska/pkg/rpcclient"
-	"github.com/p9c/matrjoska/pkg/util"
+	rpc "github.com/p9c/pod/pkg/rpcclient"
+	"github.com/p9c/pod/pkg/util"
 )
 
 // nodeConfig contains all the args and data required to launch a pod process and connect the rpc client to it.

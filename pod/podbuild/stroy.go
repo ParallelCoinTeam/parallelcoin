@@ -10,10 +10,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	_ "github.com/p9c/matrjoska/pkg/fork"
+	_ "github.com/p9c/pod/pkg/fork"
 
-	"github.com/p9c/matrjoska/pkg/appdata"
-	"github.com/p9c/matrjoska/pkg/apputil"
+	"github.com/p9c/pod/pkg/appdata"
+	"github.com/p9c/pod/pkg/apputil"
 )
 
 var (

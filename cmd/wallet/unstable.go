@@ -1,9 +1,9 @@
 package wallet
 
 import (
-	"github.com/p9c/matrjoska/pkg/chainhash"
-	"github.com/p9c/matrjoska/pkg/walletdb"
-	"github.com/p9c/matrjoska/pkg/wtxmgr"
+	"github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/walletdb"
+	"github.com/p9c/pod/pkg/wtxmgr"
 )
 
 // UnstableAPI exposes unstable api in the wallet

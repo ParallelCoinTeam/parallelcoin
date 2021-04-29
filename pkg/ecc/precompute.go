@@ -11,7 +11,7 @@ import (
 	"io/ioutil"
 	"strings"
 
-	"github.com/p9c/matrjoska/pkg/ecc/bytepoints"
+	"github.com/p9c/pod/pkg/ecc/bytepoints"
 )
 
 //go:generate go run -tags gensecp256k1 ./genprecomps/.

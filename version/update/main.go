@@ -12,7 +12,7 @@ import (
 	"gopkg.in/src-d/go-git.v4/plumbing"
 	"gopkg.in/src-d/go-git.v4/plumbing/storer"
 
-	"github.com/p9c/matrjoska/version"
+	"github.com/p9c/pod/version"
 )
 
 var (

@@ -6,9 +6,9 @@ import (
 	"reflect"
 	"testing"
 	
-	"github.com/p9c/matrjoska/pkg/walletdb"
-	"github.com/p9c/matrjoska/pkg/walletdb/bdb"
-	_ "github.com/p9c/matrjoska/pkg/walletdb/bdb"
+	"github.com/p9c/pod/pkg/walletdb"
+	"github.com/p9c/pod/pkg/walletdb/bdb"
+	_ "github.com/p9c/pod/pkg/walletdb/bdb"
 )
 
 // dbType is the database type name for this driver.

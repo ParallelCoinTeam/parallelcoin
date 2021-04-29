@@ -6,7 +6,7 @@ import (
 	"strings"
 	"sync"
 	
-	"github.com/p9c/matrjoska/pkg/btcjson"
+	"github.com/p9c/pod/pkg/btcjson"
 )
 
 // HelpDescsEnUS defines the English descriptions used for the help strings.

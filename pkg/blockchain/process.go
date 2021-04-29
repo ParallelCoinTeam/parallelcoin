@@ -3,15 +3,15 @@ package blockchain
 import (
 	"errors"
 	"fmt"
-	"github.com/p9c/matrjoska/pkg/bits"
-	"github.com/p9c/matrjoska/pkg/block"
-	"github.com/p9c/matrjoska/pkg/fork"
+	"github.com/p9c/pod/pkg/bits"
+	"github.com/p9c/pod/pkg/block"
+	"github.com/p9c/pod/pkg/fork"
 	"github.com/p9c/log"
 
 	"time"
 	
-	"github.com/p9c/matrjoska/pkg/chainhash"
-	"github.com/p9c/matrjoska/pkg/database"
+	"github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/database"
 )
 
 // BehaviorFlags is a bitmask defining tweaks to the normal behavior when

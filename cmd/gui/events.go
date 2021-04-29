@@ -5,15 +5,15 @@ import (
 	"io/ioutil"
 	"time"
 
-	"github.com/p9c/matrjoska/pkg/amt"
-	"github.com/p9c/matrjoska/pkg/chainrpc/p2padvt"
-	"github.com/p9c/matrjoska/pkg/transport"
-	"github.com/p9c/matrjoska/pkg/wire"
+	"github.com/p9c/pod/pkg/amt"
+	"github.com/p9c/pod/pkg/chainrpc/p2padvt"
+	"github.com/p9c/pod/pkg/transport"
+	"github.com/p9c/pod/pkg/wire"
 
-	"github.com/p9c/matrjoska/pkg/btcjson"
-	"github.com/p9c/matrjoska/pkg/chainhash"
-	"github.com/p9c/matrjoska/pkg/rpcclient"
-	"github.com/p9c/matrjoska/pkg/util"
+	"github.com/p9c/pod/pkg/btcjson"
+	"github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/rpcclient"
+	"github.com/p9c/pod/pkg/util"
 )
 
 func (wg *WalletGUI) WalletAndClientRunning() bool {

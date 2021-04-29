@@ -4,8 +4,8 @@ import (
 	"crypto/rand"
 	"testing"
 	
-	"github.com/p9c/matrjoska/pkg/chainhash"
-	"github.com/p9c/matrjoska/pkg/ecc"
+	"github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/ecc"
 )
 
 // genRandomSig returns a random message, a signature of the message under the public key and the public key. This

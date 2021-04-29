@@ -2,14 +2,14 @@ package blockchain
 
 import (
 	"fmt"
-	bits2 "github.com/p9c/matrjoska/pkg/bits"
-	"github.com/p9c/matrjoska/pkg/fork"
+	bits2 "github.com/p9c/pod/pkg/bits"
+	"github.com/p9c/pod/pkg/fork"
 	"math/big"
 	"strings"
 	
 	"github.com/VividCortex/ewma"
 	
-	"github.com/p9c/matrjoska/pkg/wire"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 // GetAlgStamps ...

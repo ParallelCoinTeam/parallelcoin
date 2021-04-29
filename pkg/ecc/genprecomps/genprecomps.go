@@ -16,8 +16,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/p9c/matrjoska/pkg/apputil"
-	"github.com/p9c/matrjoska/pkg/ecc"
+	"github.com/p9c/pod/pkg/apputil"
+	"github.com/p9c/pod/pkg/ecc"
 )
 
 func main() {

@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 	
-	"github.com/p9c/matrjoska/pkg/btcjson"
+	"github.com/p9c/pod/pkg/btcjson"
 )
 
 // TestWalletSvrWsNtfns tests all of the chain server websocket-specific notifications marshal and unmarshal into valid

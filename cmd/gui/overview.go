@@ -12,7 +12,7 @@ import (
 	l "github.com/p9c/gio/layout"
 
 	"github.com/p9c/gel"
-	"github.com/p9c/matrjoska/pkg/btcjson"
+	"github.com/p9c/pod/pkg/btcjson"
 )
 
 func (wg *WalletGUI) balanceCard() func(gtx l.Context) l.Dimensions {

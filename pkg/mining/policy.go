@@ -1,9 +1,9 @@
 package mining
 
 import (
-	"github.com/p9c/matrjoska/pkg/amt"
-	"github.com/p9c/matrjoska/pkg/blockchain"
-	"github.com/p9c/matrjoska/pkg/wire"
+	"github.com/p9c/pod/pkg/amt"
+	"github.com/p9c/pod/pkg/blockchain"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 const (

@@ -2,16 +2,16 @@ package blockchain
 
 import (
 	"fmt"
-	"github.com/p9c/matrjoska/pkg/block"
+	"github.com/p9c/pod/pkg/block"
 	"math"
 	"runtime"
 	
 	"github.com/p9c/qu"
 	
-	"github.com/p9c/matrjoska/pkg/hardfork"
-	"github.com/p9c/matrjoska/pkg/txscript"
-	"github.com/p9c/matrjoska/pkg/util"
-	"github.com/p9c/matrjoska/pkg/wire"
+	"github.com/p9c/pod/pkg/hardfork"
+	"github.com/p9c/pod/pkg/txscript"
+	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 // txValidateItem holds a transaction along with which input to validate.

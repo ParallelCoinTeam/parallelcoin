@@ -6,7 +6,7 @@ import (
 	l "github.com/p9c/gio/layout"
 
 	"github.com/p9c/gel"
-	"github.com/p9c/matrjoska/pkg/p9icons"
+	"github.com/p9c/pod/pkg/p9icons"
 )
 
 func (wg *WalletGUI) getLoadingPage() (a *gel.App) {

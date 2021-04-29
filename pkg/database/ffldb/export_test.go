@@ -4,7 +4,7 @@
 package ffldb
 
 import (
-	"github.com/p9c/matrjoska/pkg/database"
+	"github.com/p9c/pod/pkg/database"
 )
 
 // TstRunWithMaxBlockFileSize runs the passed function with the maximum allowed file size for the database set to the

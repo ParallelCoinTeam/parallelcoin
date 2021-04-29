@@ -9,13 +9,13 @@ import (
 	"github.com/p9c/qu"
 
 	"github.com/p9c/log"
-	"github.com/p9c/matrjoska/pkg/chaincfg"
-	"github.com/p9c/matrjoska/pod/config"
-	"github.com/p9c/matrjoska/pod/state"
+	"github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pod/config"
+	"github.com/p9c/pod/pod/state"
 
 	"github.com/p9c/interrupt"
 
-	"github.com/p9c/matrjoska/pkg/chainclient"
+	"github.com/p9c/pod/pkg/chainclient"
 )
 
 // Main is a work-around main function that is required since deferred functions

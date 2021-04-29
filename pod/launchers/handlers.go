@@ -9,13 +9,13 @@ import (
 	"github.com/p9c/interrupt"
 	"github.com/p9c/qu"
 
-	"github.com/p9c/matrjoska/cmd/ctl"
-	"github.com/p9c/matrjoska/cmd/node"
-	"github.com/p9c/matrjoska/cmd/wallet"
-	"github.com/p9c/matrjoska/pkg/constant"
-	"github.com/p9c/matrjoska/pod/state"
+	"github.com/p9c/pod/cmd/ctl"
+	"github.com/p9c/pod/cmd/node"
+	"github.com/p9c/pod/cmd/wallet"
+	"github.com/p9c/pod/pkg/constant"
+	"github.com/p9c/pod/pod/state"
 
-	"github.com/p9c/matrjoska/pkg/apputil"
+	"github.com/p9c/pod/pkg/apputil"
 )
 
 // NodeHandle runs the ParallelCoin blockchain node

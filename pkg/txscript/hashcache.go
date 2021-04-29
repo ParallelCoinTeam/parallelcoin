@@ -3,8 +3,8 @@ package txscript
 import (
 	"sync"
 	
-	"github.com/p9c/matrjoska/pkg/chainhash"
-	"github.com/p9c/matrjoska/pkg/wire"
+	"github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 // TxSigHashes houses the partial set of sighashes introduced within BIP0143. This partial set of sighashes may be

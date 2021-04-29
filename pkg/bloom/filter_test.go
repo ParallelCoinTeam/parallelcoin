@@ -3,14 +3,14 @@ package bloom_test
 import (
 	"bytes"
 	"encoding/hex"
-	block2 "github.com/p9c/matrjoska/pkg/block"
-	"github.com/p9c/matrjoska/pkg/btcaddr"
+	block2 "github.com/p9c/pod/pkg/block"
+	"github.com/p9c/pod/pkg/btcaddr"
 	"testing"
 	
-	"github.com/p9c/matrjoska/pkg/bloom"
-	"github.com/p9c/matrjoska/pkg/chainhash"
-	"github.com/p9c/matrjoska/pkg/util"
-	"github.com/p9c/matrjoska/pkg/wire"
+	"github.com/p9c/pod/pkg/bloom"
+	"github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 // TestFilterLarge ensures a maximum sized filter can be created.

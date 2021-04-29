@@ -5,8 +5,8 @@ package launchers
 import (
 	"fmt"
 
-	"github.com/p9c/matrjoska/cmd/gui"
-	"github.com/p9c/matrjoska/pod/state"
+	"github.com/p9c/pod/cmd/gui"
+	"github.com/p9c/pod/pod/state"
 )
 
 // GUIHandle starts up the GUI wallet

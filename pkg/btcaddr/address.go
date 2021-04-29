@@ -7,9 +7,9 @@ import (
 	"golang.org/x/crypto/ripemd160"
 	"hash"
 	
-	"github.com/p9c/matrjoska/pkg/base58"
-	"github.com/p9c/matrjoska/pkg/chaincfg"
-	ec "github.com/p9c/matrjoska/pkg/ecc"
+	"github.com/p9c/pod/pkg/base58"
+	"github.com/p9c/pod/pkg/chaincfg"
+	ec "github.com/p9c/pod/pkg/ecc"
 )
 
 // //

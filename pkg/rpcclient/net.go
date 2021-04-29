@@ -3,7 +3,7 @@ package rpcclient
 import (
 	js "encoding/json"
 	
-	"github.com/p9c/matrjoska/pkg/btcjson"
+	"github.com/p9c/pod/pkg/btcjson"
 )
 
 // AddNodeCommand enumerates the available commands that the AddNode function accepts.

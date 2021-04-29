@@ -1,7 +1,7 @@
 package cfgutil
 
 import (
-	"github.com/p9c/matrjoska/pkg/amt"
+	"github.com/p9c/pod/pkg/amt"
 	"strconv"
 	"strings"
 )

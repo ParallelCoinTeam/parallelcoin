@@ -7,7 +7,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/p9c/matrjoska/pod/state"
+	"github.com/p9c/pod/pod/state"
 	"github.com/p9c/opts/binary"
 	"github.com/p9c/opts/duration"
 	"github.com/p9c/opts/float"

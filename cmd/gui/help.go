@@ -5,8 +5,8 @@ import (
 	"github.com/p9c/gio/text"
 
 	"github.com/p9c/gel"
-	"github.com/p9c/matrjoska/pkg/p9icons"
-	"github.com/p9c/matrjoska/version"
+	"github.com/p9c/pod/pkg/p9icons"
+	"github.com/p9c/pod/version"
 )
 
 func (wg *WalletGUI) HelpPage() func(gtx l.Context) l.Dimensions {

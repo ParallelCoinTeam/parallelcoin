@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 	
-	"github.com/p9c/matrjoska/pkg/btcjson"
+	"github.com/p9c/pod/pkg/btcjson"
 )
 
 // TestCmdMethod tests the CmdMethod function to ensure it returns the expected methods and errors.

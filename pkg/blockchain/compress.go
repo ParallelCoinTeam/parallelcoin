@@ -1,8 +1,8 @@
 package blockchain
 
 import (
-	"github.com/p9c/matrjoska/pkg/ecc"
-	"github.com/p9c/matrjoska/pkg/txscript"
+	"github.com/p9c/pod/pkg/ecc"
+	"github.com/p9c/pod/pkg/txscript"
 )
 
 // In order to reduce the size of stored scripts, a domain specific compression algorithm is used which recognizes

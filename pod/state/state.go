@@ -10,17 +10,17 @@ import (
 
 	"go.uber.org/atomic"
 
-	"github.com/p9c/matrjoska/cmd/ctrl"
-	"github.com/p9c/matrjoska/pkg/chaincfg"
-	"github.com/p9c/matrjoska/pkg/chainclient"
-	"github.com/p9c/matrjoska/pkg/chainrpc"
-	"github.com/p9c/matrjoska/pod/config"
+	"github.com/p9c/pod/cmd/ctrl"
+	"github.com/p9c/pod/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/chainclient"
+	"github.com/p9c/pod/pkg/chainrpc"
+	"github.com/p9c/pod/pod/config"
 	"github.com/p9c/opts/opt"
 
 	"github.com/p9c/qu"
 
-	"github.com/p9c/matrjoska/cmd/node/active"
-	"github.com/p9c/matrjoska/pkg/util/lang"
+	"github.com/p9c/pod/cmd/node/active"
+	"github.com/p9c/pod/pkg/util/lang"
 )
 
 // type _dtype int

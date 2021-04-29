@@ -3,16 +3,16 @@ package job
 //
 // import (
 // 	"errors"
-// 	"github.com/p9c/matrjoska/pkg/chaincfg"
+// 	"github.com/p9c/pod/pkg/chaincfg"
 // 	"time"
 //
 // 	"github.com/niubaoshu/gotiny"
 //
-// 	"github.com/p9c/matrjoska/pkg/blockchain"
-// 	"github.com/p9c/matrjoska/pkg/chainhash"
-// 	"github.com/p9c/matrjoska/pkg/blockchain/fork"
-// 	"github.com/p9c/matrjoska/pkg/wire"
-// 	"github.com/p9c/matrjoska/pkg/util"
+// 	"github.com/p9c/pod/pkg/blockchain"
+// 	"github.com/p9c/pod/pkg/chainhash"
+// 	"github.com/p9c/pod/pkg/blockchain/fork"
+// 	"github.com/p9c/pod/pkg/wire"
+// 	"github.com/p9c/pod/pkg/util"
 // )
 //
 

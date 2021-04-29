@@ -2,8 +2,8 @@ package blockchain
 
 import (
 	"fmt"
-	"github.com/p9c/matrjoska/pkg/bits"
-	"github.com/p9c/matrjoska/pkg/fork"
+	"github.com/p9c/pod/pkg/bits"
+	"github.com/p9c/pod/pkg/fork"
 	"math/big"
 )
 

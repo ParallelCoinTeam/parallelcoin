@@ -8,8 +8,8 @@ import (
 	
 	"github.com/p9c/qu"
 	
-	"github.com/p9c/matrjoska/pkg/transport"
-	"github.com/p9c/matrjoska/pkg/util/loop"
+	"github.com/p9c/pod/pkg/transport"
+	"github.com/p9c/pod/pkg/util/loop"
 )
 
 const (

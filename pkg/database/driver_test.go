@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 	
-	"github.com/p9c/matrjoska/pkg/database"
-	_ "github.com/p9c/matrjoska/pkg/database/ffldb"
+	"github.com/p9c/pod/pkg/database"
+	_ "github.com/p9c/pod/pkg/database/ffldb"
 )
 
 var (

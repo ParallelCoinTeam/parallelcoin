@@ -2,15 +2,15 @@ package waddrmgr
 
 import (
 	"fmt"
-	"github.com/p9c/matrjoska/pkg/btcaddr"
-	"github.com/p9c/matrjoska/pkg/chaincfg"
+	"github.com/p9c/pod/pkg/btcaddr"
+	"github.com/p9c/pod/pkg/chaincfg"
 	"sync"
 
-	ec "github.com/p9c/matrjoska/pkg/ecc"
-	"github.com/p9c/matrjoska/pkg/util"
-	"github.com/p9c/matrjoska/pkg/util/hdkeychain"
-	"github.com/p9c/matrjoska/pkg/util/zero"
-	"github.com/p9c/matrjoska/pkg/walletdb"
+	ec "github.com/p9c/pod/pkg/ecc"
+	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/util/hdkeychain"
+	"github.com/p9c/pod/pkg/util/zero"
+	"github.com/p9c/pod/pkg/walletdb"
 )
 
 // DerivationPath represents a derivation path from a particular key manager's

@@ -5,8 +5,8 @@ import (
 	"os"
 	"testing"
 	
-	"github.com/p9c/matrjoska/pkg/walletdb"
-	_ "github.com/p9c/matrjoska/pkg/walletdb/bdb"
+	"github.com/p9c/pod/pkg/walletdb"
+	_ "github.com/p9c/pod/pkg/walletdb/bdb"
 )
 
 var (

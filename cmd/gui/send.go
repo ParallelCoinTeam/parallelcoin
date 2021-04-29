@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/p9c/matrjoska/pkg/amt"
-	"github.com/p9c/matrjoska/pkg/btcaddr"
+	"github.com/p9c/pod/pkg/amt"
+	"github.com/p9c/pod/pkg/btcaddr"
 
 	"github.com/atotto/clipboard"
 
@@ -15,7 +15,7 @@ import (
 	"github.com/p9c/gio/text"
 
 	"github.com/p9c/gel"
-	"github.com/p9c/matrjoska/pkg/chainhash"
+	"github.com/p9c/pod/pkg/chainhash"
 )
 
 type SendPage struct {

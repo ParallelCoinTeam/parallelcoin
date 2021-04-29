@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 	
-	"github.com/p9c/matrjoska/pkg/btcjson"
+	"github.com/p9c/pod/pkg/btcjson"
 )
 
 // TestHelpReflectInternals ensures the various help functions which deal with reflect types work as expected for

@@ -2,9 +2,9 @@
 package txsizes
 
 import (
-	"github.com/p9c/matrjoska/pkg/blockchain"
-	h "github.com/p9c/matrjoska/pkg/util/helpers"
-	"github.com/p9c/matrjoska/pkg/wire"
+	"github.com/p9c/pod/pkg/blockchain"
+	h "github.com/p9c/pod/pkg/util/helpers"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 // Worst case script and input/output size estimates.

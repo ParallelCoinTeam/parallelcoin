@@ -18,8 +18,8 @@ import (
 	
 	"github.com/btcsuite/websocket"
 	
-	"github.com/p9c/matrjoska/pkg/btcjson"
-	"github.com/p9c/matrjoska/pkg/chainclient"
+	"github.com/p9c/pod/pkg/btcjson"
+	"github.com/p9c/pod/pkg/chainclient"
 	"github.com/p9c/interrupt"
 )
 

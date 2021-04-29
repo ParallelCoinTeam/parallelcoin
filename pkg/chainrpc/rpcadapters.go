@@ -3,14 +3,14 @@ package chainrpc
 import (
 	"sync/atomic"
 
-	"github.com/p9c/matrjoska/pkg/block"
+	"github.com/p9c/pod/pkg/block"
 
-	"github.com/p9c/matrjoska/pkg/blockchain"
-	"github.com/p9c/matrjoska/pkg/chainhash"
-	"github.com/p9c/matrjoska/pkg/mempool"
-	"github.com/p9c/matrjoska/pkg/netsync"
-	"github.com/p9c/matrjoska/pkg/peer"
-	"github.com/p9c/matrjoska/pkg/wire"
+	"github.com/p9c/pod/pkg/blockchain"
+	"github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/mempool"
+	"github.com/p9c/pod/pkg/netsync"
+	"github.com/p9c/pod/pkg/peer"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 // Peer provides a peer for use with the RPC Server and implements the RPCServerPeer interface.

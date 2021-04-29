@@ -5,7 +5,7 @@ import (
 	"runtime"
 	"testing"
 	
-	"github.com/p9c/matrjoska/pkg/txscript"
+	"github.com/p9c/pod/pkg/txscript"
 )
 
 // TestCheckBlockScripts ensures that validating the all of the scripts in a known-good block doesn't return an error.

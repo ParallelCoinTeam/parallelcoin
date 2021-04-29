@@ -2,7 +2,7 @@ package util_test
 
 import (
 	"fmt"
-	"github.com/p9c/matrjoska/pkg/amt"
+	"github.com/p9c/pod/pkg/amt"
 	"math"
 )
 

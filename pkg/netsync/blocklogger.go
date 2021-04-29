@@ -2,7 +2,7 @@ package netsync
 
 import (
 	"fmt"
-	"github.com/p9c/matrjoska/pkg/block"
+	"github.com/p9c/pod/pkg/block"
 	"sync"
 	"time"
 )

@@ -6,7 +6,7 @@ import (
 	"github.com/p9c/qu"
 
 	"github.com/p9c/gel"
-	"github.com/p9c/matrjoska/cmd/glom/pkg/pathtree"
+	"github.com/p9c/pod/cmd/glom/pkg/pathtree"
 	"github.com/p9c/interrupt"
 )
 

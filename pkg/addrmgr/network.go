@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net"
 	
-	"github.com/p9c/matrjoska/pkg/wire"
+	"github.com/p9c/pod/pkg/wire"
 )
 
 var (

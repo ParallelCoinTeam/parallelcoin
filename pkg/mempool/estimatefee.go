@@ -5,8 +5,8 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
-	"github.com/p9c/matrjoska/pkg/amt"
-	"github.com/p9c/matrjoska/pkg/block"
+	"github.com/p9c/pod/pkg/amt"
+	"github.com/p9c/pod/pkg/block"
 	"io"
 	"math"
 	"math/rand"
@@ -14,9 +14,9 @@ import (
 	"strings"
 	"sync"
 	
-	"github.com/p9c/matrjoska/pkg/chainhash"
-	"github.com/p9c/matrjoska/pkg/mining"
-	"github.com/p9c/matrjoska/pkg/util"
+	"github.com/p9c/pod/pkg/chainhash"
+	"github.com/p9c/pod/pkg/mining"
+	"github.com/p9c/pod/pkg/util"
 )
 
 // DUOPerKilobyte is number with units of parallelcoins per kilobyte.

@@ -12,9 +12,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/p9c/matrjoska/pkg/util"
-	"github.com/p9c/matrjoska/pod/config"
-	"github.com/p9c/matrjoska/pod/state"
+	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pod/config"
+	"github.com/p9c/pod/pod/state"
 )
 
 type listenFunc func(net string, laddr string) (net.Listener, error)
