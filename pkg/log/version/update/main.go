@@ -114,7 +114,7 @@ func main() {
 	// I.Ln(PathBase)
 	versionFile := `package version
 
-` + `//go:generate go run ./update/.
+`+`//go:generate go run ./update/.
 
 import (
 	"fmt"

@@ -10,6 +10,15 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/p9c/opts/binary"
+	"github.com/p9c/opts/duration"
+	"github.com/p9c/opts/float"
+	"github.com/p9c/opts/integer"
+	"github.com/p9c/opts/list"
+	"github.com/p9c/opts/meta"
+	"github.com/p9c/opts/opt"
+	"github.com/p9c/opts/sanitizers"
+	"github.com/p9c/opts/text"
 	"github.com/p9c/pod/pkg/appdata"
 	"github.com/p9c/pod/pkg/base58"
 	"github.com/p9c/pod/pkg/blockchain"
@@ -20,15 +29,6 @@ import (
 	"github.com/p9c/pod/pod/config"
 	"github.com/p9c/pod/pod/podcmds"
 	"github.com/p9c/pod/pod/podconfig/checkpoints"
-	"github.com/p9c/opts/binary"
-	"github.com/p9c/opts/duration"
-	"github.com/p9c/opts/float"
-	"github.com/p9c/opts/integer"
-	"github.com/p9c/opts/list"
-	"github.com/p9c/opts/meta"
-	"github.com/p9c/opts/opt"
-	"github.com/p9c/opts/sanitizers"
-	"github.com/p9c/opts/text"
 )
 
 // GetDefaultConfig returns a Config struct pristine factory fresh
@@ -1044,7 +1044,7 @@ func GetConfigs() (c config.Configs) {
 		"Solo": binary.New(meta.Data{
 			Group: "mining",
 			Label: "Solo Generate",
-			Tags:    tags("node"),
+			Tags:  tags("node"),
 			Description:
 			"mine even if not connected to a network",
 			Documentation: "<placeholder for detailed documentation>",

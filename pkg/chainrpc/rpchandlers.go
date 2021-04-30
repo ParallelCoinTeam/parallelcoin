@@ -2242,7 +2242,7 @@ func (a API) VersionWait(cmd *btcjson.VersionCmd) (out *map[string]btcjson.Versi
 }
 
 
-// RunAPI starts up the api handler Server that receives rpc.API messages and runs the handler and returns the result
+// RunAPI starts up the api handler server that receives rpc.API messages and runs the handler and returns the result
 // Note that the parameters are type asserted to prevent the consumer of the API from sending wrong message types not
 // because it's necessary since they are interfaces end to end
 func RunAPI(server *Server, quit qu.C) {

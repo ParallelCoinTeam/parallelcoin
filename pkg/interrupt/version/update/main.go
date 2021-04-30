@@ -5,36 +5,43 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"runtime"
 	"strings"
 	"time"
 
 	"gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/plumbing"
 	"gopkg.in/src-d/go-git.v4/plumbing/storer"
+
+	"github.com/p9c/interrupt/version"
 )
 
 var (
-	URL       string
-	GitRef    string
-	GitCommit string
-	BuildTime string
-	Tag       string
+	URL                 string
+	GitRef              string
+	GitCommit           string
+	BuildTime           string
+	Tag                 string
+	Major, Minor, Patch int
+	Meta                string
+	PathBase            string
 )
 
 func main() {
+	I.Ln(version.Get())
 	BuildTime = time.Now().Format(time.RFC3339)
 	var cwd string
 	var e error
-	if cwd, e = os.Getwd(); e != nil {
+	if cwd, e = os.Getwd(); E.Chk(e) {
 		return
 	}
+	cwd = filepath.Dir(cwd)
+	// I.Ln(cwd)
 	var repo *git.Repository
-	if repo, e = git.PlainOpen(cwd); e != nil {
+	if repo, e = git.PlainOpen(cwd); E.Chk(e) {
 		return
 	}
 	var rr []*git.Remote
-	if rr, e = repo.Remotes(); e != nil {
+	if rr, e = repo.Remotes(); E.Chk(e) {
 		return
 	}
 	for i := range rr {
@@ -55,15 +62,18 @@ func main() {
 
 		}
 	}
+	var tr *git.Worktree
+	if tr, e = repo.Worktree(); E.Chk(e) {
+	}
 	var rh *plumbing.Reference
-	if rh, e = repo.Head(); e != nil {
+	if rh, e = repo.Head(); E.Chk(e) {
 		return
 	}
 	rhs := rh.Strings()
 	GitRef = rhs[0]
 	GitCommit = rhs[1]
 	var rt storer.ReferenceIter
-	if rt, e = repo.Tags(); e != nil {
+	if rt, e = repo.Tags(); E.Chk(e) {
 		return
 	}
 	var maxVersion int
@@ -71,42 +81,44 @@ func main() {
 	var maxIs bool
 	if e = rt.ForEach(
 		func(pr *plumbing.Reference) (e error) {
-			prs := strings.Split(pr.String(), "/")[2]
+			s := strings.Split(pr.String(), "/")
+			prs := s[2]
 			if strings.HasPrefix(prs, "v") {
 				var va [3]int
-				_, _ = fmt.Sscanf(prs, "v%d.%d.%d", &va[0], &va[1], &va[2])
+				var meta string
+				_, _ = fmt.Sscanf(prs, "v%d.%d.%d%s", &va[0], &va[1], &va[2], &meta)
 				vn := va[0]*1000000 + va[1]*1000 + va[2]
 				if maxVersion < vn {
 					maxVersion = vn
 					maxString = prs
+					Major = va[0]
+					Minor = va[1]
+					Patch = va[2]
+					Meta = meta
 				}
 				if pr.Hash() == rh.Hash() {
 					maxIs = true
+					return
 				}
 			}
-			return nil
+			return
 		},
-	); e != nil {
+	); E.Chk(e) {
 		return
 	}
 	if !maxIs {
 		maxString += "+"
 	}
 	Tag = maxString
-	_, file, _, _ := runtime.Caller(0)
-	// fmt.Fprintln(os.Stderr, "file", file)
-	urlSplit := strings.Split(URL, "/")
-	// fmt.Fprintln(os.Stderr, "urlSplit", urlSplit)
-	baseFolder := urlSplit[len(urlSplit)-1]
-	// fmt.Fprintln(os.Stderr, "baseFolder", baseFolder)
-	splitPath := strings.Split(file, baseFolder)
-	// fmt.Fprintln(os.Stderr, "splitPath", splitPath)
-	PathBase := filepath.Join(splitPath[0], baseFolder) + string(filepath.Separator)
-	PathBase = strings.ReplaceAll(PathBase, "\\", "\\\\")
-	// fmt.Fprintln(os.Stderr, "PathBase", PathBase)
+	PathBase = tr.Filesystem.Root() + "/"
+	// I.Ln(PathBase)
 	versionFile := `package version
 
-import "fmt"
+`+`//go:generate go run ./update/.
+
+import (
+	"fmt"
+)
 
 var (
 
@@ -123,17 +135,29 @@ var (
 	Tag = "%s"
 	// PathBase is the path base returned from runtime caller
 	PathBase = "%s"
+	// Major is the major number from the tag
+	Major = %d
+	// Minor is the minor number from the tag
+	Minor = %d
+	// Patch is the patch version number from the tag
+	Patch = %d
+	// Meta is the extra arbitrary string field from Semver spec
+	Meta = "%s"
 )
 
 // Get returns a pretty printed version information string
 func Get() string {
 	return fmt.Sprint(
-		"Repository Information\n"+
-		"	git repository: "+URL+"\n",
-		"	branch: "+GitRef+"\n"+
-		"	commit: "+GitCommit+"\n"+
-		"	built: "+BuildTime+"\n"+
-		"	Tag: "+Tag+"\n",
+		"\nRepository Information\n"+
+		"\tGit repository: "+URL+"\n",
+		"\tBranch: "+GitRef+"\n"+
+		"\tCommit: "+GitCommit+"\n"+
+		"\tBuilt: "+BuildTime+"\n"+
+		"\tTag: "+Tag+"\n",
+		"\tMajor:", Major, "\n",
+		"\tMinor:", Minor, "\n",
+		"\tPatch:", Patch, "\n",
+		"\tMeta: ", Meta, "\n",
 	)
 }
 `
@@ -145,8 +169,14 @@ func Get() string {
 		BuildTime,
 		Tag,
 		PathBase,
+		Major,
+		Minor,
+		Patch,
+		Meta,
 	)
-	if e = ioutil.WriteFile("version/version.go", []byte(versionFileOut), 0666); E.Chk(e) {
+	path := filepath.Join(filepath.Join(PathBase, "version"), "version.go")
+	if e = ioutil.WriteFile(path, []byte(versionFileOut), 0666); E.Chk(e) {
 	}
+	// I.Ln("updated version.go written")
 	return
 }

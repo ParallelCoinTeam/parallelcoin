@@ -146,7 +146,7 @@ type (
 // RequestHandler is a handler function to handle an unmarshaled and parsed request into a marshalable response.  If the 
 // error is a *json.RPCError or any of the above special error classes, the server will respond with the JSON-RPC 
 // appropriate error code.  All other errors use the wallet catch-all error code, json.ErrRPCWallet.
-type RequestHandler func(interface{}, *Wallet,
+type RequestHandler func(interface{}, *Wallet, 
 	...*chainclient.RPCClient) (interface{}, error)
 
 // RPCHandlers is all of the RPC calls available
@@ -161,7 +161,7 @@ type RequestHandler func(interface{}, *Wallet,
 // Get and save the Result function's return, and you can then call the call functions check, result and wait functions 
 // for asynchronous and synchronous calls to RPC functions
 var RPCHandlers = map[string]struct {
-	Handler RequestHandler
+	Handler          RequestHandler
 	// Function variables cannot be compared against anything but nil, so use a boolean to record whether help 
     // generation is necessary.  This is used by the tests to ensure that help can be generated for every implemented 
     // method.
@@ -2125,7 +2125,7 @@ func (a API) WalletPassphraseChangeWait(cmd *btcjson.WalletPassphraseChangeCmd) 
 // RunAPI starts up the api handler server that receives rpc.API messages and runs the handler and returns the result
 // Note that the parameters are type asserted to prevent the consumer of the API from sending wrong message types not
 // because it's necessary since they are interfaces end to end
-func RunAPI(chainRPC *chainclient.RPCClient, wallet *Wallet,
+func RunAPI(chainRPC *chainclient.RPCClient, wallet *Wallet, 
 	quit qu.C) {
 	nrh := RPCHandlers
 	go func() {

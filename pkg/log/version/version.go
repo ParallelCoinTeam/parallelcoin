@@ -13,14 +13,14 @@ var (
 	// GitRef is the gitref, as in refs/heads/branchname
 	GitRef = "refs/heads/main"
 	// GitCommit is the commit hash of the current HEAD
-	GitCommit = "83c1fd7593475aa4652c7449dc1fd364a4a882d0"
+	GitCommit = "7c23420da29226fb15a03a16499cba0e5b5d654f"
 	// BuildTime stores the time when the current binary was built
-	BuildTime = "2021-04-18T15:27:15+02:00"
+	BuildTime = "2021-04-30T17:15:39+02:00"
 	// Tag lists the Tag on the build, adding a + to the newest Tag if the commit is
 	// not that commit
-	Tag = "v0.0.9"
+	Tag = "v0.0.9+"
 	// PathBase is the path base returned from runtime caller
-	PathBase = "/home/loki/src/github.com/p9c/matrjoska/pkg/log/"
+	PathBase = "/home/loki/src/github.com/p9c/pod/pkg/log/"
 	// Major is the major number from the tag
 	Major = 0
 	// Minor is the minor number from the tag
@@ -35,11 +35,11 @@ var (
 func Get() string {
 	return fmt.Sprint(
 		"\nRepository Information\n"+
-			"\tGit repository: "+URL+"\n",
+		"\tGit repository: "+URL+"\n",
 		"\tBranch: "+GitRef+"\n"+
-			"\tCommit: "+GitCommit+"\n"+
-			"\tBuilt: "+BuildTime+"\n"+
-			"\tTag: "+Tag+"\n",
+		"\tCommit: "+GitCommit+"\n"+
+		"\tBuilt: "+BuildTime+"\n"+
+		"\tTag: "+Tag+"\n",
 		"\tMajor:", Major, "\n",
 		"\tMinor:", Minor, "\n",
 		"\tPatch:", Patch, "\n",

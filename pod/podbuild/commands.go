@@ -34,4 +34,12 @@ var commands = map[string][]string{
 	"builder": {
 		"go install -v ./pod/podbuild/.",
 	},
+	"generate":{
+		"go generate ./...",
+		"go generate ./pkg/gel/...",
+		"go generate ./pkg/interrupt/...",
+		"go generate ./pkg/log/...",
+		"go generate ./pkg/opts/...",
+		"go generate ./pkg/qu/...",
+	},
 }
