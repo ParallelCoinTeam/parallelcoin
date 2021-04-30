@@ -2,27 +2,27 @@
 	path = docs/whitepaper
 	url = https://github.com/p9c/whitepaper.git
 [submodule "pkg/gel"]
-        path = pkg/gel
-        url = git@github.com:p9c/gel.git
+    path = pkg/gel
+    url = git@github.com:p9c/gel.git
 	branch = main
 [submodule "pkg/qu"]
-        path = pkg/qu
-        url = git@github.com:p9c/qu.git
+    path = pkg/qu
+    url = git@github.com:p9c/qu.git
 	branch = main
 [submodule "pkg/logo"]
-        path = pkg/logo
-        url = git@github.com:p9c/logo.git
+    path = pkg/logo
+    url = git@github.com:p9c/logo.git
 	branch = main
 [submodule "pkg/opts"]
-        path = pkg/opts
-        url = git@github.com:p9c/opts.git
+    path = pkg/opts
+    url = git@github.com:p9c/opts.git
 	branch = main
 [submodule "pkg/log"]
-        path = pkg/log
-        url = git@github.com:p9c/log.git
+    path = pkg/log
+    url = git@github.com:p9c/log.git
 	branch = main
 [submodule "pkg/interrupt"]
-        path = pkg/interrupt
-        url = git@github.com:p9c/interrupt.git
+    path = pkg/interrupt
+    url = git@github.com:p9c/interrupt.git
 	branch = main
 
