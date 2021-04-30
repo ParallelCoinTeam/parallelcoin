@@ -36,10 +36,10 @@ var commands = map[string][]string{
 	},
 	"generate":{
 		"go generate ./...",
-		"go generate ./pkg/gel/...",
-		"go generate ./pkg/interrupt/...",
-		"go generate ./pkg/log/...",
-		"go generate ./pkg/opts/...",
-		"go generate ./pkg/qu/...",
+		"cd pkg/gel/;go generate ./...",
+		"cd pkg/interrupt; go generate ./...",
+		"cd pkg/log; go generate ./...",
+		"cd pkg/opts; go generate ./...",
+		"cd pkg/qu; go generate ./...",
 	},
 }

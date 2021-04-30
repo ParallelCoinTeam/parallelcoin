@@ -44,7 +44,6 @@ require (
 	lukechampine.com/blake3 v1.1.5
 )
 
-//replace gioui.org => github.com/p9c/gio v0.0.3
 replace (
 	github.com/p9c/gel => ./pkg/gel
 	github.com/p9c/interrupt => ./pkg/interrupt
