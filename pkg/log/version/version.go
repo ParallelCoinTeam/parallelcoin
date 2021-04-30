@@ -15,7 +15,7 @@ var (
 	// GitCommit is the commit hash of the current HEAD
 	GitCommit = "60395252b1e9386999afc84935d88f499e5ef741"
 	// BuildTime stores the time when the current binary was built
-	BuildTime = "2021-04-30T18:52:59+02:00"
+	BuildTime = "2021-04-30T19:36:13+02:00"
 	// Tag lists the Tag on the build, adding a + to the newest Tag if the commit is
 	// not that commit
 	Tag = "v0.0.11"
