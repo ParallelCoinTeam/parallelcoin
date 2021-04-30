@@ -11,11 +11,11 @@ var (
 	// URL is the git URL for the repository
 	URL = "github.com/p9c/pod"
 	// GitRef is the gitref, as in refs/heads/branchname
-	GitRef = "refs/heads/master"
+	GitRef = "refs/heads/main"
 	// GitCommit is the commit hash of the current HEAD
-	GitCommit = "b9fbcac716ae3c7ad6ec6499376a12c55b567ec6"
+	GitCommit = "0c21aa8454294a2c11aa40992f3b60d1b11b721c"
 	// BuildTime stores the time when the current binary was built
-	BuildTime = "2021-04-30T18:21:45+02:00"
+	BuildTime = "2021-04-30T18:53:07+02:00"
 	// Tag lists the Tag on the build, adding a + to the newest Tag if the commit is
 	// not that commit
 	Tag = "v1.9.25+"
