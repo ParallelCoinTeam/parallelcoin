@@ -53,7 +53,7 @@ func main() {
 				var split []string
 				out := strings.ReplaceAll(list[i], "%datadir", datadir)
 				split = strings.Split(out, " ")
-				fmt.Printf("executing item %d of list '%v' '%v' '%v'",
+				fmt.Printf("executing item %d of list '%v' '%v' '%v'\n",
 					i, os.Args[1], split[0], split[1:],
 				)
 				var cmd *exec.Cmd
