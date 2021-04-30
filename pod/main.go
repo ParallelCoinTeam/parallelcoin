@@ -44,7 +44,7 @@ func Main() (quit qu.C) {
 		// if e = debugConfig(cx.Config); E.Chk(e) {
 		// }
 
-		D.Ln("running command")
+		D.Ln("running command:", cx.Config.RunningCommand.Name)
 		if e = cx.Config.RunningCommand.Entrypoint(cx); E.Chk(e) {
 			fail()
 		}

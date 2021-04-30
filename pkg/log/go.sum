@@ -38,6 +38,7 @@ github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e h1:fD57ERR4JtEqsWb
 github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e/go.mod h1:zD1mROLANZcx1PVRCS0qkT7pwLkGfwJo4zjcN/Tysno=
 github.com/p9c/interrupt v0.0.2 h1:TLxE0DIv/Ly67nYlpnItjqgJPLX15rTIo+2Hu0LUUYM=
 github.com/p9c/interrupt v0.0.2/go.mod h1:/Qc9jCQ6uGRGTuvN3cGQVzSGevgM+RYa5F3G0riHdek=
+github.com/p9c/log v0.0.4/go.mod h1:BQGlR1Qg9Mylv6AQu3HGC2hpdR07gvYN2KlpYLMRzVI=
 github.com/p9c/log v0.0.5/go.mod h1:BQGlR1Qg9Mylv6AQu3HGC2hpdR07gvYN2KlpYLMRzVI=
 github.com/p9c/log v0.0.6/go.mod h1:BQGlR1Qg9Mylv6AQu3HGC2hpdR07gvYN2KlpYLMRzVI=
 github.com/p9c/qu v0.0.3 h1:ZrEziZcSvgAG8+eRsbGTz6mhWleFmX32i8GkDiv2bHU=

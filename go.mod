@@ -23,7 +23,7 @@ require (
 	github.com/niubaoshu/gotiny v0.0.3
 	github.com/p9c/gel v0.1.24
 	github.com/p9c/gio v0.0.5
-	github.com/p9c/interrupt v0.0.4
+	github.com/p9c/interrupt v0.0.5
 	github.com/p9c/log v0.0.11
 	github.com/p9c/opts v0.0.12
 	github.com/p9c/qu v0.0.10
@@ -45,6 +45,7 @@ require (
 )
 
 replace (
+	github.com/p9c/gio => ./pkg/gel/gio
 	github.com/p9c/gel => ./pkg/gel
 	github.com/p9c/interrupt => ./pkg/interrupt
 	github.com/p9c/log => ./pkg/log

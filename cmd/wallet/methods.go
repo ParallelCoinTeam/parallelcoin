@@ -340,8 +340,6 @@ func LazyApplyHandler(request *btcjson.Request, w *Wallet, chainClient chainclie
 			if e != nil {
 				return nil, btcjson.ErrRPCInvalidRequest
 			}
-			D.Ln("running command:")
-			// D.S(cmd)
 			switch client := chainClient.(type) {
 			case *chainclient.RPCClient:
 				D.Ln("client is a chain.RPCClient")
