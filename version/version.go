@@ -13,9 +13,9 @@ var (
 	// GitRef is the gitref, as in refs/heads/branchname
 	GitRef = "refs/heads/main"
 	// GitCommit is the commit hash of the current HEAD
-	GitCommit = "4d7316c0de0d7f3a95f814dbc222686cb216a84c"
+	GitCommit = "178a14315eb015bc2d2bc334778b8c7d4ba11e39"
 	// BuildTime stores the time when the current binary was built
-	BuildTime = "2021-04-30T20:15:30+02:00"
+	BuildTime = "2021-04-30T21:01:16+02:00"
 	// Tag lists the Tag on the build, adding a + to the newest Tag if the commit is
 	// not that commit
 	Tag = "v1.9.25+"
