@@ -13,12 +13,12 @@ var (
 	// GitRef is the gitref, as in refs/heads/branchname
 	GitRef = "refs/heads/main"
 	// GitCommit is the commit hash of the current HEAD
-	GitCommit = "69697a82d22baa9b5a8920c5602c7ec670c7db7c"
+	GitCommit = "07a291c709063e2d2fb7fa45d4a6e983a10f950f"
 	// BuildTime stores the time when the current binary was built
-	BuildTime = "2021-04-30T18:21:50+02:00"
+	BuildTime = "2021-04-30T18:34:00+02:00"
 	// Tag lists the Tag on the build, adding a + to the newest Tag if the commit is
 	// not that commit
-	Tag = "v0.0.10+"
+	Tag = "v0.0.11"
 	// PathBase is the path base returned from runtime caller
 	PathBase = "/home/loki/src/github.com/p9c/pod/pkg/opts/"
 	// Major is the major number from the tag
@@ -26,7 +26,7 @@ var (
 	// Minor is the minor number from the tag
 	Minor = 0
 	// Patch is the patch version number from the tag
-	Patch = 10
+	Patch = 11
 	// Meta is the extra arbitrary string field from Semver spec
 	Meta = ""
 )
