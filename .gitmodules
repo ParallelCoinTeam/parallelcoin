@@ -1,6 +1,6 @@
 [submodule "docs/whitepaper"]
 	path = docs/whitepaper
-	url = git@github.com:p9c/whitepaper.git
+	url = https://github.com/p9c/whitepaper.git
 [submodule "pkg/gel"]
         path = pkg/gel
         url = git@github.com:p9c/gel.git
