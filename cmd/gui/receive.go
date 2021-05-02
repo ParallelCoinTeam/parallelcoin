@@ -329,7 +329,7 @@ func (rp *ReceivePage) RegenerateButton() l.Widget {
 						// accidental double clicks/taps
 						wg.inputs["receiveAmount"].SetText("")
 						wg.inputs["receiveMessage"].SetText("")
-						wg.invalidate <- struct{}{}
+						wg.Invalidate()
 					},
 				),
 		).

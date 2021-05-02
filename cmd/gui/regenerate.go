@@ -53,7 +53,7 @@ func (wg *WalletGUI) GetNewReceivingAddress() {
 		filename := filepath.Join(wg.cx.Config.DataDir.V(), "state.json")
 		if e = wg.State.Save(filename, wg.cx.Config.WalletPass.Bytes(), false); E.Chk(e) {
 		}
-		wg.invalidate <- struct{}{}
+		wg.Invalidate()
 	}
 }
 
