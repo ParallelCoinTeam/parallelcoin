@@ -23,14 +23,14 @@ var IPNet *net.IPNet
 
 // Interface is the net.Interface of the Address above
 var Interface *net.Interface
-
-// SecondaryAddresses are all the other addresses that can be reached from
-// somewhere (including localhost) but not necessarily the internet
-var SecondaryAddresses []net.IP
-
-// SecondaryInterfaces is the interfaces of the SecondaryAddresses stored in the
-// corresponding slice index
-var SecondaryInterfaces []*net.Interface
+//
+// // SecondaryAddresses are all the other addresses that can be reached from
+// // somewhere (including localhost) but not necessarily the internet
+// var SecondaryAddresses []net.IP
+//
+// // SecondaryInterfaces is the interfaces of the SecondaryAddresses stored in the
+// // corresponding slice index
+// var SecondaryInterfaces []*net.Interface
 
 // GetAddressesAndInterfaces returns all of the addresses and interfaces that
 // would be resolved from an automatic addresses that can connect two processes at all
@@ -41,12 +41,12 @@ func GetAddressesAndInterfaces() (Interfaces []*net.Interface, Addresses map[str
 		}
 	}
 	Interfaces = append(Interfaces, Interface)
-	Interfaces = append(Interfaces, SecondaryInterfaces...)
+	// Interfaces = append(Interfaces, SecondaryInterfaces...)
 	Addresses = make(map[string]struct{})
 	Addresses[Address.String()] = struct{}{}
-	for i := range SecondaryAddresses {
-		Addresses[SecondaryAddresses[i].String()] = struct{}{}
-	}
+	// for i := range SecondaryAddresses {
+	// 	Addresses[SecondaryAddresses[i].String()] = struct{}{}
+	// }
 	// D.S(Interfaces)
 	// D.S(Addresses)
 	return
@@ -108,15 +108,15 @@ func Discover() (e error) {
 			}
 		}
 	}
-	SecondaryAddresses = secondaryAddresses
-	SecondaryInterfaces = secondaryInterfaces
+	// SecondaryAddresses = secondaryAddresses
+	// SecondaryInterfaces = secondaryInterfaces
 	T.Ln("Gateway", Gateway)
 	T.Ln("Address", Address)
 	T.Ln("Interface", Interface.Name)
-	T.Ln("SecondaryAddresses")
-	for i := range SecondaryInterfaces {
-		T.Ln(SecondaryInterfaces[i].Name, SecondaryAddresses[i].String())
-	}
+	// T.Ln("SecondaryAddresses")
+	// for i := range SecondaryInterfaces {
+	// 	T.Ln(SecondaryInterfaces[i].Name, SecondaryAddresses[i].String())
+	// }
 	return
 }
 
@@ -147,8 +147,8 @@ func GetAllInterfacesAndAddresses() (interfaces []*net.Interface, udpAddrs []*ne
 		E.Ln("no routeable address found")
 		return
 	}
-	interfaces = append([]*net.Interface{Interface}, SecondaryInterfaces...)
-	naddrs := append([]net.IP{Address}, SecondaryAddresses...)
+	interfaces = []*net.Interface{Interface}
+	naddrs := []net.IP{Address}
 	var addrs []*net.IP
 	for i := range naddrs {
 		addrs = append(addrs, &naddrs[i])
